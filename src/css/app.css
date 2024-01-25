@@ -1,0 +1,201 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+    --ezs-theme-color: #F7B54F;
+    --f7-font-family: 'Be Vietnam Pro', sans-serif;
+
+    --f7-navbar-height: 48px;
+    --f7-navbar-bg-color: var(--ezs-theme-color);
+    --f7-navbar-border-color: "#f5d49f";
+
+    --f7-toolbar-height: 48px;
+
+    --f7-button-fill-pressed-bg-color: #f1bc68;
+
+    --f7-tabbar-link-active-color: var(--ezs-theme-color);
+
+    --f7-button-large-font-size: 15px;
+    --f7-button-large-font-weight: 600;
+    --f7-button-large-height: 46px;
+
+    --f7-dialog-button-strong-font-weight: 400;
+    --f7-dialog-button-font-size: 16px;
+
+    --f7-calendar-week-header-height: 45px;
+    --f7-calendar-day-size: 40px;
+    --f7-calendar-selected-bg-color: var(--ezs-theme-color);
+    --f7-calendar-today-bg-color: #F3F6F9;
+
+    --f7-actions-button-font-size: 15px;
+    --f7-actions-button-height: 50px;
+    --f7-actions-button-text-color: "#3f4254";
+
+    --f7-sheet-border-radius: 16px;
+
+    --f7-toggle-inactive-border-color: #EBEDF3;
+    --f7-toggle-inactive-bg-color: transparent;
+
+    --f7-actions-bg-color: #fff;
+
+    --f7-subnavbar-bg-color: #fff;
+
+    --f7-photobrowser-bars-bg-color: var(--ezs-theme-color);
+    --f7-photobrowser-bars-text-color: #fff;
+    --f7-photobrowser-bars-link-color: #fff;
+    --f7-photobrowser-caption-light-text-color: #fff;
+
+    --f7-timeline-margin-vertical: 0;
+    --f7-timeline-padding-horizontal: 0;
+
+    --f7-text-editor-margin: 0;
+    --f7-text-editor-padding: 16px;
+    --f7-text-editor-height: 180px;
+
+    --ezs-safe-area-bottom: var(--f7-safe-area-bottom);
+    --ezs-safe-area-top: var(--f7-safe-area-top);
+}
+
+/* Page */    
+
+.page-shadow-effect {
+    background: transparent;
+}
+
+.page-content::-webkit-scrollbar {
+  display: none;
+}
+
+.page-content {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+/* Page Content*/
+.page.page-current .page-scrollbar {
+    transition: all .2s ease-in-out;
+    transform: translateY(var(--keyboard-translate, 0));
+}
+
+/* Toolbar */
+
+.toolbar-ezs~.page {
+    --f7-page-toolbar-bottom-offset: var(--f7-toolbar-height);
+}
+
+.no-toolbar>.page-content {
+    --f7-safe-area-bottom: 0;
+}
+
+.tabbar {
+    --f7-safe-area-bottom: 0
+}
+
+/* Navbar */
+
+.navbar-hidden {
+    transform: translate3d(0, calc(-1 * (var(--f7-navbar-height) + var(--ezs-safe-area-top))), 0);
+}
+
+.no-navbar>.page-content {
+    --f7-page-navbar-offset: 0;
+}
+
+/* Input */
+
+.input input,
+.input textarea {
+    @apply w-full py-3 px-4 border transition focus:border-primary font-normal border-[#d5d7da] shadow-[0_4px_6px_0_rgba(16,25,40,.06)] block
+}
+
+.input {
+    @apply relative
+}
+
+.input .input-clear-button {
+    @apply absolute w-12 h-[47px] right-0 top-0 opacity-0
+}
+
+.input.input-with-value .input-clear-button {
+    @apply opacity-100
+}
+
+.input .input-clear-button:after {
+    content: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true" class="w-2 h-2"> <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path> </svg>');
+    @apply w-5 h-5 left-2/4 top-2/4 -translate-x-2/4 -translate-y-2/4 absolute text-muted
+}
+
+.input.input-invalid input,
+.input.input-invalid textarea {
+    @apply border-danger focus:border-primary
+}
+
+.input.input-invalid .input-error-message {
+    @apply mt-1.5 text-xs text-danger font-light
+}
+
+.text-editor {
+    @apply shadow-[0_4px_6px_0_rgba(16,25,40,.06)] rounded
+}
+
+
+/* Dialog */
+.ios .dialog-title+.dialog-text {
+    word-break: break-word;
+}
+
+/* Sheet Modal */
+
+.sheet-modal .sheet-modal-inner {
+    padding-bottom: var(--keyboard-translate-sheet-modal, 0);
+    transition: padding 250ms ease;
+}
+
+/* Actions */
+
+.actions-button {
+    @apply font-medium
+}
+.actions-button.disabled {
+    @apply !opacity-100 text-app
+}
+
+/* Calendar */
+
+.calendar-day-number {
+    @apply flex items-center justify-center !rounded-lg
+}
+
+/* .with-panel-closing .panel-backdrop-in {
+    pointer-events: none;
+} */
+
+/* / Pull To Refresh / */
+.ezs-ptr.ezs-ptr-white .lds-ellipsis div {
+    @apply !bg-white;
+}
+
+.ezs-ptr .lds-ellipsis div {
+    @apply !bg-app;
+}
+
+.ezs-ptr .ptr__pull-down--pull-more {
+    display: none !important;
+}
+
+/* Toastify */
+.Toastify {
+    @apply relative z-[125000]
+}
+
+/* */
+.reset-content ul,
+.reset-content ol {
+    list-style: revert;
+    @apply pl-4
+}
+.reset-content blockquote {
+    @apply bg-[#F3F6F9] py-3 px-4 border-l-4 border-app italic
+}
+
