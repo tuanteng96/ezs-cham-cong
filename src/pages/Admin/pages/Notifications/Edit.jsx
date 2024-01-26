@@ -25,6 +25,7 @@ import NotificationsAPI from "../../../../api/Notifications.api";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { toast } from "react-toastify";
+import moment from "moment";
 
 const TypeLinks = [
   //   {
@@ -238,7 +239,7 @@ function NotificationEditAdmin({ f7route }) {
           ToUsers: values.ToUsers
             ? values.ToUsers.map((x) => x.value).toString()
             : "",
-          NotiDate: values.NotiDate
+          NotiDate: values.IsSchedule && values.NotiDate
             ? moment(values.NotiDate).format("YYYY-MM-DD HH:mm")
             : null,
         },
@@ -460,6 +461,7 @@ function NotificationEditAdmin({ f7route }) {
                       type="checkbox"
                       className="sr-only peer"
                       {...field}
+                      checked={field.value}
                     />
                     <div className="w-11 h-6 bg-gray-200 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600" />
                   </label>
@@ -487,19 +489,21 @@ function NotificationEditAdmin({ f7route }) {
             </div>
           </div>
         </div>
-        <div className="p-4">
-          <Button
-            type="submit"
-            className="rounded-full bg-app"
-            fill
-            large
-            preloader
-            loading={updateMutation.isLoading}
-            disabled={updateMutation.isLoading}
-          >
-            {watchForm.IsSchedule ? "Đặt lịch gửi" : "Thực hiện gửi"}
-          </Button>
-        </div>
+        {!watchForm.IsSent && (
+          <div className="p-4">
+            <Button
+              type="submit"
+              className="rounded-full bg-app"
+              fill
+              large
+              preloader
+              loading={updateMutation.isLoading}
+              disabled={updateMutation.isLoading}
+            >
+              {watchForm.IsSchedule ? "Cập nhập" : "Thực hiện gửi"}
+            </Button>
+          </div>
+        )}
       </form>
     </Page>
   );

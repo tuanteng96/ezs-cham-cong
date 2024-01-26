@@ -49,20 +49,21 @@ const MyApp = () => {
   };
 
   const handleNotification = (data) => {
-    //f7.dialog.alert(JSON.stringify(data));
+    if (
+      data?.data?.id &&
+      Number(data?.data?.id) !== Number(localStorage.getItem("_noti_id"))
+    ) {
+      localStorage.setItem("_noti_id", data?.data?.id);
+      f7.views.main.router.navigate(`/notifications/view/${data?.data?.id}/`);
+    }
   };
 
   window.addEventListener("click", KeyboardsHelper.bodyEventListener);
 
-  const onAppForceIn = () => {
-    window.timeOutForce = setTimeout(() => {
-      PromHelpers.RELOAD_APP();
-    }, 30 * 60 * 100); //3 * 60 * 60 * 100
-  };
+  const onAppForceIn = () => {};
 
   const onAppForceOut = () => {
     KeyboardsHelper.forceOutListener();
-    if (window.timeOutForce) clearTimeout(window.timeOutForce);
   };
 
   useEffect(() => {

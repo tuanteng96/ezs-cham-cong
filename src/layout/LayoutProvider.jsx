@@ -117,10 +117,13 @@ function LayoutProvider({ children }) {
       let { data: Global } = await axios.get(
         `${Brand?.Domain}/brand/global/Global.json`
       );
+      let { data: template } = await axios.get(
+        `${Brand?.Domain}/AdminCp/Controls/Noti2/NotiTemplate.json`
+      );
 
       return {
         Config: Config?.data || null,
-        Global: Global || null,
+        Global: Global ? {...Global, ...template } : null,
       };
     },
     onSettled: ({ Config, Global }) => {

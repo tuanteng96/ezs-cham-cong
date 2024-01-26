@@ -84,7 +84,7 @@ function Statistical({ f7router }) {
       name="Statistical"
       onPageBeforeIn={() => PromHelpers.STATUS_BAR_COLOR("light")}
       ptr
-      onPtrRefresh={(done) => refetch().then(done())}
+      onPtrRefresh={(done) => refetch().then(() => done())}
     >
       <Navbar innerClass="!px-0 text-white" outline={false}>
         <NavLeft className="!justify-center w-12 h-full">

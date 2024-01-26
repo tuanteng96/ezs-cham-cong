@@ -54,7 +54,7 @@ function NotificationAdmin({ f7router }) {
       name="Notifications"
       onPageBeforeIn={() => PromHelpers.STATUS_BAR_COLOR("light")}
       ptr
-      onPtrRefresh={(done) => resultNotificationsQuery.refetch().then(done())}
+      onPtrRefresh={(done) => resultNotificationsQuery.refetch().then(() => done())}
       infinite
       infiniteDistance={50}
       infinitePreloader={resultNotificationsQuery.isLoading}
@@ -99,7 +99,7 @@ function NotificationAdmin({ f7router }) {
                     {item.IsSent ? (
                       <span className="text-success">Đã gửi</span>
                     ) : (
-                      <span className="text-warning">Đang thực hiện</span>
+                      <span className="text-warning">Chờ gửi</span>
                     )}
                   </div>
                 </div>

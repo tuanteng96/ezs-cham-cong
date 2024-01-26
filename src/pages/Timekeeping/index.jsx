@@ -53,7 +53,7 @@ function Timekeeping({ f7router }) {
     <Page
       onPageBeforeIn={() => PromHelpers.STATUS_BAR_COLOR("light")}
       ptr
-      onPtrRefresh={(done) => refetch().then(done())}
+      onPtrRefresh={(done) => refetch().then(() => done())}
     >
       <Navbar innerClass="!px-0 text-white" outline={false}>
         <NavLeft className="h-full">

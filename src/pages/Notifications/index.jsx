@@ -27,7 +27,7 @@ function Notifications({ f7router }) {
   let Notifications = useStore("Notifications");
 
   const queryClient = useQueryClient();
-
+  
   let NotificationsGroup = ArrayHelpers.groupbyDDHHMM(
     Notifications,
     "CreateDate"
@@ -61,7 +61,7 @@ function Notifications({ f7router }) {
       onPageBeforeIn={() => PromHelpers.STATUS_BAR_COLOR("light")}
       ptr
       onPtrRefresh={(done) =>
-        queryClient.invalidateQueries(["Notifications"]).then(done())
+        queryClient.invalidateQueries(["Notifications"]).then(() => done())
       }
     >
       <Navbar innerClass="!px-0 text-white" outline={false}>
@@ -94,7 +94,7 @@ function Notifications({ f7router }) {
           {NotificationsGroup.map((group, index) => (
             <div className="mb-4 last:mb-0" key={index}>
               <div className="uppercase text-[#7E8299] font-bold text-[12px] mb-3">
-                {moment(group.dayFull).format("dddd, [Ngày] mm yyyy")}
+                {moment(group.dayFull).format("dddd, [Ngày] DD [T]M yyyy")}
               </div>
               <div>
                 {group.items &&

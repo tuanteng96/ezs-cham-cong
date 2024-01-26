@@ -139,6 +139,15 @@
     @apply shadow-[0_4px_6px_0_rgba(16,25,40,.06)] rounded
 }
 
+.text-editor ul {
+    list-style: decimal;
+    padding-left: 16px;
+}
+.text-editor ol {
+    list-style: disc;
+    padding-left: 16px;
+}
+
 
 /* Dialog */
 .ios .dialog-title+.dialog-text {

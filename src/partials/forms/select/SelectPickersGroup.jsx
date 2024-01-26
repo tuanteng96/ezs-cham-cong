@@ -33,7 +33,7 @@ function SelectPickersGroup({
         <div className="relative" onClick={open}>
           <div
             className={clsx(
-              "w-full flex flex-wrap pl-4 pr-10 pb-2 pt-[12px] border rounded text-input focus:border-primary shadow-[0_4px_6px_0_rgba(16,25,40,.06)",
+              "w-full flex flex-wrap pl-4 pr-10 pb-2 pt-[12px] border rounded text-input focus:border-primary shadow-[0_4px_6px_0_rgba(16,25,40,.06) min-h-[50px]",
               errorMessageForce ? "border-danger" : "border-[#d5d7da]"
             )}
           >
@@ -55,7 +55,9 @@ function SelectPickersGroup({
                   </span>
                 </span>
               ))}
-            {!value && <div className="pt-[2px] pb-1.5 text-muted">{placeholder}</div>}
+            {(!value || value.length === 0) && (
+              <div className="pt-[2px] pb-1.5 text-muted">{placeholder}</div>
+            )}
             <ChevronDownIcon className="absolute w-5 right-4 top-2/4 -translate-y-2/4" />
           </div>
         </div>

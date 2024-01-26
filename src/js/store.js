@@ -79,7 +79,7 @@ const store = createStore({
           })),
         }
       };
-      
+
       StorageHelpers.set({
         data: {
           Auth: newValue,
@@ -173,7 +173,7 @@ const store = createStore({
     },
     setLogout: ({ state }) => {
       StorageHelpers.remove({
-        keys: ["Auth", "CrStocks", "WorkTimeSettings", "Stocks"],
+        keys: ["Auth", "CrStocks", "WorkTimeSettings", "Stocks", "_noti_id"],
         success: () => {
           state.Auth = null;
           state.CrStocks = null;

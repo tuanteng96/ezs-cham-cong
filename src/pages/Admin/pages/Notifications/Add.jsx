@@ -94,7 +94,7 @@ function NotificationAddAdmin(props) {
     }
   }, []);
 
-  const { control, handleSubmit, setError, setValue, watch } = useForm({
+  const { control, handleSubmit, setValue, watch } = useForm({
     defaultValues: {
       ID: 0,
       ToMembers: "", //gui cho kh
@@ -311,9 +311,24 @@ function NotificationAddAdmin(props) {
                   <TextEditor
                     placeholder="Nhập chi tiết..."
                     buttons={[
-                      ["bold", "italic", "underline", "strikeThrough"],
+                      ["bold", "italic", "underline"],
                       ["orderedList", "unorderedList"],
+                      ["image"],
                     ]}
+                    // customButtons={{
+                    //   Upload: {
+                    //     // button html content
+                    //     content: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true" data-slot="icon" class="w-6 h-6">
+                    //     <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"></path>
+                    //   </svg>`,
+                    //     // button click handler
+                    //     onClick(event, buttonEl) {
+                    //       event.value = '123'
+                    //       console.log(event)
+                    //       document.execCommand("insertHorizontalRule", false);
+                    //     },
+                    //   },
+                    // }}
                     value={field.value}
                     errorMessage={fieldState?.error?.message}
                     errorMessageForce={fieldState?.invalid}
@@ -367,7 +382,7 @@ function NotificationAddAdmin(props) {
                 name="Thumbnail"
                 control={control}
                 render={({ field: { ref, ...field }, fieldState }) => (
-                  <UploadFile {...field} PathFrame={watchForm.PathFrame}/>
+                  <UploadFile {...field} PathFrame={watchForm.PathFrame} />
                 )}
               />
             </div>

@@ -63,7 +63,7 @@ function Technicians({ f7router, f7route }) {
     <Page
       name="Technicians"
       ptr
-      onPtrRefresh={(done) => refetch().then(done())}
+      onPtrRefresh={(done) => refetch().then(() => done())}
     >
       <Navbar innerClass="!px-0" className="text-white" outline={false}>
         <NavLeft className="h-full">
