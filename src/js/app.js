@@ -28,7 +28,7 @@ import App from '../components/app.jsx';
 // Init F7 React Plugin
 Framework7.use(Framework7React)
 
-if (!window.ResizeObserver) install();
+if (typeof window !== "undefined") install();
 
 // Mount React App
 const root = createRoot(document.getElementById('app'));

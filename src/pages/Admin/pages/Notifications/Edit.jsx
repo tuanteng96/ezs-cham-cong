@@ -8,10 +8,15 @@ import {
   Page,
   TextEditor,
   f7,
+  useStore,
 } from "framework7-react";
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import PromHelpers from "../../../../helpers/PromHelpers";
-import { ChevronLeftIcon } from "@heroicons/react/24/outline";
+import {
+  ChevronLeftIcon,
+  PhotoIcon,
+  VideoCameraIcon,
+} from "@heroicons/react/24/outline";
 import { Controller, useForm } from "react-hook-form";
 import {
   DatePicker,
@@ -26,6 +31,8 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { toast } from "react-toastify";
 import moment from "moment";
+import MoresAPI from "../../../../api/Mores.api";
+import AssetsHelpers from "../../../../helpers/AssetsHelpers";
 
 const TypeLinks = [
   //   {
@@ -83,6 +90,10 @@ const schemaAdd = yup
 function NotificationEditAdmin({ f7route }) {
   const queryClient = useQueryClient();
   const [isEditLink, setIsEditLink] = useState(true);
+
+  const Auth = useStore("Auth");
+
+  const inputFileRef = useRef("");
 
   const { control, handleSubmit, reset, setValue, watch } = useForm({
     defaultValues: {
@@ -228,6 +239,42 @@ function NotificationEditAdmin({ f7route }) {
     mutationFn: (body) => NotificationsAPI.send(body),
   });
 
+  const uploadMutation = useMutation({
+    mutationFn: (body) => MoresAPI.upload(body),
+  });
+
+  const uploadFileEditor = (e) => {
+    f7.dialog.preloader("Đang upload...");
+    const files = event.target.files;
+    var bodyFormData = new FormData();
+    bodyFormData.append("file", files[0]);
+
+    uploadMutation.mutate(
+      {
+        Token: Auth?.token,
+        File: bodyFormData,
+      },
+      {
+        onSuccess: ({ data }) => {
+          if (data?.error) {
+            toast.error(data.error);
+          } else {
+            setValue(
+              "Html",
+              `${watchForm.Html} <div><img src="${AssetsHelpers.toAbsoluteUrl(
+                data.data
+              )}" /></div>`
+            );
+          }
+          f7.dialog.close();
+        },
+        onError: (error) => {
+          console.log(error);
+        },
+      }
+    );
+  };
+
   const onSubmit = (values) => {
     updateMutation.mutate(
       {
@@ -239,9 +286,10 @@ function NotificationEditAdmin({ f7route }) {
           ToUsers: values.ToUsers
             ? values.ToUsers.map((x) => x.value).toString()
             : "",
-          NotiDate: values.IsSchedule && values.NotiDate
-            ? moment(values.NotiDate).format("YYYY-MM-DD HH:mm")
-            : null,
+          NotiDate:
+            values.IsSchedule && values.NotiDate
+              ? moment(values.NotiDate).format("YYYY-MM-DD HH:mm")
+              : null,
         },
       },
       {
@@ -324,24 +372,55 @@ function NotificationEditAdmin({ f7route }) {
           </div>
           <div className="mb-4">
             <div className="mb-px font-light">Chi tiết</div>
+            <input
+              type="file"
+              name="uploadfile"
+              accept="image/*"
+              className="hidden w-full h-full opacity-0"
+              ref={inputFileRef}
+              onChange={uploadFileEditor}
+            />
             <Controller
               name="Html"
               control={control}
               render={({ field, fieldState }) => (
-                <TextEditor
-                  placeholder="Nhập chi tiết..."
-                  buttons={[
-                    ["bold", "italic", "underline", "strikeThrough"],
-                    ["orderedList", "unorderedList"],
-                  ]}
-                  value={field.value}
-                  errorMessage={fieldState?.error?.message}
-                  errorMessageForce={fieldState?.invalid}
-                  onInput={field.onChange}
-                  onFocus={(e) =>
-                    KeyboardsHelper.setAndroid({ Type: "body", Event: e })
-                  }
-                />
+                <div className="relative">
+                  <TextEditor
+                    placeholder="Nhập chi tiết..."
+                    buttons={[
+                      ["bold", "italic", "underline"],
+                      ["orderedList", "unorderedList"],
+                    ]}
+                    value={field.value}
+                    errorMessage={fieldState?.error?.message}
+                    errorMessageForce={fieldState?.invalid}
+                    onTextEditorChange={field.onChange}
+                    onFocus={(e) =>
+                      KeyboardsHelper.setAndroid({ Type: "body", Event: e })
+                    }
+                  />
+                  <div className="absolute top-0 right-0 z-[1000] flex h-[44px] pr-2">
+                    <div
+                      className="flex items-center justify-center h-full w-[35px]"
+                      onClick={() => inputFileRef?.current.click()}
+                    >
+                      <PhotoIcon className="w-6" />
+                    </div>
+                    <div
+                      className="flex items-center justify-center h-full w-[35px]"
+                      onClick={() => {
+                        f7.dialog.prompt("Nhập URL Video Youtube", (video) => {
+                          setValue(
+                            "Html",
+                            `${watchForm.Html} <div><iframe class="w-full" height="200" src="${video}" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe></div>`
+                          );
+                        });
+                      }}
+                    >
+                      <VideoCameraIcon className="w-6" />
+                    </div>
+                  </div>
+                </div>
               )}
             />
           </div>
@@ -383,7 +462,7 @@ function NotificationEditAdmin({ f7route }) {
               />
             </div>
           )}
-          {!isEditLink && (
+          {/* {!isEditLink && (
             <div className="mb-4">
               <div className="mb-px font-light">Loại Link</div>
               <div className="w-full flex flex-wrap px-4 py-3.5 bg-gray-100 border rounded text-input focus:border-primary shadow-[0_4px_6px_0_rgba(16,25,40,.06) border-[#d5d7da]">
@@ -396,7 +475,7 @@ function NotificationEditAdmin({ f7route }) {
                 </div>
               </div>
             </div>
-          )}
+          )} */}
           <div className="mb-4">
             <div className="mb-px font-light">Hình ảnh</div>
             <Controller

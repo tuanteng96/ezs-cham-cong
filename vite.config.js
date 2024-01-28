@@ -1,7 +1,5 @@
 import path from 'path';
 import react from '@vitejs/plugin-react';
-import browserslistToEsbuild from 'browserslist-to-esbuild';
-// import { manualChunksPlugin } from 'vite-plugin-webpackchunkname'
 
 const SRC_DIR = path.resolve(__dirname, './src');
 const PUBLIC_DIR = path.resolve(__dirname, './public');
@@ -26,7 +24,7 @@ export default async () => {
     base: BASE,
     publicDir: PUBLIC_DIR,
     build: {
-      target: browserslistToEsbuild(['>0.2%', 'not dead', 'not op_mini all']),
+      target: ['es2020', 'edge88', 'firefox78', 'chrome87', 'safari12'],
       minify: true,
       outDir: BUILD_DIR,
       assetsInlineLimit: 0,

@@ -10,9 +10,14 @@ import {
   f7,
   useStore,
 } from "framework7-react";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import PromHelpers from "../../../../helpers/PromHelpers";
-import { ChevronLeftIcon, PlusIcon } from "@heroicons/react/24/outline";
+import {
+  ChevronLeftIcon,
+  PhotoIcon,
+  PlusIcon,
+  VideoCameraIcon,
+} from "@heroicons/react/24/outline";
 import { Controller, useForm } from "react-hook-form";
 import {
   DatePicker,
@@ -27,6 +32,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { toast } from "react-toastify";
 import AssetsHelpers from "../../../../helpers/AssetsHelpers";
+import MoresAPI from "../../../../api/Mores.api";
 
 const TypeLinks = [
   //   {
@@ -87,6 +93,9 @@ function NotificationAddAdmin(props) {
   const [isTemplate, setIsTemplate] = useState(true);
 
   const { Global } = useStore("Brand");
+  const Auth = useStore("Auth");
+
+  const inputFileRef = useRef("");
 
   useEffect(() => {
     if (Global?.TemplatesNoti && Global.TemplatesNoti.length > 0) {
@@ -204,6 +213,42 @@ function NotificationAddAdmin(props) {
     mutationFn: (body) => NotificationsAPI.send(body),
   });
 
+  const uploadMutation = useMutation({
+    mutationFn: (body) => MoresAPI.upload(body),
+  });
+
+  const uploadFileEditor = (e) => {
+    f7.dialog.preloader("Đang upload...");
+    const files = event.target.files;
+    var bodyFormData = new FormData();
+    bodyFormData.append("file", files[0]);
+
+    uploadMutation.mutate(
+      {
+        Token: Auth?.token,
+        File: bodyFormData,
+      },
+      {
+        onSuccess: ({ data }) => {
+          if (data?.error) {
+            toast.error(data.error);
+          } else {
+            setValue(
+              "Html",
+              `${watchForm.Html} <div><img src="${AssetsHelpers.toAbsoluteUrl(
+                data.data
+              )}" /></div>`
+            );
+          }
+          f7.dialog.close();
+        },
+        onError: (error) => {
+          console.log(error);
+        },
+      }
+    );
+  };
+
   const onSubmit = (values) => {
     updateMutation.mutate(
       {
@@ -304,39 +349,58 @@ function NotificationAddAdmin(props) {
             </div>
             <div className="mb-4">
               <div className="mb-px font-light">Chi tiết</div>
+              <input
+                type="file"
+                name="uploadfile"
+                accept="image/*"
+                className="hidden w-full h-full opacity-0"
+                ref={inputFileRef}
+                onChange={uploadFileEditor}
+              />
               <Controller
                 name="Html"
                 control={control}
                 render={({ field, fieldState }) => (
-                  <TextEditor
-                    placeholder="Nhập chi tiết..."
-                    buttons={[
-                      ["bold", "italic", "underline"],
-                      ["orderedList", "unorderedList"],
-                      ["image"],
-                    ]}
-                    // customButtons={{
-                    //   Upload: {
-                    //     // button html content
-                    //     content: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true" data-slot="icon" class="w-6 h-6">
-                    //     <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"></path>
-                    //   </svg>`,
-                    //     // button click handler
-                    //     onClick(event, buttonEl) {
-                    //       event.value = '123'
-                    //       console.log(event)
-                    //       document.execCommand("insertHorizontalRule", false);
-                    //     },
-                    //   },
-                    // }}
-                    value={field.value}
-                    errorMessage={fieldState?.error?.message}
-                    errorMessageForce={fieldState?.invalid}
-                    onInput={field.onChange}
-                    onFocus={(e) =>
-                      KeyboardsHelper.setAndroid({ Type: "body", Event: e })
-                    }
-                  />
+                  <div className="relative">
+                    <TextEditor
+                      placeholder="Nhập chi tiết..."
+                      buttons={[
+                        ["bold", "italic", "underline"],
+                        ["orderedList", "unorderedList"]
+                      ]}
+                      value={field.value}
+                      errorMessage={fieldState?.error?.message}
+                      errorMessageForce={fieldState?.invalid}
+                      onTextEditorChange={field.onChange}
+                      onFocus={(e) =>
+                        KeyboardsHelper.setAndroid({ Type: "body", Event: e })
+                      }
+                    />
+                    <div className="absolute top-0 right-0 z-[1000] flex h-[44px] pr-2">
+                      <div
+                        className="flex items-center justify-center h-full w-[35px]"
+                        onClick={() => inputFileRef?.current.click()}
+                      >
+                        <PhotoIcon className="w-6" />
+                      </div>
+                      <div
+                        className="flex items-center justify-center h-full w-[35px]"
+                        onClick={() => {
+                          f7.dialog.prompt(
+                            "Nhập URL Video Youtube",
+                            (video) => {
+                              setValue(
+                                "Html",
+                                `${watchForm.Html} <div><iframe class="w-full" height="200" src="${video}" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe></div>`
+                              );
+                            }
+                          );
+                        }}
+                      >
+                        <VideoCameraIcon className="w-6" />
+                      </div>
+                    </div>
+                  </div>
                 )}
               />
             </div>
