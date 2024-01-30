@@ -87,7 +87,7 @@ const schemaAdd = yup
   })
   .required();
 
-function NotificationAddAdmin(props) {
+function NotificationAddAdmin({ f7router }) {
   const queryClient = useQueryClient();
 
   const [isTemplate, setIsTemplate] = useState(true);
@@ -289,7 +289,13 @@ function NotificationAddAdmin(props) {
           <Link
             noLinkClass
             className="!text-white h-full flex item-center justify-center w-12"
-            back
+            onClick={() => {
+              if (!isTemplate) {
+                setIsTemplate(true)
+              } else {
+                f7router.back();
+              }
+            }}
           >
             <ChevronLeftIcon className="w-6" />
           </Link>
@@ -366,7 +372,7 @@ function NotificationAddAdmin(props) {
                       placeholder="Nhập chi tiết..."
                       buttons={[
                         ["bold", "italic", "underline"],
-                        ["orderedList", "unorderedList"]
+                        ["orderedList", "unorderedList"],
                       ]}
                       value={field.value}
                       errorMessage={fieldState?.error?.message}
@@ -404,7 +410,7 @@ function NotificationAddAdmin(props) {
                 )}
               />
             </div>
-            <div className="mb-4">
+            {/* <div className="mb-4">
               <div className="mb-px font-light">Loại Link</div>
               <Controller
                 name="TypeLink"
@@ -439,7 +445,7 @@ function NotificationAddAdmin(props) {
                   />
                 )}
               />
-            </div>
+            </div> */}
             <div className="mb-4">
               <div className="mb-px font-light">Hình ảnh</div>
               <Controller

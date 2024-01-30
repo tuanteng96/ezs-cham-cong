@@ -424,7 +424,7 @@ function NotificationEditAdmin({ f7route }) {
               )}
             />
           </div>
-          {isEditLink && (
+          {/* {isEditLink && (
             <div className="mb-4">
               <div className="mb-px font-light">Loại Link</div>
               <Controller
@@ -461,7 +461,7 @@ function NotificationEditAdmin({ f7route }) {
                 )}
               />
             </div>
-          )}
+          )} */}
           {/* {!isEditLink && (
             <div className="mb-4">
               <div className="mb-px font-light">Loại Link</div>
