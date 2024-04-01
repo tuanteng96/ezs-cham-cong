@@ -140,12 +140,16 @@
 }
 
 .text-editor ul {
-    list-style: decimal;
+    list-style: disc;
     padding-left: 16px;
 }
 .text-editor ol {
-    list-style: disc;
+    list-style: decimal;
     padding-left: 16px;
+}
+
+.text-editor.text-editor-resizable {
+    min-height: 180px;
 }
 
 
@@ -207,4 +211,3 @@
 .reset-content blockquote {
     @apply bg-[#F3F6F9] py-3 px-4 border-l-4 border-app italic
 }
-

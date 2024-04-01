@@ -19,7 +19,7 @@ const setAndroid = ({
             "--keyboard-translate"
         )
 
-        if(Type === "modal") {
+        if (Type === "modal") {
             translateKeyboard = getComputedStyle(document.querySelector("html")).getPropertyValue(
                 "--keyboard-translate-sheet-modal"
             )
@@ -29,7 +29,7 @@ const setAndroid = ({
         let elementHeight = element.outerHeight();
         let ElementOffsetTop = element.offset().top;
 
-        if(Type === "modal") {
+        if (Type === "modal") {
             elementCrOffset = -elementCrOffset
         }
 
@@ -65,6 +65,7 @@ const bodyEventListener = (event) => {
         if (
             (!Dom7(event.target).is("input") && !Dom7(event.target).is("textarea")) || Dom7(event.target).hasClass("no-keyboard")
         ) {
+            if(Dom7(event.target).hasClass("input-clear-button")) return;
             if (getComputedStyle(document.querySelector("html")).getPropertyValue(
                     "--keyboard-translate"
                 )) {

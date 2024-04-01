@@ -12,10 +12,10 @@ let months = Array.apply(0, Array(12)).map((_, i) =>
   moment().month(i).format("M")
 );
 const years = [...Array(2112 - 1990).keys()].map((i) => (i + 1990).toString());
-const hoursList = Array(23)
+const hoursList = Array(24)
   .fill()
   .map((_, i) => i.toString());
-const minuteList = Array(59)
+const minuteList = Array(60)
   .fill()
   .map((_, i) => (i < 10 ? "0" + i : i.toString()));
 
@@ -196,12 +196,14 @@ function DatePicker({
                     }) => {
                       onChange(
                         moment({
-                          years,
-                          months: Number(months) - 1,
-                          date,
-                          hours,
-                          minutes,
-                          seconds,
+                          years: years || moment(new Date()).format("YYYY"),
+                          months: months
+                            ? Number(months) - 1
+                            : moment(new Date()).format("M"),
+                          date: date || moment(new Date()).format("DD"),
+                          hours: hours || moment(new Date()).format("H"),
+                          minutes: minutes || moment(new Date()).format("mm"),
+                          seconds: seconds || moment(new Date()).format("ss"),
                           milliseconds,
                         }).toDate()
                       );
@@ -212,6 +214,7 @@ function DatePicker({
                       "gap-1.5 last:[&>div]:hidden",
                       "!grid-cols-" + getColsTotal(format)
                     )}
+                    wheel="normal"
                   >
                     {format.includes("HH") && (
                       <Picker.Column key="hours" name="hours">

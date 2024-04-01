@@ -204,7 +204,7 @@ function Panels(props) {
   const renderMemberGroups = () => {
     if (Auth?.ID === 1) {
       return "Administrator";
-    } else if (Auth?.GroupTitles.length > 0) {
+    } else if (Auth?.GroupTitles && Auth?.GroupTitles.length > 0) {
       return Auth.GroupTitles.join(", ");
     } else {
       return "Nhân viên";

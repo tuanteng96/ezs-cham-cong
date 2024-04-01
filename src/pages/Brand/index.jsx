@@ -19,7 +19,7 @@ const schemaDomain = yup
 const BrandPage = ({ f7router }) => {
   const { control, handleSubmit, setError, setValue } = useForm({
     defaultValues: {
-      Domain: "https://",
+      Domain: "",
     },
     resolver: yupResolver(schemaDomain),
   });
@@ -29,7 +29,7 @@ const BrandPage = ({ f7router }) => {
       keys: ["_historyDomain"],
       success: ({ _historyDomain }) => {
         if(_historyDomain) {
-          setValue("Domain", _historyDomain)
+          setValue("Domain", _historyDomain.replaceAll('https://', ''))
         }
       },
     });
@@ -52,12 +52,12 @@ const BrandPage = ({ f7router }) => {
   });
 
   const onSubmit = ({ Domain }) => {
-    domainMutation.mutate(Domain.toLowerCase(), {
+    domainMutation.mutate("https://" + Domain.toLowerCase(), {
       onSuccess: ({ BrandsInfo, Global, success }) => {
         if (success && BrandsInfo) {
           store
             .dispatch("setBrand", {
-              Domain: Domain.toLowerCase(),
+              Domain: "https://" + Domain.toLowerCase(),
               Name: BrandsInfo.filter((x) => x.Name === "Bill.Title")[0][
                 "ValueText"
               ],
@@ -67,7 +67,7 @@ const BrandPage = ({ f7router }) => {
             .then(() => {
               StorageHelpers.set({
                 data: {
-                  _historyDomain: Domain,
+                  _historyDomain: "https://" + Domain,
                 },
               });
               f7router.navigate("/login/");
@@ -1715,9 +1715,9 @@ const BrandPage = ({ f7router }) => {
                 control={control}
                 render={({ field, fieldState }) => (
                   <Input
-                    className="[&_input]:rounded [&_input]:lowercase [&_input]:placeholder:normal-case"
+                    className="[&_input]:rounded [&_input]:placeholder:normal-case"
                     type="text"
-                    placeholder="Nhập tên miền SPA ... (Eg: https://cser.vn)"
+                    placeholder="Nhập tên miền SPA ... (Eg: cser.vn)"
                     value={field.value}
                     errorMessage={fieldState?.error?.message}
                     errorMessageForce={fieldState?.invalid}
@@ -1726,6 +1726,11 @@ const BrandPage = ({ f7router }) => {
                       KeyboardsHelper.setAndroid({ Type: "body", Event: e })
                     }
                     clearButton={true}
+                    onInputClear={() => {
+                      StorageHelpers.remove({
+                        keys: ['_historyDomain', '_historyP', '_historyU']
+                      })
+                    }}
                   />
                 )}
               />

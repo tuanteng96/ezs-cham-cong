@@ -84,6 +84,16 @@ const TypeLinks = [
 const schemaAdd = yup
   .object({
     Title: yup.string().required("Vui lòng nhập tiêu đề."),
+    ToMembers: yup.array().test("Vui lòng chọn khách hàng","Vui lòng chọn khách hàng",function (value) {
+      const { ToUsers } = this.parent
+      if (!ToUsers || ToUsers.length === 0) return value.length > 0
+      return true
+    }),
+    ToUsers: yup.array().test("Vui lòng chọn nhân viên","Vui lòng chọn nhân viên",function (value) {
+      const { ToMembers } = this.parent
+      if (!ToMembers || ToMembers.length === 0) return value.length > 0
+      return true
+    })
   })
   .required();
 
@@ -103,10 +113,10 @@ function NotificationAddAdmin({ f7router }) {
     }
   }, []);
 
-  const { control, handleSubmit, setValue, watch } = useForm({
+  const { control, handleSubmit, setValue, watch, reset, trigger } = useForm({
     defaultValues: {
       ID: 0,
-      ToMembers: "", //gui cho kh
+      ToMembers: [], //gui cho kh
       SetNotiDate: false,
       ToUserText: "",
       ToMemberText: "",
@@ -116,7 +126,7 @@ function NotificationAddAdmin({ f7router }) {
       IsWrapedEmail: false,
       TitleEmail: "",
       ContentEmail: "",
-      ToUsers: "",
+      ToUsers: [],
       NotiDate: null,
       CreateDate: "",
       Type: "",
@@ -283,6 +293,9 @@ function NotificationAddAdmin({ f7router }) {
       className="bg-white"
       name="NotificationsAdd"
       onPageBeforeIn={() => PromHelpers.STATUS_BAR_COLOR("light")}
+      onPageAfterOut={() => {
+        reset();
+      }}
     >
       <Navbar innerClass="!px-0 text-white" outline={false}>
         <NavLeft className="h-full">
@@ -291,7 +304,8 @@ function NotificationAddAdmin({ f7router }) {
             className="!text-white h-full flex item-center justify-center w-12"
             onClick={() => {
               if (!isTemplate) {
-                setIsTemplate(true)
+                setIsTemplate(true);
+                reset();
               } else {
                 f7router.back();
               }
@@ -339,6 +353,7 @@ function NotificationAddAdmin({ f7router }) {
                 control={control}
                 render={({ field, fieldState }) => (
                   <Input
+                    resizable
                     className="[&_textarea]:rounded [&_textarea]:lowercase [&_textarea]:placeholder:normal-case"
                     type="textarea"
                     placeholder="Nhập tóm tắt"
@@ -369,6 +384,7 @@ function NotificationAddAdmin({ f7router }) {
                 render={({ field, fieldState }) => (
                   <div className="relative">
                     <TextEditor
+                      resizable
                       placeholder="Nhập chi tiết..."
                       buttons={[
                         ["bold", "italic", "underline"],
@@ -378,9 +394,9 @@ function NotificationAddAdmin({ f7router }) {
                       errorMessage={fieldState?.error?.message}
                       errorMessageForce={fieldState?.invalid}
                       onTextEditorChange={field.onChange}
-                      onFocus={(e) =>
-                        KeyboardsHelper.setAndroid({ Type: "body", Event: e })
-                      }
+                      // onTextEditorFocus={(e) => {
+                      //   KeyboardsHelper.setAndroid({ Type: "body", Event: e });
+                      // }}
                     />
                     <div className="absolute top-0 right-0 z-[1000] flex h-[44px] pr-2">
                       <div
@@ -470,6 +486,7 @@ function NotificationAddAdmin({ f7router }) {
                     label="Chọn khách hàng"
                     onChange={(val) => {
                       field.onChange(val);
+                      trigger('ToUsers')
                     }}
                     errorMessage={fieldState?.error?.message}
                     errorMessageForce={fieldState?.invalid}
@@ -491,6 +508,7 @@ function NotificationAddAdmin({ f7router }) {
                     label="Chọn nhân viên"
                     onChange={(val) => {
                       field.onChange(val);
+                      trigger('ToMembers')
                     }}
                     errorMessage={fieldState?.error?.message}
                     errorMessageForce={fieldState?.invalid}

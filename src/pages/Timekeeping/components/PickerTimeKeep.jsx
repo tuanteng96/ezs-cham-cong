@@ -106,14 +106,14 @@ function PickerTimeKeep({ children, item }) {
                           <span className="text-success">
                             +
                             {StringHelpers.formatVND(
-                              data?.Info["DI_SOM"].Value
+                              data?.Info["DI_SOM"]?.Value
                             )}
                           </span>
                         ) : (
                           <span className="text-danger">
                             -
                             {StringHelpers.formatVND(
-                              data?.Info["DI_MUON"].Value
+                              data?.Info["DI_MUON"]?.Value
                             )}
                           </span>
                         )}

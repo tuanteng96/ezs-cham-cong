@@ -310,6 +310,9 @@ function NotificationEditAdmin({ f7route }) {
       className="bg-white"
       name="Notifications"
       onPageBeforeIn={() => PromHelpers.STATUS_BAR_COLOR("light")}
+      onPageAfterOut={() => {
+        reset();
+      }}
     >
       <Navbar innerClass="!px-0 text-white" outline={false}>
         <NavLeft className="h-full">
@@ -366,6 +369,7 @@ function NotificationEditAdmin({ f7route }) {
                   onFocus={(e) =>
                     KeyboardsHelper.setAndroid({ Type: "body", Event: e })
                   }
+                  resizable
                 />
               )}
             />
@@ -395,9 +399,7 @@ function NotificationEditAdmin({ f7route }) {
                     errorMessage={fieldState?.error?.message}
                     errorMessageForce={fieldState?.invalid}
                     onTextEditorChange={field.onChange}
-                    onFocus={(e) =>
-                      KeyboardsHelper.setAndroid({ Type: "body", Event: e })
-                    }
+                    resizable
                   />
                   <div className="absolute top-0 right-0 z-[1000] flex h-[44px] pr-2">
                     <div

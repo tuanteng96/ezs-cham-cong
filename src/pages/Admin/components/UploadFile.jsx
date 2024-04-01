@@ -67,9 +67,9 @@ function UploadFile({ value, onChange, PathFrame }) {
           className="flex flex-col items-center justify-center w-32 h-32 border-[1px] border-[#d5d7da] border-dashed rounded cursor-pointer"
         >
           {value && (
-            <div>
+            <div className="w-full h-full">
               <img
-                className="w-full"
+                className="object-contain w-full h-full"
                 src={AssetsHelpers.toAbsoluteUrl(value, "")}
                 alt="Hình ảnh"
               />

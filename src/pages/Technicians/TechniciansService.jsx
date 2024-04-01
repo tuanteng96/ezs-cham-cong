@@ -33,6 +33,7 @@ import Resizer from "react-image-file-resizer";
 import MoresAPI from "../../api/Mores.api";
 import PromHelpers from "../../helpers/PromHelpers";
 import { toast } from "react-toastify";
+import clsx from "clsx";
 
 const Photos = ({ PhotoList, Title }) => {
   const Brand = useStore("Brand");
@@ -426,7 +427,9 @@ function TechniciansService({ id, memberid, itemid }) {
                   <div className="mt-px font-medium">
                     {data?.Title}
                     {data?.Status === "done" && (
-                      <span className="pl-2 font-semibold text-success">(Hoàn thành)</span>
+                      <span className="pl-2 font-semibold text-success">
+                        (Hoàn thành)
+                      </span>
                     )}
                   </div>
                 </div>
@@ -453,12 +456,49 @@ function TechniciansService({ id, memberid, itemid }) {
                     {Staffs && Staffs.map((x) => x.StaffName).join(", ")}
                   </div>
                 </div>
-                {/* <div className="px-4 py-2">
-                  <div className="text-muted">Ghi chú</div>
-                  <div className="mt-px font-medium capitalize">
-                    {data?.Desc || "Không"}
-                  </div>
-                </div> */}
+                {console.log(data)}
+                {data?.Status === "done" && (
+                  <>
+                    <div className="px-4 py-2">
+                      <div className="text-muted">Đánh giá</div>
+                      {data?.Rate ? (
+                        <div className="mt-1.5 font-medium capitalize">
+                          <div className="flex items-center">
+                            {Array(5)
+                              .fill()
+                              .map((_, i) => (
+                                <svg
+                                  key={i}
+                                  className={clsx(
+                                    "w-4 h-4 me-1",
+                                    Number(data?.Rate) >= (i + 1)
+                                      ? "text-yellow-300"
+                                      : "text-gray-300"
+                                  )}
+                                  aria-hidden="true"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  fill="currentColor"
+                                  viewBox="0 0 22 20"
+                                >
+                                  <path d="M20.924 7.625a1.523 1.523 0 0 0-1.238-1.044l-5.051-.734-2.259-4.577a1.534 1.534 0 0 0-2.752 0L7.365 5.847l-5.051.734A1.535 1.535 0 0 0 1.463 9.2l3.656 3.563-.863 5.031a1.532 1.532 0 0 0 2.226 1.616L11 17.033l4.518 2.375a1.534 1.534 0 0 0 2.226-1.617l-.863-5.03L20.537 9.2a1.523 1.523 0 0 0 .387-1.575Z" />
+                                </svg>
+                              ))}
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="mt-px font-medium capitalize">
+                          Chưa đánh giá
+                        </div>
+                      )}
+                    </div>
+                    <div className="px-4 py-2">
+                      <div className="text-muted">Ghi chú đánh giá</div>
+                      <div className="mt-px font-medium capitalize">
+                        {data?.RateNote || "Chưa có"}
+                      </div>
+                    </div>
+                  </>
+                )}
               </div>
               <div className="mb-3.5">
                 <div className="mb-1">Ghi chú</div>

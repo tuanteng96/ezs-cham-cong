@@ -24,6 +24,7 @@ import NotificationAdminPage from "../pages/Admin/pages/Notifications/index.jsx"
 import NotificationAddAdminPage from "../pages/Admin/pages/Notifications/Add.jsx";
 import NotificationEditAdminPage from "../pages/Admin/pages/Notifications/Edit.jsx";
 import TimekeepingSettingsPage from "../pages/Admin/pages/Utility/TimekeepingSettings.jsx";
+import StocksPage from "../pages/Stocks/index.jsx";
 
 var routes = [
   {
@@ -223,6 +224,14 @@ var routes = [
       transition: "f7-cover",
     },
   },
+  {
+    path: "/stocks/",
+    component: StocksPage,
+    options: {
+      transition: "f7-cover",
+    },
+  },
+  
   {
     path: "(.*)",
     component: NotFoundPage,

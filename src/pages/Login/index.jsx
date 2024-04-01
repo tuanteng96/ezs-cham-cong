@@ -60,53 +60,64 @@ function LoginPage({ f7router }) {
           {
             onSuccess: ({ data }) => {
               if (data && data?.acc_type && data?.acc_type !== "M") {
-                if (data.ID === 1 || data?.DeviceIDs === deviceId) {
-                  PromHelpers.SEND_TOKEN_FIREBASE().then(({ token, error }) => {
-                    if (!error) {
-                      var bodyFormData = new FormData();
-                      bodyFormData.append("token", token);
+                if (data?.Status !== -1) {
+                  if (data.ID === 1 || data?.DeviceIDs === deviceId) {
+                    PromHelpers.SEND_TOKEN_FIREBASE().then(
+                      ({ token, error }) => {
+                        if (!error) {
+                          var bodyFormData = new FormData();
+                          bodyFormData.append("token", token);
 
-                      AuthAPI.sendTokenFirebase({
-                        ID: data.ID,
-                        Type: data.acc_type,
-                        bodyFormData,
-                      }).then(() =>
-                        store.dispatch("setAuth", data).then(() => {
-                          f7router.navigate("/home/");
-                          StorageHelpers.set({
-                            data: {
-                              _historyU: values.USN,
-                              _historyP: values.PWD,
-                            },
-                          });
-                        })
-                      );
-                    } else {
-                      SubscribeHelpers.set(data).then(() =>
-                        store.dispatch("setAuth", data).then(() => {
-                          f7router.navigate("/home/");
-                          StorageHelpers.set({
-                            data: {
-                              _historyU: values.USN,
-                              _historyP: values.PWD,
-                            },
-                          });
-                        })
-                      );
-                    }
-                  });
+                          AuthAPI.sendTokenFirebase({
+                            ID: data.ID,
+                            Type: data.acc_type,
+                            bodyFormData,
+                          }).then(() =>
+                            store.dispatch("setAuth", data).then(() => {
+                              f7router.navigate("/home/");
+                              StorageHelpers.set({
+                                data: {
+                                  _historyU: values.USN,
+                                  _historyP: values.PWD,
+                                },
+                              });
+                            })
+                          );
+                        } else {
+                          SubscribeHelpers.set(data).then(() =>
+                            store.dispatch("setAuth", data).then(() => {
+                              f7router.navigate("/home/");
+                              StorageHelpers.set({
+                                data: {
+                                  _historyU: values.USN,
+                                  _historyP: values.PWD,
+                                },
+                              });
+                            })
+                          );
+                        }
+                      }
+                    );
+                  } else {
+                    setError("USN", {
+                      type: "Server",
+                      message:
+                        "Tài khoản của bạn đang đăng nhập tại thiết bị khác.",
+                    });
+                  }
                 } else {
                   setError("USN", {
                     type: "Server",
-                    message:
-                      "Tài khoản của bạn đang đăng nhập tại thiết bị khác.",
+                    message: "Tài khoản của bạn đã bị vô hiệu hoá.",
                   });
                 }
               } else {
                 setError("USN", {
                   type: "Server",
                   message:
-                    data?.error || "Tài khoản hoặc mật khẩu không hợp lệ.",
+                    data?.error === "Yêu cầu đăng nhập"
+                      ? "Tài khoản hoặc mật khẩu không hợp lệ."
+                      : data?.error,
                 });
                 setValue("PWD", "");
               }

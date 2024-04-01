@@ -46,63 +46,72 @@ function LayoutProvider({ children }) {
   useQuery({
     queryKey: ["Auth", { Token: Auth?.Token, WorkTrackStockID: CrStocks?.ID }],
     queryFn: async () => {
-      let { data, error } = await AuthAPI.checkToken({
+      let { data } = await AuthAPI.checkToken({
         Token: Auth?.token,
         WorkTrackStockID: CrStocks?.ID,
       });
-      return { data, error };
+      return { data };
     },
-    onSettled: ({ data, error }) => {
-      if (error) {
-        if (error === "TOKEN_KHONG_HOP_LE_2") {
+    onSettled: ({ data }) => {
+      if (data?.error) {
+        if (data?.error === "TOKEN_KHONG_HOP_LE_2") {
           f7.dialog.alert("Phiên đăng nhập của bạn đã hết hạn.", () => {
             store
               .dispatch("setLogout")
               .then(() => f7.views.main.router.navigate("/login/"));
           });
         } else {
-          f7.dialog.alert(error || "Lỗi chưa được xác định.", () => {
+          f7.dialog.alert(data?.error || "Lỗi chưa được xác định.", () => {
             store
               .dispatch("setLogout")
               .then(() => f7.views.main.router.navigate("/login/"));
           });
         }
       } else {
-        DeviceHelpers.get({
-          success: ({ deviceId }) => {
-            if (
-              data &&
-              data.ID &&
-              data.DeviceIDs &&
-              data.DeviceIDs === deviceId
-            ) {
-              store.dispatch("setAuth", data);
-            } else if (
-              data &&
-              data.ID &&
-              data.DeviceIDs &&
-              data.ID !== 1 &&
-              data.DeviceIDs !== deviceId
-            ) {
-              f7.dialog.alert(
-                "Tài khoản đang đăng nhập trên thiết bị khác.",
-                () => {
+        if (data?.Status !== -1) {
+          DeviceHelpers.get({
+            success: ({ deviceId }) => {
+              if (
+                (data &&
+                  data.ID &&
+                  data.DeviceIDs &&
+                  data.DeviceIDs === deviceId) ||
+                (data && data.ID && data.ID === 1)
+              ) {
+                store.dispatch("setAuth", data);
+              } else if (
+                data &&
+                data.ID &&
+                data.DeviceIDs &&
+                data.ID !== 1 &&
+                data.DeviceIDs !== deviceId
+              ) {
+                f7.dialog.alert(
+                  "Tài khoản đang đăng nhập trên thiết bị khác.",
+                  () => {
+                    store
+                      .dispatch("setLogout")
+                      .then(() => f7.views.main.router.navigate("/login/"));
+                  }
+                );
+              } else if (data && data.ID && !data.DeviceIDs) {
+                f7.dialog.alert("Phiên đăng nhập của bạn đã hết hạn.", () => {
                   store
                     .dispatch("setLogout")
                     .then(() => f7.views.main.router.navigate("/login/"));
-                }
-              );
-            } else if (data && data.ID && !data.DeviceIDs) {
-              f7.dialog.alert("Phiên đăng nhập của bạn đã hết hạn.", () => {
-                store
-                  .dispatch("setLogout")
-                  .then(() => f7.views.main.router.navigate("/login/"));
-              });
-            } else if (data) {
-              store.dispatch("setAuth", data);
-            }
-          },
-        });
+                });
+              } else if (data) {
+                store.dispatch("setAuth", data);
+              }
+            },
+          });
+        } else {
+          f7.dialog.alert("Tài khoản của bạn đã bị vô hiệu hoá.", () => {
+            store
+              .dispatch("setLogout")
+              .then(() => f7.views.main.router.navigate("/login/"));
+          });
+        }
       }
     },
     enabled: Boolean(Auth && Auth?.token),
@@ -123,7 +132,7 @@ function LayoutProvider({ children }) {
 
       return {
         Config: Config?.data || null,
-        Global: Global ? {...Global, ...template } : null,
+        Global: Global ? { ...Global, ...template } : null,
       };
     },
     onSettled: ({ Config, Global }) => {
@@ -194,8 +203,17 @@ function LayoutProvider({ children }) {
           WorkTimeToday = Days[indexDays];
           WorkTimeToday.SalaryHours = AuthWorkTimeSetting?.SalaryHours || 0;
         }
+      } else {
+        let flexibleIndex = WorkTimeSetting.findIndex((x) => x.flexible);
+        if (flexibleIndex > -1) {
+          let { flexible, Options } = WorkTimeSetting[flexibleIndex];
+          WorkTimeToday = {
+            flexible,
+            Options,
+            SalaryHours: AuthWorkTimeSetting?.SalaryHours || 0,
+          };
+        }
       }
-
       store.dispatch("setWorkTimeSettings", {
         WorkTimeToday,
         WorkTimeSetting,

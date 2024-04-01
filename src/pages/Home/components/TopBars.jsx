@@ -32,20 +32,24 @@ function TopBars(props) {
           },
         }))
       : [];
-    actionsToPopover.current = f7.actions.create({
-      buttons: [
-        ...newButtons,
-        {
-          text: "Đóng",
-          color: "red",
-        },
-      ],
-      targetEl:
-        buttonToPopoverWrapper.current.querySelector(".button-to-popover"),
-    });
+    if (newButtons && newButtons.length > 4) {
+      f7.views.main.router.navigate(`/stocks/`);
+    } else {
+      actionsToPopover.current = f7.actions.create({
+        buttons: [
+          ...newButtons,
+          {
+            text: "Đóng",
+            color: "red",
+          },
+        ],
+        targetEl:
+          buttonToPopoverWrapper.current.querySelector(".button-to-popover"),
+      });
 
-    if (newButtons && newButtons.length > 0) {
-      actionsToPopover.current.open();
+      if (newButtons && newButtons.length > 0) {
+        actionsToPopover.current.open();
+      }
     }
   };
 
@@ -68,7 +72,10 @@ function TopBars(props) {
         </div>
       </div>
       <div className="flex">
-        <Link href="/notifications/" className="relative flex items-center justify-center bg-white rounded-xl w-11 h-11">
+        <Link
+          href="/notifications/"
+          className="relative flex items-center justify-center bg-white rounded-xl w-11 h-11"
+        >
           <BellAlertIcon className="w-6 text-app" />
           {Notifications && Notifications.length > 0 && (
             <div className="absolute text-white bg-danger text-[10px] px-1 min-w-[15px] h-[15px] rounded-full flex items-center justify-center top-1.5 right-1.5">

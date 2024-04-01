@@ -41,6 +41,7 @@ const BOTTOM_NAVIGATION_PAGES = [
   "/admin/notifications/add/",
   "/admin/notifications/edit/",
   "/admin/utility/timekeeping-setting/",
+  "/stocks/"
 ];
 
 const PATH_NAVIGATION_PAGES = [
@@ -105,30 +106,31 @@ function Navigation(props) {
         if (CheckIn && CheckIn?.Info?.WorkToday) {
           resolve(CheckIn?.Info?.WorkToday);
         } else {
-          if (!actionsToPopover.current) {
-            let newButtons = WorkTimeToday?.Options
-              ? WorkTimeToday?.Options.map((x) => ({
-                  text: x.Title,
-                  close: true,
-                  onClick: (actions, e) => resolve({ ...x, isOff: false }),
-                }))
-              : [];
-            actionsToPopover.current = f7.actions.create({
-              buttons: [
-                [...newButtons],
-                [
-                  {
-                    text: "Đóng",
-                    color: "red",
-                  },
-                ],
+          let newButtons = WorkTimeToday?.Options
+            ? WorkTimeToday?.Options.map((x) => ({
+                text: x.Title,
+                close: true,
+                onClick: (actions, e) => {
+                  resolve({ ...x, isOff: false });
+                },
+              }))
+            : [];
+          actionsToPopover.current = f7.actions.create({
+            buttons: [
+              [...newButtons],
+              [
+                {
+                  text: "Đóng",
+                  color: "red",
+                },
               ],
-              targetEl:
-                buttonToPopoverWrapper.current.querySelector(
-                  ".button-to-popover"
-                ),
-            });
-          }
+            ],
+            targetEl:
+              buttonToPopoverWrapper.current.querySelector(
+                ".button-to-popover"
+              ),
+          });
+
           actionsToPopover.current.open();
         }
       } else {
@@ -166,9 +168,10 @@ function Navigation(props) {
             const PreCheckLocation = () => {
               PromHelpers.GET_LOCATION()
                 .then(({ data }) => {
-                  f7.dialog.close();
-                  f7.dialog.preloader("Đang chấm công...");
-
+                  if (PreCheckIndex === 1) {
+                    f7.dialog.close();
+                    f7.dialog.preloader("Đang chấm công...");
+                  }
                   let lengthInMeters = getDistance(
                     { latitude: Lat, longitude: Lng },
                     { ...data }
@@ -329,7 +332,9 @@ function Navigation(props) {
                               WifiName: CrStocks?.WifiName,
                               WifiID: CrStocks?.WifiID,
                             },
-                            WarningWifi: (data.BSSID !== CrStocks?.WifiID) || (data.SSID !== CrStocks?.WifiName)
+                            WarningWifi:
+                              data.BSSID !== CrStocks?.WifiID ||
+                              data.SSID !== CrStocks?.WifiName,
                           },
                         },
                       ],
@@ -393,7 +398,9 @@ function Navigation(props) {
               })
               .catch((error) => {
                 f7.dialog.close();
-                f7.dialog.alert(`Vui lòng kết nối WIFI "${CrStocks?.WifiName}" để thực hiện chấm công.`);
+                f7.dialog.alert(
+                  `Vui lòng kết nối WIFI "${CrStocks?.WifiName}" để thực hiện chấm công.`
+                );
               });
           }
         );
@@ -401,11 +408,136 @@ function Navigation(props) {
     }
   };
 
-  const handleCheckIn = () => {
+  const handleCheckInBasic = (open) => {
+    if (
+      !WorkTimeToday ||
+      (WorkTimeToday?.flexible &&
+        (!WorkTimeToday?.Options || WorkTimeToday?.Options.length === 0))
+    ) {
+      f7.dialog.alert(
+        `Bạn chưa được cài đặt loại công ca. Vui lòng liên hệ quản trị viên để được cài đặt?`
+      );
+      return;
+    }
+    openFlexibleShifts().then((WorkTimeShift) => {
+      f7.dialog.confirm(
+        !CheckIn
+          ? "Bạn muốn chấm công vào làm ?"
+          : "Bạn muốn chấm công ra về ?",
+        () => {
+          PromHelpers.GET_NETWORK_TYPE()
+            .then(({ data }) => {
+              f7.dialog.preloader("Đang thực hiện ...");
+              DateTimeHelpers.getNowServer().then(({ CrDate }) => {
+                f7.dialog.close();
+                let dataCheckInOut = {
+                  list: [
+                    {
+                      UserID: Auth?.ID,
+                      StockID: CrStocks?.ID,
+                      Info: {
+                        Lat: "",
+                        Lng: "",
+                        WorkToday: {
+                          ...WorkTimeShift,
+                          Value: WorkTimeShift?.isOff
+                            ? 0
+                            : WorkTimeShift?.Value,
+                          flexible: WorkTimeToday?.flexible,
+                        },
+                        Basic: true,
+                        BSSID: data.BSSID,
+                        SSID: data.SSID,
+                      },
+                    },
+                  ],
+                };
+                if (!CheckIn) {
+                  dataCheckInOut.list[0].CheckIn =
+                    moment(CrDate).format("YYYY-MM-DD HH:mm");
+                } else {
+                  dataCheckInOut.list[0].CheckOut =
+                    moment(CrDate).format("YYYY-MM-DD HH:mm");
+                }
+
+                WorksHelpers.getConfirmOutIn({
+                  WorkShiftsSetting,
+                  WorkTimeToday: {
+                    ...WorkTimeShift,
+                    SalaryHours: WorkTimeToday?.SalaryHours,
+                  },
+                  CheckIn,
+                  CheckOut,
+                  CrDate,
+                })
+                  .then((initialValues) => {
+                    f7.dialog.close();
+                    open({
+                      ...dataCheckInOut.list[0],
+                      Info: {
+                        ...dataCheckInOut.list[0].Info,
+                        ...initialValues,
+                      },
+                    });
+                  })
+                  .catch(() => {
+                    inOutMutation.mutate(dataCheckInOut, {
+                      onSettled: ({ data }) => {
+                        Promise.all([
+                          queryClient.invalidateQueries(["Auth"]),
+                          queryClient.invalidateQueries(["TimekeepingHome"]),
+                          queryClient.invalidateQueries(["TimekeepingList"]),
+                        ]).then(() => {
+                          f7.dialog.close();
+                          toast.success("Chấm công thành công.", {
+                            position: toast.POSITION.TOP_CENTER,
+                            autoClose: 2000,
+                          });
+                        });
+                      },
+                    });
+                  });
+              });
+            })
+            .catch((error) => {
+              f7.dialog.close();
+              f7.dialog.alert(
+                `Vui lòng kết nối WIFI "${CrStocks?.WifiName}" để thực hiện chấm công.`
+              );
+            });
+        }
+      );
+    });
+  };
+
+  const handleCheckIn = (open) => {
     if (CheckIn && CheckOut) {
       f7.dialog.alert(`Hôm nay bạn đã thực hiện chấm công rồi nhé.`);
     } else {
-      setVisible(true);
+      if (
+        !CrStocks?.Lat &&
+        !CrStocks?.Lng &&
+        !CrStocks?.WifiID &&
+        !CrStocks?.WifiName
+      ) {
+        handleCheckInBasic(open);
+      } else if (
+        CrStocks?.Lat &&
+        CrStocks?.Lng &&
+        !CrStocks?.WifiID &&
+        !CrStocks?.WifiName
+      ) {
+        handleCheckInLocation(open);
+      } else if (
+        !CrStocks?.Lat &&
+        !CrStocks?.Lng &&
+        CrStocks?.WifiID &&
+        CrStocks?.WifiName
+      ) {
+        handleCheckInWifi(open);
+      } else {
+        setVisible(true);
+      }
     }
   };
 
