@@ -180,7 +180,7 @@ function TakeBreakPage(props) {
                                 Đến
                               </div>
                               <div className="pt-5 font-semibold capitalize">
-                                {moment(work.From).format("HH:mm ddd, ll")}
+                                {moment(work.To).format("HH:mm ddd, ll")}
                               </div>
                             </div>
                           </div>
