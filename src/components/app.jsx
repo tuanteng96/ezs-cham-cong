@@ -20,13 +20,15 @@ window.timeOutForce = null;
 
 const queryClient = new QueryClient({
   defaultOptions: {
-    refetchOnWindowFocus: false,
+    queries: {
+      refetchOnWindowFocus: false, 
+    },
   },
 });
 
 const MyApp = () => {
   const f7params = {
-    name: "EZS Chấm công", // App name
+    name: "Thông báo", // App name
     theme: "ios", // Automatic theme detection
     colors: {
       primary: "#3E97FF",

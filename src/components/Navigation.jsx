@@ -41,7 +41,8 @@ const BOTTOM_NAVIGATION_PAGES = [
   "/admin/notifications/add/",
   "/admin/notifications/edit/",
   "/admin/utility/timekeeping-setting/",
-  "/stocks/"
+  "/admin/article/",
+  "/stocks/",
 ];
 
 const PATH_NAVIGATION_PAGES = [

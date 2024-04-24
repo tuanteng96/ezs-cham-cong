@@ -43,8 +43,8 @@ function Panels(props) {
   const CrStocks = useStore("CrStocks");
   const [pathname, setPathname] = useState("");
 
-  const { notification, report, cong_ca } = RolesHelpers.useRoles({
-    nameRoles: ["notification", "report", "cong_ca"],
+  const { notification, report, cong_ca, article } = RolesHelpers.useRoles({
+    nameRoles: ["notification", "report", "cong_ca", "article"],
     auth: Auth,
     CrStocks,
   });
@@ -87,6 +87,25 @@ function Panels(props) {
           },
         ],
         hasRight: notification?.hasRight || false,
+      },
+      {
+        Title: "Quản lý nội dung",
+        ActiveLink: ["/admin/article/", "/admin/banner/"],
+        SubMenu: [
+          {
+            Title: "Bài viết",
+            Link: "/admin/article/",
+            active: false,
+          },
+          {
+            Title: "Banner & Quảng cáo",
+            Link: "/admin/banner/",
+            active: false,
+          },
+        ],
+        active: false,
+        Id: f7.utils.id("xxxx-xxxx-xxxx-xxxx"),
+        hasRight: article?.hasRight || false,
       },
       {
         Title: "Chấm công",
