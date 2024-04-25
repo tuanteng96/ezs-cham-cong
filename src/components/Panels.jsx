@@ -1,4 +1,13 @@
-import { ChevronRightIcon, PowerIcon } from "@heroicons/react/24/outline";
+import {
+  BellIcon,
+  ChevronRightIcon,
+  EllipsisHorizontalCircleIcon,
+  FingerPrintIcon,
+  HomeIcon,
+  PencilSquareIcon,
+  PowerIcon,
+  PresentationChartBarIcon,
+} from "@heroicons/react/24/outline";
 import { Link, Panel, f7, f7ready, useStore } from "framework7-react";
 import React, { useEffect, useState } from "react";
 import {
@@ -32,6 +41,12 @@ function CSubMenu({ children, defaultOpen, ...props }) {
       defaultOpen={defaultOpen}
       open={open}
       onOpenChange={handleMenuToggle}
+      rootStyles={{
+        [".ps-menu-icon"]: {
+          width: "auto",
+          minWidth: "auto",
+        },
+      }}
     >
       {children}
     </SubMenu>
@@ -61,106 +76,112 @@ function Panels(props) {
 
   useEffect(() => {
     setMenus([
+      // {
+      //   Title: "Trang chủ",
+      //   Link: "/home/",
+      //   ActiveLink: ["/", "/home/"],
+      //   active: true,
+      //   Id: f7.utils.id("xxxx-xxxx-xxxx-xxxx"),
+      //   hasRight: true,
+      //   Icon: <HomeIcon className="w-5" />,
+      // },
       {
-        Title: "Trang chủ",
-        Link: "/home/",
-        ActiveLink: ["/", "/home/"],
-        active: true,
-        Id: f7.utils.id("xxxx-xxxx-xxxx-xxxx"),
-        hasRight: true,
-      },
-      {
-        Title: "Quản lý thông báo",
+        Title: "Gửi tin nhắn APP",
+        Link: "/admin/notifications/add/",
         ActiveLink: ["/admin/notifications/", "/admin/notifications/add/"],
         active: true,
         Id: f7.utils.id("xxxx-xxxx-xxxx-xxxx"),
-        SubMenu: [
-          {
-            Title: "Tạo mới",
-            Link: "/admin/notifications/add/",
-            active: false,
-          },
-          {
-            Title: "Danh sách",
-            Link: "/admin/notifications/",
-            active: false,
-          },
-        ],
+        Icon: <BellIcon className="w-5" />,
+        // SubMenu: [
+        //   {
+        //     Title: "Tạo mới",
+        //     Link: "/admin/notifications/add/",
+        //     active: false,
+        //   },
+        //   {
+        //     Title: "Danh sách",
+        //     Link: "/admin/notifications/",
+        //     active: false,
+        //   },
+        // ],
         hasRight: notification?.hasRight || false,
       },
       {
-        Title: "Quản lý nội dung",
+        Title: "Viết bài blogs",
+        Link: "/admin/article/",
+        Icon: <PencilSquareIcon className="w-5" />,
         ActiveLink: ["/admin/article/", "/admin/banner/"],
-        SubMenu: [
-          {
-            Title: "Bài viết",
-            Link: "/admin/article/",
-            active: false,
-          },
-          {
-            Title: "Banner & Quảng cáo",
-            Link: "/admin/banner/",
-            active: false,
-          },
-        ],
+        // SubMenu: [
+        //   {
+        //     Title: "Bài viết",
+        //     Link: "/admin/article/",
+        //     active: false,
+        //   },
+        //   {
+        //     Title: "Banner & Quảng cáo",
+        //     Link: "/admin/banner/",
+        //     active: false,
+        //   },
+        // ],
         active: false,
         Id: f7.utils.id("xxxx-xxxx-xxxx-xxxx"),
         hasRight: article?.hasRight || false,
       },
-      {
-        Title: "Chấm công",
-        ActiveLink: ["/timekeeping/", "/take-break/"],
-        SubMenu: [
-          {
-            Title: "Bảng công",
-            Link: "/timekeeping/",
-            active: false,
-          },
-          {
-            Title: "Xin nghỉ",
-            Link: "/take-break/",
-            active: false,
-          },
-        ],
-        active: false,
-        Id: f7.utils.id("xxxx-xxxx-xxxx-xxxx"),
-        hasRight: true,
-      },
-      {
-        Title: "Kỹ thuật viên",
-        ActiveLink: ["/technicians/", "/technicians/?Type=dl"],
-        SubMenu: [
-          {
-            Title: "Dịch vụ",
-            Link: "/technicians/",
-            active: false,
-          },
-          {
-            Title: "Đặt lịch",
-            Link: "/technicians/?Type=dl",
-            active: false,
-          },
-        ],
-        active: false,
-        Id: f7.utils.id("xxxx-xxxx-xxxx-xxxx"),
-        hasRight: true,
-      },
-      {
-        Title: "Thông báo",
-        Link: "/notifications/",
-        ActiveLink: ["/notifications/"],
-        active: false,
-        Id: f7.utils.id("xxxx-xxxx-xxxx-xxxx"),
-        hasRight: true,
-      },
-      {
-        Title: "Bảng lương",
-        Link: "/statistical/",
-        ActiveLink: ["/statistical/"],
-        active: false,
-        Id: f7.utils.id("xxxx-xxxx-xxxx-xxxx"),
-        hasRight: true,
-      },
+      // {
+      //   Title: "Chấm công",
+      //   Icon: <FingerPrintIcon className="w-5" />,
+      //   ActiveLink: ["/timekeeping/", "/take-break/"],
+      //   SubMenu: [
+      //     {
+      //       Title: "Bảng công",
+      //       Link: "/timekeeping/",
+      //       active: false,
+      //     },
+      //     {
+      //       Title: "Xin nghỉ",
+      //       Link: "/take-break/",
+      //       active: false,
+      //     },
+      //   ],
+      //   active: false,
+      //   Id: f7.utils.id("xxxx-xxxx-xxxx-xxxx"),
+      //   hasRight: true,
+      // },
+      // {
+      //   Title: "Kỹ thuật viên",
+      //   ActiveLink: ["/technicians/", "/technicians/?Type=dl"],
+      //   SubMenu: [
+      //     {
+      //       Title: "Dịch vụ",
+      //       Link: "/technicians/",
+      //       active: false,
+      //     },
+      //     {
+      //       Title: "Đặt lịch",
+      //       Link: "/technicians/?Type=dl",
+      //       active: false,
+      //     },
+      //   ],
+      //   active: false,
+      //   Id: f7.utils.id("xxxx-xxxx-xxxx-xxxx"),
+      //   hasRight: true,
+      // },
+      // {
+      //   Title: "Thông báo",
+      //   Link: "/notifications/",
+      //   ActiveLink: ["/notifications/"],
+      //   active: false,
+      //   Id: f7.utils.id("xxxx-xxxx-xxxx-xxxx"),
+      //   hasRight: true,
+      // },
+      // {
+      //   Title: "Bảng lương",
+      //   Link: "/statistical/",
+      //   ActiveLink: ["/statistical/"],
+      //   active: false,
+      //   Id: f7.utils.id("xxxx-xxxx-xxxx-xxxx"),
+      //   hasRight: true,
+      // },
       {
         Title: "Báo cáo",
         Link: "/report/",
@@ -168,9 +189,11 @@ function Panels(props) {
         active: false,
         Id: f7.utils.id("xxxx-xxxx-xxxx-xxxx"),
         hasRight: report?.hasRight || false,
+        Icon: <PresentationChartBarIcon className="w-5" />,
       },
       {
         Title: "Tiện ích",
+        Icon: <EllipsisHorizontalCircleIcon className="w-5" />,
         ActiveLink: ["/admin/utility/", "/admin/utility/timekeeping-setting/"],
         SubMenu: [
           {
@@ -183,14 +206,6 @@ function Panels(props) {
         active: false,
         Id: f7.utils.id("xxxx-xxxx-xxxx-xxxx"),
         hasRight: cong_ca?.hasRight || false,
-      },
-      {
-        Title: "Thông tin cá nhân",
-        Link: "/account/",
-        ActiveLink: ["/account/"],
-        active: false,
-        Id: f7.utils.id("xxxx-xxxx-xxxx-xxxx"),
-        hasRight: true,
       },
     ]);
   }, [Auth, CrStocks]);
@@ -220,16 +235,6 @@ function Panels(props) {
     );
   };
 
-  const renderMemberGroups = () => {
-    if (Auth?.ID === 1) {
-      return "Administrator";
-    } else if (Auth?.GroupTitles && Auth?.GroupTitles.length > 0) {
-      return Auth.GroupTitles.join(", ");
-    } else {
-      return "Nhân viên";
-    }
-  };
-
   return (
     <Panel
       floating
@@ -239,7 +244,12 @@ function Panels(props) {
       onPanelOpen={onPanelOpen}
     >
       <div className="flex flex-col h-full">
-        <div className="flex items-center p-4 bg-white border-b">
+        <Link
+          onClick={() => f7.panel.close(Dom7("#panel-app"))}
+          href="/account/"
+          noLinkClass
+          className="flex items-center p-4 bg-white border-b"
+        >
           <div className="w-11 h-11">
             <div className="relative h-full overflow-hidden bg-gray-100 w-11 rounded-xl">
               <svg
@@ -258,9 +268,9 @@ function Panels(props) {
           </div>
           <div className="flex-1 pl-3">
             <div className="font-medium">{Auth?.FullName}</div>
-            <div className="capitalize text-muted">{renderMemberGroups()}</div>
+            <div className="text-muted">Thông tin tài khoản</div>
           </div>
-        </div>
+        </Link>
         <div className="overflow-auto grow bg-[#f7f9fa]">
           <Sidebar
             width="var(--f7-panel-width)"
@@ -303,6 +313,7 @@ function Panels(props) {
                       key={menu.Id}
                       active={menu.active}
                       defaultOpen={menu.active}
+                      icon={menu.Icon}
                     >
                       {menu.SubMenu.map((sub, i) => (
                         <MenuItem
@@ -324,7 +335,10 @@ function Panels(props) {
                       active={menu.active}
                       key={index}
                     >
-                      {menu.Title}
+                      <div className="flex items-center">
+                        {menu.Icon && <div className="mr-2">{menu.Icon}</div>}
+                        <span>{menu.Title}</span>
+                      </div>
                     </MenuItem>
                   )
                 )}

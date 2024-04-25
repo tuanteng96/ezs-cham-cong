@@ -116,7 +116,7 @@ function ArticleAddAdmin({ f7router, f7route }) {
     enabled: !isAddMode,
   });
 
-  const { fields, remove, prepend } = useFieldArray({
+  const { fields, remove, append } = useFieldArray({
     control,
     name: "PhotoList",
   });
@@ -159,7 +159,7 @@ function ArticleAddAdmin({ f7router, f7route }) {
         onSuccess: ({ data }) => {
           if (data) {
             for (let Src of data) {
-              prepend({ Src });
+              append({ Src });
             }
           }
           f7.dialog.close();
@@ -258,21 +258,21 @@ function ArticleAddAdmin({ f7router, f7route }) {
         </NavLeft>
         <NavTitle>{isAddMode ? "Tạo bài viết" : "Chỉnh sửa bài viết"}</NavTitle>
 
-        {/* <NavRight className="h-full">
+        <NavRight className="h-full">
           <Link
             noLinkClass
-            className="!text-white h-full flex items-center justify-center w-14 font-semibold"
+            className="!text-white bg-primary mr-3 px-2 py-1.5 text-[15px] rounded"
             onClick={() => buttonRef?.current?.click()}
           >
-            Tiếp
+            Đăng bài
           </Link>
-        </NavRight> */}
+        </NavRight>
 
         <div className="absolute h-[2px] w-full bottom-0 left-0 bg-[rgba(255,255,255,0.3)]"></div>
       </Navbar>
       <FormProvider {...methods}>
         <form
-          className="flex flex-col h-full"
+          className="relative flex flex-col h-full"
           onSubmit={handleSubmit(onSubmit)}
         >
           <Controller
@@ -312,70 +312,64 @@ function ArticleAddAdmin({ f7router, f7route }) {
                   errorMessageForce={fieldState?.invalid}
                   onTextEditorChange={field.onChange}
                 />
+                <div className="absolute flex h-11 top-[56px]  z-[10000] right-0 pr-2">
+                  <input
+                    type="file"
+                    name="uploadfile"
+                    accept="image/*"
+                    className="hidden w-full h-full opacity-0"
+                    ref={inputFileRef}
+                    onChange={uploadFileEditor}
+                    multiple
+                    value=""
+                  />
+                  <div
+                    className="flex items-center justify-center h-full w-11 text-[#333]"
+                    onClick={() => inputFileRef?.current.click()}
+                  >
+                    <PhotoIcon className="w-7" />
+                  </div>
+                  <div
+                    className="flex items-center justify-center h-full w-11 text-[#333]"
+                    onClick={() => {
+                      f7.dialog.prompt("Nhập Mã Video Youtube", (video) => {
+                        setValue(
+                          "Content",
+                          `${watchForm.Content} <div class="mt-2"><iframe class="w-full" height="200" src="https://www.youtube.com/embed/${video}" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe></div>`
+                        );
+                      });
+                    }}
+                  >
+                    <VideoCameraIcon className="w-7" />
+                  </div>
+                </div>
               </>
             )}
           />
-
-          <div className="grid grid-cols-4 gap-2 p-4">
-            {fields &&
-              fields.map((image, index) => (
-                <div
-                  className="relative object-contain w-full rounded group aspect-square"
-                  key={image.id}
-                >
+          {fields && fields.length > 0 && (
+            <div className="grid grid-cols-4 gap-2 p-4">
+              {fields &&
+                fields.map((image, index) => (
                   <div
-                    className="absolute z-10 flex items-center justify-center w-5 h-5 text-white transition bg-gray-700 border border-white rounded-full shadow-xl cursor-pointer top-1 right-1"
-                    onClick={() => remove(index)}
+                    className="relative object-contain w-full rounded group aspect-square"
+                    key={image.id}
                   >
-                    <XMarkIcon className="w-3.5" />
+                    <div
+                      className="absolute z-10 flex items-center justify-center w-5 h-5 text-white transition bg-gray-700 border border-white rounded-full shadow-xl cursor-pointer top-1 right-1"
+                      onClick={() => remove(index)}
+                    >
+                      <XMarkIcon className="w-3.5" />
+                    </div>
+                    <img
+                      className="object-contain w-full border rounded aspect-square"
+                      src={AssetsHelpers.toAbsoluteUrl(image.Src)}
+                      alt=""
+                    />
                   </div>
-                  <img
-                    className="object-contain w-full border rounded aspect-square"
-                    src={AssetsHelpers.toAbsoluteUrl(image.Src)}
-                    alt=""
-                  />
-                </div>
-              ))}
-          </div>
-          <div className="flex items-center justify-between h-14 pl-2.5 border-t">
-            <div className="flex">
-              <input
-                type="file"
-                name="uploadfile"
-                accept="image/*"
-                className="hidden w-full h-full opacity-0"
-                ref={inputFileRef}
-                onChange={uploadFileEditor}
-                multiple
-                value=""
-              />
-              <div
-                className="flex items-center justify-center h-full w-11 text-[#333]"
-                onClick={() => inputFileRef?.current.click()}
-              >
-                <PhotoIcon className="w-7" />
-              </div>
-              <div
-                className="flex items-center justify-center h-full w-11 text-[#333]"
-                onClick={() => {
-                  f7.dialog.prompt("Nhập Mã Video Youtube", (video) => {
-                    setValue(
-                      "Content",
-                      `${watchForm.Content} <div class="mt-2"><iframe class="w-full" height="200" src="https://www.youtube.com/embed/${video}" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe></div>`
-                    );
-                  });
-                }}
-              >
-                <VideoCameraIcon className="w-7" />
-              </div>
+                ))}
             </div>
-            <div
-              className="flex items-center justify-center h-full w-14"
-              onClick={() => buttonRef?.current?.click()}
-            >
-              <PaperAirplaneIcon className="w-7 text-primary" />
-            </div>
-          </div>
+          )}
+
           <button
             type="submit"
             className="hidden rounded-full bg-app"

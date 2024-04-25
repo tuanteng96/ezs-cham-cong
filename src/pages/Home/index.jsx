@@ -1,5 +1,5 @@
 import React, { useRef, useState } from "react";
-import { Page, f7, useStore } from "framework7-react";
+import { Link, Page, f7, useStore } from "framework7-react";
 import PromHelpers from "../../helpers/PromHelpers";
 import {
   ArrowLeftOnRectangleIcon,
@@ -193,18 +193,10 @@ function HomePage(props) {
                     <ArrowRightOnRectangleIcon className="absolute w-6 right-3 bottom-3 text-danger" />
                   </div>
                 </div>
-                {/* {(!CheckIn || !CheckOut) && (
-                  <div className="flex items-center px-4 py-2 mb-4 text-xs text-white rounded bg-warning">
-                    <ExclamationTriangleIcon className="w-5" />
-                    <span className="pl-2">
-                      Bạn chưa chấm công {!CheckIn ? "vào làm" : "ra về"} ngày
-                      hôm nay
-                      <span className="pl-1">
-                        {moment().format("DD/MM/YYYY")}
-                      </span>
-                    </span>
-                  </div>
-                )} */}
+                <div className="grid grid-cols-2 gap-4 mt-4">
+                  <Link className="flex justify-center py-3.5 border rounded text-[#333] font-medium" href="/timekeeping/" noLinkClass>Bảng công</Link>
+                  <Link className="flex justify-center py-3.5 border rounded text-[#333] font-medium" href="/take-break/" noLinkClass>Xin nghỉ</Link>
+                </div>
               </div>
             </div>
           </PullToRefresh>

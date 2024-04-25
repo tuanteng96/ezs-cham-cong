@@ -37,6 +37,7 @@ const BOTTOM_NAVIGATION_PAGES = [
   "/technicians/profile/",
   "/technicians/service/",
   "/technicians/history/",
+  "/notifications/",
   "/notifications/view/",
   "/admin/notifications/add/",
   "/admin/notifications/edit/",
@@ -569,7 +570,7 @@ function Navigation(props) {
             )}
           >
             <HomeIcon className="w-6" />
-            <span className="text-[10px] mt-px leading-4">Trang chủ</span>
+            <span className="text-[10px] mt-px leading-4">Chấm công</span>
           </div>
         </Link>
         <Link href="/technicians/">
@@ -696,7 +697,7 @@ function Navigation(props) {
             )}
           >
             <ChartBarIcon className="w-6" />
-            <span className="text-[10px] mt-px leading-4">Thống kê</span>
+            <span className="text-[10px] mt-px leading-4">Bảng lương</span>
           </div>
         </Link>
         <Link panelOpen="right">

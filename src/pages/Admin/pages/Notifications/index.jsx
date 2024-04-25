@@ -73,7 +73,7 @@ function NotificationAdmin({ f7router }) {
         <NavTitle>Danh sách thông báo</NavTitle>
         <NavRight className="h-full">
           <Link
-            href="/admin/notifications/add/"
+            back
             noLinkClass
             className="!text-white h-full flex item-center justify-center w-12"
           >

@@ -3,6 +3,7 @@ import {
   Input,
   Link,
   NavLeft,
+  NavRight,
   NavTitle,
   Navbar,
   Page,
@@ -14,6 +15,7 @@ import React, { useEffect, useRef, useState } from "react";
 import PromHelpers from "../../../../helpers/PromHelpers";
 import {
   ChevronLeftIcon,
+  ListBulletIcon,
   PhotoIcon,
   PlusIcon,
   VideoCameraIcon,
@@ -84,16 +86,28 @@ const TypeLinks = [
 const schemaAdd = yup
   .object({
     Title: yup.string().required("Vui lòng nhập tiêu đề."),
-    ToMembers: yup.array().test("Vui lòng chọn khách hàng","Vui lòng chọn khách hàng",function (value) {
-      const { ToUsers } = this.parent
-      if (!ToUsers || ToUsers.length === 0) return value.length > 0
-      return true
-    }),
-    ToUsers: yup.array().test("Vui lòng chọn nhân viên","Vui lòng chọn nhân viên",function (value) {
-      const { ToMembers } = this.parent
-      if (!ToMembers || ToMembers.length === 0) return value.length > 0
-      return true
-    })
+    ToMembers: yup
+      .array()
+      .test(
+        "Vui lòng chọn khách hàng",
+        "Vui lòng chọn khách hàng",
+        function (value) {
+          const { ToUsers } = this.parent;
+          if (!ToUsers || ToUsers.length === 0) return value.length > 0;
+          return true;
+        }
+      ),
+    ToUsers: yup
+      .array()
+      .test(
+        "Vui lòng chọn nhân viên",
+        "Vui lòng chọn nhân viên",
+        function (value) {
+          const { ToMembers } = this.parent;
+          if (!ToMembers || ToMembers.length === 0) return value.length > 0;
+          return true;
+        }
+      ),
   })
   .required();
 
@@ -315,7 +329,15 @@ function NotificationAddAdmin({ f7router }) {
           </Link>
         </NavLeft>
         <NavTitle>Thêm mới thông báo</NavTitle>
-
+        <NavRight className="h-full">
+          <Link
+            href="/admin/notifications/"
+            noLinkClass
+            className="!text-white h-full flex item-center justify-center w-12"
+          >
+            <ListBulletIcon className="w-6" />
+          </Link>
+        </NavRight>
         <div className="absolute h-[2px] w-full bottom-0 left-0 bg-[rgba(255,255,255,0.3)]"></div>
       </Navbar>
       {!isTemplate && (
@@ -486,7 +508,7 @@ function NotificationAddAdmin({ f7router }) {
                     label="Chọn khách hàng"
                     onChange={(val) => {
                       field.onChange(val);
-                      trigger('ToUsers')
+                      trigger("ToUsers");
                     }}
                     errorMessage={fieldState?.error?.message}
                     errorMessageForce={fieldState?.invalid}
@@ -508,7 +530,7 @@ function NotificationAddAdmin({ f7router }) {
                     label="Chọn nhân viên"
                     onChange={(val) => {
                       field.onChange(val);
-                      trigger('ToMembers')
+                      trigger("ToMembers");
                     }}
                     errorMessage={fieldState?.error?.message}
                     errorMessageForce={fieldState?.invalid}
