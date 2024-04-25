@@ -261,7 +261,7 @@ function ArticleAddAdmin({ f7router, f7route }) {
         <NavRight className="h-full">
           <Link
             noLinkClass
-            className="!text-white bg-primary mr-3 px-2 py-1.5 text-[15px] rounded"
+            className="!text-white bg-success mr-3 px-2 py-1.5 text-[15px] rounded"
             onClick={() => buttonRef?.current?.click()}
           >
             Đăng bài

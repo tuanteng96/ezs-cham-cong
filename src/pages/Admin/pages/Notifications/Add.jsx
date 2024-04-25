@@ -594,13 +594,14 @@ function NotificationAddAdmin({ f7router }) {
       )}
       {isTemplate && (
         <div className="relative p-4">
-          <div className="grid grid-cols-2 gap-4 mb-4">
+          <div className="grid mb-4">
             <div
               className="flex flex-col items-center justify-center h-32 border-[1px] border-[#d5d7da] border-dashed rounded cursor-pointer"
               onClick={() => setIsTemplate(false)}
             >
               <PlusIcon className="w-8 mb-2 text-muted" />
-              <div className="text-[13px] text-muted">Tạo mới mặc định</div>
+              <div className="font-meidum text-[15px] mb-px">Tạo mới mặc định</div>
+              <div className="text-muted text-[13px]">Hoặc chọn mẫu bên dưới</div>
             </div>
           </div>
           <div>

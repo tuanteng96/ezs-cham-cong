@@ -169,7 +169,7 @@ function Article({ f7router }) {
             Lists.length > 0 &&
             Lists.map((item, index) => (
               <div
-                className="flex flex-col p-4 mb-1.5 bg-white last:mb-0"
+                className="flex flex-col p-4 mb-2.5 bg-white last:mb-0"
                 key={index}
               >
                 <div className="mb-3">
