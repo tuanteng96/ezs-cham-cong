@@ -88,7 +88,11 @@ function Statistical({ f7router }) {
     >
       <Navbar innerClass="!px-0 text-white" outline={false}>
         <NavLeft className="!justify-center w-12 h-full">
-          <Link href="/" noLinkClass className="!text-white h-full flex item-center justify-center">
+          <Link
+            href="/"
+            noLinkClass
+            className="!text-white h-full flex item-center justify-center"
+          >
             <HomeIcon className="w-6" />
           </Link>
         </NavLeft>
@@ -492,7 +496,7 @@ function Statistical({ f7router }) {
                     <div className="px-4 py-2.5 border-r font-light col-span-3">
                       <span
                         className={clsx(
-                          "pr-1",
+                          "pr-1 font-medium",
                           item.OSStatus === "done"
                             ? "text-success"
                             : "text-warning"
@@ -502,8 +506,11 @@ function Statistical({ f7router }) {
                           ? "Hoàn thành"
                           : "Đang thực hiện"}
                       </span>
-                      - {item.ProdTitle} -
-                      {moment(item.CreateDate).format("llll")}
+                      - {item.ProdTitle}
+                      <span className="px-1">
+                        ( {item.ConvertTitle || item.Root2Title || item.RootTitle} )
+                      </span>
+                      - {moment(item.CreateDate).format("llll")}
                       <div>
                         {item?.Member?.FullName}
                         {!Global?.APP?.Staff?.hidePhoneMember &&
