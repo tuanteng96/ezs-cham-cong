@@ -694,9 +694,10 @@ function Statistical({ f7router }) {
                       Tổng *
                     </div>
                     <div className="px-4 py-2.5 font-semibold text-right text-danger col-span-2">
+                      
                       {StringHelpers.formatVND(
                         ArrayHelpers.sumTotal(
-                          THUONG_HOA_HONG_DOANH_SO?.ApplyList,
+                          data?.THUONG_HOA_HONG_DOANH_SO?.ApplyList,
                           "Value"
                         ) + (data?.KpiTourResult?.Value || 0)
                       )}
