@@ -10,7 +10,6 @@ const WorksHelpers = {
     }) => new Promise((resolve, reject) => {
 
         let initialValues = {};
-
         if (WorkTimeToday && !WorkTimeToday.isOff) {
 
             if (!WorkTimeToday.TimeFrom && !WorkTimeToday.TimeTo) reject("Chưa cài đặt thời gian ca làm.");

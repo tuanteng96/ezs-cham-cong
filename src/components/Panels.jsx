@@ -57,7 +57,7 @@ function Panels(props) {
   let Auth = useStore("Auth");
   const CrStocks = useStore("CrStocks");
   const [pathname, setPathname] = useState("");
-
+  
   const { notification, report, cong_ca, article } = RolesHelpers.useRoles({
     nameRoles: ["notification", "report", "cong_ca", "article"],
     auth: Auth,

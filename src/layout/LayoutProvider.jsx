@@ -124,10 +124,10 @@ function LayoutProvider({ children }) {
         `${Brand?.Domain}/api/v3/config?cmd=getnames&names=Bill.Title,logo.mau&ignore_root=1`
       );
       let { data: Global } = await axios.get(
-        `${Brand?.Domain}/brand/global/Global.json`
+        `${Brand?.Domain}/brand/global/Global.json?${new Date().getTime()}`
       );
       let { data: template } = await axios.get(
-        `${Brand?.Domain}/AdminCp/Controls/Noti2/NotiTemplate.json`
+        `${Brand?.Domain}/AdminCp/Controls/Noti2/NotiTemplate.json?${new Date().getTime()}`
       );
 
       return {

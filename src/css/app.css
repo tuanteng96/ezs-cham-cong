@@ -39,6 +39,7 @@
     --f7-toggle-inactive-bg-color: transparent;
 
     --f7-actions-bg-color: #fff;
+    --f7-actions-grid-button-font-size: 15px;
 
     --f7-subnavbar-bg-color: #fff;
 
@@ -157,6 +158,14 @@
 /* Dialog */
 .ios .dialog-title+.dialog-text {
     word-break: break-word;
+}
+
+.dialog-backdrop {
+    z-index: 13501;
+}
+
+.dialog {
+    z-index: 13502;
 }
 
 /* Sheet Modal */
