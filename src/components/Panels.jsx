@@ -188,7 +188,7 @@ function Panels(props) {
         ActiveLink: ["/report/"],
         active: false,
         Id: f7.utils.id("xxxx-xxxx-xxxx-xxxx"),
-        hasRight: report?.hasRight || false,
+        hasRight: report?.hasRight || true,
         Icon: <PresentationChartBarIcon className="w-5" />,
       },
       {
