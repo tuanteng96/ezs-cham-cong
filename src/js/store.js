@@ -79,7 +79,7 @@ const store = createStore({
           })),
         }
       };
-
+      
       StorageHelpers.set({
         data: {
           Auth: newValue,
