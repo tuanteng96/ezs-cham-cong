@@ -58,8 +58,10 @@ function PickerConfirm({ children }) {
   });
 
   const onSubmit = (values) => {
+    
     f7.dialog.preloader("Đang chấm công...");
     let newValues = { ...values };
+    
     delete newValues.Info.Title;
     if (
       newValues.Info["DI_MUON"] &&
@@ -97,6 +99,39 @@ function PickerConfirm({ children }) {
         Value: 0,
       };
     }
+
+    if (
+      newValues.Info["DI_MUON"] &&
+      newValues?.Info?.Type?.value === "CA_NHAN" &&
+      typeof newValues.Info["DI_MUON"].WorkDays !== "undefined"
+    ) {
+      newValues.Info.WorkToday.Value = newValues.Info["DI_MUON"].WorkDays
+    }
+
+    if (
+      newValues.Info["VE_SOM"] &&
+      newValues?.Info?.Type?.value === "CA_NHAN" &&
+      typeof newValues.Info["VE_SOM"].WorkDays !== "undefined"
+    ) {
+      newValues.Info.WorkToday.Value = newValues.Info["VE_SOM"].WorkDays
+    }
+
+    if (
+      newValues.Info["DI_SOM"] &&
+      newValues?.Info?.Type?.value === "CONG_TY" &&
+      typeof newValues.Info["DI_SOM"].WorkDays !== "undefined"
+    ) {
+      newValues.Info.WorkToday.Value = newValues.Info["DI_SOM"].WorkDays
+    }
+
+    if (
+      newValues.Info["VE_MUON"] &&
+      newValues?.Info?.Type?.value === "CONG_TY" &&
+      typeof newValues.Info["VE_MUON"].WorkDays !== "undefined"
+    ) {
+      newValues.Info.WorkToday.Value = newValues.Info["VE_MUON"].WorkDays
+    }
+
     let dataConfirm = {
       list: [
         {
@@ -108,6 +143,7 @@ function PickerConfirm({ children }) {
         },
       ],
     };
+    
     confirmMutation.mutate(dataConfirm, {
       onSettled: () => {
         f7.dialog.close();

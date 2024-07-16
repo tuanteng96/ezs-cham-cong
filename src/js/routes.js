@@ -30,7 +30,11 @@ import ArticlePage from "../pages/Admin/pages/Article/index.jsx";
 import ArticleAddAdminPage from "../pages/Admin/pages/Article/Add.jsx";
 
 import TimekeepingSettingsPage from "../pages/Admin/pages/Utility/TimekeepingSettings.jsx";
+
 import StocksPage from "../pages/Stocks/index.jsx";
+
+import CoursesPage from "../pages/Courses/index.jsx";
+import AttendancePage from "../pages/Courses/Attendance.jsx";
 
 
 var routes = [{
@@ -218,6 +222,20 @@ var routes = [{
     routes: [{
       path: "change-password/",
       component: ChangePasswordPage,
+      options: {
+        transition: "f7-cover",
+      },
+    }, ],
+  },
+  {
+    path: "/courses/",
+    component: CoursesPage,
+    options: {
+      transition: "f7-cover",
+    },
+    routes: [{
+      path: "attendance/:id",
+      component: AttendancePage,
       options: {
         transition: "f7-cover",
       },

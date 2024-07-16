@@ -44,6 +44,7 @@ const BOTTOM_NAVIGATION_PAGES = [
   "/admin/utility/timekeeping-setting/",
   "/admin/article/",
   "/stocks/",
+  "/courses/attendance/"
 ];
 
 const PATH_NAVIGATION_PAGES = [
@@ -291,6 +292,8 @@ function Navigation(props) {
                         } else {
                           dataCheckInOut.list[0].CheckOut =
                             moment(CrDate).format("YYYY-MM-DD HH:mm");
+                          dataCheckInOut.list[0].Info.WorkToday.Value =
+                            CheckIn.Info.WorkToday.Value;
                         }
 
                         WorksHelpers.getConfirmOutIn({
@@ -302,6 +305,7 @@ function Navigation(props) {
                           CheckIn,
                           CheckOut,
                           CrDate,
+                          CheckInOutJSON: dataCheckInOut,
                         })
                           .then((initialValues) => {
                             f7.dialog.close();
@@ -453,6 +457,8 @@ function Navigation(props) {
                       } else {
                         dataCheckInOut.list[0].CheckOut =
                           moment(CrDate).format("YYYY-MM-DD HH:mm");
+                        dataCheckInOut.list[0].Info.WorkToday.Value =
+                          CheckIn.Info.WorkToday.Value;
                       }
 
                       WorksHelpers.getConfirmOutIn({
@@ -464,6 +470,7 @@ function Navigation(props) {
                         CheckIn,
                         CheckOut,
                         CrDate,
+                        CheckInOutJSON: dataCheckInOut,
                       })
                         .then((initialValues) => {
                           f7.dialog.close();
@@ -568,6 +575,8 @@ function Navigation(props) {
               } else {
                 dataCheckInOut.list[0].CheckOut =
                   moment(CrDate).format("YYYY-MM-DD HH:mm");
+                dataCheckInOut.list[0].Info.WorkToday.Value =
+                  CheckIn.Info.WorkToday.Value;
               }
 
               WorksHelpers.getConfirmOutIn({
@@ -579,6 +588,7 @@ function Navigation(props) {
                 CheckIn,
                 CheckOut,
                 CrDate,
+                CheckInOutJSON: dataCheckInOut,
               })
                 .then((initialValues) => {
                   f7.dialog.close();
@@ -663,6 +673,8 @@ function Navigation(props) {
               } else {
                 dataCheckInOut.list[0].CheckOut =
                   moment(CrDate).format("YYYY-MM-DD HH:mm");
+                dataCheckInOut.list[0].Info.WorkToday.Value =
+                  CheckIn.Info.WorkToday.Value;
               }
 
               inOutMutation.mutate(dataCheckInOut, {

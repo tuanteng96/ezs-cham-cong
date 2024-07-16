@@ -90,8 +90,8 @@ function Technicians({ f7router, f7route }) {
           {!isLoading && (
             <>
               {Type === "dv"
-                ? `Dịch vụ (${data?.data?.length})`
-                : `Đặt lịch (${data?.mBook?.length})`}
+                ? `Dịch vụ (${data?.data?.length || 0})`
+                : `Đặt lịch (${data?.mBook?.length || 0})`}
             </>
           )}
         </NavTitle>

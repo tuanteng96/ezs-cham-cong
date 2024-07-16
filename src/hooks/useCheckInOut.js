@@ -6,7 +6,7 @@ const useCheckInOut = () => {
   const [CheckIn, setCheckIn] = useState(null);
   const [CheckOut, setCheckOut] = useState(null);
   const Auth = useStore("Auth");
-
+  
   useEffect(() => {
     if (Auth?.WorkTrack && Auth?.WorkTrack?.List?.length > 0) {
       let { WorkTrack } = Auth;

@@ -7,6 +7,7 @@ import {
   PencilSquareIcon,
   PowerIcon,
   PresentationChartBarIcon,
+  BookOpenIcon
 } from "@heroicons/react/24/outline";
 import { Link, Panel, f7, f7ready, useStore } from "framework7-react";
 import React, { useEffect, useState } from "react";
@@ -190,6 +191,15 @@ function Panels(props) {
         Id: f7.utils.id("xxxx-xxxx-xxxx-xxxx"),
         hasRight: report?.hasRight || true,
         Icon: <PresentationChartBarIcon className="w-5" />,
+      },
+      {
+        Title: "Đào tạo",
+        Link: "/courses/",
+        ActiveLink: ["/courses/"],
+        active: false,
+        Id: f7.utils.id("xxxx-xxxx-xxxx-xxxx"),
+        hasRight: true,
+        Icon: <BookOpenIcon className="w-5" />,
       },
       {
         Title: "Tiện ích",

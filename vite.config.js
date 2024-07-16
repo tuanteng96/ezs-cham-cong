@@ -21,7 +21,7 @@ export default async () => {
       //manualChunksPlugin()
     ],
     root: SRC_DIR,
-    base: BASE,
+    base: "",
     publicDir: PUBLIC_DIR,
     build: {
       target: ['es2020', 'edge88', 'firefox78', 'chrome87', 'safari12'],
