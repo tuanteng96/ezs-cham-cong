@@ -11,13 +11,17 @@ import {
 import PromHelpers from "../../helpers/PromHelpers";
 import { useInfiniteQuery } from "react-query";
 import CoursesAPI from "../../api/Course.api";
-import { CalendarDaysIcon, ChevronLeftIcon } from "@heroicons/react/24/outline";
-import { DatePickerWrap } from "../../partials/forms";
+import {
+  AdjustmentsVerticalIcon,
+  ChevronLeftIcon,
+} from "@heroicons/react/24/outline";
 import NoFound from "../../components/NoFound";
 import ArrayHelpers from "../../helpers/ArrayHelpers";
 import StringHelpers from "../../helpers/StringHelpers";
+import moment from "moment";
+import { PickerEditStudent, PickerStudentFilter } from "./components";
 
-function AttendancePage({ f7route }) {
+function StudentPage({ f7route }) {
   let { params, query } = f7route;
   let [filters, setFilters] = useState({
     pi: 1,
@@ -43,8 +47,23 @@ function AttendancePage({ f7route }) {
         ...filters,
         pi: pageParam,
         ps: 10,
+        filter: {
+          ...filters.filter,
+          no: filters.filter.no?.value || '',
+          Status: filters.filter.Status?.value || ''
+        }
       });
-      return data;
+      return data
+        ? {
+            ...data,
+            items: data?.items
+              ? data?.items.map((x) => ({
+                  ...x,
+                  OutOfDate: getOutOfDate(x),
+                }))
+              : [],
+          }
+        : null;
     },
     getNextPageParam: (lastPage, pages) =>
       lastPage.pi === lastPage.pcount ? undefined : lastPage.pi + 1,
@@ -55,13 +74,29 @@ function AttendancePage({ f7route }) {
     "items"
   );
 
-  console.log(Lists);
+  const getOutOfDate = (rowData) => {
+    if (rowData.Status === "1") return;
+    let { Course, MinDate } = rowData;
+    let { DayCount } = Course;
+
+    if (!MinDate) return;
+
+    let EndDate = moment(MinDate, "YYYY-MM-DD")
+      .add(Number(DayCount), "days")
+      .format("YYYY-MM-DD");
+
+    let ofDate = moment(EndDate, "YYYY-MM-DD").diff(new Date(), "days");
+
+    if (ofDate < 0) {
+      return `Quán hạn tốt nghiệp ${Math.abs(ofDate)} ngày`;
+    }
+  };
 
   const loadMore = () => {
     if (!allowInfinite.current) return;
     allowInfinite.current = false;
 
-    CoursesQuery.fetchNextPage().then(() => {
+    StudentQuery.fetchNextPage().then(() => {
       allowInfinite.current = true;
     });
   };
@@ -88,41 +123,58 @@ function AttendancePage({ f7route }) {
         </NavLeft>
         <NavTitle>Học viên {query.title}</NavTitle>
         <NavRight className="h-full">
-          <DatePickerWrap
-            value={filters.filter.CreateDate}
-            format="DD-MM-YYYY"
-            onChange={(val) => {
+          <PickerStudentFilter
+            data={filters.filter}
+            onChange={(val) =>
               setFilters((prevState) => ({
                 ...prevState,
                 filter: {
                   ...prevState.filter,
-                  CreateDate: val,
+                  ...val,
                 },
-              }));
-            }}
-            label="Chọn ngày"
+              }))
+            }
           >
             {({ open }) => (
               <div
                 className="flex items-center justify-center w-12 h-full"
                 onClick={open}
               >
-                <CalendarDaysIcon className="w-6" />
+                <AdjustmentsVerticalIcon className="w-6" />
               </div>
             )}
-          </DatePickerWrap>
+          </PickerStudentFilter>
         </NavRight>
         <div className="absolute h-[2px] w-full bottom-0 left-0 bg-[rgba(255,255,255,0.3)]"></div>
       </Navbar>
-      {StudentQuery.isLoading && <div>Đang tải ...</div>}
+      {StudentQuery.isLoading && (
+        <div className="pb-safe-b">
+          <div className="p-4">
+            {Array(3)
+              .fill()
+              .map((_, index) => (
+                <div className="bg-white mb-3.5 last:mb-0 rounded" key={index}>
+                  <div className="border-b px-3 py-2.5">
+                    <div className="w-full h-4 bg-gray-200 rounded-full animate-pulse"></div>
+                  </div>
+                  <div className="p-4">
+                    <div className="w-full h-3 mb-1.5 bg-gray-200 rounded-full animate-pulse"></div>
+                    <div className="w-2/4 h-3 mb-1.5 bg-gray-200 rounded-full animate-pulse"></div>
+                    <div className="w-8/12 h-3 mb-1.5 bg-gray-200 rounded-full animate-pulse"></div>
+                  </div>
+                </div>
+              ))}
+          </div>
+        </div>
+      )}
       {!StudentQuery.isLoading && (
-        <>
+        <div className="pb-safe-b">
           {Lists && Lists.length > 0 && (
             <div className="p-4">
               {Lists.map((item, index) => (
-                <div className="bg-white mb-3.5 rounded" key={index}>
+                <div className="bg-white mb-3.5 last:mb-0 rounded" key={index}>
                   <div className="border-b px-3 py-2.5">
-                    <div className="font-semibold text-[15px]">
+                    <div className="font-semibold text-[15px] text-primary">
                       {item?.Member.FullName} - {item?.Member.MobilePhone}
                     </div>
                     {item?.OutOfDate && (
@@ -131,22 +183,45 @@ function AttendancePage({ f7route }) {
                       </div>
                     )}
                   </div>
-                  <div className="p-4">
-                    <div>{item?.Places}</div>
-                    <div>{item?.Member.HomeAddress}</div>
+                  <div className="p-4 text-[15px]">
                     <div>
-                      {item?.TotalCheck + Number(item?.TotalBefore || 0)}/
-                      {item?.Course?.Total}
+                      <span className="pr-1 text-[#3f4254]">Buổi / Tổng :</span>
+                      <span className="font-medium">
+                        {item?.TotalCheck + Number(item?.TotalBefore || 0)} /
+                        {item?.Course?.Total}
+                      </span>
                     </div>
                     <div>
-                      {StringHelpers.formatVNDPositive(item?.RemainPay)}
+                      <span className="pr-1 text-[#3f4254]">Nợ : </span>
+                      <span className="font-medium">
+                        {StringHelpers.formatVNDPositive(item?.RemainPay)}
+                      </span>
                     </div>
                     <div>
-                      {Number(item?.Status) === 1 && "Đã tốt nghiệp"}
-                      {Number(item?.Status) === 2 && "Chưa tốt nghiệp"}
-                      {Number(item?.Status) === 3 && "Đang tạm dừng"}
+                      <span className="pr-1 text-[#3f4254]">Trạng thái : </span>
+                      <span className="font-medium">
+                        {Number(item?.Status) === 1 && "Đã tốt nghiệp"}
+                        {Number(item?.Status) === 2 && "Chưa tốt nghiệp"}
+                        {Number(item?.Status) === 3 && "Đang tạm dừng"}
+                      </span>
                     </div>
-                    <div>{item.Desc}</div>
+                  </div>
+                  <div className="p-4 border-t">
+                    <PickerEditStudent
+                      refetch={StudentQuery.refetch}
+                      data={item}
+                      params={params}
+                    >
+                      {({ open }) => (
+                        <button
+                          type="button"
+                          className="!text-white bg-success mr-3 px-2 py-2.5 text-[15px] rounded font-medium w-full"
+                          onClick={open}
+                        >
+                          Xem chi tiết
+                        </button>
+                      )}
+                    </PickerEditStudent>
                   </div>
                 </div>
               ))}
@@ -160,10 +235,10 @@ function AttendancePage({ f7route }) {
               />
             </div>
           )}
-        </>
+        </div>
       )}
     </Page>
   );
 }
 
-export default AttendancePage;
+export default StudentPage;

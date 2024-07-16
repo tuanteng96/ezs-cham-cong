@@ -177,12 +177,12 @@ function AttendancePage({ f7route }) {
         </NavRight>
         <div className="absolute h-[2px] w-full bottom-0 left-0 bg-[rgba(255,255,255,0.3)]"></div>
       </Navbar>
-      <div className="h-full bg-white flex flex-col">
+      <div className="flex flex-col h-full bg-white">
         <div className="flex border-b shadow-lg">
-          <div className="w-[200px] px-4 py-3 border-r font-semibold">
+          <div className="w-[160px] px-4 py-3 border-r font-semibold">
             Học viên
           </div>
-          <div className="flex-1 font-semibold px-4 py-3 text-center">
+          <div className="flex-1 px-4 py-3 font-semibold text-center">
             {moment(filters.filter.CreateDate).format("DD-MM-YYYY")}
           </div>
         </div>
@@ -193,11 +193,11 @@ function AttendancePage({ f7route }) {
                 .fill()
                 .map((_, index) => (
                   <div className="flex border-b h-[80px]" key={index}>
-                    <div className="w-[200px] px-4 py-2 border-r font-semibold flex items-center">
+                    <div className="w-[160px] px-4 py-2 border-r font-semibold flex items-center">
                       <div className="w-10/12 h-3 bg-gray-200 rounded-full animate-pulse"></div>
                     </div>
-                    <div className="px-4 py-2 flex-1 flex items-center">
-                      <div className="flex justify-center items-center w-full">
+                    <div className="flex items-center flex-1 px-4 py-2">
+                      <div className="flex items-center justify-center w-full">
                         <div className="w-6 h-6 bg-[#EBEDF3] rounded shadow-lg"></div>
                       </div>
                     </div>
@@ -211,12 +211,12 @@ function AttendancePage({ f7route }) {
                 <>
                   {data.map((member, index) => (
                     <div className="flex border-b h-[80px]" key={index}>
-                      <div className="w-[200px] px-4 py-2 border-r font-semibold flex items-center">
+                      <div className="w-[160px] px-4 py-2 border-r font-semibold flex items-center">
                         <div className="line-clamp-2">
                           {member.Member.FullName}
                         </div>
                       </div>
-                      <div className="px-4 py-2 flex-1 flex items-center">
+                      <div className="flex items-center justify-center flex-1 px-4 py-2">
                         {member.items && member.items.length > 0 ? (
                           <>
                             {member.items.map((x, i) => (
@@ -227,10 +227,10 @@ function AttendancePage({ f7route }) {
                               >
                                 {({ open }) => (
                                   <div
-                                    className="flex justify-center items-start"
+                                    className="flex items-start justify-center"
                                     onClick={open}
                                   >
-                                    <div className="text-success font-semibold">
+                                    <div className="font-semibold text-success">
                                       Điểm danh lúc
                                       <span className="pl-1">
                                         {moment(x.CreateDate).format("HH:mm")}
@@ -243,7 +243,7 @@ function AttendancePage({ f7route }) {
                             ))}
                           </>
                         ) : (
-                          <div className="flex justify-center items-center w-full">
+                          <div className="flex items-center justify-center w-full">
                             <div
                               className="w-6 h-6 bg-[#EBEDF3] rounded shadow-lg"
                               onClick={() => onCheckAttendance(member)}

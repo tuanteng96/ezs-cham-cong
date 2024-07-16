@@ -66,24 +66,33 @@ const store = createStore({
         WorkTimeSetting: null,
         GroupTitles: null,
         Groups: null,
-        WorkTrack: null
+        WorkTrack: null,
       };
       let newValue = {
         ...pick(value, keys(model)),
         Info: {
-          ...pick(value.Info, keys({
-            CrStockID: null,
-            StockRights: null,
-            rightTree: null,
-            Stocks: null
-          })),
-        }
+          ...pick(
+            value.Info,
+            keys({
+              CrStockID: null,
+              StockRights: null,
+              rightTree: null,
+              Stocks: null,
+            })
+          ),
+        },
       };
-      
+
       StorageHelpers.set({
         data: {
           Auth: newValue,
-          Stocks: value?.Info?.StockRights || [],
+          Stocks: value?.Info?.StockRights
+            ? value?.Info?.StockRights.map((x) => ({
+                ...x,
+                value: x.ID,
+                label: x.Title,
+              }))
+            : [],
         },
         success: () => {
           if (
@@ -146,8 +155,16 @@ const store = createStore({
           state.Stocks =
             (value?.Info?.StockRights &&
               value?.Info?.StockRights.length > 0 &&
-              value?.Info?.StockRights) ||
-            value?.Info?.Stocks?.filter((x) => x.ParentID !== 0);
+              value?.Info?.StockRights.map((x) => ({
+                ...x,
+                value: x.ID,
+                label: x.Title,
+              }))) ||
+            value?.Info?.Stocks?.filter((x) => x.ParentID !== 0).map((x) => ({
+              ...x,
+              value: x.ID,
+              label: x.Title,
+            }));
         },
       });
     },

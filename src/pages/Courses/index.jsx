@@ -17,7 +17,7 @@ import {
   ChevronLeftIcon,
 } from "@heroicons/react/24/outline";
 import moment from "moment";
-import { PickerActionFilter } from "../../components";
+import { PickerCourseFilter } from "./components";
 import NoFound from "../../components/NoFound";
 
 function CoursesPage(props) {
@@ -27,7 +27,7 @@ function CoursesPage(props) {
     pi: 1,
     ps: 10,
     filter: {
-      StockID: CrStocks?.ID || "",
+      StockID: CrStocks ? { label: CrStocks.Title, value: CrStocks.ID } : "",
       Tags: "",
       Status: "",
       Teachers: "," + Auth?.ID.toString(),
@@ -43,6 +43,13 @@ function CoursesPage(props) {
         ...filters,
         pi: pageParam,
         ps: 15,
+        filter: {
+          ...filters?.filter,
+          StockID: filters?.filter?.StockID?.value || '',
+          Tags: "",
+          Status: filters?.filter?.Status?.value || "",
+          Teachers: "," + Auth?.ID.toString(),
+        },
       });
       return data;
     },
@@ -86,20 +93,14 @@ function CoursesPage(props) {
         </NavLeft>
         <NavTitle>Khoá đào tạo</NavTitle>
         <NavRight className="h-full">
-          <PickerActionFilter
-            options={[
-              { Title: "Tất cả", value: "" },
-              { Title: "Đang vận hành", value: 1 },
-              { Title: "Đã kết thúc", value: 2 },
-            ]}
-            label="Trạng thái"
-            option={filters.filter.Status}
+          <PickerCourseFilter
+            data={filters.filter}
             onChange={(val) =>
               setFilters((prevState) => ({
                 ...prevState,
                 filter: {
                   ...prevState.filter,
-                  Status: val?.value || "",
+                  ...val,
                 },
               }))
             }
@@ -112,7 +113,7 @@ function CoursesPage(props) {
                 <AdjustmentsVerticalIcon className="w-6" />
               </div>
             )}
-          </PickerActionFilter>
+          </PickerCourseFilter>
         </NavRight>
         <div className="absolute h-[2px] w-full bottom-0 left-0 bg-[rgba(255,255,255,0.3)]"></div>
       </Navbar>
@@ -185,12 +186,14 @@ function CoursesPage(props) {
                         )}
                       </span>
                     </div>
-                    <div className="flex">
-                      <span className="pr-1 text-[#3f4254]">Tags :</span>
-                      <span className="font-medium">{item.Tags}</span>
-                    </div>
+                    {item.Tags && (
+                      <div className="flex">
+                        <span className="pr-1 text-[#3f4254]">Tags :</span>
+                        <span className="font-medium">{item.Tags}</span>
+                      </div>
+                    )}
                   </div>
-                  <div className="pt-3.5 mt-4 border-t grid grid-cols-2 gap-3">
+                  <div className="pt-3.5 mt-4 border-t grid grid-cols-2 gap-4">
                     <Link
                       href={`/courses/student/${item.ID}?title=${item.Title}`}
                       className="!text-white bg-primary mr-3 px-2 py-2.5 text-[15px] rounded font-medium w-full"

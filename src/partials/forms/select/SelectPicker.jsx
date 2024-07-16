@@ -17,6 +17,7 @@ function SelectPicker({
   errorMessage,
   errorMessageForce,
   isRequired = true,
+  isClearable = true,
 }) {
   const [visible, setVisible] = useState(false);
 
@@ -41,7 +42,22 @@ function SelectPicker({
             value={value?.label ? value?.label : ""}
             readOnly
           ></input>
-          <ChevronDownIcon className="absolute w-5 right-4 top-2/4 -translate-y-2/4" />
+          <div className="absolute right-0 flex h-full top-2/4 -translate-y-2/4">
+            <div className="flex items-center justify-center w-12 h-full">
+              <ChevronDownIcon className="w-5" />
+            </div>
+            {isClearable && value && (
+              <div
+                className="flex items-center justify-center w-12 h-full relative after:content-[''] after:absolute after:right-0 after:h-4/6 after:w-[1px] after:bg-[#d5d7da] after:left-0"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onChange("");
+                }}
+              >
+                <XMarkIcon className="w-5" />
+              </div>
+            )}
+          </div>
         </div>
         {errorMessage && errorMessageForce && (
           <div className="mt-1.5 text-xs text-danger font-light">
