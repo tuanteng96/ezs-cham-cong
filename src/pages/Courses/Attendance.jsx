@@ -19,7 +19,7 @@ function AttendancePage({ f7route }) {
   let { params, query } = f7route;
   let [filters, setFilters] = useState({
     pi: 1,
-    ps: 10,
+    ps: 500,
     filter: {
       CreateDate: new Date(),
       CourseID: params.id,
@@ -81,7 +81,7 @@ function AttendancePage({ f7route }) {
           }
         }
       }
-      return data?.items || [];
+      return newData;
     },
     enabled: Boolean(Clients && Clients.length > 0),
   });
@@ -94,7 +94,7 @@ function AttendancePage({ f7route }) {
     //   allowInfinite.current = true;
     // });
   };
-
+  console.log(data)
   return (
     <Page
       onPageBeforeIn={() => PromHelpers.STATUS_BAR_COLOR("light")}
@@ -143,7 +143,26 @@ function AttendancePage({ f7route }) {
         </NavRight>
         <div className="absolute h-[2px] w-full bottom-0 left-0 bg-[rgba(255,255,255,0.3)]"></div>
       </Navbar>
-      <div className="p-4">
+      <div>
+        <div className="flex">
+            <div>Học viên</div>
+            <div>{moment(filters.filter.CreateDate).format("DD-MM-YYYY")}</div>
+        </div>
+        {
+            data && data.length > 0 && (
+                <div>
+                    {
+                        data.map((member,index) => (
+                            <div key={index}>
+                                <div>{member.Member.FullName}</div>
+                                <div>Checkin</div>
+                            </div>
+                        ))
+                    }
+                </div>
+            )
+        }
+
         {/* {CoursesQuery.isLoading && (
           <>
             {Array(5)
