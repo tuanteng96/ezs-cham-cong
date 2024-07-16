@@ -1,6 +1,4 @@
-import {
-  f7
-} from "framework7-react";
+import { f7 } from "framework7-react";
 import NotFoundPage from "../pages/404.jsx";
 
 import BrandPage from "../pages/Brand/index.jsx";
@@ -35,13 +33,12 @@ import StocksPage from "../pages/Stocks/index.jsx";
 
 import CoursesPage from "../pages/Courses/index.jsx";
 import AttendancePage from "../pages/Courses/Attendance.jsx";
+import StudentPage from "../pages/Courses/Student.jsx"
 
-
-var routes = [{
+var routes = [
+  {
     path: "/",
-    redirect: ({
-      resolve
-    }) => {
+    redirect: ({ resolve }) => {
       if (!f7.store.state.Brand && !f7.store.state.Auth) {
         resolve({
           url: "/brand/",
@@ -95,11 +92,7 @@ var routes = [{
   {
     path: "/report/",
     //component: ReportPage,
-    async: function ({
-      router,
-      to,
-      resolve
-    }) {
+    async: function ({ router, to, resolve }) {
       // App instance
       var app = router.app;
       if (router.url !== "/report/") {
@@ -120,39 +113,39 @@ var routes = [{
     options: {
       transition: "f7-cover",
     },
-    routes: [{
-      path: "view/:id/",
-      //component: NotificationDetailPage,
-      async: function ({
-        router,
-        to,
-        resolve
-      }) {
-        // App instance
-        var app = router.app;
-        app.dialog.preloader("Đang tải...");
+    routes: [
+      {
+        path: "view/:id/",
+        //component: NotificationDetailPage,
+        async: function ({ router, to, resolve }) {
+          // App instance
+          var app = router.app;
+          app.dialog.preloader("Đang tải...");
 
-        resolve({
-          component: NotificationDetailPage,
-        });
+          resolve({
+            component: NotificationDetailPage,
+          });
+        },
+        options: {
+          transition: "f7-cover",
+        },
       },
-      options: {
-        transition: "f7-cover",
-      },
-    }, ],
+    ],
   },
   {
     path: "/admin/",
     options: {
       transition: "f7-cover",
     },
-    routes: [{
+    routes: [
+      {
         path: "notifications/",
         component: NotificationAdminPage,
         options: {
           transition: "f7-cover",
         },
-        routes: [{
+        routes: [
+          {
             path: "add/",
             component: NotificationAddAdminPage,
             options: {
@@ -174,13 +167,15 @@ var routes = [{
         options: {
           transition: "f7-cover",
         },
-        routes: [{
-          path: "timekeeping-setting/",
-          component: TimekeepingSettingsPage,
-          options: {
-            transition: "f7-cover",
+        routes: [
+          {
+            path: "timekeeping-setting/",
+            component: TimekeepingSettingsPage,
+            options: {
+              transition: "f7-cover",
+            },
           },
-        }, ],
+        ],
       },
       {
         path: "article/",
@@ -195,11 +190,7 @@ var routes = [{
         options: {
           transition: "f7-cover-v",
         },
-        async: function ({
-          router,
-          to,
-          resolve
-        }) {
+        async: function ({ router, to, resolve }) {
           var app = router.app;
           var isAddMode = to.params.id === "add";
           if (!isAddMode) {
@@ -208,9 +199,8 @@ var routes = [{
           resolve({
             component: ArticleAddAdminPage,
           });
-        }
+        },
       },
-
     ],
   },
   {
@@ -219,13 +209,15 @@ var routes = [{
     options: {
       transition: "f7-cover",
     },
-    routes: [{
-      path: "change-password/",
-      component: ChangePasswordPage,
-      options: {
-        transition: "f7-cover",
+    routes: [
+      {
+        path: "change-password/",
+        component: ChangePasswordPage,
+        options: {
+          transition: "f7-cover",
+        },
       },
-    }, ],
+    ],
   },
   {
     path: "/courses/",
@@ -233,13 +225,22 @@ var routes = [{
     options: {
       transition: "f7-cover",
     },
-    routes: [{
-      path: "attendance/:id",
-      component: AttendancePage,
-      options: {
-        transition: "f7-cover",
+    routes: [
+      {
+        path: "attendance/:id",
+        component: AttendancePage,
+        options: {
+          transition: "f7-cover",
+        },
       },
-    }, ],
+      {
+        path: "student/:id",
+        component: StudentPage,
+        options: {
+          transition: "f7-cover",
+        },
+      },
+    ],
   },
   {
     path: "/technicians/",
@@ -248,7 +249,8 @@ var routes = [{
       transition: "f7-cover",
     },
 
-    routes: [{
+    routes: [
+      {
         path: "profile/:memberid/:id/",
         component: TechniciansProfile,
         options: {

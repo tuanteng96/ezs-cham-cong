@@ -190,7 +190,13 @@ function CoursesPage(props) {
                       <span className="font-medium">{item.Tags}</span>
                     </div>
                   </div>
-                  <div className="pt-3.5 mt-4 border-t">
+                  <div className="pt-3.5 mt-4 border-t grid grid-cols-2 gap-3">
+                    <Link
+                      href={`/courses/student/${item.ID}?title=${item.Title}`}
+                      className="!text-white bg-primary mr-3 px-2 py-2.5 text-[15px] rounded font-medium w-full"
+                    >
+                      Học viên
+                    </Link>
                     <Link
                       href={`/courses/attendance/${item.ID}?title=${item.Title}`}
                       className="!text-white bg-success mr-3 px-2 py-2.5 text-[15px] rounded font-medium w-full"

@@ -44,7 +44,8 @@ const BOTTOM_NAVIGATION_PAGES = [
   "/admin/utility/timekeeping-setting/",
   "/admin/article/",
   "/stocks/",
-  "/courses/attendance/"
+  "/courses/attendance/",
+  "/courses/student/"
 ];
 
 const PATH_NAVIGATION_PAGES = [
