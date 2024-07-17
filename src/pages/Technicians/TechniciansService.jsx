@@ -456,7 +456,6 @@ function TechniciansService({ id, memberid, itemid }) {
                     {Staffs && Staffs.map((x) => x.StaffName).join(", ")}
                   </div>
                 </div>
-                {console.log(data)}
                 {data?.Status === "done" && (
                   <>
                     <div className="px-4 py-2">

@@ -13,11 +13,12 @@ import {
   Page,
   Segmented,
   Subnavbar,
+  PhotoBrowser,
   Tab,
   Tabs,
   useStore,
 } from "framework7-react";
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useQuery } from "react-query";
 import StaffsAPI from "../../api/Staffs.api";
 import moment from "moment";
@@ -39,6 +40,11 @@ function TechniciansProfile({ id, memberid, f7route }) {
   });
 
   const [active, setActive] = useState("#thong-tin");
+  const [photos, setPhotos] = useState([]);
+  const [thumbs, setThumbs] = useState([]);
+
+  const standalone = useRef(null);
+  const elDiary = useRef(null);
 
   const { data, isLoading, refetch } = useQuery({
     queryKey: ["Technicians-Info"],
@@ -70,14 +76,18 @@ function TechniciansProfile({ id, memberid, f7route }) {
       if (f7route.query.type) {
         return data?.data ? data?.data[0] : null;
       }
-      return data?.mBook ? {
-        ...data?.mBook[0],
-        member: {
-          ...data?.mBook[0].Member,
-          FullName: data?.mBook[0]?.FullName || data?.mBook[0].Member?.FullName,
-          MobilePhone: data?.mBook[0]?.Phone || data?.mBook[0].Member?.MobilePhone,
-        }
-      } : null;
+      return data?.mBook
+        ? {
+            ...data?.mBook[0],
+            member: {
+              ...data?.mBook[0].Member,
+              FullName:
+                data?.mBook[0]?.FullName || data?.mBook[0].Member?.FullName,
+              MobilePhone:
+                data?.mBook[0]?.Phone || data?.mBook[0].Member?.MobilePhone,
+            },
+          }
+        : null;
     },
     enabled: Boolean(Auth && Auth?.ID),
   });
@@ -142,6 +152,28 @@ function TechniciansProfile({ id, memberid, f7route }) {
     },
     enabled: Boolean(active === "#hinh-anh"),
   });
+
+  useEffect(() => {
+    if (elDiary?.current) {
+      let $$ = Dom7;
+      let images = $$(elDiary?.current).find("img");
+      let newPhotos = [];
+      let newThumbs = [];
+
+      for (let image of images) {
+        let src = $$(image).attr("src");
+        newPhotos.push({ url: src });
+        newThumbs.push(src);
+
+        $$(image).click(() => {
+          let index = photos.findIndex((x) => x.url === src);
+          standalone.current.open(index);
+        });
+      }
+      setPhotos(newPhotos);
+      setThumbs(newThumbs);
+    }
+  }, [elDiary?.current, Diary, standalone]);
 
   const loadRefresh = (done) => {
     if (active === "#thong-tin") {
@@ -398,7 +430,7 @@ function TechniciansProfile({ id, memberid, f7route }) {
           {!DiaryLoading && (
             <>
               {Diary && Diary.length > 0 && (
-                <div className="timeline">
+                <div className="timeline" ref={elDiary}>
                   {Diary &&
                     Diary.map((item, index) => (
                       <div className="pb-4 timeline-item" key={index}>
@@ -433,6 +465,13 @@ function TechniciansProfile({ id, memberid, f7route }) {
                     ))}
                 </div>
               )}
+              <PhotoBrowser
+                photos={photos}
+                thumbs={thumbs}
+                ref={standalone}
+                navbarShowCount={true}
+                toolbar={false}
+              />
               {(!Diary || Diary.length === 0) && (
                 <NoFound
                   Title="Không có kết quả nào."
