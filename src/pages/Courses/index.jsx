@@ -30,7 +30,7 @@ function CoursesPage(props) {
       StockID: CrStocks ? { label: CrStocks.Title, value: CrStocks.ID } : "",
       Tags: "",
       Status: "",
-      Teachers: "," + Auth?.ID.toString(),
+      Teachers: Auth?.ID === 1 ? "" : "," + Auth?.ID.toString(),
     },
   });
 
@@ -48,7 +48,7 @@ function CoursesPage(props) {
           StockID: filters?.filter?.StockID?.value || '',
           Tags: "",
           Status: filters?.filter?.Status?.value || "",
-          Teachers: "," + Auth?.ID.toString(),
+          Teachers: Auth?.ID === 1 ? "" : "," + Auth?.ID.toString(),
         },
       });
       return data;

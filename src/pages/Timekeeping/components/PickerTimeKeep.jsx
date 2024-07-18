@@ -182,7 +182,7 @@ function PickerTimeKeep({ children, item }) {
                           <span className="text-danger">
                             -
                             {StringHelpers.formatVND(
-                              data?.Info?.CheckOut["VE_SOM"].Value
+                              data?.Info?.CheckOut["VE_SOM"]?.Value
                             )}
                           </span>
                         )}

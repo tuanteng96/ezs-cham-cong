@@ -45,6 +45,7 @@ function TechniciansProfile({ id, memberid, f7route }) {
 
   const standalone = useRef(null);
   const elDiary = useRef(null);
+  const elAttachments = useRef(null);
 
   const { data, isLoading, refetch } = useQuery({
     queryKey: ["Technicians-Info"],
@@ -154,9 +155,16 @@ function TechniciansProfile({ id, memberid, f7route }) {
   });
 
   useEffect(() => {
-    if (elDiary?.current) {
+    if (elDiary?.current || elAttachments?.current) {
       let $$ = Dom7;
-      let images = $$(elDiary?.current).find("img");
+      let images = [];
+      if (active === "#hinh-anh") {
+        images = $$(elAttachments?.current).find("img");
+      }
+      if (active === "#nhat-ky") {
+        images = $$(elDiary?.current).find("img");
+      }
+
       let newPhotos = [];
       let newThumbs = [];
 
@@ -170,22 +178,18 @@ function TechniciansProfile({ id, memberid, f7route }) {
           standalone.current.open(index);
         });
       }
+
       setPhotos(newPhotos);
       setThumbs(newThumbs);
     }
-  }, [elDiary?.current, Diary, standalone]);
-
-  const loadRefresh = (done) => {
-    if (active === "#thong-tin") {
-      refetch().then(() => done());
-    }
-    if (active === "#nhat-ky") {
-      DiaryRefetch().then(() => done());
-    }
-    if (active === "#hinh-anh") {
-      AttachmentsRefetch().then(() => done());
-    }
-  };
+  }, [
+    elDiary?.current,
+    elAttachments?.current,
+    Diary,
+    Attachments,
+    standalone,
+    active,
+  ]);
 
   return (
     <Page
@@ -465,13 +469,6 @@ function TechniciansProfile({ id, memberid, f7route }) {
                     ))}
                 </div>
               )}
-              <PhotoBrowser
-                photos={photos}
-                thumbs={thumbs}
-                ref={standalone}
-                navbarShowCount={true}
-                toolbar={false}
-              />
               {(!Diary || Diary.length === 0) && (
                 <NoFound
                   Title="Không có kết quả nào."
@@ -541,7 +538,7 @@ function TechniciansProfile({ id, memberid, f7route }) {
           {!AttachmentsLoading && (
             <>
               {Attachments && Attachments.length > 0 && (
-                <div className="timeline">
+                <div className="timeline" ref={elAttachments}>
                   {Attachments &&
                     Attachments.map((item, index) => (
                       <div className="pb-4 timeline-item" key={index}>
@@ -584,6 +581,13 @@ function TechniciansProfile({ id, memberid, f7route }) {
           )}
         </Tab>
       </Tabs>
+      <PhotoBrowser
+        photos={photos}
+        thumbs={thumbs}
+        ref={standalone}
+        navbarShowCount={true}
+        toolbar={false}
+      />
     </Page>
   );
 }

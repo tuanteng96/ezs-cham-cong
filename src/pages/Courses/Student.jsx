@@ -49,9 +49,9 @@ function StudentPage({ f7route }) {
         ps: 10,
         filter: {
           ...filters.filter,
-          no: filters.filter.no?.value || '',
-          Status: filters.filter.Status?.value || ''
-        }
+          no: filters.filter.no?.value || "",
+          Status: filters.filter.Status?.value || "",
+        },
       });
       return data
         ? {
@@ -121,7 +121,14 @@ function StudentPage({ f7route }) {
             <ChevronLeftIcon className="w-6" />
           </Link>
         </NavLeft>
-        <NavTitle>Học viên {query.title}</NavTitle>
+        {console.log(StudentQuery)}
+        <NavTitle>
+          (
+          {StudentQuery?.data?.pages && StudentQuery?.data?.pages.length > 0
+            ? StudentQuery?.data?.pages[0].total
+            : 0}
+          ) {query.title}
+        </NavTitle>
         <NavRight className="h-full">
           <PickerStudentFilter
             data={filters.filter}

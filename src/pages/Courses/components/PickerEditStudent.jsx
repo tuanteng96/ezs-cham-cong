@@ -114,14 +114,14 @@ function PickerEditStudent({ children, data, refetch, params }) {
                 onClick={close}
               ></motion.div>
               <motion.div
-                className="relative z-20 bg-white rounded-t-[var(--f7-sheet-border-radius)]"
+                className="relative z-20 bg-white rounded-t-[var(--f7-sheet-border-radius)] h-[90%]"
                 initial={{ opacity: 0, translateY: "100%" }}
                 animate={{ opacity: 1, translateY: "0%" }}
                 exit={{ opacity: 0, translateY: "100%" }}
               >
                 <form
                   onSubmit={handleSubmit(onSubmit)}
-                  className="h-full pb-safe-b"
+                  className="flex flex-col h-full pb-safe-b"
                   autoComplete="off"
                 >
                   <div className="relative flex justify-center px-4 py-5 text-xl font-semibold text-center">
@@ -133,7 +133,7 @@ function PickerEditStudent({ children, data, refetch, params }) {
                       <XMarkIcon className="w-6" />
                     </div>
                   </div>
-                  <div className="px-4">
+                  <div className="px-4 overflow-auto grow">
                     <div className="text-[15px] mb-3.5">
                       <table className="w-full">
                         <tbody>
@@ -146,19 +146,37 @@ function PickerEditStudent({ children, data, refetch, params }) {
                             </td>
                           </tr>
                           <tr>
-                            <td className="px-4 py-2.5 border">Ký túc xá</td>
+                            <td className="w-[45%] px-4 py-2.5 border text-[#6c7293] font-medium">
+                              Ngày sinh
+                            </td>
+                            <td className="px-4 py-2.5 font-semibold text-right border">
+                              {data?.Member?.BirthDate
+                                ? moment(data?.Member?.BirthDate).format(
+                                    "DD-MM-YYYY"
+                                  )
+                                : "Không"}
+                            </td>
+                          </tr>
+                          <tr>
+                            <td className="px-4 py-2.5 border text-[#6c7293] font-medium">
+                              Ký túc xá
+                            </td>
                             <td className="px-4 py-2.5 font-semibold text-right border">
                               {data?.Member?.MobilePhone}
                             </td>
                           </tr>
                           <tr>
-                            <td className="px-4 py-2.5 border">Địa chỉ</td>
+                            <td className="px-4 py-2.5 border text-[#6c7293] font-medium">
+                              Địa chỉ
+                            </td>
                             <td className="px-4 py-2.5 font-semibold text-right border">
                               {data?.Member?.HomeAddress || "Không"}
                             </td>
                           </tr>
                           <tr>
-                            <td className="px-4 py-2.5 border">Buổi / Tổng</td>
+                            <td className="px-4 py-2.5 border text-[#6c7293] font-medium">
+                              Buổi / Tổng
+                            </td>
                             <td className="px-4 py-2.5 font-semibold text-right border">
                               {data?.TotalCheck +
                                 Number(data?.TotalBefore || 0)}
@@ -166,7 +184,7 @@ function PickerEditStudent({ children, data, refetch, params }) {
                             </td>
                           </tr>
                           <tr>
-                            <td className="px-4 py-2.5 border">
+                            <td className="px-4 py-2.5 border text-[#6c7293] font-medium">
                               Giá trị khoá học
                             </td>
                             <td className="px-4 py-2.5 font-semibold text-right border">
@@ -176,7 +194,9 @@ function PickerEditStudent({ children, data, refetch, params }) {
                             </td>
                           </tr>
                           <tr>
-                            <td className="px-4 py-2.5 border">Nợ</td>
+                            <td className="px-4 py-2.5 border text-[#6c7293] font-medium">
+                              Nợ
+                            </td>
                             <td className="px-4 py-2.5 font-semibold text-right border">
                               {StringHelpers.formatVNDPositive(data?.RemainPay)}
                             </td>
