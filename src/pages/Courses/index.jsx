@@ -36,6 +36,8 @@ function CoursesPage(props) {
 
   const allowInfinite = useRef(true);
 
+  const { Global } = useStore("Brand");
+
   const CoursesQuery = useInfiniteQuery({
     queryKey: ["CoursesList", filters],
     queryFn: async ({ pageParam = 1 }) => {
@@ -152,7 +154,8 @@ function CoursesPage(props) {
                 >
                   <div className="flex items-center justify-between pb-3.5 mb-4 border-b">
                     <div className="text-base font-medium capitalize text-primary">
-                      {item.Title} - {item.Total} buổi
+                      {item.Title} 
+                      {Global?.Admin?.khoahocinfo && <span>- {item.Total} buổi</span>}
                     </div>
                   </div>
                   <div className="text-[15px]">

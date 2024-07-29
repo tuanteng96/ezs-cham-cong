@@ -41,6 +41,7 @@ function PickerEditStudent({ children, data, refetch, params }) {
       OrderItemID: "",
       Places: "",
       TotalBefore: 0,
+      Tags: ""
     },
   });
 
@@ -58,6 +59,7 @@ function PickerEditStudent({ children, data, refetch, params }) {
         OrderItemID: data?.OrderItemID,
         Places: data?.Places || "",
         TotalBefore: data?.TotalBefore,
+        Tags: data?.Tags || ""
       });
     }
   }, [data, visible]);
@@ -199,6 +201,14 @@ function PickerEditStudent({ children, data, refetch, params }) {
                             </td>
                             <td className="px-4 py-2.5 font-semibold text-right border">
                               {StringHelpers.formatVNDPositive(data?.RemainPay)}
+                            </td>
+                          </tr>
+                          <tr>
+                            <td className="px-4 py-2.5 border text-[#6c7293] font-medium">
+                              Tags
+                            </td>
+                            <td className="px-4 py-2.5 font-semibold text-right border">
+                              {data?.Tags}
                             </td>
                           </tr>
                         </tbody>

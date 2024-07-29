@@ -6,7 +6,7 @@ import {
   Navbar,
   Page,
   Link,
-  f7,
+  useStore,
 } from "framework7-react";
 import PromHelpers from "../../helpers/PromHelpers";
 import { useInfiniteQuery } from "react-query";
@@ -37,6 +37,8 @@ function StudentPage({ f7route }) {
       CreateDate: "desc",
     },
   });
+
+  const { Global } = useStore("Brand");
 
   const allowInfinite = useRef(true);
 
@@ -76,7 +78,7 @@ function StudentPage({ f7route }) {
 
   const getOutOfDate = (rowData) => {
     if (rowData.Status === "1") return;
-    let { Course, MinDate } = rowData;
+    let { Course, MinDate, tongthoigian } = rowData;
     let { DayCount } = Course;
 
     if (!MinDate) return;
@@ -86,6 +88,13 @@ function StudentPage({ f7route }) {
       .format("YYYY-MM-DD");
 
     let ofDate = moment(EndDate, "YYYY-MM-DD").diff(new Date(), "days");
+
+    if (!Global?.Admin?.khoahocinfo) {
+      EndDate = moment(MinDate, "YYYY-MM-DD")
+        .add(Number(tongthoigian), "days")
+        .format("YYYY-MM-DD");
+      ofDate = moment(EndDate, "YYYY-MM-DD").diff(new Date(), "days");
+    }
 
     if (ofDate < 0) {
       return `Quán hạn tốt nghiệp ${Math.abs(ofDate)} ngày`;
@@ -121,7 +130,6 @@ function StudentPage({ f7route }) {
             <ChevronLeftIcon className="w-6" />
           </Link>
         </NavLeft>
-        {console.log(StudentQuery)}
         <NavTitle>
           (
           {StudentQuery?.data?.pages && StudentQuery?.data?.pages.length > 0
@@ -193,9 +201,22 @@ function StudentPage({ f7route }) {
                   <div className="p-4 text-[15px]">
                     <div>
                       <span className="pr-1 text-[#3f4254]">Buổi / Tổng :</span>
+                      {Global?.Admin?.khoahocinfo ? (
+                        <span className="font-medium">
+                          {item?.TotalCheck + Number(item?.TotalBefore || 0)} /
+                          {item?.Course?.Total}
+                        </span>
+                      ) : (
+                        <span className="font-medium">
+                          {item?.TotalCheck + Number(item?.TotalBefore || 0)} /
+                          {item?.Sobuoi}
+                        </span>
+                      )}
+                    </div>
+                    <div>
+                      <span className="pr-1 text-[#3f4254]">Giá trị khoá học : </span>
                       <span className="font-medium">
-                        {item?.TotalCheck + Number(item?.TotalBefore || 0)} /
-                        {item?.Course?.Total}
+                        {StringHelpers.formatVNDPositive(item?.OrderItem?.ToPay)}
                       </span>
                     </div>
                     <div>
@@ -205,11 +226,18 @@ function StudentPage({ f7route }) {
                       </span>
                     </div>
                     <div>
+                      <span className="pr-1 text-[#3f4254]">Tags : </span>
+                      <span className="font-medium">
+                        {item?.Tags}
+                      </span>
+                    </div>
+                    <div>
                       <span className="pr-1 text-[#3f4254]">Trạng thái : </span>
                       <span className="font-medium">
                         {Number(item?.Status) === 1 && "Đã tốt nghiệp"}
                         {Number(item?.Status) === 2 && "Chưa tốt nghiệp"}
                         {Number(item?.Status) === 3 && "Đang tạm dừng"}
+                        {Number(item?.Status) === 4 && "Chờ tốt nghiệp"}
                       </span>
                     </div>
                   </div>
