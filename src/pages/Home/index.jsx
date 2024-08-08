@@ -31,11 +31,13 @@ function HomePage(props) {
         To: moment(filters.Date).format("YYYY-MM-DD"),
       };
       let { data } = await WorkTrackAPI.List(newFilters);
+      
       let { List } =
         (data.list[0]?.Users &&
           data.list[0]?.Users.length > 0 &&
           data.list[0]?.Users[0]) ||
         null;
+        
       let indexCheckIn = List && List.findIndex((obj) => obj.CheckIn);
       let indexCheckOut = List && List.findIndex((obj) => obj.CheckOut);
 
@@ -46,7 +48,7 @@ function HomePage(props) {
     },
     enabled: Boolean(Auth && Auth?.ID && filters.Date),
   });
-
+  
   const onPageInit = () => {
     const $ = f7.$;
     // Inline with custom toolbar

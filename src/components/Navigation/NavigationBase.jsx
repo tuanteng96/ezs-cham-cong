@@ -19,44 +19,20 @@ import {
   HomeIcon,
   UserGroupIcon,
 } from "@heroicons/react/24/outline";
-import PromHelpers from "../helpers/PromHelpers";
-import WorkTrackAPI from "../api/WorkTrack.api";
+import PromHelpers from "../../helpers/PromHelpers";
+import WorkTrackAPI from "../../api/WorkTrack.api";
 import moment from "moment";
 import { useMutation, useQueryClient } from "react-query";
 import { toast } from "react-toastify";
-import { useCheckInOut } from "../hooks";
-import PickerConfirm from "./PickerConfirm";
-import WorksHelpers from "../helpers/WorksHelpers";
+import { useCheckInOut } from "../../hooks";
+import PickerConfirm from "../PickerConfirm";
+import WorksHelpers from "../../helpers/WorksHelpers";
 import { getDistance } from "geolib";
-import DateTimeHelpers from "../helpers/DateTimeHelpers";
+import DateTimeHelpers from "../../helpers/DateTimeHelpers";
+import RouterHelpers from "../../helpers/RouterHelpers";
 
-const BOTTOM_NAVIGATION_PAGES = [
-  "/login/",
-  "/brand/",
-  "/account/change-password/",
-  "/technicians/profile/",
-  "/technicians/service/",
-  "/technicians/history/",
-  "/notifications/",
-  "/notifications/view/",
-  "/admin/notifications/add/",
-  "/admin/notifications/edit/",
-  "/admin/utility/timekeeping-setting/",
-  "/admin/article/",
-  "/stocks/",
-  "/courses/attendance/",
-  "/courses/student/"
-];
 
-const PATH_NAVIGATION_PAGES = [
-  "/",
-  "/home/",
-  "/statistical/",
-  "/technicians/",
-  "/technicians/?Type=dl",
-];
-
-function Navigation(props) {
+function NavigationBase(props) {
   const [pathname, setPathname] = useState("");
   const [visible, setVisible] = useState(false);
   const [actionsGridOpened, setActionsGridOpened] = useState(false);
@@ -65,7 +41,6 @@ function Navigation(props) {
   const [Option, setOption] = useState({});
   const Brand = useStore("Brand");
   const CrStocks = useStore("CrStocks");
-  //const Stocks = useStore("Stocks");
   const Auth = useStore("Auth");
   const WorkTimeSettings = useStore("WorkTimeSettings");
   const { WorkShiftsSetting, WorkTimeToday } = {
@@ -743,8 +718,8 @@ function Navigation(props) {
 
   const noBottomNav = useMemo(() => {
     return (
-      BOTTOM_NAVIGATION_PAGES.includes(pathname) ||
-      BOTTOM_NAVIGATION_PAGES.some((x) => pathname.indexOf(x) > -1)
+      RouterHelpers.BOTTOM_NAVIGATION_PAGES.includes(pathname) ||
+      RouterHelpers.BOTTOM_NAVIGATION_PAGES.some((x) => pathname.indexOf(x) > -1)
     );
   }, [pathname]);
 
@@ -951,7 +926,7 @@ function Navigation(props) {
           <div
             className={clsx(
               "flex flex-col items-center justify-center pt-1",
-              PATH_NAVIGATION_PAGES.includes(pathname)
+              RouterHelpers.PATH_NAVIGATION_PAGES.includes(pathname)
                 ? "text-gray-700"
                 : "text-app"
             )}
@@ -965,4 +940,4 @@ function Navigation(props) {
   );
 }
 
-export default Navigation;
+export default NavigationBase;

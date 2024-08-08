@@ -157,10 +157,19 @@ const GET_NETWORK_TYPE = () => {
                     }
                 })
             }).catch(() => {
-                reject("Vui lòng kết nối WIFI")
+                if(import.meta.env.DEV) {
+                    resolve({
+                        data: {
+                            BSSID: "",
+                            SSID: "Hung Bien_5G"
+                        }
+                    })
+                }
+                else {
+                    reject("Vui lòng kết nối WIFI")
+                }
             })
         })
-        //return APP21.prom('GET_NETWORK_TYPE');
     }
 }
 
