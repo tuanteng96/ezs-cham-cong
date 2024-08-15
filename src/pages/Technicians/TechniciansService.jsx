@@ -3,6 +3,7 @@ import {
   CameraIcon,
   ChevronLeftIcon,
   XMarkIcon,
+  ChevronDownIcon,
 } from "@heroicons/react/24/outline";
 import {
   Button,
@@ -34,6 +35,7 @@ import MoresAPI from "../../api/Mores.api";
 import PromHelpers from "../../helpers/PromHelpers";
 import { toast } from "react-toastify";
 import clsx from "clsx";
+import { useForm, Controller } from "react-hook-form";
 
 const Photos = ({ PhotoList, Title }) => {
   const Brand = useStore("Brand");
@@ -50,7 +52,7 @@ const Photos = ({ PhotoList, Title }) => {
   return (
     <>
       <button
-        className="py-2 mt-2 text-white rounded bg-primary"
+        className="py-2 mt-4 text-white rounded bg-primary"
         type="button"
         onClick={() => refPhotoWeb?.current?.open()}
       >
@@ -70,9 +72,250 @@ const Photos = ({ PhotoList, Title }) => {
   );
 };
 
+let renderCount = 0;
+
+const Notes = ({ onSubmit, initialValues }) => {
+  const {
+    reset,
+    handleSubmit,
+    control,
+    watch,
+    formState,
+    formState: { isValidating },
+  } = useForm({
+    defaultValues: { TINH_TRANG: "", THU_THUAT: "", DANH_GIA: "", LUU_Y: "" },
+    mode: "onChange",
+  });
+
+  useEffect(() => {
+    if (initialValues) {
+      let newValues = JSON.parse(initialValues);
+
+      reset(newValues);
+    }
+  }, [initialValues]);
+
+  renderCount++;
+
+  const data = watch();
+
+  useEffect(() => {
+    if (formState.isValid && !isValidating) {
+      //debouncedSave();
+    }
+  }, [formState, data, isValidating]);
+
+  // const debouncedSave = useCallback(
+  //   debounce(() => {
+  //     methods.handleSubmit(onSubmit)();
+  //   }, 1000),
+  //   []
+  // );
+
+  return (
+    <form onSubmit={handleSubmit(onSubmit)}>
+      <div className="mb-3.5">
+        <div className="mb-1">Tình trạng</div>
+        <Controller
+          control={control}
+          name="TINH_TRANG"
+          render={({ field: { onChange, onBlur, value, ref } }) => (
+            <Input
+              value={value}
+              className="[&_textarea]:rounded [&_textarea]:lowercase [&_textarea]:placeholder:normal-case text-input [&_textarea]:min-h-[100px] [&_textarea]:shadow-none [&_textarea]:border-0"
+              type="textarea"
+              placeholder="Nhập tình trạng"
+              // errorMessage={fieldState?.error?.message}
+              // errorMessageForce={fieldState?.invalid}
+              onChange={onChange}
+              onFocus={(e) =>
+                KeyboardsHelper.setAndroid({ Type: "modal", Event: e })
+              }
+              onBlur={() => {
+                handleSubmit(onSubmit)();
+              }}
+            />
+          )}
+        />
+      </div>
+      <div className="mb-3.5">
+        <div className="mb-1">Thủ thuật</div>
+        <Controller
+          control={control}
+          name="THU_THUAT"
+          render={({ field: { onChange, onBlur, value, ref } }) => (
+            <Input
+              value={value}
+              className="[&_textarea]:rounded [&_textarea]:lowercase [&_textarea]:placeholder:normal-case text-input [&_textarea]:min-h-[100px] [&_textarea]:shadow-none [&_textarea]:border-0"
+              type="textarea"
+              placeholder="Nhập thủ thuật"
+              // errorMessage={fieldState?.error?.message}
+              // errorMessageForce={fieldState?.invalid}
+              onChange={onChange}
+              onFocus={(e) =>
+                KeyboardsHelper.setAndroid({ Type: "modal", Event: e })
+              }
+              onBlur={() => {
+                handleSubmit(onSubmit)();
+              }}
+            />
+          )}
+        />
+      </div>
+      <div className="mb-3.5">
+        <div className="mb-1">Đánh giá sau buổi trị liệu</div>
+        <Controller
+          control={control}
+          name="DANH_GIA"
+          render={({ field: { onChange, onBlur, value, ref } }) => (
+            <Input
+              value={value}
+              className="[&_textarea]:rounded [&_textarea]:lowercase [&_textarea]:placeholder:normal-case text-input [&_textarea]:min-h-[100px] [&_textarea]:shadow-none [&_textarea]:border-0"
+              type="textarea"
+              placeholder="Nhập đánh giá"
+              // errorMessage={fieldState?.error?.message}
+              // errorMessageForce={fieldState?.invalid}
+              onChange={onChange}
+              onFocus={(e) =>
+                KeyboardsHelper.setAndroid({ Type: "modal", Event: e })
+              }
+              onBlur={() => {
+                handleSubmit(onSubmit)();
+              }}
+            />
+          )}
+        />
+      </div>
+      <div className="mb-3.5">
+        <div className="mb-1">Lưu ý cho buổi sau</div>
+        <Controller
+          control={control}
+          name="LUU_Y"
+          render={({ field: { onChange, onBlur, value, ref } }) => (
+            <Input
+              value={value}
+              className="[&_textarea]:rounded [&_textarea]:lowercase [&_textarea]:placeholder:normal-case text-input [&_textarea]:min-h-[100px] [&_textarea]:shadow-none [&_textarea]:border-0"
+              type="textarea"
+              placeholder="Nhập lưu ý"
+              // errorMessage={fieldState?.error?.message}
+              // errorMessageForce={fieldState?.invalid}
+              onChange={onChange}
+              onFocus={(e) =>
+                KeyboardsHelper.setAndroid({ Type: "modal", Event: e })
+              }
+              onBlur={() => {
+                handleSubmit(onSubmit)();
+              }}
+            />
+          )}
+        />
+      </div>
+    </form>
+  );
+};
+
+const ScheduleItem = ({ item, checkStatus, index }) => {
+  const Brand = useStore("Brand");
+  const InfoJSON =
+    Brand?.Global?.Admin?.os_4_chi_tiet &&
+    item?.InfoJSON &&
+    item?.Status === "done"
+      ? JSON.parse(item.InfoJSON)
+      : null;
+  const [open, setOpen] = useState((InfoJSON && index === 0) || false);
+
+  return (
+    <div className="pb-4 timeline-item">
+      <div className="timeline-item-date">
+        <span className="font-semibold">
+          {item.BookDate && moment(item.BookDate).format("DD")}
+        </span>
+        <small className="pl-[2px]">
+          {item.BookDate && moment(item.BookDate).format("MMM")}
+        </small>
+      </div>
+      <div className="timeline-item-divider"></div>
+      <div className="w-full timeline-item-content">
+        <div className="p-4 bg-white rounded">
+          <div className="flex justify-between">
+            <span>{checkStatus(item.Status)}</span>
+            <span className="text-xs font-medium">
+              {item.BookDate && moment(item.BookDate).format("HH:mm A")}
+            </span>
+          </div>
+          <div
+            className="flex mt-2 font-medium"
+            onClick={() =>
+              Brand?.Global?.Admin?.os_4_chi_tiet &&
+              InfoJSON &&
+              item?.Status === "done" &&
+              setOpen(!open)
+            }
+          >
+            <div className="items-center flex-1">{item.Title}</div>
+            {Brand?.Global?.Admin?.os_4_chi_tiet &&
+              InfoJSON &&
+              item?.Status === "done" && <ChevronDownIcon className="w-5" />}
+          </div>
+          {open && (
+            <div
+              className={clsx(
+                "pt-2 mt-2 border-t",
+                item?.PhotoList &&
+                  item?.PhotoList.length > 0 &&
+                  "border-b pb-2 mb-2"
+              )}
+            >
+              <div className="mb-1 last:mb-0">
+                <div className="text-[#B5B5C3]">Tình trạng</div>
+                <div>{InfoJSON?.TINH_TRANG || "Không"}</div>
+              </div>
+              <div className="mb-1 last:mb-0">
+                <div className="text-[#B5B5C3]">Thủ thuật</div>
+                <div>{InfoJSON?.THU_THUAT || "Không"}</div>
+              </div>
+              <div className="mb-1 last:mb-0">
+                <div className="text-[#B5B5C3]">Đánh giá sau buổi trị liệu</div>
+                <div>{InfoJSON?.DANH_GIA || "Không"}</div>
+              </div>
+              <div className="mb-1 last:mb-0">
+                <div className="text-[#B5B5C3]">Lưu ý cho buổi sau</div>
+                <div>{InfoJSON?.LUU_Y || "Không"}</div>
+              </div>
+            </div>
+          )}
+          {item?.PhotoList && item?.PhotoList.length > 0 && (
+            <Photos Title={item.Title} PhotoList={item?.PhotoList} />
+          )}
+          {(item?.Rate || item?.Rate === 0) && (
+            <div className="pt-2 mt-2 border-t">
+              <div className="flex items-center">
+                {Array(5).fill().map((_, index) => (
+                  <svg
+                    key={index}
+                    className="w-4 h-4 mr-1 text-yellow-300"
+                    aria-hidden="true"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="currentColor"
+                    viewBox="0 0 22 20"
+                  >
+                    <path d="M20.924 7.625a1.523 1.523 0 0 0-1.238-1.044l-5.051-.734-2.259-4.577a1.534 1.534 0 0 0-2.752 0L7.365 5.847l-5.051.734A1.535 1.535 0 0 0 1.463 9.2l3.656 3.563-.863 5.031a1.532 1.532 0 0 0 2.226 1.616L11 17.033l4.518 2.375a1.534 1.534 0 0 0 2.226-1.617l-.863-5.03L20.537 9.2a1.523 1.523 0 0 0 .387-1.575Z" />
+                  </svg>
+                ))}
+              </div>
+              {item?.RateNote && <div className="mt-1 text-sm text-gray-400">{item?.RateNote}</div>}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
 function TechniciansService({ id, memberid, itemid }) {
   const Auth = useStore("Auth");
   const CrStocks = useStore("CrStocks");
+  const Brand = useStore("Brand");
 
   const [active, setActive] = useState("#thong-tin");
   const [Note, setNote] = useState("");
@@ -145,7 +388,12 @@ function TechniciansService({ id, memberid, itemid }) {
         Token: Auth?.token,
         StockID: CrStocks?.ID || "",
       });
-      return data || null;
+
+      return data
+        ? data.sort((a, b) =>
+            moment.utc(b["BookDate"]).diff(moment.utc(a["BookDate"]))
+          )
+        : null;
     },
     enabled: Boolean(active === "#lich-trinh"),
   });
@@ -250,6 +498,24 @@ function TechniciansService({ id, memberid, itemid }) {
         ID: id,
         data: {
           Desc: e.target.value,
+        },
+      },
+      {
+        onSuccess: (data) => {
+          refetch().then(() => f7.preloader.hide());
+        },
+      }
+    );
+  };
+
+  const onUpdateOs = (values) => {
+    f7.preloader.show();
+    updateDescOsMutation.mutate(
+      {
+        ID: id,
+        data: {
+          Desc: Note,
+          InfoJSON: JSON.stringify(values),
         },
       },
       {
@@ -470,7 +736,7 @@ function TechniciansService({ id, memberid, itemid }) {
                                   key={i}
                                   className={clsx(
                                     "w-4 h-4 me-1",
-                                    Number(data?.Rate) >= (i + 1)
+                                    Number(data?.Rate) >= i + 1
                                       ? "text-yellow-300"
                                       : "text-gray-300"
                                   )}
@@ -515,6 +781,10 @@ function TechniciansService({ id, memberid, itemid }) {
                   onBlur={onUpdateDescOs}
                 />
               </div>
+              {Brand?.Global?.Admin?.os_4_chi_tiet && (
+                <Notes onSubmit={onUpdateOs} initialValues={data?.InfoJSON} />
+              )}
+
               <div>
                 <div className="mb-1">Hình ảnh</div>
                 <div className="grid grid-cols-3 gap-4">
@@ -600,37 +870,12 @@ function TechniciansService({ id, memberid, itemid }) {
                 <div className="timeline">
                   {Schedule &&
                     Schedule.map((item, index) => (
-                      <div className="pb-4 timeline-item" key={index}>
-                        <div className="timeline-item-date">
-                          <span className="font-semibold">
-                            {item.BookDate &&
-                              moment(item.BookDate).format("DD")}
-                          </span>
-                          <small className="pl-[2px]">
-                            {item.BookDate &&
-                              moment(item.BookDate).format("MMM")}
-                          </small>
-                        </div>
-                        <div className="timeline-item-divider"></div>
-                        <div className="w-full timeline-item-content">
-                          <div className="p-4 bg-white rounded">
-                            <div className="flex justify-between">
-                              <span>{checkStatus(item.Status)}</span>
-                              <span className="text-xs font-medium">
-                                {item.BookDate &&
-                                  moment(item.BookDate).format("HH:mm A")}
-                              </span>
-                            </div>
-                            <div className="mt-2 font-medium">{item.Title}</div>
-                            {item?.PhotoList && item?.PhotoList.length > 0 && (
-                              <Photos
-                                Title={item.Title}
-                                PhotoList={item?.PhotoList}
-                              />
-                            )}
-                          </div>
-                        </div>
-                      </div>
+                      <ScheduleItem
+                        index={index}
+                        key={index}
+                        item={item}
+                        checkStatus={checkStatus}
+                      />
                     ))}
                 </div>
               )}
