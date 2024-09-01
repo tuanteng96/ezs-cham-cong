@@ -2,14 +2,18 @@ import {
   ArrowLeftOnRectangleIcon,
   ArrowRightOnRectangleIcon,
 } from "@heroicons/react/24/outline";
-import { Sheet } from "framework7-react";
+import { Sheet, useStore } from "framework7-react";
 import moment from "moment";
 import React, { useEffect, useState } from "react";
+import { PickerChangeStocks } from "../components";
 import StringHelpers from "../../../helpers/StringHelpers";
 
 function PickerTimeKeep({ children, item }) {
   const [visible, setVisible] = useState(false);
   const [data, setData] = useState(null);
+
+  let Auth = useStore("Auth");
+  let Stocks = useStore("Stocks");
 
   const close = () => setVisible(false);
 
@@ -24,6 +28,14 @@ function PickerTimeKeep({ children, item }) {
       setData(item["Users"][0]["List"][0]);
     }
   }, [item]);
+
+  const getStocksAdv = () => {
+    let index = Stocks?.findIndex((x) => x.ID === data?.StockID);
+    if (index > -1) {
+      return Stocks[index].Title;
+    }
+    return "Chưa xác định";
+  };
 
   return (
     <>
@@ -62,6 +74,30 @@ function PickerTimeKeep({ children, item }) {
                   </div>
                 </div>
               )}
+              {data?.CheckIn && (
+                <PickerChangeStocks data={{
+                  ...data,
+                  StockTitle: data?.StockTitle || getStocksAdv()
+                }}>
+                  {({ open }) => (
+                    <div className="mt-2.5 mb-3 flex">
+                      <div className="mb-px font-light text-gray-500">
+                        Cơ sở
+                      </div>
+                      <div className="pl-2">
+                        {Auth.StockID === data.StockID && (
+                          <span>{Auth?.StockInfo?.Title}</span>
+                        )}
+                        {Auth.StockID !== data.StockID && (
+                          <span className="text-danger">
+                            Khác điểm : {data?.StockTitle || getStocksAdv()}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </PickerChangeStocks>
+              )}
               <div className="p-4 mb-4 border rounded">
                 <div className="relative flex items-center justify-between mb-2">
                   <div>
@@ -74,20 +110,6 @@ function PickerTimeKeep({ children, item }) {
                   </div>
                   <ArrowLeftOnRectangleIcon className="absolute right-0 w-7 top-2/4 -translate-y-2/4 text-success" />
                 </div>
-                {/* <div className="grid grid-cols-2 gap-8 mb-2.5">
-                  <div>
-                    <div className="mb-px font-light text-gray-500">Lat</div>
-                    <div className="font-medium truncate">
-                      {data?.Info?.Lat || 0.0}
-                    </div>
-                  </div>
-                  <div className="font-medium">
-                    <div className="mb-px font-light text-gray-500">Lng</div>
-                    <div className="font-medium truncate">
-                      {data?.Info?.Lng || 0.0}
-                    </div>
-                  </div>
-                </div> */}
 
                 {data?.Info?.Type && (
                   <div>
@@ -142,20 +164,6 @@ function PickerTimeKeep({ children, item }) {
                   </div>
                   <ArrowRightOnRectangleIcon className="absolute right-0 w-7 top-2/4 -translate-y-2/4 text-danger" />
                 </div>
-                {/* <div className="grid grid-cols-2 gap-8 mb-2.5">
-                  <div>
-                    <div className="mb-px font-light text-gray-500">Lat</div>
-                    <div className="font-medium truncate">
-                      {data?.Info?.CheckOut?.Lng || 0.0}
-                    </div>
-                  </div>
-                  <div>
-                    <div className="mb-px font-light text-gray-500">Lng</div>
-                    <div className="font-medium truncate">
-                      {data?.Info?.CheckOut?.Lat || 0.0}
-                    </div>
-                  </div>
-                </div> */}
                 {data?.Info?.CheckOut?.Type && (
                   <div>
                     <div className="mb-px font-light text-gray-500">

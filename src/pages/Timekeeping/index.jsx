@@ -48,7 +48,7 @@ function Timekeeping({ f7router }) {
     },
     enabled: Boolean(Auth && Auth?.ID),
   });
-
+  
   return (
     <Page
       onPageBeforeIn={() => PromHelpers.STATUS_BAR_COLOR("light")}
@@ -108,20 +108,6 @@ function Timekeeping({ f7router }) {
         </NavRight>
         <div className="absolute h-[2px] w-full bottom-0 left-0 bg-[rgba(255,255,255,0.3)]"></div>
       </Navbar>
-      {/* <div className="fixed w-full z-[-1]">
-        <svg
-          className="w-full"
-          id="Layer_1"
-          data-name="Layer 1"
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 504.77 562.03"
-        >
-          <path
-            className="fill-app"
-            d="M504.77,318V0H0V546.41C18.85,555,41.66,560.83,69.21,562,167.43,566,384.51,404.48,504.77,318Z"
-          />
-        </svg>
-      </div> */}
       <div className="p-4">
         {isLoading && (
           <>
