@@ -104,12 +104,9 @@ const store = createStore({
               state.CrStocks?.WifiID === value.StockInfo?.WifiID &&
               state.CrStocks?.WifiName === value.StockInfo?.WifiName)
           ) {
-            let StocksList =
-              value?.Info?.StockRights && value?.Info?.StockRights?.length > 0
-                ? value?.Info?.StockRights.filter((x) => x.ID !== 0)
-                : value?.Info?.Stocks?.filter(
-                    (x) => x.ID !== state.CrStocks?.ID
-                  );
+            let StocksList = value?.Info?.Stocks?.filter(
+              (x) => x.ID !== state.CrStocks?.ID
+            );
             StorageHelpers.set({
               data: {
                 CrStocks: value.StockInfo || StocksList[0],
@@ -118,14 +115,9 @@ const store = createStore({
                 (state.CrStocks = value.StockInfo || StocksList[0]),
             });
           } else {
-            let indexStock =
-              value?.Info?.StockRights && value?.Info?.StockRights?.length > 0
-                ? value?.Info?.StockRights.findIndex(
-                    (x) => x.ID === state.CrStocks?.ID
-                  )
-                : value?.Info?.Stocks?.findIndex(
-                    (x) => x.ID === state.CrStocks?.ID
-                  );
+            let indexStock = value?.Info?.Stocks?.findIndex(
+              (x) => x.ID === state.CrStocks?.ID
+            );
             if (indexStock === -1) {
               StorageHelpers.set({
                 data: {
@@ -136,35 +128,34 @@ const store = createStore({
             } else {
               StorageHelpers.set({
                 data: {
-                  CrStocks:
-                    value?.Info?.StockRights &&
-                    value?.Info?.StockRights?.length > 0
-                      ? value?.Info?.StockRights[indexStock]
-                      : value?.Info?.Stocks[indexStock],
+                  CrStocks: value?.Info?.Stocks[indexStock],
                 },
                 success: () =>
-                  (state.CrStocks =
-                    value?.Info?.StockRights &&
-                    value?.Info?.StockRights?.length > 0
-                      ? value?.Info?.StockRights[indexStock]
-                      : value?.Info?.Stocks[indexStock]),
+                  (state.CrStocks = value?.Info?.Stocks[indexStock]),
               });
             }
           }
           state.Auth = value;
-          state.Stocks =
-            (value?.Info?.StockRights &&
-              value?.Info?.StockRights.length > 0 &&
-              value?.Info?.StockRights.map((x) => ({
-                ...x,
-                value: x.ID,
-                label: x.Title,
-              }))) ||
-            value?.Info?.Stocks?.filter((x) => x.ParentID !== 0).map((x) => ({
-              ...x,
-              value: x.ID,
-              label: x.Title,
-            }));
+          state.Stocks = value?.Info?.Stocks?.filter(
+            (x) => x.ParentID !== 0
+          ).map((x) => ({
+            ...x,
+            value: x.ID,
+            label: x.Title,
+          }));
+          // state.Stocks =
+          //   (value?.Info?.StockRights &&
+          //     value?.Info?.StockRights.length > 0 &&
+          //     value?.Info?.StockRights.map((x) => ({
+          //       ...x,
+          //       value: x.ID,
+          //       label: x.Title,
+          //     }))) ||
+          //   value?.Info?.Stocks?.filter((x) => x.ParentID !== 0).map((x) => ({
+          //     ...x,
+          //     value: x.ID,
+          //     label: x.Title,
+          //   }));
         },
       });
     },
