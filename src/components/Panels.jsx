@@ -185,12 +185,23 @@ function Panels(props) {
       // },
       {
         Title: "Báo cáo",
-        Link: "/report/",
-        ActiveLink: ["/report/"],
+        ActiveLink: ["/report/", "/report-preview/"],
         active: false,
         Id: f7.utils.id("xxxx-xxxx-xxxx-xxxx"),
         hasRight: report?.hasRight || true,
         Icon: <PresentationChartBarIcon className="w-5" />,
+        SubMenu: [
+          {
+            Title: "Tổng quan",
+            Link: "/report-preview/",
+            active: false,
+          },
+          {
+            Title: "Chi tiết",
+            Link: "/report/",
+            active: false,
+          },
+        ],
       },
       {
         Title: "Đào tạo",

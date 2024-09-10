@@ -107,12 +107,13 @@ const store = createStore({
             let StocksList = value?.Info?.Stocks?.filter(
               (x) => x.ID !== state.CrStocks?.ID
             );
+            
             StorageHelpers.set({
               data: {
-                CrStocks: value.StockInfo || StocksList[0],
+                CrStocks: value.StockInfo || StocksList.filter(x => x.ParentID > 0)[0],
               },
               success: () =>
-                (state.CrStocks = value.StockInfo || StocksList[0]),
+                (state.CrStocks = value.StockInfo || StocksList.filter(x => x.ParentID > 0)[0]),
             });
           } else {
             let indexStock = value?.Info?.Stocks?.findIndex(

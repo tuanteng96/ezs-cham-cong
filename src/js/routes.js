@@ -17,6 +17,7 @@ import ChangePasswordPage from "../pages/Account/ChangePassword.jsx";
 import HomePage from "../pages/Home/index.jsx";
 import TakeBreakPage from "../pages/TakeBreak/index.jsx";
 import ReportPage from "../pages/Report/index.jsx";
+import ReportPreviewPage from "../pages/Report/ReportPreview.jsx";
 import NotificationsPage from "../pages/Notifications/index.jsx";
 import NotificationDetailPage from "../pages/Notifications/NotificationDetail.jsx";
 
@@ -101,6 +102,24 @@ var routes = [
 
       resolve({
         component: ReportPage,
+      });
+    },
+    options: {
+      transition: "f7-cover",
+    },
+  },
+  {
+    path: "/report-preview/",
+    //component: ReportPage,
+    async: function ({ router, to, resolve }) {
+      // App instance
+      var app = router.app;
+      if (router.url !== "/report-preview/") {
+        app.dialog.preloader("Đang tải báo cáo...");
+      }
+
+      resolve({
+        component: ReportPreviewPage,
       });
     },
     options: {

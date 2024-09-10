@@ -23,8 +23,9 @@ import { toast } from "react-toastify";
 
 function TimekeepingSettings(props) {
   const CrStocks = useStore("CrStocks");
+  
   const queryClient = useQueryClient();
-  const { control, handleSubmit, setError, setValue, watch } = useForm({
+  const { control, handleSubmit, setValue } = useForm({
     defaultValues: {
       ID: CrStocks?.ID || "",
       Lat: CrStocks?.Lat || "",
