@@ -13,7 +13,8 @@ const BOTTOM_NAVIGATION_PAGES = [
     "/admin/article/",
     "/stocks/",
     "/courses/attendance/",
-    "/courses/student/"
+    "/courses/student/",
+    "/admin/processings/"
   ];
   
   const PATH_NAVIGATION_PAGES = [

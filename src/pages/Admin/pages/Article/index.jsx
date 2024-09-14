@@ -18,7 +18,6 @@ import ArticleAPI from "../../../../api/Article.api";
 import { useInfiniteQuery } from "react-query";
 import ArrayHelpers from "../../../../helpers/ArrayHelpers";
 import PromHelpers from "../../../../helpers/PromHelpers";
-import AssetsHelpers from "../../../../helpers/AssetsHelpers";
 import { ArticlePicker } from "../../components";
 import NoFound from "../../../../components/NoFound";
 import { GridGallery } from "../../../../components";

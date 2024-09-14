@@ -25,6 +25,8 @@ import NotificationAdminPage from "../pages/Admin/pages/Notifications/index.jsx"
 import NotificationAddAdminPage from "../pages/Admin/pages/Notifications/Add.jsx";
 import NotificationEditAdminPage from "../pages/Admin/pages/Notifications/Edit.jsx";
 
+import ProcessingsPage from "../pages/Admin/pages/Processings/index.jsx";
+
 import ArticlePage from "../pages/Admin/pages/Article/index.jsx";
 import ArticleAddAdminPage from "../pages/Admin/pages/Article/Add.jsx";
 
@@ -34,7 +36,7 @@ import StocksPage from "../pages/Stocks/index.jsx";
 
 import CoursesPage from "../pages/Courses/index.jsx";
 import AttendancePage from "../pages/Courses/Attendance.jsx";
-import StudentPage from "../pages/Courses/Student.jsx"
+import StudentPage from "../pages/Courses/Student.jsx";
 
 var routes = [
   {
@@ -157,6 +159,14 @@ var routes = [
       transition: "f7-cover",
     },
     routes: [
+      {
+        path: "processings/",
+        component: ProcessingsPage,
+        options: {
+          transition: "f7-cover",
+        },
+        routes: [],
+      },
       {
         path: "notifications/",
         component: NotificationAdminPage,

@@ -1,11 +1,13 @@
 import path from 'path';
 import react from '@vitejs/plugin-react';
+import { splitVendorChunkPlugin } from 'vite';
 
 const SRC_DIR = path.resolve(__dirname, './src');
 const PUBLIC_DIR = path.resolve(__dirname, './public');
 const BUILD_DIR = path.resolve(__dirname, './www', );
 
 const BASE = 'https://spa1.ezs.vn/AppCore/';
+
 
 export default async () => {
 
@@ -19,10 +21,25 @@ export default async () => {
       //   renderLegacyChunks: false,
       // }),
       //manualChunksPlugin()
+      splitVendorChunkPlugin()
     ],
     root: SRC_DIR,
-    base: BASE,
+    base: "",
     publicDir: PUBLIC_DIR,
+    experimental: {
+      renderBuiltUrl(filename, {
+        hostType
+      }) {
+        if (hostType === 'js') {
+          return {
+            runtime: `window.cdnUrl(${JSON.stringify(filename)})`
+          };
+        }
+        return {
+          relative: true
+        }
+      }
+    },
     build: {
       target: ['es2020', 'edge88', 'firefox78', 'chrome87', 'safari12'],
       minify: true,
@@ -33,11 +50,14 @@ export default async () => {
       rollupOptions: {
         treeshake: false,
         output: {
-          // manualChunks(id) {
-          //   if (id.includes('node_modules')) {
-          //     return id.toString().split('node_modules/')[1].split('/')[0].toString();
-          //   }
-          // },
+          manualChunks:(id) => {
+            const url = new URL(id, import.meta.url);
+            const chunkName = url.searchParams.get("chunkName");
+            if (chunkName) {
+              return chunkName;
+            }
+            // return void will invoke the built-in `viteManualChunks`
+          },  
           assetFileNames: (assetInfo) => {
             if (/\.css$/.test(assetInfo.name)) {
               return 'assets/css/[name][extname]'

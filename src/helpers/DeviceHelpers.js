@@ -15,7 +15,6 @@ const get = ({ success, fail }) => {
     PromHelpers.GET_DEVICE()
       .then((response) => {
         if (response.success) {
-          console.log(response)
           let DevicesOption = {};
           let Devices = response.data.split(",");
           for (let key of Devices) {

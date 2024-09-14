@@ -45,14 +45,16 @@ function NavigationDivide(props) {
   };
   const queryClient = useQueryClient();
   let { CheckIn, CheckOut } = useCheckInOut();
-  
+
   const actionsToPopover = useRef(null);
   const buttonToPopoverWrapper = useRef(null);
-  
+
   useEffect(() => {
     f7ready((f7) => {
       f7.views.main.on("routeChange", (newRoute) => {
         setPathname(newRoute.url);
+
+        window.PathCurrent = newRoute.url;
 
         if (window.PlatformId === "ANDROID") {
           if (
@@ -76,7 +78,15 @@ function NavigationDivide(props) {
   }, []);
 
   const inOutMutation = useMutation({
-    mutationFn: (body) => WorkTrackAPI.CheckInOut(body),
+    mutationFn: async (body) => {
+      let data = await WorkTrackAPI.CheckInOut(body);
+      await Promise.all([
+        queryClient.invalidateQueries(["Auth"]),
+        queryClient.invalidateQueries(["TimekeepingHome"]),
+        queryClient.invalidateQueries(["TimekeepingList"]),
+      ]);
+      return data;
+    },
   });
 
   const openFlexibleShifts = () =>
@@ -118,9 +128,7 @@ function NavigationDivide(props) {
                     lengthInMeters <=
                     (Number(Brand?.Global?.APP?.accuracy) || 150)
                   ) {
-
                     DateTimeHelpers.getNowServer().then(({ CrDate }) => {
-                      f7.dialog.close();
                       let dataCheckInOut = {
                         list: [
                           {
@@ -168,21 +176,11 @@ function NavigationDivide(props) {
                               ...initialValues.Info,
                             };
                             inOutMutation.mutate(dataCheckInOut, {
-                              onSettled: ({ data }) => {
-                                Promise.all([
-                                  queryClient.invalidateQueries(["Auth"]),
-                                  queryClient.invalidateQueries([
-                                    "TimekeepingHome",
-                                  ]),
-                                  queryClient.invalidateQueries([
-                                    "TimekeepingList",
-                                  ]),
-                                ]).then(() => {
-                                  f7.dialog.close();
-                                  toast.success("Chấm công thành công.", {
-                                    position: toast.POSITION.TOP_CENTER,
-                                    autoClose: 2000,
-                                  });
+                              onSuccess: ({ data }) => {
+                                f7.dialog.close();
+                                toast.success("Chấm công thành công.", {
+                                  position: toast.POSITION.TOP_CENTER,
+                                  autoClose: 2000,
                                 });
                               },
                             });
@@ -192,7 +190,6 @@ function NavigationDivide(props) {
                           }
                         });
                     });
-                    
                   } else {
                     if (PreCheckIndex > 3) {
                       f7.dialog.close();
@@ -241,7 +238,6 @@ function NavigationDivide(props) {
                   CrStocks?.WifiID === data.BSSID
                 ) {
                   DateTimeHelpers.getNowServer().then(({ CrDate }) => {
-                    f7.dialog.close();
                     let dataCheckInOut = {
                       list: [
                         {
@@ -286,21 +282,11 @@ function NavigationDivide(props) {
                             ...initialValues.Info,
                           };
                           inOutMutation.mutate(dataCheckInOut, {
-                            onSettled: ({ data }) => {
-                              Promise.all([
-                                queryClient.invalidateQueries(["Auth"]),
-                                queryClient.invalidateQueries([
-                                  "TimekeepingHome",
-                                ]),
-                                queryClient.invalidateQueries([
-                                  "TimekeepingList",
-                                ]),
-                              ]).then(() => {
-                                f7.dialog.close();
-                                toast.success("Chấm công thành công.", {
-                                  position: toast.POSITION.TOP_CENTER,
-                                  autoClose: 2000,
-                                });
+                            onSuccess: ({ data }) => {
+                              f7.dialog.close();
+                              toast.success("Chấm công thành công.", {
+                                position: toast.POSITION.TOP_CENTER,
+                                autoClose: 2000,
                               });
                             },
                           });
@@ -330,7 +316,6 @@ function NavigationDivide(props) {
   };
 
   const handleCheckInBasic = (open) => {
-
     openFlexibleShifts().then((WorkTimeShift) => {
       f7.dialog.confirm(
         !CheckIn
@@ -339,7 +324,6 @@ function NavigationDivide(props) {
         () => {
           f7.dialog.preloader("Đang thực hiện ...");
           DateTimeHelpers.getNowServer().then(({ CrDate }) => {
-            f7.dialog.close();
             let dataCheckInOut = {
               list: [
                 {
@@ -385,16 +369,10 @@ function NavigationDivide(props) {
                   };
                   inOutMutation.mutate(dataCheckInOut, {
                     onSettled: ({ data }) => {
-                      Promise.all([
-                        queryClient.invalidateQueries(["Auth"]),
-                        queryClient.invalidateQueries(["TimekeepingHome"]),
-                        queryClient.invalidateQueries(["TimekeepingList"]),
-                      ]).then(() => {
-                        f7.dialog.close();
-                        toast.success("Chấm công thành công.", {
-                          position: toast.POSITION.TOP_CENTER,
-                          autoClose: 2000,
-                        });
+                      f7.dialog.close();
+                      toast.success("Chấm công thành công.", {
+                        position: toast.POSITION.TOP_CENTER,
+                        autoClose: 2000,
                       });
                     },
                   });

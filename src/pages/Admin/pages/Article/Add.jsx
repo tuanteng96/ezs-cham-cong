@@ -1,6 +1,4 @@
 import {
-  Button,
-  Input,
   Link,
   NavLeft,
   NavRight,
@@ -11,14 +9,11 @@ import {
   f7,
   useStore,
 } from "framework7-react";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import PromHelpers from "../../../../helpers/PromHelpers";
 import {
   ChevronLeftIcon,
-  PaperAirplaneIcon,
   PhotoIcon,
-  PlusIcon,
-  TrashIcon,
   VideoCameraIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
@@ -28,16 +23,12 @@ import {
   useFieldArray,
   useForm,
 } from "react-hook-form";
-import { DatePicker } from "../../../../partials/forms";
-import KeyboardsHelper from "../../../../helpers/KeyboardsHelper";
-import { UploadFile } from "../../components";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { toast } from "react-toastify";
 import AssetsHelpers from "../../../../helpers/AssetsHelpers";
 import MoresAPI from "../../../../api/Mores.api";
-import { UploadImages } from "../../../../components";
 import ArticleAPI from "../../../../api/Article.api";
 import moment from "moment";
 import StringHelpers from "../../../../helpers/StringHelpers";

@@ -16,7 +16,6 @@ function ReportPreview({ f7router }) {
   const Auth = useStore("Auth");
   const { Domain } = useStore("Brand");
   let CrStocks = useStore("CrStocks");
-  let Stocks = useStore("Stocks");
   
   return (
     <Page

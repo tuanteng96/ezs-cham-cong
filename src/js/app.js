@@ -19,6 +19,7 @@ import '../css/icons.css';
 import '../css/app.css';
 
 //
+import "./bz.js"
 import "./prom.js";
 import "./event-notification.js";
 

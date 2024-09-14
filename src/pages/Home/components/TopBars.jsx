@@ -1,14 +1,27 @@
 import { BellAlertIcon, ChevronDownIcon } from "@heroicons/react/24/outline";
 import React, { useEffect, useRef } from "react";
-import { Link, f7, useStore } from "framework7-react";
+import { Link, f7, useStore, Popover } from "framework7-react";
 import store from "../../../js/store";
+import { useIsFetching } from "react-query";
+import { RolesHelpers } from "@/helpers/RolesHelpers";
 
 function TopBars(props) {
   let Brand = useStore("Brand");
-  let Auth = useStore("Auth");
   let CrStocks = useStore("CrStocks");
+  let Auth = useStore("Auth");
   let Stocks = useStore("Stocks");
   let Notifications = useStore("Notifications");
+  let Processings = useStore("Processings");
+
+  const { pos_mng } = RolesHelpers.useRoles({
+    nameRoles: ["pos_mng"],
+    auth: Auth,
+    CrStocks,
+  });
+  
+  const isFetchingProcess = useIsFetching(["Processings"]);
+  const isFetchingNoti = useIsFetching(["Notifications"]);
+  const isFetching = isFetchingProcess === 1 || isFetchingNoti === 1;
 
   const actionsToPopover = useRef(null);
   const buttonToPopoverWrapper = useRef(null);
@@ -53,11 +66,6 @@ function TopBars(props) {
     }
   };
 
-  const getFirstText = (text) => {
-    if (!text) return;
-    return text.split(" ").reverse()[0].charAt(0);
-  };
-
   return (
     <div className="flex items-center justify-between p-4">
       <div className="flex items-center" ref={buttonToPopoverWrapper}>
@@ -72,23 +80,74 @@ function TopBars(props) {
         </div>
       </div>
       <div className="flex">
-        <Link
-          href="/notifications/"
-          className="relative flex items-center justify-center bg-white rounded-xl w-11 h-11"
-        >
-          <BellAlertIcon className="w-6 text-app" />
-          {Notifications && Notifications.length > 0 && (
-            <div className="absolute text-white bg-danger text-[10px] px-1 min-w-[15px] h-[15px] rounded-full flex items-center justify-center top-1.5 right-1.5">
-              {Notifications.length}
-            </div>
-          )}
-        </Link>
-        {/* <Link
-          href="/account/"
-          className="flex items-center justify-center overflow-hidden rounded-xl w-11 h-11 bg-[#e09a25] text-white font-bold text-lg uppercase"
-        >
-          {getFirstText(Auth?.FullName)}
-        </Link> */}
+        {pos_mng?.hasRight && (
+          <>
+            <Link
+              popoverOpen=".popover-notifications"
+              className="relative flex items-center justify-center bg-white rounded-xl w-11 h-11"
+            >
+              <BellAlertIcon className="w-6 text-app" />
+              {!isFetching && (
+                <>
+                  {((Notifications && Notifications.length > 0) ||
+                    (Processings?.Count && Processings?.Count > 0)) && (
+                    <span className="absolute text-white bg-danger text-[10px] px-1 min-w-[15px] h-[15px] rounded-full flex items-center justify-center top-1.5 right-1.5">
+                      {Notifications.length + (Processings?.Count || 0)}
+                    </span>
+                  )}
+                </>
+              )}
+            </Link>
+            <Popover className="popover-notifications w-[170px]">
+              <div className="flex flex-col">
+                <Link
+                  className="relative px-4 py-3 border-b last:border-0"
+                  noLinkClass
+                  href="/notifications/"
+                  popoverClose
+                >
+                  <span>Thông báo</span>
+                  {Notifications && Notifications.length > 0 ? (
+                    <span className="absolute text-white bg-danger text-[10px] px-1 min-w-[15px] h-[15px] rounded-full flex items-center justify-center top-2/4 right-4 -translate-y-2/4">
+                      {Notifications.length}
+                    </span>
+                  ) : (
+                    <></>
+                  )}
+                </Link>
+                <Link
+                  className="relative px-4 py-3 border-b last:border-0"
+                  noLinkClass
+                  href="/admin/processings/"
+                  popoverClose
+                >
+                  <span>Cần xử lý</span>
+                  {Processings?.Count && Processings?.Count > 0 ? (
+                    <span className="absolute text-white bg-danger text-[10px] px-1 min-w-[15px] h-[15px] rounded-full flex items-center justify-center top-2/4 right-4 -translate-y-2/4">
+                      {Processings?.Count}
+                    </span>
+                  ) : (
+                    <></>
+                  )}
+                </Link>
+              </div>
+            </Popover>
+          </>
+        )}
+
+        {!pos_mng?.hasRight && (
+          <Link
+            href="/notifications/"
+            className="relative flex items-center justify-center bg-white rounded-xl w-11 h-11"
+          >
+            <BellAlertIcon className="w-6 text-app" />
+            {Notifications && Notifications.length > 0 && (
+              <div className="absolute text-white bg-danger text-[10px] px-1 min-w-[15px] h-[15px] rounded-full flex items-center justify-center top-1.5 right-1.5">
+                {Notifications.length}
+              </div>
+            )}
+          </Link>
+        )}
       </div>
     </div>
   );

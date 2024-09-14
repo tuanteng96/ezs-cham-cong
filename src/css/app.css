@@ -74,10 +74,21 @@
   scrollbar-width: none;  /* Firefox */
 }
 
+
 /* Page Content*/
 .page.page-current .page-scrollbar {
     transition: all .2s ease-in-out;
     transform: translateY(var(--keyboard-translate, 0));
+}
+
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+.no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
 }
 
 /* Toolbar */

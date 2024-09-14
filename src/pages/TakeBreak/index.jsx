@@ -87,17 +87,6 @@ function TakeBreakPage(props) {
         </NavRight>
         <div className="absolute h-[2px] w-full bottom-0 left-0 bg-[rgba(255,255,255,0.3)]"></div>
       </Navbar>
-
-      {/* <div className="fixed w-full z-[-1]">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 750 610.61">
-          <g id="Layer_2" data-name="Layer 2">
-            <path
-              className="fill-app"
-              d="M750,100V0H0V215.35H17.2c36.15,1,85.18,9,131.3,38.34,87.72,55.73,130.25,238.85,292.39,323.77,101.35,53.09,224.51,37.74,309.11-13V169.82h-.24V100Z"
-            />
-          </g>
-        </svg>
-      </div> */}
       <div className="p-4">
         {isLoading && (
           <>

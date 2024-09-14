@@ -31,7 +31,6 @@ import { getDistance } from "geolib";
 import DateTimeHelpers from "../../helpers/DateTimeHelpers";
 import RouterHelpers from "../../helpers/RouterHelpers";
 
-
 function NavigationBase(props) {
   const [pathname, setPathname] = useState("");
   const [visible, setVisible] = useState(false);
@@ -57,6 +56,8 @@ function NavigationBase(props) {
     f7ready((f7) => {
       f7.views.main.on("routeChange", (newRoute) => {
         setPathname(newRoute.url);
+
+        window.PathCurrent = newRoute.url;
 
         if (window.PlatformId === "ANDROID") {
           if (
@@ -93,7 +94,15 @@ function NavigationBase(props) {
   }, []);
 
   const inOutMutation = useMutation({
-    mutationFn: (body) => WorkTrackAPI.CheckInOut(body),
+    mutationFn: async (body) => {
+      let data = await WorkTrackAPI.CheckInOut(body);
+      await Promise.all([
+        queryClient.invalidateQueries(["Auth"]),
+        queryClient.invalidateQueries(["TimekeepingHome"]),
+        queryClient.invalidateQueries(["TimekeepingList"]),
+      ]);
+      return data;
+    },
   });
 
   const openFlexibleShifts = () =>
@@ -296,20 +305,10 @@ function NavigationBase(props) {
                           .catch(() => {
                             inOutMutation.mutate(dataCheckInOut, {
                               onSettled: ({ data }) => {
-                                Promise.all([
-                                  queryClient.invalidateQueries(["Auth"]),
-                                  queryClient.invalidateQueries([
-                                    "TimekeepingHome",
-                                  ]),
-                                  queryClient.invalidateQueries([
-                                    "TimekeepingList",
-                                  ]),
-                                ]).then(() => {
-                                  f7.dialog.close();
-                                  toast.success("Chấm công thành công.", {
-                                    position: toast.POSITION.TOP_CENTER,
-                                    autoClose: 2000,
-                                  });
+                                f7.dialog.close();
+                                toast.success("Chấm công thành công.", {
+                                  position: toast.POSITION.TOP_CENTER,
+                                  autoClose: 2000,
                                 });
                               },
                             });
@@ -401,7 +400,6 @@ function NavigationBase(props) {
                     CrStocks?.WifiID === data.BSSID
                   ) {
                     DateTimeHelpers.getNowServer().then(({ CrDate }) => {
-                      f7.dialog.close();
                       let dataCheckInOut = {
                         list: [
                           {
@@ -461,20 +459,10 @@ function NavigationBase(props) {
                         .catch(() => {
                           inOutMutation.mutate(dataCheckInOut, {
                             onSettled: ({ data }) => {
-                              Promise.all([
-                                queryClient.invalidateQueries(["Auth"]),
-                                queryClient.invalidateQueries([
-                                  "TimekeepingHome",
-                                ]),
-                                queryClient.invalidateQueries([
-                                  "TimekeepingList",
-                                ]),
-                              ]).then(() => {
-                                f7.dialog.close();
-                                toast.success("Chấm công thành công.", {
-                                  position: toast.POSITION.TOP_CENTER,
-                                  autoClose: 2000,
-                                });
+                              f7.dialog.close();
+                              toast.success("Chấm công thành công.", {
+                                position: toast.POSITION.TOP_CENTER,
+                                autoClose: 2000,
                               });
                             },
                           });
@@ -522,7 +510,6 @@ function NavigationBase(props) {
           () => {
             f7.dialog.preloader("Đang thực hiện ...");
             DateTimeHelpers.getNowServer().then(({ CrDate }) => {
-              f7.dialog.close();
               let dataCheckInOut = {
                 list: [
                   {
@@ -578,17 +565,11 @@ function NavigationBase(props) {
                 })
                 .catch(() => {
                   inOutMutation.mutate(dataCheckInOut, {
-                    onSettled: ({ data }) => {
-                      Promise.all([
-                        queryClient.invalidateQueries(["Auth"]),
-                        queryClient.invalidateQueries(["TimekeepingHome"]),
-                        queryClient.invalidateQueries(["TimekeepingList"]),
-                      ]).then(() => {
-                        f7.dialog.close();
-                        toast.success("Chấm công thành công.", {
-                          position: toast.POSITION.TOP_CENTER,
-                          autoClose: 2000,
-                        });
+                    onSuccess: ({ data }) => {
+                      f7.dialog.close();
+                      toast.success("Chấm công thành công.", {
+                        position: toast.POSITION.TOP_CENTER,
+                        autoClose: 2000,
                       });
                     },
                   });
@@ -619,7 +600,6 @@ function NavigationBase(props) {
           .then(({ data }) => {
             f7.dialog.preloader("Đang thực hiện ...");
             DateTimeHelpers.getNowServer().then(({ CrDate }) => {
-              f7.dialog.close();
               let dataCheckInOut = {
                 list: [
                   {
@@ -655,18 +635,12 @@ function NavigationBase(props) {
 
               inOutMutation.mutate(dataCheckInOut, {
                 onSettled: ({ data }) => {
-                  Promise.all([
-                    queryClient.invalidateQueries(["Auth"]),
-                    queryClient.invalidateQueries(["TimekeepingHome"]),
-                    queryClient.invalidateQueries(["TimekeepingList"]),
-                  ]).then(() => {
-                    f7.dialog.close();
-                    setActionsGridOpened(false);
-                    setOption({});
-                    toast.success("Chấm công thành công.", {
-                      position: toast.POSITION.TOP_CENTER,
-                      autoClose: 2000,
-                    });
+                  f7.dialog.close();
+                  setActionsGridOpened(false);
+                  setOption({});
+                  toast.success("Chấm công thành công.", {
+                    position: toast.POSITION.TOP_CENTER,
+                    autoClose: 2000,
                   });
                 },
               });
@@ -719,7 +693,9 @@ function NavigationBase(props) {
   const noBottomNav = useMemo(() => {
     return (
       RouterHelpers.BOTTOM_NAVIGATION_PAGES.includes(pathname) ||
-      RouterHelpers.BOTTOM_NAVIGATION_PAGES.some((x) => pathname.indexOf(x) > -1)
+      RouterHelpers.BOTTOM_NAVIGATION_PAGES.some(
+        (x) => pathname.indexOf(x) > -1
+      )
     );
   }, [pathname]);
 

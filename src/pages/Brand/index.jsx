@@ -9,6 +9,7 @@ import axios from "axios";
 import store from "../../js/store";
 import KeyboardsHelper from "../../helpers/KeyboardsHelper";
 import StorageHelpers from "../../helpers/StorageHelpers";
+import DeviceHelpers from "../../helpers/DeviceHelpers";
 
 const schemaDomain = yup
   .object({
@@ -28,8 +29,8 @@ const BrandPage = ({ f7router }) => {
     StorageHelpers.get({
       keys: ["_historyDomain"],
       success: ({ _historyDomain }) => {
-        if(_historyDomain) {
-          setValue("Domain", _historyDomain.replaceAll('https://', ''))
+        if (_historyDomain) {
+          setValue("Domain", _historyDomain.replaceAll("https://", ""));
         }
       },
     });
@@ -68,6 +69,8 @@ const BrandPage = ({ f7router }) => {
               StorageHelpers.set({
                 data: {
                   _historyDomain: "https://" + Domain,
+                  _historyU: "",
+                  _historyP: "",
                 },
               });
               f7router.navigate("/login/");
@@ -1701,6 +1704,13 @@ const BrandPage = ({ f7router }) => {
           <div className="mb-5 text-center">
             <div
               className="mb-1.5 text-xl font-bold"
+              onClick={() => {
+                DeviceHelpers.get({
+                  success: ({ deviceId }) => {
+                    f7.dialog.alert(deviceId);
+                  },
+                });
+              }}
             >
               Chọn SPA
             </div>
@@ -1728,8 +1738,8 @@ const BrandPage = ({ f7router }) => {
                     clearButton={true}
                     onInputClear={() => {
                       StorageHelpers.remove({
-                        keys: ['_historyDomain', '_historyP', '_historyU']
-                      })
+                        keys: ["_historyDomain", "_historyP", "_historyU"],
+                      });
                     }}
                   />
                 )}

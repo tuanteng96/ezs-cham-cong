@@ -5,7 +5,6 @@ import {
   NavTitle,
   Navbar,
   Page,
-  f7,
   useStore,
 } from "framework7-react";
 import React from "react";

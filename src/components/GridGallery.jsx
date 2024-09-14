@@ -3,7 +3,6 @@ import AssetsHelpers from "../helpers/AssetsHelpers";
 import clsx from "clsx";
 
 function GridGallery({ photos }) {
-  console.log(photos);
   if (photos.length === 1) {
     return photos.map((x, index) => (
       <img

@@ -15,6 +15,7 @@ const store = createStore({
     WorkTimeSettings:
       JSON.parse(localStorage.getItem("WorkTimeSettings")) || null,
     Notifications: [],
+    Processings: null
   },
   getters: {
     Brand({ state }) {
@@ -35,10 +36,16 @@ const store = createStore({
     Notifications({ state }) {
       return state.Notifications;
     },
+    Processings({ state }) {
+      return state.Processings;
+    },
   },
   actions: {
     setNotifications({ state }, value) {
       state.Notifications = value;
+    },
+    setProcessings({ state }, value) {
+      state.Processings = value;
     },
     setBrand({ state }, value) {
       StorageHelpers.set({

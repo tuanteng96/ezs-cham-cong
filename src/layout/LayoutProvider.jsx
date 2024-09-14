@@ -1,8 +1,9 @@
 import { f7, useStore } from "framework7-react";
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import store from "../js/store";
 import { useQuery } from "react-query";
 import AuthAPI from "../api/Auth.api";
+import AdminAPI from "../api/Admin.api";
 import DeviceHelpers from "../helpers/DeviceHelpers";
 import axios from "axios";
 import ConfigsAPI from "../api/Configs.api";
@@ -13,6 +14,8 @@ function LayoutProvider({ children }) {
   let Auth = useStore("Auth");
   let Brand = useStore("Brand");
   let CrStocks = useStore("CrStocks");
+
+  const notificationFull = useRef(null);
 
   useEffect(() => {
     if (!window.PlatformVersion) {
@@ -127,7 +130,9 @@ function LayoutProvider({ children }) {
         `${Brand?.Domain}/brand/global/Global.json?${new Date().getTime()}`
       );
       let { data: template } = await axios.get(
-        `${Brand?.Domain}/AdminCp/Controls/Noti2/NotiTemplate.json?${new Date().getTime()}`
+        `${
+          Brand?.Domain
+        }/AdminCp/Controls/Noti2/NotiTemplate.json?${new Date().getTime()}`
       );
 
       return {
@@ -229,7 +234,7 @@ function LayoutProvider({ children }) {
   });
 
   useQuery({
-    queryKey: ["Notifications", Auth],
+    queryKey: ["Notifications", { ID: Auth?.ID }],
     queryFn: async () => {
       let { data } = await AuthAPI.listNotifications(Auth?.ID);
       return data?.data || [];
@@ -238,6 +243,149 @@ function LayoutProvider({ children }) {
       store.dispatch("setNotifications", data);
     },
     enabled: Boolean(Auth && Auth?.token),
+  });
+
+  const { refetch: refetchProcessings } = useQuery({
+    queryKey: ["Processings", { ID: Auth?.ID, StockID: CrStocks?.ID }],
+    queryFn: async () => {
+      let { data } = await AdminAPI.listProcessings({
+        StockID: CrStocks?.ID,
+        Token: Auth?.token,
+      });
+      let rs = null;
+      if (data?.data) {
+        rs = {
+          items: [],
+          Count: 0,
+        };
+
+        for (const property in data?.data) {
+          if (
+            [
+              "memberBooks",
+              "memberBooksCancel",
+              "orderWebApp",
+              "smsPayed",
+              "noti",
+              "contact",
+              "qrCallback",
+            ].includes(property)
+          ) {
+            if (Array.isArray(data?.data[property])) {
+              rs.Count += data?.data[property].length;
+            }
+
+            let obj = {};
+            obj.children = data?.data[property];
+            obj.ID = property;
+            if (property === "memberBooks") {
+              obj.Title = "Đặt lịch";
+              obj.Index = 1;
+            }
+            if (property === "memberBooksCancel") {
+              obj.Title = "Huỷ lịch";
+              obj.Index = 2;
+            }
+            if (property === "orderWebApp") {
+              obj.Title = "Đơn hàng Online";
+              obj.Index = 3;
+            }
+            if (property === "smsPayed") {
+              obj.Title = "Duyệt thanh toán";
+              obj.Index = 4;
+            }
+            if (property === "noti") {
+              obj.Title = "Lịch nhắc";
+              obj.Index = 5;
+            }
+            if (property === "contact") {
+              obj.Title = "Liên hệ";
+              obj.Index = 6;
+            }
+            if (property === "qrCallback") {
+              obj.Title = "Thanh toán";
+              obj.Index = 7;
+            }
+            rs.items.push(obj);
+          }
+        }
+      }
+
+      return {
+        ...rs,
+        items: rs.items.sort((a, b) => a?.Index - b?.Index),
+      };
+    },
+    onSettled: (data) => {
+      store.dispatch("setProcessings", data);
+    },
+    enabled: Boolean(Auth && Auth?.token),
+    initialData: {
+      items: [],
+      Count: 0,
+    },
+  });
+
+  const handleBzReceive = ({ data }) => {
+    let newData = JSON.parse(data.data);
+    if (!newData?.subject) return;
+
+    refetchProcessings();
+
+    if (!notificationFull.current) {
+      notificationFull.current = f7.notification.create({
+        titleRightText: "vài giây trước",
+        title: "Thông báo",
+        subtitle: "Bạn có 1 cần xử lý mới",
+        closeTimeout: 5000,
+        closeOnClick: true,
+
+        on: {
+          click() {
+            if (window.PathCurrent !== "/admin/processings/") {
+              f7.views.main.router.navigate("/admin/processings/");
+            }
+          },
+        },
+      });
+    }
+    notificationFull.current.open();
+  };
+
+  useEffect(() => {
+    if (Auth?.token) {
+      if (!window.bzClient) {
+        var gr = Brand.Domain.replaceAll("https://", "");
+
+        var bzClient = new BZ({
+          group: gr,
+          user: "u_" + Auth?.ID,
+          ReceiveMessage: function (sender, data, group) {
+            var e = new Event("bz.receive");
+            e.data = {
+              sender: sender,
+              data: data,
+            };
+            document.dispatchEvent(e);
+
+            try {
+              var o = JSON.parse(data); //{to: subject:'', body:{}}
+              //console.log(o);
+            } catch (e) {
+              //
+              throw e;
+            }
+          },
+        });
+        window.bzClient = bzClient;
+        bzClient.start();
+      }
+    }
+  }, [Auth, Brand]);
+
+  useEffect(() => {
+    document.addEventListener("bz.receive", handleBzReceive);
+    return () => document.removeEventListener("bz.receive", handleBzReceive);
   });
 
   return <>{children}</>;
