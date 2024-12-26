@@ -7,10 +7,19 @@ import { XMarkIcon } from "@heroicons/react/24/outline";
 import AssetsHelpers from "../../../helpers/AssetsHelpers";
 import { motion } from "framer-motion";
 import { createPortal } from "react-dom";
+import clsx from "clsx";
 
-function UploadFile({ value, onChange, PathFrame }) {
+function UploadFile({
+  value,
+  onChange,
+  PathFrame,
+  widthClass = "w-32",
+  heightClass = "h-32",
+  wrapClass = "flex items-end",
+}) {
   const [isCreate, setIsCreate] = useState(false);
   const Auth = useStore("Auth");
+  const Brand = useStore("Brand");
   const uploadMutation = useMutation({
     mutationFn: (body) => MoresAPI.upload(body),
   });
@@ -60,11 +69,15 @@ function UploadFile({ value, onChange, PathFrame }) {
   );
 
   return (
-    <div className="flex items-end">
+    <div className={clsx(wrapClass)}>
       <div className="relative">
         <label
           htmlFor="dropzone-file"
-          className="flex flex-col items-center justify-center w-32 h-32 border-[1px] border-[#d5d7da] border-dashed rounded cursor-pointer"
+          className={clsx(
+            "flex flex-col items-center justify-center border-[1px] border-[#d5d7da] border-dashed rounded cursor-pointer",
+            widthClass,
+            heightClass
+          )}
         >
           {value && (
             <div className="w-full h-full">
@@ -120,6 +133,7 @@ function UploadFile({ value, onChange, PathFrame }) {
           Chỉnh sửa ảnh
         </div>
       )}
+
       {isCreate &&
         createPortal(
           <div className="fixed z-[125001] inset-0 flex justify-end flex-col">
@@ -141,7 +155,7 @@ function UploadFile({ value, onChange, PathFrame }) {
                   <iframe
                     id="Demo1"
                     className="w-full h-full"
-                    src={`https://cser.vn${PathFrame}?token=${Auth?.token}`}
+                    src={`${Brand?.Domain}${PathFrame}?token=${Auth?.token}`}
                     title="Mẫu 1"
                     // onLoad={handleIfrmeLoad}
                     //scrolling="no"

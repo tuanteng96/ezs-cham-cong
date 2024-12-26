@@ -2,15 +2,17 @@ import {
   BellIcon,
   ChevronRightIcon,
   EllipsisHorizontalCircleIcon,
-  FingerPrintIcon,
   HomeIcon,
   PencilSquareIcon,
   PowerIcon,
   PresentationChartBarIcon,
-  BookOpenIcon
+  BookOpenIcon,
+  TvIcon,
+  ChevronDownIcon,
+  CodeBracketIcon,
 } from "@heroicons/react/24/outline";
 import { Link, Panel, f7, f7ready, useStore } from "framework7-react";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   Menu,
   MenuItem,
@@ -56,14 +58,27 @@ function CSubMenu({ children, defaultOpen, ...props }) {
 
 function Panels(props) {
   let Auth = useStore("Auth");
+  let Brand = useStore("Brand");
+  let Stocks = useStore("Stocks");
   const CrStocks = useStore("CrStocks");
   const [pathname, setPathname] = useState("");
-  
-  const { notification, report, cong_ca, article } = RolesHelpers.useRoles({
-    nameRoles: ["notification", "report", "cong_ca", "article"],
-    auth: Auth,
-    CrStocks,
-  });
+
+  const actionsToPopover = useRef(null);
+  const buttonToPopoverWrapper = useRef(null);
+
+  const { notification, report, cong_ca, article, pos_mng, printConfig } =
+    RolesHelpers.useRoles({
+      nameRoles: [
+        "notification",
+        "report",
+        "cong_ca",
+        "article",
+        "pos_mng",
+        "printConfig",
+      ],
+      auth: Auth,
+      CrStocks,
+    });
 
   const [Menus, setMenus] = useState([]);
 
@@ -77,20 +92,35 @@ function Panels(props) {
 
   useEffect(() => {
     setMenus([
-      // {
-      //   Title: "Trang chủ",
-      //   Link: "/home/",
-      //   ActiveLink: ["/", "/home/"],
-      //   active: true,
-      //   Id: f7.utils.id("xxxx-xxxx-xxxx-xxxx"),
-      //   hasRight: true,
-      //   Icon: <HomeIcon className="w-5" />,
-      // },
+      {
+        Title: "Chấm công",
+        Link: "/home/",
+        ActiveLink: ["/", "/home/"],
+        active: true,
+        Id: f7.utils.id("xxxx-xxxx-xxxx-xxxx"),
+        hasRight: Brand?.Global?.PosApp,
+        Icon: <HomeIcon className="w-5" />,
+      },
+      {
+        Title: "Thu ngân",
+        Link: "/admin/pos/clients/",
+        ActiveLink: [
+          "/admin/pos/calendar/",
+          "/admin/pos/clients/",
+          "/admin/pos/processings/",
+          "/admin/pos/invoice-processings/",
+        ],
+        active: false,
+        Id: f7.utils.id("xxxx-xxxx-xxxx-xxxx"),
+        Icon: <TvIcon className="w-5" />,
+        hasRight: Brand?.Global?.PosApp && pos_mng?.hasRight,
+        //hasRight: pos_mng?.hasRight || false,
+      },
       {
         Title: "Gửi tin nhắn APP",
         Link: "/admin/notifications/add/",
         ActiveLink: ["/admin/notifications/", "/admin/notifications/add/"],
-        active: true,
+        active: false,
         Id: f7.utils.id("xxxx-xxxx-xxxx-xxxx"),
         Icon: <BellIcon className="w-5" />,
         // SubMenu: [
@@ -195,11 +225,13 @@ function Panels(props) {
             Title: "Tổng quan",
             Link: "/report-preview/",
             active: false,
+            hasRight: true,
           },
           {
             Title: "Chi tiết",
             Link: "/report/",
             active: false,
+            hasRight: true,
           },
         ],
       },
@@ -215,7 +247,11 @@ function Panels(props) {
       {
         Title: "Tiện ích",
         Icon: <EllipsisHorizontalCircleIcon className="w-5" />,
-        ActiveLink: ["/admin/utility/", "/admin/utility/timekeeping-setting/"],
+        ActiveLink: [
+          "/admin/utility/",
+          "/admin/utility/timekeeping-setting/",
+          "/admin/utility/printerip-setting/",
+        ],
         SubMenu: [
           {
             Title: "Cài đặt Công ca - Wifi",
@@ -223,13 +259,36 @@ function Panels(props) {
             active: false,
             hasRight: cong_ca?.hasRight || false,
           },
+          {
+            Title: "Cài đặt IP máy in",
+            Link: "/admin/utility/printerip-setting/",
+            active: false,
+            hasRight: printConfig?.hasRight || false,
+          },
         ],
         active: false,
         Id: f7.utils.id("xxxx-xxxx-xxxx-xxxx"),
-        hasRight: cong_ca?.hasRight || false,
+        hasRight: cong_ca?.hasRight || printConfig?.hasRight || false,
       },
+      // {
+      //   Title: "Debug",
+      //   Link: "/debug/",
+      //   ActiveLink: ["/debug/"],
+      //   active: false,
+      //   Id: f7.utils.id("xxxx-xxxx-xxxx-xxxx"),
+      //   hasRight: Brand?.Domain === "https://cserbeauty.com",
+      //   Icon: <CodeBracketIcon className="w-5" />,
+      // },
     ]);
-  }, [Auth, CrStocks]);
+  }, [Auth, CrStocks, Brand]);
+
+  useEffect(() => {
+    return () => {
+      if (actionsToPopover.current) {
+        actionsToPopover.current.destroy();
+      }
+    };
+  }, []);
 
   const logout = () => {
     store.dispatch("logout", () => {
@@ -242,7 +301,7 @@ function Panels(props) {
       prevState.map((x) => ({
         ...x,
         active:
-          pathname === "/"
+          pathname === "/" || pathname === ""
             ? x.Link === "/home/"
             : x.ActiveLink.includes(pathname),
         SubMenu: x.SubMenu
@@ -256,6 +315,62 @@ function Panels(props) {
     );
   };
 
+  const splitName = (name) => {
+    if (!name) return "";
+    let newName = name.split(" ");
+    if (newName.length > 3) {
+      let nameStr = [];
+      for (const [i, value] of newName.entries()) {
+        if (i === 0 || i === newName.length - 1) {
+          nameStr.push(`${value} `);
+        } else if (i === newName.length - 2) {
+          nameStr.push(`${value.charAt(0)} `);
+        } else {
+          nameStr.push(`${value.charAt(0)}.`);
+        }
+      }
+
+      return nameStr.join("");
+    } else {
+      return name;
+    }
+  };
+
+  const openChooseStocks = () => {
+    let newButtons = Stocks
+      ? Stocks.map((x) => ({
+          text: x.Title,
+          close: false,
+          disabled: CrStocks?.ID === x.ID,
+          onClick: (actions, e) => {
+            store.dispatch("setCrStocks", x).then(() => actions.close());
+          },
+        }))
+      : [];
+    if (newButtons && newButtons.length > 4) {
+      f7.views.main.router.navigate(`/stocks/`);
+    } else {
+      actionsToPopover.current = f7.actions.create({
+        buttons: [
+          ...newButtons,
+          {
+            text: "Đóng",
+            color: "red",
+          },
+        ],
+        targetEl:
+          buttonToPopoverWrapper.current.querySelector(".button-to-popover"),
+      });
+
+      if (newButtons && newButtons.length > 0) {
+        actionsToPopover.current.open();
+      }
+    }
+    setTimeout(() => {
+      f7.panel.close(Dom7("#panel-app"));
+    }, 10);
+  };
+
   return (
     <Panel
       floating
@@ -265,13 +380,13 @@ function Panels(props) {
       onPanelOpen={onPanelOpen}
     >
       <div className="flex flex-col h-full">
-        <Link
-          onClick={() => f7.panel.close(Dom7("#panel-app"))}
-          href="/account/"
-          noLinkClass
-          className="flex items-center p-4 bg-white border-b"
-        >
-          <div className="w-11 h-11">
+        <div className="flex items-center p-4 bg-white border-b">
+          <Link
+            onClick={() => f7.panel.close(Dom7("#panel-app"))}
+            href="/account/"
+            noLinkClass
+            className="w-11 h-11"
+          >
             <div className="relative h-full overflow-hidden bg-gray-100 w-11 rounded-xl">
               <svg
                 className="absolute w-12 h-12 text-gray-400 -bottom-2 left-2/4 -translate-x-2/4"
@@ -286,12 +401,20 @@ function Panels(props) {
                 />
               </svg>
             </div>
+          </Link>
+          <div className="flex-1 pl-3" ref={buttonToPopoverWrapper}>
+            <div className="font-medium">{splitName(Auth?.FullName)}</div>
+            <Link
+              noLinkClass
+              className="flex text-primary"
+              onClick={openChooseStocks}
+            >
+              <div className="truncate max-w-[150px]">{CrStocks?.Title}</div>
+              <ChevronDownIcon className="w-4 ml-1" />
+            </Link>
           </div>
-          <div className="flex-1 pl-3">
-            <div className="font-medium">{Auth?.FullName}</div>
-            <div className="text-muted">Thông tin tài khoản</div>
-          </div>
-        </Link>
+        </div>
+
         <div className="overflow-auto grow bg-[#f7f9fa]">
           <Sidebar
             width="var(--f7-panel-width)"
@@ -336,7 +459,7 @@ function Panels(props) {
                       defaultOpen={menu.active}
                       icon={menu.Icon}
                     >
-                      {menu.SubMenu.map((sub, i) => (
+                      {menu.SubMenu.filter((x) => x.hasRight).map((sub, i) => (
                         <MenuItem
                           className="font-normal border-t"
                           component={<Link href={sub.Link} />}

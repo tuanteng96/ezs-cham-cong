@@ -10,6 +10,7 @@
     --f7-subnavbar-height: 48px;
     --f7-navbar-bg-color: var(--ezs-theme-color);
     --f7-navbar-border-color: "#f5d49f";
+    --f7-subnavbar-border-color: "#ebedf4";
 
     --f7-toolbar-height: 48px;
 
@@ -43,6 +44,8 @@
 
     --f7-subnavbar-bg-color: #fff;
 
+    --f7-popover-bg-color: #fff;
+
     --f7-photobrowser-bars-bg-color: var(--ezs-theme-color);
     --f7-photobrowser-bars-text-color: #fff;
     --f7-photobrowser-bars-link-color: #fff;
@@ -57,6 +60,12 @@
 
     --ezs-safe-area-bottom: var(--f7-safe-area-bottom);
     --ezs-safe-area-top: var(--f7-safe-area-top);
+
+    --fc-border-color: #d6d7da;
+    --fc-today-bg-color: #fff;
+    --fc-small-font-size: 13px;
+
+    --f7-panel-left-width: 300px
 }
 
 /* Page */    
@@ -126,6 +135,10 @@
     @apply relative
 }
 
+input:disabled {
+    @apply bg-[#f0f0f0]
+}
+
 .input .input-clear-button {
     @apply absolute w-12 h-[47px] right-0 top-0 opacity-0
 }
@@ -148,6 +161,14 @@
     @apply mt-1.5 text-xs text-danger font-light
 }
 
+.hidden-error-message .input-invalid ~ .input-error-message {
+    @apply !hidden
+}
+
+.input-number-format {
+    
+}
+
 .text-editor {
     @apply shadow-[0_4px_6px_0_rgba(16,25,40,.06)] rounded
 }
@@ -165,6 +186,19 @@
     min-height: 180px;
 }
 
+.text-editor-toolbar {
+    @apply rounded-t
+}
+
+.text-editor-error.text-editor {
+    @apply !border-danger
+}
+
+/* Button */
+
+.button > i + span, .button > span + span, .button > span ~ i {
+    @apply ml-0
+}
 
 /* Dialog */
 .ios .dialog-title+.dialog-text {
@@ -172,11 +206,11 @@
 }
 
 .dialog-backdrop {
-    z-index: 13501;
+    z-index: 135001;
 }
 
 .dialog {
-    z-index: 13502;
+    z-index: 135002;
 }
 
 /* Sheet Modal */
@@ -201,10 +235,6 @@
     @apply flex items-center justify-center !rounded-lg
 }
 
-/* .with-panel-closing .panel-backdrop-in {
-    pointer-events: none;
-} */
-
 /* / Pull To Refresh / */
 .ezs-ptr.ezs-ptr-white .lds-ellipsis div {
     @apply !bg-white;
@@ -220,7 +250,7 @@
 
 /* Toastify */
 .Toastify {
-    @apply relative z-[125000]
+    @apply relative z-[1250000]
 }
 
 /* */
@@ -231,4 +261,215 @@
 }
 .reset-content blockquote {
     @apply bg-[#F3F6F9] py-3 px-4 border-l-4 border-app italic
+}
+
+/* Popover */
+
+.popover.modal-in {
+    pointer-events: auto;
+}
+
+.popover {
+    pointer-events: none;
+}
+
+.popover-backdrop {
+    z-index: 130000;
+}
+
+.popover {
+    z-index: 1350000;
+}
+
+/* FullCalendar */
+
+.fc {
+    @apply h-full
+}
+
+.fc-event::after {
+    inset: -1px;
+    content: "";
+    position: absolute;
+    z-index: 1;
+}
+
+.fc-event::before {
+    inset: 0px;
+    content: "";
+    position: absolute;
+    z-index: 3;
+}
+
+.fc .fc-timegrid-slot {
+    @apply h-12 relative after:content-[''] after:absolute after:w-full after:border-t after:border-dotted after:border-[var(--fc-border-color)] after:top-2/4 after:-translate-y-2/4
+}
+
+.fc .fc-timegrid-slot-label {
+    @apply align-baseline
+}
+
+.fc .fc-scrollgrid-section-liquid > td {
+    @apply border-b-0
+}
+
+.fc-timegrid-slot.fc-timegrid-slot-label.fc-timegrid-slot-minor,
+.fc-timegrid-slot.fc-timegrid-slot-label.fc-scrollgrid-shrink {
+    @apply border-0 after:hidden
+}
+
+.fc .fc-timegrid-axis-cushion, .fc .fc-timegrid-slot-label-cushion {
+    @apply p-0 
+}
+
+.fc-direction-ltr .fc-timegrid-slot-label-frame {
+    @apply text-center
+}
+
+.fc .fc-resourceTimeGridDay-view>table>tbody>tr td:first-child .fc-scroller-liquid-absolute::-webkit-scrollbar {
+    @apply bg-white
+}
+.fc .fc-resourceTimeGridDay-view>table>tbody>tr td:first-child .fc-scroller-liquid-absolute::-webkit-scrollbar-thumb {
+    @apply bg-white rounded-[10px]
+}
+.fc .fc-resourceTimeGridDay-view>table>tbody>tr td:first-child .fc-scroller-liquid-absolute::-webkit-scrollbar-track {
+    @apply bg-white rounded-[10px]
+}
+
+.fc .fc-resourceTimeGridDay-view .fc-scrollgrid-section-header .fc-scroller::-webkit-scrollbar, .fc .fc-resourceTimeGridDay-view .fc-scrollgrid-section-header .fc-scroller::-webkit-scrollbar-thumb {
+    @apply bg-white
+}
+
+.fc .fc-resourceTimeGridDay-view .fc-scrollgrid-section-header .fc-scroller::-webkit-scrollbar-track, .fc .fc-timeGridDay-view .fc-scrollgrid-liquid>thead .fc-scroller::-webkit-scrollbar-thumb {
+    @apply bg-white
+}
+
+.fc .fc-resourceTimeGridDay-view .fc-scrollgrid-section-header.fc-scrollgrid-section-sticky > th:last-child .fc-scroller::-webkit-scrollbar {
+    @apply w-[5px]
+}
+
+.fc .fc-resource-timeline .fc-scrollgrid-liquid .fc-timeline-slot-cushion {
+    @apply w-full p-0
+}
+
+.fc-datagrid-expander {
+    @apply hidden
+}
+
+.fc .fc-resource-timeline .fc-scrollgrid-liquid>tbody .fc-scrollgrid-section>td:first-child .fc-datagrid-cell-frame,
+.fc .fc-resource-timeline .fc-timeline-lane-frame {
+    height: 100px !important;
+}
+
+.fc .fc-resource-timeline.fc-resourceTimelineDay-view .fc-scrollgrid-liquid .fc-resource-group:not([rowspan]) .fc-datagrid-cell-frame {
+    height: 68px !important;
+}
+
+.fc .fc-resource-timeline.fc-resourceTimelineDay-view .fc-scrollgrid-liquid .fc-resource-group:not([rowspan]) .fc-datagrid-cell-frame > div,
+.fc .fc-resource-timeline .fc-scrollgrid-liquid>tbody .fc-scrollgrid-section>td:first-child .fc-datagrid-cell-frame > div {
+    @apply h-full flex items-center justify-center
+}
+
+.fc .fc-resource-timeline .fc-resource-group:not([rowspan]) {
+    height: 70px !important;
+}
+
+.fc-event.fc-primary {
+    @apply bg-primary border-primary
+}
+
+.fc-event.fc-danger {
+    @apply bg-danger border-danger
+}
+
+.fc-event.fc-success {
+    @apply bg-success border-success
+}
+
+.fc-event.fc-warning {
+    @apply bg-warning border-warning
+}
+
+.fc-event.fc-info {
+    @apply bg-[#8950fc] border-[#8950fc]
+}
+
+.fc-event.fc-primary-2 {
+    @apply bg-[#17c653] border-[#17c653]
+}
+
+.fc-event.fc-secondary {
+    @apply bg-[#929293] border-[#929293]
+}
+
+.fc .fc-listWeek-view .fc-day-today {
+    @apply hidden
+}
+
+.fc .fc-listWeek-view .fc-event {
+    --fc-border-color : #ebedf4;
+    @apply !bg-white !shadow-none !border-none !text-gray-900
+}
+
+.fc .fc-listWeek-view .fc-event .fc-list-event-time {
+    @apply font-lato font-semibold py-3.5
+}
+
+.fc .fc-listWeek-view .fc-event .fc-list-event-title {
+    @apply py-3.5 font-medium
+}
+
+.fc .fc-listWeek-view .fc-event .fc-list-event-graphic {
+    @apply pr-[14px] pt-4
+}
+
+.fc .fc-listWeek-view .fc-event.fc-success .fc-list-event-graphic .fc-list-event-dot {
+    @apply border-success
+}
+.fc .fc-listWeek-view .fc-event.fc-primary .fc-list-event-graphic .fc-list-event-dot {
+    @apply border-primary
+}
+.fc .fc-listWeek-view .fc-event.fc-danger .fc-list-event-graphic .fc-list-event-dot {
+    @apply border-danger
+}
+.fc .fc-listWeek-view .fc-event.fc-warning .fc-list-event-graphic .fc-list-event-dot {
+    @apply border-warning
+}
+.fc .fc-listWeek-view .fc-event.fc-info .fc-list-event-graphic .fc-list-event-dot {
+    @apply border-info
+}
+
+.fc .fc-listWeek-view .fc-event.fc-primary-2 .fc-list-event-graphic .fc-list-event-dot {
+    @apply border-[#17c653]
+}
+
+.fc .fc-listWeek-view .fc-event.fc-secondary .fc-list-event-graphic .fc-list-event-dot {
+    @apply border-[#929293]
+}
+
+.fc .fc-bg-event {
+    background: transparent;
+    background-image: linear-gradient(45deg, #ddd 25%, transparent 0, transparent 50%, #ddd 0, #ddd 75%, transparent 0, transparent) !important;
+    background-size: 4px 4px;
+    cursor: not-allowed;
+    opacity: 1;
+}
+
+.fc .fc-more-popover .fc-popover-body {
+    height: 200px;
+    overflow: auto;
+}
+
+.fc .fc-more-popover .fc-popover-body .fc-event {
+    @apply before:hidden after:hidden
+}
+
+.fc .fc-listWeek-view .fc-event {
+    @apply before:hidden after:hidden
+}
+
+/* HTML: <div class="triangle"></div> */
+.triangle-left-top {
+    aspect-ratio: 1;
+    clip-path: polygon(0 0, 100% 0, 0 100%);
 }

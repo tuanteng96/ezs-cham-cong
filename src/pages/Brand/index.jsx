@@ -9,7 +9,6 @@ import axios from "axios";
 import store from "../../js/store";
 import KeyboardsHelper from "../../helpers/KeyboardsHelper";
 import StorageHelpers from "../../helpers/StorageHelpers";
-import DeviceHelpers from "../../helpers/DeviceHelpers";
 
 const schemaDomain = yup
   .object({
@@ -39,7 +38,7 @@ const BrandPage = ({ f7router }) => {
   const domainMutation = useMutation({
     mutationFn: async (domain) => {
       let { data: rsConfig } = await axios.get(
-        `${domain}/api/v3/config?cmd=getnames&names=Bill.Title,logo.mau&ignore_root=1`
+        `${domain}/api/v3/config?cmd=getnames&names=Bill.Title,logo.mau,App.webnoti&ignore_root=1`
       );
       let { data: Global } = await axios.get(
         `${domain}/brand/global/Global.json`
@@ -56,6 +55,19 @@ const BrandPage = ({ f7router }) => {
     domainMutation.mutate("https://" + Domain.toLowerCase(), {
       onSuccess: ({ BrandsInfo, Global, success }) => {
         if (success && BrandsInfo) {
+          let FirebaseApp = null;
+          if (BrandsInfo.filter((x) => x.Name === "App.webnoti").length > 0) {
+            let firebaseStr = BrandsInfo.filter(
+              (x) => x.Name === "App.webnoti"
+            )[0]["ValueText"];
+
+            let firebase = {
+              initializeApp: (obj) => {
+                FirebaseApp = obj;
+              },
+            };
+            eval(firebaseStr);
+          }
           store
             .dispatch("setBrand", {
               Domain: "https://" + Domain.toLowerCase(),
@@ -63,6 +75,10 @@ const BrandPage = ({ f7router }) => {
                 "ValueText"
               ],
               Logo: BrandsInfo.filter((x) => x.Name === "logo.mau")[0]["Src"],
+              Firebase: BrandsInfo.filter((x) => x.Name === "App.webnoti")[0][
+                "ValueText"
+              ],
+              FirebaseApp,
               Global,
             })
             .then(() => {
@@ -1702,18 +1718,7 @@ const BrandPage = ({ f7router }) => {
 
         <div className="p-4">
           <div className="mb-5 text-center">
-            <div
-              className="mb-1.5 text-xl font-bold"
-              onClick={() => {
-                DeviceHelpers.get({
-                  success: ({ deviceId }) => {
-                    f7.dialog.alert(deviceId);
-                  },
-                });
-              }}
-            >
-              Chọn SPA
-            </div>
+            <div className="mb-1.5 text-xl font-bold">Chọn SPA</div>
             <div className="font-light">
               Nhập tên miền hoặc quét QR Code để chọn cơ sở bạn đang làm việc.
             </div>

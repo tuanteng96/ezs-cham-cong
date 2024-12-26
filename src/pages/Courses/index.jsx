@@ -80,7 +80,7 @@ function CoursesPage(props) {
       onPtrRefresh={(done) => CoursesQuery.refetch().then(() => done())}
       infinite
       infiniteDistance={50}
-      infinitePreloader={CoursesQuery.isLoading}
+      infinitePreloader={CoursesQuery.isFetchingNextPage}
       onInfinite={loadMore}
     >
       <Navbar innerClass="!px-0 text-white" outline={false}>

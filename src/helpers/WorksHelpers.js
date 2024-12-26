@@ -32,7 +32,7 @@ const WorksHelpers = {
       let initialValues = {
         Info: {},
       };
-      
+
       let MinutesPrice = 333;
 
       let index = Intervals.findIndex(
@@ -192,16 +192,38 @@ const WorksHelpers = {
             duration > 0 ? "Hôm nay bạn đi sớm?" : "Hôm nay bạn đi muộn?";
 
           if (WorkShiftDuration[indexShift].Value < 0) {
-            initialValues[duration > 0 ? "DI_SOM" : "DI_MUON"] = {
-              ...WorkShiftDuration[indexShift],
-              Value: 0,
-              WorkDays:
-                duration > 0
-                  ? Number(CheckInOutJSON.list[0].Info.WorkToday.Value) -
-                    Number(WorkShiftDuration[indexShift].Value)
-                  : Number(CheckInOutJSON.list[0].Info.WorkToday.Value) +
-                    Number(WorkShiftDuration[indexShift].Value),
-            };
+            if (Number(WorkShiftDuration[indexShift].Value === -60)) {
+              initialValues[duration > 0 ? "DI_SOM" : "DI_MUON"] = {
+                ...WorkShiftDuration[indexShift],
+                Value: Math.round(
+                  Math.abs(duration) * ((WorkTimeToday.SalaryHours || 0) / 60)
+                ),
+              };
+            } else if (WorkShiftDuration[indexShift].Value > -10) {
+              initialValues[duration > 0 ? "DI_SOM" : "DI_MUON"] = {
+                ...WorkShiftDuration[indexShift],
+                Value: 0,
+                WorkDays:
+                  duration > 0
+                    ? Number(
+                        (
+                          Number(CheckInOutJSON.list[0].Info.WorkToday.Value) -
+                          Number(WorkShiftDuration[indexShift].Value)
+                        ).toFixed(1)
+                      )
+                    : Number(
+                        (
+                          Number(CheckInOutJSON.list[0].Info.WorkToday.Value) +
+                          Number(WorkShiftDuration[indexShift].Value)
+                        ).toFixed(1)
+                      ),
+              };
+            } else {
+              initialValues[duration > 0 ? "DI_SOM" : "DI_MUON"] = {
+                ...WorkShiftDuration[indexShift],
+                Value: Math.abs(duration) * WorkShiftDuration[indexShift].Value,
+              };
+            }
           } else {
             initialValues[duration > 0 ? "DI_SOM" : "DI_MUON"] = {
               ...WorkShiftDuration[indexShift],
@@ -231,16 +253,41 @@ const WorksHelpers = {
           initialValues.Title =
             duration > 0 ? "Hôm nay bạn về sớm?" : "Hôm nay bạn về muộn?";
           if (WorkShiftDuration[indexShift].Value < 0) {
-            initialValues[duration > 0 ? "VE_SOM" : "VE_MUON"] = {
-              ...WorkShiftDuration[indexShift],
-              Value: 0,
-              WorkDays:
-                duration > 0
-                  ? Number(CheckInOutJSON.list[0].Info.WorkToday.Value) +
-                    Number(WorkShiftDuration[indexShift].Value)
-                  : Number(CheckInOutJSON.list[0].Info.WorkToday.Value) -
-                    Number(WorkShiftDuration[indexShift].Value),
-            };
+            if (
+              Number(WorkShiftDuration[indexShift].Value) === -60 &&
+              WorkTimeToday.SalaryHours
+            ) {
+              initialValues[duration > 0 ? "VE_SOM" : "VE_MUON"] = {
+                ...WorkShiftDuration[indexShift],
+                Value: Math.round(
+                  Math.abs(duration) * (WorkTimeToday.SalaryHours / 60)
+                ),
+              };
+            } else if (WorkShiftDuration[indexShift].Value > -10) {
+              initialValues[duration > 0 ? "VE_SOM" : "VE_MUON"] = {
+                ...WorkShiftDuration[indexShift],
+                Value: 0,
+                WorkDays:
+                  duration > 0
+                    ? Number(
+                        (
+                          Number(CheckInOutJSON.list[0].Info.WorkToday.Value) +
+                          Number(WorkShiftDuration[indexShift].Value)
+                        ).toFixed(1)
+                      )
+                    : Number(
+                        (
+                          Number(CheckInOutJSON.list[0].Info.WorkToday.Value) -
+                          Number(WorkShiftDuration[indexShift].Value)
+                        ).toFixed(1)
+                      ),
+              };
+            } else {
+              initialValues[duration > 0 ? "VE_SOM" : "VE_MUON"] = {
+                ...WorkShiftDuration[indexShift],
+                Value: Math.abs(duration) * WorkShiftDuration[indexShift].Value,
+              };
+            }
           } else {
             initialValues[duration > 0 ? "VE_SOM" : "VE_MUON"] = {
               ...WorkShiftDuration[indexShift],

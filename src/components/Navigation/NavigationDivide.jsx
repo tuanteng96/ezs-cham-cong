@@ -2,7 +2,6 @@ import {
   Link,
   Toolbar,
   f7,
-  f7ready,
   useStore,
   Actions,
   ActionsGroup,
@@ -31,16 +30,14 @@ import { getDistance } from "geolib";
 import DateTimeHelpers from "../../helpers/DateTimeHelpers";
 import RouterHelpers from "../../helpers/RouterHelpers";
 
-function NavigationDivide(props) {
-  const [pathname, setPathname] = useState("");
+function NavigationDivide({ pathname }) {
   const [visible, setVisible] = useState(false);
 
   const Brand = useStore("Brand");
   const CrStocks = useStore("CrStocks");
   const Auth = useStore("Auth");
   const WorkTimeSettings = useStore("WorkTimeSettings");
-  const { WorkShiftsSetting, WorkTimeToday } = {
-    WorkShiftsSetting: WorkTimeSettings?.WorkShiftsSetting || null,
+  const { WorkTimeToday } = {
     WorkTimeToday: WorkTimeSettings?.WorkTimeToday || null,
   };
   const queryClient = useQueryClient();
@@ -48,26 +45,6 @@ function NavigationDivide(props) {
 
   const actionsToPopover = useRef(null);
   const buttonToPopoverWrapper = useRef(null);
-
-  useEffect(() => {
-    f7ready((f7) => {
-      f7.views.main.on("routeChange", (newRoute) => {
-        setPathname(newRoute.url);
-
-        window.PathCurrent = newRoute.url;
-
-        if (window.PlatformId === "ANDROID") {
-          if (
-            document.activeElement &&
-            (document.activeElement.tagName === "INPUT" ||
-              document.activeElement.tagName === "TEXTAREA")
-          ) {
-            document.activeElement.blur();
-          }
-        }
-      });
-    });
-  }, []);
 
   useEffect(() => {
     return () => {
@@ -97,7 +74,7 @@ function NavigationDivide(props) {
   const handleCheckInLocation = (open) => {
     if (!CrStocks?.Lat && !CrStocks?.Lng) {
       f7.dialog.alert(
-        `Vui lòng liên hệ quản trị viên cập nhập vị trí Spa cơ sở ${CrStocks?.Title}.`
+        `Vui lòng liên hệ quản trị viên cập nhật vị trí Spa cơ sở ${CrStocks?.Title}.`
       );
     } else {
       openFlexibleShifts().then((WorkTimeShift) => {
@@ -220,7 +197,7 @@ function NavigationDivide(props) {
   const handleCheckInWifi = (open) => {
     if (!CrStocks?.WifiID && !CrStocks?.WifiName) {
       f7.dialog.alert(
-        `Vui lòng liên hệ quản trị viên cập nhập thông tin WIFI tại Spa cơ sở ${CrStocks?.Title}.`
+        `Vui lòng liên hệ quản trị viên cập nhật thông tin WIFI tại Spa cơ sở ${CrStocks?.Title}.`
       );
     } else {
       openFlexibleShifts().then((WorkTimeShift) => {

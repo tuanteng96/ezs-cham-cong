@@ -8,7 +8,7 @@ import Actions from 'framework7/components/actions';
 import Sheet from 'framework7/components/sheet';
 // import Toast from 'framework7/components/toast';
 import Preloader from 'framework7/components/preloader';
-// import Progressbar from 'framework7/components/progressbar';
+import Progressbar from 'framework7/components/progressbar';
 // import Sortable from 'framework7/components/sortable';
 // import Swipeout from 'framework7/components/swipeout';
 // import Accordion from 'framework7/components/accordion';
@@ -59,7 +59,7 @@ Framework7.use([
   Sheet,
   //Toast,
   Preloader,
-  // Progressbar,
+  Progressbar,
   // Sortable,
   // Swipeout,
   // Accordion,

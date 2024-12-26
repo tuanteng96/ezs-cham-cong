@@ -1,8 +1,13 @@
 import React from "react";
 
-function NoFound({ Title, Desc }) {
+function NoFound({
+  Title,
+  Desc,
+  svgClassName = "w-10/12",
+  className = "flex flex-col items-center min-h-full pt-8",
+}) {
   return (
-    <div className="flex flex-col items-center min-h-full pt-8">
+    <div className={className}>
       <svg
         xmlns="http://www.w3.org/2000/svg"
         xmlnsXlink="http://www.w3.org/1999/xlink"
@@ -12,7 +17,7 @@ function NoFound({ Title, Desc }) {
         viewBox="0 0 500 500"
         style={{ enableBackground: "new 0 0 500 500" }}
         xmlSpace="preserve"
-        className="w-10/12"
+        className={svgClassName}
       >
         <g id="Background_Complete">
           <g>

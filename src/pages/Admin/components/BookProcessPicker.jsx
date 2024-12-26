@@ -146,7 +146,7 @@ function BookProcessPicker({ children, data, type }) {
                         control={control}
                         render={({ field, fieldState }) => (
                           <Input
-                            className="[&_textarea]:rounded [&_textarea]:placeholder:normal-case text-input [&_textarea]:min-h-[80px]"
+                            className="[&_textarea]:rounded [&_textarea]:placeholder:normal-case [&_textarea]:min-h-[80px]"
                             type="textarea"
                             placeholder="Nhập nội dung"
                             rows="3"
@@ -189,7 +189,7 @@ function BookProcessPicker({ children, data, type }) {
                         control={control}
                         render={({ field, fieldState }) => (
                           <Input
-                            className="[&_textarea]:rounded [&_textarea]:placeholder:normal-case text-input [&_textarea]:min-h-[80px]"
+                            className="[&_textarea]:rounded [&_textarea]:placeholder:normal-case [&_textarea]:min-h-[80px]"
                             type="textarea"
                             placeholder="Nhập ghi chú"
                             rows="3"

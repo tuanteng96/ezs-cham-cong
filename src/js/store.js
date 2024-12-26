@@ -5,6 +5,7 @@ import { f7 } from "framework7-react";
 import SubscribeHelpers from "../helpers/SubscribeHelpers";
 import axios from "axios";
 import { pick, keys } from "lodash-es";
+import { initializeApp } from "firebase/app";
 
 const store = createStore({
   state: {
@@ -15,7 +16,10 @@ const store = createStore({
     WorkTimeSettings:
       JSON.parse(localStorage.getItem("WorkTimeSettings")) || null,
     Notifications: [],
-    Processings: null
+    Processings: null,
+    InvoiceProcessings: null,
+    ClientBirthDay: null,
+    FirebaseApp: null,
   },
   getters: {
     Brand({ state }) {
@@ -39,20 +43,38 @@ const store = createStore({
     Processings({ state }) {
       return state.Processings;
     },
+    InvoiceProcessings({ state }) {
+      return state.InvoiceProcessings;
+    },
+    ClientBirthDay({ state }) {
+      return state.ClientBirthDay;
+    },
+    FirebaseApp({ state }) {
+      return state.FirebaseApp ? initializeApp(state.FirebaseApp) : null;
+    },
   },
   actions: {
     setNotifications({ state }, value) {
       state.Notifications = value;
     },
+    setClientBirthDay({ state }, value) {
+      state.ClientBirthDay = value;
+    },
     setProcessings({ state }, value) {
       state.Processings = value;
+    },
+    setInvoiceProcessings({ state }, value) {
+      state.InvoiceProcessings = value;
     },
     setBrand({ state }, value) {
       StorageHelpers.set({
         data: {
           Brand: value,
         },
-        success: () => (state.Brand = value),
+        success: () => {
+          state.Brand = value;
+          state.FirebaseApp = value.FirebaseApp;
+        },
       });
     },
     setAuth({ state }, value) {
@@ -75,6 +97,9 @@ const store = createStore({
         Groups: null,
         WorkTrack: null,
       };
+
+      window.Info = value?.Info || null;
+
       let newValue = {
         ...pick(value, keys(model)),
         Info: {
@@ -93,13 +118,13 @@ const store = createStore({
       StorageHelpers.set({
         data: {
           Auth: newValue,
-          Stocks: value?.Info?.StockRights
-            ? value?.Info?.StockRights.map((x) => ({
-                ...x,
-                value: x.ID,
-                label: x.Title,
-              }))
-            : [],
+          Stocks: value?.Info?.Stocks?.filter((x) => x.ParentID !== 0).map(
+            (x) => ({
+              ...x,
+              value: x.ID,
+              label: x.Title,
+            })
+          ),
         },
         success: () => {
           if (
@@ -114,13 +139,17 @@ const store = createStore({
             let StocksList = value?.Info?.Stocks?.filter(
               (x) => x.ID !== state.CrStocks?.ID
             );
-            
+
             StorageHelpers.set({
               data: {
-                CrStocks: value.StockInfo || StocksList.filter(x => x.ParentID > 0)[0],
+                CrStocks:
+                  value.StockInfo ||
+                  StocksList.filter((x) => x.ParentID > 0)[0],
               },
               success: () =>
-                (state.CrStocks = value.StockInfo || StocksList.filter(x => x.ParentID > 0)[0]),
+                (state.CrStocks =
+                  value.StockInfo ||
+                  StocksList.filter((x) => x.ParentID > 0)[0]),
             });
           } else {
             let indexStock = value?.Info?.Stocks?.findIndex(

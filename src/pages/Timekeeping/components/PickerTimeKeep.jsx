@@ -61,7 +61,7 @@ function PickerTimeKeep({ children, item }) {
                 {moment(item.Date).format("ddd, [Ngày] ll")}
               </div>
             </div>
-            <div className="p-4 overflow-auto grow no-scrollbar">
+            <div className="px-4 overflow-auto grow no-scrollbar">
               {data?.Info?.WorkToday && data?.Info?.WorkToday?.TimeFrom && (
                 <div className="flex mb-2">
                   <div className="pr-2 mb-px font-light text-gray-500">

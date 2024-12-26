@@ -30,6 +30,7 @@ function DatePicker({
   errorMessageForce,
   placeholder = "Chọn thời gian",
   defaultValue,
+  minDate = null,
   ...props
 }) {
   const [visible, setVisible] = useState(false);
@@ -98,7 +99,7 @@ function DatePicker({
       <>
         <div
           className="relative"
-          onClick={open}
+          onClick={() => !props?.disabled && open()}
           //onMouseDown={(e) => e.stopPropagation()}
         >
           <input
@@ -121,9 +122,11 @@ function DatePicker({
                 <div
                   className="absolute right-0 flex items-center justify-center w-12 h-full top-2/4 -translate-y-2/4"
                   onClick={(e) => {
-                    e.stopPropagation();
-                    onChange("");
-                    close();
+                    if (!props?.disabled) {
+                      e.stopPropagation();
+                      onChange("");
+                      close();
+                    }
                   }}
                 >
                   <XMarkIcon className="w-5 text-gray-700" />
@@ -194,8 +197,9 @@ function DatePicker({
                       seconds,
                       milliseconds,
                     }) => {
-                      onChange(
-                        moment({
+                      let isSet = true;
+                      if (minDate) {
+                        let newValue = moment({
                           years: years || moment(new Date()).format("YYYY"),
                           months: months
                             ? Number(months) - 1
@@ -205,8 +209,26 @@ function DatePicker({
                           minutes: minutes || moment(new Date()).format("mm"),
                           seconds: seconds || moment(new Date()).format("ss"),
                           milliseconds,
-                        }).toDate()
-                      );
+                        }).toDate();
+                        if (moment(minDate).diff(newValue, "minutes") > 0) {
+                          isSet = false;
+                        }
+                      }
+                      if (isSet) {
+                        onChange(
+                          moment({
+                            years: years || moment(new Date()).format("YYYY"),
+                            months: months
+                              ? Number(months) - 1
+                              : moment(new Date()).format("M"),
+                            date: date || moment(new Date()).format("DD"),
+                            hours: hours || moment(new Date()).format("H"),
+                            minutes: minutes || moment(new Date()).format("mm"),
+                            seconds: seconds || moment(new Date()).format("ss"),
+                            milliseconds,
+                          }).toDate()
+                        );
+                      }
                     }}
                     itemHeight={52}
                     height={260}

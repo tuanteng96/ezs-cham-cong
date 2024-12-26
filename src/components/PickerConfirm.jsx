@@ -227,7 +227,7 @@ function PickerConfirm({ children }) {
                   control={control}
                   render={({ field, fieldState }) => (
                     <Input
-                      className="[&_textarea]:rounded [&_textarea]:placeholder:normal-case text-input [&_textarea]:min-h-[150px]"
+                      className="[&_textarea]:rounded [&_textarea]:placeholder:normal-case [&_textarea]:min-h-[150px]"
                       type="textarea"
                       placeholder="Nhập mô tả lý do"
                       rows="5"
@@ -252,7 +252,7 @@ function PickerConfirm({ children }) {
                   loading={confirmMutation.isLoading}
                   disabled={confirmMutation.isLoading}
                 >
-                  Cập nhập
+                  Cập nhật
                 </Button>
               </div>
             </div>

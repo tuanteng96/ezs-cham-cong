@@ -4,9 +4,10 @@ import clsx from "clsx";
 import React, { useState } from "react";
 import { toast } from "react-toastify";
 import MoresAPI from "../api/Mores.api";
-import { useStore } from "framework7-react";
+import { f7, Link, useStore } from "framework7-react";
 import AssetsHelpers from "../helpers/AssetsHelpers";
 import { useMutation } from "react-query";
+import Resizer from "react-image-file-resizer";
 
 const UploadImages = ({
   className,
@@ -31,29 +32,49 @@ const UploadImages = ({
       }),
   });
 
-  const handleFileChange = (event) => {
-    const files = event.target.files;
-    var bodyFormData = new FormData();
-    bodyFormData.append("file", files[0]);
+  const handleFileChange = async (event) => {
+    const [file] = event.target.files;
 
-    uploadMutation.mutate(
-      {
-        Token: Auth?.token,
-        File: bodyFormData,
-      },
-      {
-        onSuccess: ({ data }) => {
-          if (data?.error) {
-            toast.error(data.error);
-          } else {
-            onChange(data.data);
-          }
+    if (file) {
+      let val = await new Promise((resolve) => {
+        Resizer.imageFileResizer(
+          file,
+          600,
+          600,
+          "JPEG",
+          100,
+          0,
+          (uri) => {
+            resolve(uri);
+          },
+          "file",
+          300,
+          300
+        );
+      });
+
+      var bodyFormData = new FormData();
+      bodyFormData.append("file", val);
+
+      uploadMutation.mutate(
+        {
+          Token: Auth?.token,
+          File: bodyFormData,
         },
-        onError: (error) => {
-          console.log(error);
-        },
-      }
-    );
+        {
+          onSuccess: ({ data }) => {
+            if (data?.error) {
+              toast.error(data.error);
+            } else {
+              onChange(data.data);
+            }
+          },
+          onError: (error) => {
+            console.log(error);
+          },
+        }
+      );
+    }
   };
 
   return (
@@ -67,11 +88,13 @@ const UploadImages = ({
         )}
       >
         {/* No file */}
-        <div
+        <Link
+          noLinkClass
           className={clsx(
             "relative flex flex-col items-center justify-center h-full text-center border border-primarylight rounded",
             errorMessageForce && "border-danger"
           )}
+          popoverOpen=".popover-action-upload"
         >
           <svg
             className="w-9"
@@ -92,18 +115,10 @@ const UploadImages = ({
           >
             {buttonText}
           </div>
-          <input
-            value=""
-            className="absolute top-0 left-0 z-0 w-full h-full opacity-0 cursor-pointer"
-            type="file"
-            title=""
-            {...props}
-            onChange={handleFileChange}
-          />
-        </div>
+        </Link>
         {/* No file */}
         {value && (
-          <div className="absolute top-0 left-0 w-full h-full bg-gray-100 dark:bg-graydark-100">
+          <div className="absolute top-0 left-0 w-full h-full bg-gray-100">
             <a
               className="flex items-center justify-center h-full overflow-hidden rounded"
               target="_blank"

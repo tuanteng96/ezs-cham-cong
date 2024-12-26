@@ -9,7 +9,7 @@ import {
   f7,
   useStore,
 } from "framework7-react";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import PromHelpers from "../../../../helpers/PromHelpers";
 import {
   ChevronLeftIcon,
@@ -368,7 +368,7 @@ function ArticleAddAdmin({ f7router, f7route }) {
             //   disabled={updateMutation.isLoading}
             ref={buttonRef}
           >
-            {isAddMode ? "Thêm mới" : "Cập nhập"}
+            {isAddMode ? "Thêm mới" : "Cập nhật"}
           </button>
         </form>
       </FormProvider>

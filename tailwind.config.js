@@ -10,17 +10,20 @@ module.exports = {
         success: "#1BC5BD",
         "success-light": "#C9F7F5",
         warning: "#FFA800",
+        "warning-light": "#FFF4DE",
         danger: "#f1416c",
         "danger-light": "#FFE2E5",
         light: "#F9F9F9",
         muted: "#B5B5C3",
+        info: "#8950FC",
         gray: {
           200: '#ebedf3',
           700: "#4B5675"
         }
       },
       fontFamily: {
-        'sans': ['Be Vietnam Pro', 'sans-serif']
+        'sans': ['Be Vietnam Pro', 'sans-serif'],
+        'lato': ['Lato','Be Vietnam Pro', 'sans-serif'],
       },
       fontSize: {
         input: ['15px', '20px']

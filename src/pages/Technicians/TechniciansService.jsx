@@ -122,7 +122,7 @@ const Notes = ({ onSubmit, initialValues }) => {
           render={({ field: { onChange, onBlur, value, ref } }) => (
             <Input
               value={value}
-              className="[&_textarea]:rounded [&_textarea]:lowercase [&_textarea]:placeholder:normal-case text-input [&_textarea]:min-h-[100px] [&_textarea]:shadow-none [&_textarea]:border-0"
+              className="[&_textarea]:rounded [&_textarea]:lowercase [&_textarea]:placeholder:normal-case [&_textarea]:min-h-[100px] [&_textarea]:shadow-none [&_textarea]:border-0"
               type="textarea"
               placeholder="Nhập tình trạng"
               // errorMessage={fieldState?.error?.message}
@@ -146,7 +146,7 @@ const Notes = ({ onSubmit, initialValues }) => {
           render={({ field: { onChange, onBlur, value, ref } }) => (
             <Input
               value={value}
-              className="[&_textarea]:rounded [&_textarea]:lowercase [&_textarea]:placeholder:normal-case text-input [&_textarea]:min-h-[100px] [&_textarea]:shadow-none [&_textarea]:border-0"
+              className="[&_textarea]:rounded [&_textarea]:lowercase [&_textarea]:placeholder:normal-case [&_textarea]:min-h-[100px] [&_textarea]:shadow-none [&_textarea]:border-0"
               type="textarea"
               placeholder="Nhập thủ thuật"
               // errorMessage={fieldState?.error?.message}
@@ -170,7 +170,7 @@ const Notes = ({ onSubmit, initialValues }) => {
           render={({ field: { onChange, onBlur, value, ref } }) => (
             <Input
               value={value}
-              className="[&_textarea]:rounded [&_textarea]:lowercase [&_textarea]:placeholder:normal-case text-input [&_textarea]:min-h-[100px] [&_textarea]:shadow-none [&_textarea]:border-0"
+              className="[&_textarea]:rounded [&_textarea]:lowercase [&_textarea]:placeholder:normal-case [&_textarea]:min-h-[100px] [&_textarea]:shadow-none [&_textarea]:border-0"
               type="textarea"
               placeholder="Nhập đánh giá"
               // errorMessage={fieldState?.error?.message}
@@ -194,7 +194,7 @@ const Notes = ({ onSubmit, initialValues }) => {
           render={({ field: { onChange, onBlur, value, ref } }) => (
             <Input
               value={value}
-              className="[&_textarea]:rounded [&_textarea]:lowercase [&_textarea]:placeholder:normal-case text-input [&_textarea]:min-h-[100px] [&_textarea]:shadow-none [&_textarea]:border-0"
+              className="[&_textarea]:rounded [&_textarea]:lowercase [&_textarea]:placeholder:normal-case [&_textarea]:min-h-[100px] [&_textarea]:shadow-none [&_textarea]:border-0"
               type="textarea"
               placeholder="Nhập lưu ý"
               // errorMessage={fieldState?.error?.message}
@@ -290,20 +290,26 @@ const ScheduleItem = ({ item, checkStatus, index }) => {
           {(item?.Rate || item?.Rate === 0) && (
             <div className="pt-2 mt-2 border-t">
               <div className="flex items-center">
-                {Array(5).fill().map((_, index) => (
-                  <svg
-                    key={index}
-                    className="w-4 h-4 mr-1 text-yellow-300"
-                    aria-hidden="true"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="currentColor"
-                    viewBox="0 0 22 20"
-                  >
-                    <path d="M20.924 7.625a1.523 1.523 0 0 0-1.238-1.044l-5.051-.734-2.259-4.577a1.534 1.534 0 0 0-2.752 0L7.365 5.847l-5.051.734A1.535 1.535 0 0 0 1.463 9.2l3.656 3.563-.863 5.031a1.532 1.532 0 0 0 2.226 1.616L11 17.033l4.518 2.375a1.534 1.534 0 0 0 2.226-1.617l-.863-5.03L20.537 9.2a1.523 1.523 0 0 0 .387-1.575Z" />
-                  </svg>
-                ))}
+                {Array(5)
+                  .fill()
+                  .map((_, index) => (
+                    <svg
+                      key={index}
+                      className="w-4 h-4 mr-1 text-yellow-300"
+                      aria-hidden="true"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="currentColor"
+                      viewBox="0 0 22 20"
+                    >
+                      <path d="M20.924 7.625a1.523 1.523 0 0 0-1.238-1.044l-5.051-.734-2.259-4.577a1.534 1.534 0 0 0-2.752 0L7.365 5.847l-5.051.734A1.535 1.535 0 0 0 1.463 9.2l3.656 3.563-.863 5.031a1.532 1.532 0 0 0 2.226 1.616L11 17.033l4.518 2.375a1.534 1.534 0 0 0 2.226-1.617l-.863-5.03L20.537 9.2a1.523 1.523 0 0 0 .387-1.575Z" />
+                    </svg>
+                  ))}
               </div>
-              {item?.RateNote && <div className="mt-1 text-sm text-gray-400">{item?.RateNote}</div>}
+              {item?.RateNote && (
+                <div className="mt-1 text-sm text-gray-400">
+                  {item?.RateNote}
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -319,6 +325,8 @@ function TechniciansService({ id, memberid, itemid }) {
 
   const [active, setActive] = useState("#thong-tin");
   const [Note, setNote] = useState("");
+
+  let progress = 0;
 
   const { data, isLoading, refetch } = useQuery({
     queryKey: ["Technicians-Info"],
@@ -412,13 +420,18 @@ function TechniciansService({ id, memberid, itemid }) {
 
   const uploadOsMutation = useMutation({
     mutationFn: async (body) => {
-      let { data } = await MoresAPI.upload({
+      let { data } = await MoresAPI.uploadMultiple({
         Token: body?.Token,
-        File: body.File,
+        Files: body.Files,
       });
       return await StaffsAPI.updateImageOs({
         ID: body.ID,
-        data: { src: data.data },
+        data: {
+          srcList:
+            data?.lst && data?.lst.length > 0
+              ? data?.lst.map((x) => x.result).toString()
+              : "",
+        },
       });
     },
   });
@@ -439,37 +452,73 @@ function TechniciansService({ id, memberid, itemid }) {
     mutationFn: (body) => StaffsAPI.deleteImagesOs(body),
   });
 
+  const uploadAll = async (files, dialog) => {
+    const results = [];
+
+    for (const i in files) {
+      let formData = new FormData();
+      formData.append(files[i].index, files[i].file);
+
+      const data = await uploadOsMutation.mutateAsync({
+        Token: Auth?.token,
+        Files: formData,
+        ID: id,
+      });
+
+      //console.log(data);
+
+      results.push(data);
+
+      progress += 100 / files.length;
+
+      dialog.setProgress(progress);
+      dialog.setText(`${files[i].index + 1} trên ${files.length}`);
+
+      if (files[i].index === files.length - 1) {
+        await ImagesOsfetch();
+      }
+    }
+
+    return results;
+  };
+
   const handleUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    f7.dialog.preloader("Đang upload...");
-    Resizer.imageFileResizer(
-      file,
-      1500,
-      1500,
-      "JPEG",
-      100,
-      0,
-      (uri) => {
-        const formData = new FormData();
-        formData.append("file", uri);
-        uploadOsMutation.mutate(
-          {
-            Token: Auth?.token,
-            File: formData,
-            ID: id,
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    const dialog = f7.dialog.progress("Đang Upload ...", progress);
+    dialog.setText(`0 trên ${files.length}`);
+
+    let newImages = [];
+
+    for (let i = 0; i < files.length; i++) {
+      let val = await new Promise((resolve) => {
+        Resizer.imageFileResizer(
+          files[i],
+          600,
+          600,
+          "JPEG",
+          100,
+          0,
+          (uri) => {
+            resolve(uri);
           },
-          {
-            onSuccess: (data) => {
-              ImagesOsfetch().then(() => f7.dialog.close());
-            },
-          }
+          "file",
+          300,
+          300
         );
-      },
-      "file",
-      300,
-      300
-    );
+      });
+      newImages.push({ index: i, file: val });
+    }
+
+    uploadAll(newImages, dialog)
+      .then((results) => {
+        f7.dialog.close();
+        progress = 0;
+      })
+      .catch((error) => {
+        console.log(error);
+      });
   };
 
   const openCameraUpload = () => {
@@ -768,7 +817,7 @@ function TechniciansService({ id, memberid, itemid }) {
               <div className="mb-3.5">
                 <div className="mb-1">Ghi chú</div>
                 <Input
-                  className="[&_textarea]:rounded [&_textarea]:lowercase [&_textarea]:placeholder:normal-case text-input [&_textarea]:min-h-[100px] [&_textarea]:shadow-none [&_textarea]:border-0"
+                  className="[&_textarea]:rounded [&_textarea]:placeholder:normal-case [&_textarea]:min-h-[100px] [&_textarea]:shadow-none [&_textarea]:border-0"
                   type="textarea"
                   placeholder="Nhập ghi chú"
                   value={Note}
@@ -814,10 +863,12 @@ function TechniciansService({ id, memberid, itemid }) {
                     </div>
                     <input
                       type="file"
-                      name="uploadfile"
                       accept="image/*"
                       onChange={handleUpload}
                       className="absolute w-full h-full opacity-0"
+                      id="file"
+                      name="files[]"
+                      multiple
                     />
                   </div>
                   <div

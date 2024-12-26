@@ -29,7 +29,16 @@ function StudentPage({ f7route }) {
     filter: {
       MemberID: "",
       CourseID: params.id,
-      Status: "",
+      Status: [
+        {
+          value: 2,
+          label: "Chưa tốt nghiệp",
+        },
+        {
+          value: 4,
+          label: "Chờ tốt nghiệp",
+        },
+      ],
       Places: "",
       no: "",
     },
@@ -52,7 +61,10 @@ function StudentPage({ f7route }) {
         filter: {
           ...filters.filter,
           no: filters.filter.no?.value || "",
-          Status: filters.filter.Status?.value || "",
+          Status:
+            filters.filter.Status && filters.filter.Status.length > 0
+              ? "," + filters.filter.Status.map((x) => x.value).toString()
+              : "",
         },
       });
       return data
@@ -117,7 +129,7 @@ function StudentPage({ f7route }) {
       onPtrRefresh={(done) => StudentQuery.refetch().then(() => done())}
       infinite
       infiniteDistance={50}
-      infinitePreloader={StudentQuery.isLoading}
+      infinitePreloader={StudentQuery.isFetchingNextPage}
       onInfinite={loadMore}
     >
       <Navbar innerClass="!px-0 text-white" outline={false}>
@@ -190,7 +202,7 @@ function StudentPage({ f7route }) {
                 <div className="bg-white mb-3.5 last:mb-0 rounded" key={index}>
                   <div className="border-b px-3 py-2.5">
                     <div className="font-semibold text-[15px] text-primary">
-                      {item?.Member.FullName} - {item?.Member.MobilePhone}
+                      {item?.Member?.FullName} - {item?.Member?.MobilePhone}
                     </div>
                     {item?.OutOfDate && (
                       <div className="text-danger text-[13px]">
@@ -214,9 +226,13 @@ function StudentPage({ f7route }) {
                       )}
                     </div>
                     <div>
-                      <span className="pr-1 text-[#3f4254]">Giá trị khoá học : </span>
+                      <span className="pr-1 text-[#3f4254]">
+                        Giá trị khoá học :{" "}
+                      </span>
                       <span className="font-medium">
-                        {StringHelpers.formatVNDPositive(item?.OrderItem?.ToPay)}
+                        {StringHelpers.formatVNDPositive(
+                          item?.OrderItem?.ToPay
+                        )}
                       </span>
                     </div>
                     <div>
@@ -227,9 +243,7 @@ function StudentPage({ f7route }) {
                     </div>
                     <div>
                       <span className="pr-1 text-[#3f4254]">Tags : </span>
-                      <span className="font-medium">
-                        {item?.Tags}
-                      </span>
+                      <span className="font-medium">{item?.Tags}</span>
                     </div>
                     <div>
                       <span className="pr-1 text-[#3f4254]">Trạng thái : </span>

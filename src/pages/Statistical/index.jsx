@@ -11,6 +11,7 @@ import React, { useState } from "react";
 import PromHelpers from "../../helpers/PromHelpers";
 import {
   CalendarDaysIcon,
+  CalendarIcon,
   ExclamationCircleIcon,
   HomeIcon,
 } from "@heroicons/react/24/outline";
@@ -88,16 +89,6 @@ function Statistical({ f7router }) {
     >
       <Navbar innerClass="!px-0 text-white" outline={false}>
         <NavLeft className="!justify-center w-12 h-full">
-          <Link
-            href="/"
-            noLinkClass
-            className="!text-white h-full flex item-center justify-center"
-          >
-            <HomeIcon className="w-6" />
-          </Link>
-        </NavLeft>
-        <NavTitle>Thống kê ({moment(filters.mon).format("MM-YYYY")})</NavTitle>
-        <NavRight className="h-full">
           <DatePickerWrap
             value={filters.mon}
             format="MM/YYYY"
@@ -118,40 +109,17 @@ function Statistical({ f7router }) {
               </div>
             )}
           </DatePickerWrap>
-        </NavRight>
-        {/* <div className="flex items-center justify-between w-full h-full text-white">
-          <div
-            className="flex items-center justify-center h-full w-14"
-            onClick={() => f7router.back()}
+        </NavLeft>
+        <NavTitle>Thống kê ({moment(filters.mon).format("MM-YYYY")})</NavTitle>
+        <NavRight className="!justify-center w-12 h-full">
+          <Link
+            href="/statistical/day/"
+            noLinkClass
+            className="!text-white h-full flex item-center justify-center"
           >
-            <HomeIcon className="w-6" />
-          </div>
-          <div className="text-base font-medium">
-            Thống kê ({moment(filters.mon).format("MM-YYYY")})
-          </div>
-          <div className="flex items-center justify-center h-full w-14">
-            <DatePickerWrap
-              value={filters.mon}
-              format="MM/YYYY"
-              onChange={(val) => {
-                setFilters((prevState) => ({
-                  ...prevState,
-                  mon: val,
-                }));
-              }}
-              label="Chọn tháng"
-            >
-              {({ open }) => (
-                <div
-                  className="flex items-center justify-center w-12 h-full"
-                  onClick={open}
-                >
-                  <CalendarDaysIcon className="w-6" />
-                </div>
-              )}
-            </DatePickerWrap>
-          </div>
-        </div> */}
+            <CalendarIcon className="w-6" />
+          </Link>
+        </NavRight>
         <div className="absolute h-[2px] w-full bottom-0 left-0 bg-[rgba(255,255,255,0.3)]"></div>
       </Navbar>
       <div className="pb-1.5">
@@ -508,7 +476,9 @@ function Statistical({ f7router }) {
                       </span>
                       - {item.ProdTitle}
                       <span className="px-1">
-                        ( {item.ConvertTitle || item.Root2Title || item.RootTitle} )
+                        ({" "}
+                        {item.ConvertTitle || item.Root2Title || item.RootTitle}{" "}
+                        )
                       </span>
                       - {moment(item.CreateDate).format("llll")}
                       <div>
@@ -694,7 +664,6 @@ function Statistical({ f7router }) {
                       Tổng *
                     </div>
                     <div className="px-4 py-2.5 font-semibold text-right text-danger col-span-2">
-                      
                       {StringHelpers.formatVND(
                         ArrayHelpers.sumTotal(
                           data?.THUONG_HOA_HONG_DOANH_SO?.ApplyList,

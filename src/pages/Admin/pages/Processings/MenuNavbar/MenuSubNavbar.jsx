@@ -48,7 +48,9 @@ const Item = ({ itemId, selected, onClick, item }) => {
       )}
     >
       <div
-        className={clsx("whitespace-nowrap h-full flex items-center text-[14px]")}
+        className={clsx(
+          "whitespace-nowrap h-full flex items-center text-[14px]"
+        )}
       >
         {item.Title} ({item?.children?.length})
       </div>
@@ -69,13 +71,14 @@ function MenuSubNavbar({ data, selected, setSelected }) {
       });
 
   const handleItemClick =
-    (itemId) =>
-    ({ getItemById, scrollToItem }) => {
+    (itemId, index) =>
+    ({ getItemById, scrollToItem, getItemElementByIndex }) => {
       if (dragState.current.dragging) {
         return false;
       }
       setSelected(itemId);
-      scrollToItem(getItemById(itemId), "smooth", "center", "nearest");
+      scrollToItem(getItemElementByIndex(index), "smooth", "center", "nearest");
+      //scrollToItem(getItemById(itemId), "smooth", "center", "nearest");
     };
 
   const onInit = ({ getItemById, scrollToItem }) => {
@@ -83,12 +86,9 @@ function MenuSubNavbar({ data, selected, setSelected }) {
       scrollToItem(getItemById(selected), "smooth", "center", "nearest");
     }
   };
-  
+
   return (
-    <div
-      className="w-full h-full"
-      onMouseLeave={dragState.current.dragStop}
-    >
+    <div className="w-full h-full" onMouseLeave={dragState.current.dragStop}>
       <ScrollMenu
         wrapperClassName="h-full"
         scrollContainerClassName="no-scrollbar"
@@ -106,11 +106,11 @@ function MenuSubNavbar({ data, selected, setSelected }) {
         options={{ throttle: 0 }}
       >
         {data &&
-          data.map((item) => (
+          data.map((item, index) => (
             <Item
               itemID={item.ID}
               key={item.ID}
-              onClick={handleItemClick(item.ID)}
+              onClick={handleItemClick(item.ID, index)}
               selected={item.ID === selected}
               item={item}
             />

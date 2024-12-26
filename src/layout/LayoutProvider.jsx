@@ -9,6 +9,9 @@ import axios from "axios";
 import ConfigsAPI from "../api/Configs.api";
 import moment from "moment";
 import PromHelpers from "../helpers/PromHelpers";
+import CDNHelpers from "@/helpers/CDNHelpers";
+
+window.axios = axios;
 
 function LayoutProvider({ children }) {
   let Auth = useStore("Auth");
@@ -53,6 +56,7 @@ function LayoutProvider({ children }) {
         Token: Auth?.token,
         WorkTrackStockID: CrStocks?.ID,
       });
+
       return { data };
     },
     onSettled: ({ data }) => {
@@ -74,6 +78,27 @@ function LayoutProvider({ children }) {
         if (data?.Status !== -1) {
           DeviceHelpers.get({
             success: ({ deviceId }) => {
+              let { StockInfo, Info } = data;
+              let { Stocks } = Info;
+              if (
+                data.ID !== 1 &&
+                StockInfo &&
+                Stocks.some(
+                  (x) =>
+                    typeof x?.IsPublic !== "undefined" &&
+                    x.ID === StockInfo?.ID &&
+                    !x?.IsPublic
+                )
+              ) {
+                f7.dialog.alert(
+                  `Cơ sở ${StockInfo?.Title} đang dừng hoạt động.`,
+                  () => {
+                    store
+                      .dispatch("setLogout")
+                      .then(() => f7.views.main.router.navigate("/login/"));
+                  }
+                );
+              }
               if (
                 (data &&
                   data.ID &&
@@ -124,7 +149,7 @@ function LayoutProvider({ children }) {
     queryKey: ["Brand", Brand?.Domain],
     queryFn: async () => {
       let { data: Config } = await axios.get(
-        `${Brand?.Domain}/api/v3/config?cmd=getnames&names=Bill.Title,logo.mau&ignore_root=1`
+        `${Brand?.Domain}/api/v3/config?cmd=getnames&names=Bill.Title,logo.mau,App.webnoti&ignore_root=1`
       );
       let { data: Global } = await axios.get(
         `${Brand?.Domain}/brand/global/Global.json?${new Date().getTime()}`
@@ -148,10 +173,24 @@ function LayoutProvider({ children }) {
             .then(() => f7.views.main.router.navigate("/login/"));
         });
       } else {
+        let FirebaseApp = null;
+        if (Config.filter((x) => x.Name === "App.webnoti").length > 0) {
+          let firebaseStr = Config.filter((x) => x.Name === "App.webnoti")[0][
+            "ValueText"
+          ];
+
+          let firebase = {
+            initializeApp: (obj) => {
+              FirebaseApp = obj;
+            },
+          };
+          eval(firebaseStr);
+        }
         store.dispatch("setBrand", {
           Domain: Brand?.Domain,
           Name: Config.filter((x) => x.Name === "Bill.Title")[0]["ValueText"],
           Logo: Config.filter((x) => x.Name === "logo.mau")[0]["Src"],
+          FirebaseApp,
           Global,
         });
       }
@@ -165,6 +204,7 @@ function LayoutProvider({ children }) {
       let { data, headers } = await ConfigsAPI.getValue(
         "calamviecconfig,congcaconfig"
       );
+
       return {
         WorkTimes:
           data.data &&
@@ -188,35 +228,39 @@ function LayoutProvider({ children }) {
 
       let WorkTimeToday = null;
 
-      let indexWorkTime =
-        WorkTimeSetting &&
-        WorkTimeSetting.findIndex((x) => x.ID === AuthWorkTimeSetting?.ShiftID);
-
-      if (indexWorkTime > -1) {
-        let { Days, flexible, Options } = WorkTimeSetting[indexWorkTime];
-        if (flexible) {
-          WorkTimeToday = {
-            flexible,
-            Options,
-            SalaryHours: AuthWorkTimeSetting?.SalaryHours || 0,
-          };
-        } else if (Days && Days.length > 0) {
-          let indexDays = Days.findIndex(
-            (x) =>
-              x.Title === moment(CrDate, "MM/DD/YYYY HH:mm:ss").format("dddd")
+      if (WorkTimeSetting) {
+        let indexWorkTime =
+          WorkTimeSetting &&
+          WorkTimeSetting.findIndex(
+            (x) => x.ID === AuthWorkTimeSetting?.ShiftID
           );
-          WorkTimeToday = Days[indexDays];
-          WorkTimeToday.SalaryHours = AuthWorkTimeSetting?.SalaryHours || 0;
-        }
-      } else {
-        let flexibleIndex = WorkTimeSetting.findIndex((x) => x.flexible);
-        if (flexibleIndex > -1) {
-          let { flexible, Options } = WorkTimeSetting[flexibleIndex];
-          WorkTimeToday = {
-            flexible,
-            Options,
-            SalaryHours: AuthWorkTimeSetting?.SalaryHours || 0,
-          };
+
+        if (indexWorkTime > -1) {
+          let { Days, flexible, Options } = WorkTimeSetting[indexWorkTime];
+          if (flexible) {
+            WorkTimeToday = {
+              flexible,
+              Options,
+              SalaryHours: AuthWorkTimeSetting?.SalaryHours || 0,
+            };
+          } else if (Days && Days.length > 0) {
+            let indexDays = Days.findIndex(
+              (x) =>
+                x.Title === moment(CrDate, "MM/DD/YYYY HH:mm:ss").format("dddd")
+            );
+            WorkTimeToday = Days[indexDays];
+            WorkTimeToday.SalaryHours = AuthWorkTimeSetting?.SalaryHours || 0;
+          }
+        } else {
+          let flexibleIndex = WorkTimeSetting.findIndex((x) => x.flexible);
+          if (flexibleIndex > -1) {
+            let { flexible, Options } = WorkTimeSetting[flexibleIndex];
+            WorkTimeToday = {
+              flexible,
+              Options,
+              SalaryHours: AuthWorkTimeSetting?.SalaryHours || 0,
+            };
+          }
         }
       }
       store.dispatch("setWorkTimeSettings", {
@@ -255,7 +299,50 @@ function LayoutProvider({ children }) {
       let rs = null;
       if (data?.data) {
         rs = {
-          items: [],
+          items: [
+            {
+              Title: "Đặt lịch",
+              Index: 1,
+              children: [],
+              ID: "memberBooks",
+            },
+            {
+              Title: "Huỷ lịch",
+              Index: 2,
+              children: [],
+              ID: "memberBooksCancel",
+            },
+            {
+              Title: "Đơn hàng Online",
+              Index: 3,
+              children: [],
+              ID: "orderWebApp",
+            },
+            {
+              Title: "Duyệt thanh toán",
+              Index: 4,
+              children: [],
+              ID: "smsPayed",
+            },
+            {
+              Title: "Lịch nhắc",
+              Index: 5,
+              children: [],
+              ID: "noti",
+            },
+            {
+              Title: "Liên hệ",
+              Index: 6,
+              children: [],
+              ID: "contact",
+            },
+            {
+              Title: "Thanh toán",
+              Index: 7,
+              children: [],
+              ID: "qrCallback",
+            },
+          ],
           Count: 0,
         };
 
@@ -274,46 +361,16 @@ function LayoutProvider({ children }) {
             if (Array.isArray(data?.data[property])) {
               rs.Count += data?.data[property].length;
             }
-
-            let obj = {};
-            obj.children = data?.data[property];
-            obj.ID = property;
-            if (property === "memberBooks") {
-              obj.Title = "Đặt lịch";
-              obj.Index = 1;
+            let index = rs.items.findIndex((x) => x.ID === property);
+            if (index > -1) {
+              rs.items[index].children = data?.data[property];
             }
-            if (property === "memberBooksCancel") {
-              obj.Title = "Huỷ lịch";
-              obj.Index = 2;
-            }
-            if (property === "orderWebApp") {
-              obj.Title = "Đơn hàng Online";
-              obj.Index = 3;
-            }
-            if (property === "smsPayed") {
-              obj.Title = "Duyệt thanh toán";
-              obj.Index = 4;
-            }
-            if (property === "noti") {
-              obj.Title = "Lịch nhắc";
-              obj.Index = 5;
-            }
-            if (property === "contact") {
-              obj.Title = "Liên hệ";
-              obj.Index = 6;
-            }
-            if (property === "qrCallback") {
-              obj.Title = "Thanh toán";
-              obj.Index = 7;
-            }
-            rs.items.push(obj);
           }
         }
       }
-
       return {
         ...rs,
-        items: rs.items.sort((a, b) => a?.Index - b?.Index),
+        items: rs?.items ? rs.items.sort((a, b) => a?.Index - b?.Index) : [],
       };
     },
     onSettled: (data) => {
@@ -326,36 +383,84 @@ function LayoutProvider({ children }) {
     },
   });
 
+  useQuery({
+    queryKey: ["InvoiceProcessings", { ID: Auth?.ID, StockID: CrStocks?.ID }],
+    queryFn: async () => {
+      let { data } = await AdminAPI.invoiceProcessings({
+        Token: Auth?.token,
+        MemberCheckInID: CrStocks?.ID,
+        pi: 1,
+        ps: 100,
+      });
+
+      return data?.data
+        ? data?.data
+            .map((item) => ({
+              ...item,
+              TimeCheckOut: item.CheckIn.CreateDate,
+            }))
+            .sort(function (left, right) {
+              return moment
+                .utc(left.TimeCheckOut)
+                .diff(moment.utc(right.TimeCheckOut));
+            })
+        : [];
+    },
+    onSettled: (data) => {
+      store.dispatch("setInvoiceProcessings", data);
+    },
+    enabled: Boolean(Auth && Auth?.token),
+  });
+
+  useQuery({
+    queryKey: ["ClientBirthDay", { ID: Auth?.ID, StockID: CrStocks?.ID }],
+    queryFn: async () => {
+      let { data } = await AdminAPI.ClientBirthDay({
+        Token: Auth?.token,
+        pi: 1,
+        ps: 100,
+      });
+      return data?.data || null;
+    },
+    onSettled: (data) => {
+      store.dispatch("setClientBirthDay", data);
+    },
+    enabled: Boolean(Auth && Auth?.token),
+  });
+
   const handleBzReceive = ({ data }) => {
+    if (!Auth) return;
+
     let newData = JSON.parse(data.data);
     if (!newData?.subject) return;
 
     refetchProcessings();
 
-    if (!notificationFull.current) {
-      notificationFull.current = f7.notification.create({
-        titleRightText: "vài giây trước",
-        title: "Thông báo",
-        subtitle: "Bạn có 1 cần xử lý mới",
-        closeTimeout: 5000,
-        closeOnClick: true,
-
-        on: {
-          click() {
-            if (window.PathCurrent !== "/admin/processings/") {
-              f7.views.main.router.navigate("/admin/processings/");
-            }
-          },
-        },
-      });
+    if (Brand?.Global?.PosApp) {
+      // if (!notificationFull.current) {
+      //   notificationFull.current = f7.notification.create({
+      //     titleRightText: "vài giây trước",
+      //     title: "Thông báo",
+      //     subtitle: "Bạn có 1 cần xử lý mới",
+      //     closeTimeout: 5000,
+      //     closeOnClick: true,
+      //     on: {
+      //       click() {
+      //         if (window.PathCurrent !== "/admin/processings/") {
+      //           f7.views.main.router.navigate("/admin/processings/");
+      //         }
+      //       },
+      //     },
+      //   });
+      // }
+      // notificationFull.current.open();
     }
-    notificationFull.current.open();
   };
 
   useEffect(() => {
     if (Auth?.token) {
       if (!window.bzClient) {
-        var gr = Brand.Domain.replaceAll("https://", "");
+        var gr = Brand?.Domain.replaceAll("https://", "");
 
         var bzClient = new BZ({
           group: gr,
@@ -382,6 +487,33 @@ function LayoutProvider({ children }) {
       }
     }
   }, [Auth, Brand]);
+
+  useEffect(() => {
+    if (Brand && typeof appPOS === "undefined") {
+      CDNHelpers.addScript(
+        Brand.Domain + `/adminz/user.user.top/appPOS.js?${new Date().getTime()}`
+      )
+        .then(() => {
+          appPOS.setDomain(Brand.Domain);
+        })
+        .catch((err) => console.log(err));
+    } else if (!Brand && typeof appPOS !== "undefined") {
+      CDNHelpers.removeScript([
+        "https://msg.ezs.vn/lib/aspnet/signalr/dist/browser/signalr.js",
+        "/admincp/Js/datetimepicker/moment.min.js",
+        "/adminz/user.user.top/POS27.js",
+      ]);
+    }
+
+    if (Brand && typeof ClientZ === "undefined") {
+      window.SERVER = Brand.Domain;
+      CDNHelpers.addScript(
+        Brand.Domain + `/app2021/service/http-common.js?${new Date().getTime()}`
+      );
+    } else if (!Brand && typeof ClientZ !== "undefined") {
+      CDNHelpers.removeScript(["/app2021/service/http-common.js"]);
+    }
+  }, [Brand]);
 
   useEffect(() => {
     document.addEventListener("bz.receive", handleBzReceive);

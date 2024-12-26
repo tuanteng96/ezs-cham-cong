@@ -2,7 +2,6 @@ import {
   Link,
   Toolbar,
   f7,
-  f7ready,
   useStore,
   Actions,
   ActionsGroup,
@@ -31,8 +30,8 @@ import { getDistance } from "geolib";
 import DateTimeHelpers from "../../helpers/DateTimeHelpers";
 import RouterHelpers from "../../helpers/RouterHelpers";
 
-function NavigationBase(props) {
-  const [pathname, setPathname] = useState("");
+function NavigationBase({ pathname }) {
+  
   const [visible, setVisible] = useState(false);
   const [actionsGridOpened, setActionsGridOpened] = useState(false);
   const [ListHoursWork, setListHoursWork] = useState([]);
@@ -48,30 +47,10 @@ function NavigationBase(props) {
   };
   const queryClient = useQueryClient();
   let { CheckIn, CheckOut } = useCheckInOut();
-
+  
   const actionsToPopover = useRef(null);
   const buttonToPopoverWrapper = useRef(null);
-
-  useEffect(() => {
-    f7ready((f7) => {
-      f7.views.main.on("routeChange", (newRoute) => {
-        setPathname(newRoute.url);
-
-        window.PathCurrent = newRoute.url;
-
-        if (window.PlatformId === "ANDROID") {
-          if (
-            document.activeElement &&
-            (document.activeElement.tagName === "INPUT" ||
-              document.activeElement.tagName === "TEXTAREA")
-          ) {
-            document.activeElement.blur();
-          }
-        }
-      });
-    });
-  }, []);
-
+  
   useEffect(() => {
     return () => {
       if (actionsToPopover.current) {
@@ -168,7 +147,7 @@ function NavigationBase(props) {
     }
     if (!CrStocks?.Lat && !CrStocks?.Lng) {
       f7.dialog.alert(
-        `Vui lòng liên hệ quản trị viên cập nhập vị trí Spa cơ sở ${CrStocks?.Title}.`
+        `Vui lòng liên hệ quản trị viên cập nhật vị trí Spa cơ sở ${CrStocks?.Title}.`
       );
     } else {
       openFlexibleShifts().then((WorkTimeShift) => {
@@ -355,7 +334,7 @@ function NavigationBase(props) {
     }
     if (!CrStocks?.WifiID && !CrStocks?.WifiName) {
       f7.dialog.alert(
-        `Vui lòng liên hệ quản trị viên cập nhập thông tin WIFI tại Spa cơ sở ${CrStocks?.Title}.`
+        `Vui lòng liên hệ quản trị viên cập nhật thông tin WIFI tại Spa cơ sở ${CrStocks?.Title}.`
       );
     } else {
       openFlexibleShifts().then((WorkTimeShift) => {

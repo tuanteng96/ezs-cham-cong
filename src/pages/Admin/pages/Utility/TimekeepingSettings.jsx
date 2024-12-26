@@ -52,7 +52,7 @@ function TimekeepingSettings(props) {
   return (
     <Page
       className="bg-white"
-      name="Notifications"
+      name="Timekeeping-Settings"
       onPageBeforeIn={() => PromHelpers.STATUS_BAR_COLOR("light")}
     >
       <Navbar innerClass="!px-0 text-white" outline={false}>

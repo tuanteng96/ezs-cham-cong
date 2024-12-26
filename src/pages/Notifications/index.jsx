@@ -25,7 +25,7 @@ import AuthAPI from "../../api/Auth.api";
 
 function Notifications({ f7router }) {
   let Notifications = useStore("Notifications");
-
+  
   const queryClient = useQueryClient();
   
   let NotificationsGroup = ArrayHelpers.groupbyDDHHMM(
@@ -123,7 +123,7 @@ function Notifications({ f7router }) {
                               {item.Body}
                             </div>
                             <div className="text-[13px] mt-px text-muted">
-                              {moment(item.CreateDate).startOf("day").fromNow()}
+                              {moment(item.LastUpdate).fromNow()}
                             </div>
                           </div>
                         </div>

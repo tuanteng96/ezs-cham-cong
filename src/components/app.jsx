@@ -21,7 +21,7 @@ window.timeOutForce = null;
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      refetchOnWindowFocus: false, 
+      refetchOnWindowFocus: false,
     },
   },
 });
@@ -40,6 +40,9 @@ const MyApp = () => {
     dialog: {
       buttonOk: "Ok",
       buttonCancel: "Huỷ",
+    },
+    touch: {
+      activeState: false,
     },
     iosTranslucentBars: false,
     iosTranslucentModals: false,
@@ -111,7 +114,7 @@ const MyApp = () => {
         </LayoutProvider>
         <Panels />
       </App>
-      <ToastContainer icon={false} theme="colored" limit={1} />
+      <ToastContainer icon={false} theme="colored" limit={1} autoClose={800} draggable={false}/>
     </QueryClientProvider>
   );
 };

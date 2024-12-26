@@ -17,6 +17,12 @@ function app_request(cmd, value) {
 
 window.Queues = null
 
+function b64DecodeUnicode(str) {
+    return decodeURIComponent(atob(str).split('').map(function(c) {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+    }).join(''));
+}
+
 var app21 = /** @class */ (function () {
     function _21() {}
 
@@ -62,7 +68,8 @@ var app21 = /** @class */ (function () {
             var BASE64 = 'BASE64:';
             if (jsonResult && jsonResult.indexOf(BASE64) === 0) {
                 parseStr = jsonResult.substr(BASE64.length);
-                parseStr = atob(parseStr);
+                //parseStr = atob(parseStr);
+                parseStr = b64DecodeUnicode(parseStr);
                 /*
                  !!!NOTI: jsonResult -> parseStr
                  (AND) sử dụng android.util.Base64.encodeToString(data,android.util.Base64.NO_WRAP);

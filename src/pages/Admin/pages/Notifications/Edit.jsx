@@ -327,7 +327,7 @@ function NotificationEditAdmin({ f7route }) {
 
         <div className="absolute h-[2px] w-full bottom-0 left-0 bg-[rgba(255,255,255,0.3)]"></div>
       </Navbar>
-      <form className="flex flex-col h-full" onSubmit={handleSubmit(onSubmit)}>
+      <form className="flex flex-col h-full pb-safe-b" onSubmit={handleSubmit(onSubmit)}>
         <div className="p-4 overflow-auto grow">
           <div className="mb-4">
             <div className="mb-px font-light">Tiêu đề</div>
@@ -466,7 +466,7 @@ function NotificationEditAdmin({ f7route }) {
           {/* {!isEditLink && (
             <div className="mb-4">
               <div className="mb-px font-light">Loại Link</div>
-              <div className="w-full flex flex-wrap px-4 py-3.5 bg-gray-100 border rounded text-input focus:border-primary shadow-[0_4px_6px_0_rgba(16,25,40,.06) border-[#d5d7da]">
+              <div className="w-full flex flex-wrap px-4 py-3.5 bg-gray-100 border rounded focus:border-primary shadow-[0_4px_6px_0_rgba(16,25,40,.06) border-[#d5d7da]">
                 <div className="flex-1 truncate">{watchForm.Link}</div>
                 <div
                   className="px-2 text-success"
@@ -580,7 +580,7 @@ function NotificationEditAdmin({ f7route }) {
               loading={updateMutation.isLoading}
               disabled={updateMutation.isLoading}
             >
-              {watchForm.IsSchedule ? "Cập nhập" : "Thực hiện gửi"}
+              {watchForm.IsSchedule ? "Cập nhật" : "Thực hiện gửi"}
             </Button>
           </div>
         )}

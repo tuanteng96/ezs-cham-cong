@@ -72,6 +72,100 @@ const ArrayHelpers = {
     }
     return response;
   },
+  employeeRatio: (count) => {
+    if (!count) return null;
+    if (count === 1) {
+      return [100];
+    }
+    if (count === 2) {
+      return [50, 50];
+    }
+    if (count === 3) {
+      return [33.333, 33.333, 33.333];
+    }
+    if (count === 4) {
+      return [25, 25, 25, 25];
+    }
+    if (count === 5) {
+      return [20, 20, 20, 20, 20];
+    }
+    if (count === 6) {
+      return [16.666, 16.666, 16.666, 16.666, 16.666, 16.666];
+    }
+    if (count === 7) {
+      return [14.285, 14.285, 14.285, 14.285, 14.285, 14.285, 14.285];
+    }
+    if (count === 8) {
+      return [12.5, 12.5, 12.5, 12.5, 12.5, 12.5, 12.5, 12.5];
+    }
+    if (count === 9) {
+      return [
+        11.111, 11.111, 11.111, 11.111, 11.111, 11.111, 11.111, 11.111, 11.111,
+      ];
+    }
+    if (count === 10) {
+      return [10, 10, 10, 10, 10, 10, 10, 10, 10, 10];
+    }
+  },
+  getCommissionValue: ({ user, item, Type }) => {
+    if (
+      item?.prodBonus?.BonusSaleLevels &&
+      item?.prodBonus?.BonusSaleLevels.some((x) => x.Salary) &&
+      Type.value !== "KY_THUAT_VIEN"
+    ) {
+      let { BonusSaleLevels } = item?.prodBonus;
+      let index = BonusSaleLevels.findIndex((x) => x.Level === user.level);
+      let Salary = 0;
+      if (index > -1) {
+        Salary = BonusSaleLevels[index].Salary;
+      }
+      if (Salary < 100) {
+        return Math.round(
+          (item.gia_tri_thanh_toan_thuc_te * Salary * (user.Value / 100)) / 100
+        );
+      }
+      return Math.round(
+        ((((item.gia_tri_thanh_toan_thuc_te * Salary) / item.ToPay) *
+          user.Value) /
+          100) *
+          item.Qty
+      );
+    }
+
+    if (Type.value !== "KY_THUAT_VIEN") {
+      return item.prodBonus.BonusSale > 100
+        ? Math.round(
+            (((item.gia_tri_thanh_toan_thuc_te *
+              item.prodBonus.BonusSale *
+              item.Qty) /
+              item.ToPay) *
+              user.Value) /
+              100
+          )
+        : Math.round(
+            ((item.prodBonus.BonusSale / 100) *
+              item.gia_tri_thanh_toan_thuc_te *
+              user.Value) /
+              100
+          );
+    }
+
+    return item.prodBonus.BonusSale2 > 100
+      ? Math.round(
+          (((item.prodBonus.BonusSale2 *
+            item.gia_tri_thanh_toan_thuc_te *
+            item.Qty) /
+            item.ToPay) *
+            user.Value) /
+            100
+        )
+      : Math.round(
+          (user.Value *
+            item.gia_tri_thanh_toan_thuc_te *
+            (item.prodBonus.BonusSale2 / 100)) /
+            100
+        );
+  },
 };
 
 export default ArrayHelpers;

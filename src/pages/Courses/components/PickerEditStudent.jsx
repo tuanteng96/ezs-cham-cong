@@ -18,6 +18,10 @@ let options = [
     label: "Chưa tốt nghiệp",
   },
   {
+    value: 4,
+    label: "Chờ tốt nghiệp",
+  },
+  {
     value: 1,
     label: "Đã tốt nghiệp",
   },
@@ -41,7 +45,7 @@ function PickerEditStudent({ children, data, refetch, params }) {
       OrderItemID: "",
       Places: "",
       TotalBefore: 0,
-      Tags: ""
+      Tags: "",
     },
   });
 
@@ -59,7 +63,7 @@ function PickerEditStudent({ children, data, refetch, params }) {
         OrderItemID: data?.OrderItemID,
         Places: data?.Places || "",
         TotalBefore: data?.TotalBefore,
-        Tags: data?.Tags || ""
+        Tags: data?.Tags || "",
       });
     }
   }, [data, visible]);
@@ -90,7 +94,7 @@ function PickerEditStudent({ children, data, refetch, params }) {
       { edit: [newValues] },
       {
         onSuccess: (data) => {
-          toast.success("Cập nhập thành công.", { autoClose: 300 });
+          toast.success("Cập nhật thành công.", { autoClose: 300 });
           close();
           f7.dialog.close();
         },
@@ -116,7 +120,7 @@ function PickerEditStudent({ children, data, refetch, params }) {
                 onClick={close}
               ></motion.div>
               <motion.div
-                className="relative z-20 bg-white rounded-t-[var(--f7-sheet-border-radius)] h-[90%]"
+                className="relative z-20 bg-white rounded-t-[var(--f7-sheet-border-radius)] h-[90%] mb-[var(--keyboard-translate-sheet)]"
                 initial={{ opacity: 0, translateY: "100%" }}
                 animate={{ opacity: 1, translateY: "0%" }}
                 exit={{ opacity: 0, translateY: "100%" }}
@@ -164,7 +168,7 @@ function PickerEditStudent({ children, data, refetch, params }) {
                               Ký túc xá
                             </td>
                             <td className="px-4 py-2.5 font-semibold text-right border">
-                              {data?.Member?.MobilePhone}
+                              {data?.Places}
                             </td>
                           </tr>
                           <tr>
@@ -249,7 +253,7 @@ function PickerEditStudent({ children, data, refetch, params }) {
                               control={control}
                               render={({ field, fieldState }) => (
                                 <Input
-                                  className="[&_textarea]:rounded [&_textarea]:lowercase [&_textarea]:placeholder:normal-case text-input [&_textarea]:min-h-[100px]"
+                                  className="[&_textarea]:rounded [&_textarea]:lowercase [&_textarea]:placeholder:normal-case [&_textarea]:min-h-[100px]"
                                   type="textarea"
                                   placeholder="Nhập lý do của bạn"
                                   value={field.value}
@@ -258,7 +262,7 @@ function PickerEditStudent({ children, data, refetch, params }) {
                                   onChange={field.onChange}
                                   onFocus={(e) =>
                                     KeyboardsHelper.setAndroid({
-                                      Type: "modal",
+                                      Type: "sheet",
                                       Event: e,
                                     })
                                   }
@@ -280,7 +284,7 @@ function PickerEditStudent({ children, data, refetch, params }) {
                       loading={editMutation.isLoading}
                       disabled={editMutation.isLoading}
                     >
-                      Cập nhập
+                      Cập nhật
                     </Button>
                   </div>
                 </form>

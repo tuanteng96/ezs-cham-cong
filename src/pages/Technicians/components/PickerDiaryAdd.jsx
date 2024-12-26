@@ -100,7 +100,7 @@ function PickerDiaryAdd({ memberid, children }) {
                   control={control}
                   render={({ field, fieldState }) => (
                     <Input
-                      className="[&_textarea]:rounded [&_textarea]:lowercase [&_textarea]:placeholder:normal-case text-input [&_textarea]:min-h-[100px]"
+                      className="[&_textarea]:rounded [&_textarea]:placeholder:normal-case [&_textarea]:min-h-[100px]"
                       type="textarea"
                       placeholder="Nhập ghi chú"
                       value={field.value}

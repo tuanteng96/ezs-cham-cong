@@ -43,7 +43,7 @@ function AttendancePage({ f7route }) {
         filter: {
           MemberID: "",
           CourseID: params.id,
-          Status: "",
+          Status: "!(1,3)",
         },
         order: {
           CreateDate: "desc",
@@ -109,9 +109,9 @@ function AttendancePage({ f7route }) {
           ID: 0,
           MemberID: member?.MemberID,
           CourseID: member?.CourseID,
-          CourseMemberID: member?.CourseMemberID,
+          CourseMemberID: member?.CourseMemberID || "",
           Desc: "",
-          CreateDate: moment()
+          CreateDate: moment(filters.filter.CreateDate)
             .set({
               hour: time.get("hour"),
               minute: time.get("minute"),
@@ -121,6 +121,7 @@ function AttendancePage({ f7route }) {
         },
       ],
     };
+
     f7.dialog.preloader("Đang thực hiện ...");
     addEditMutation.mutate(body, {
       onSuccess: (data) => {
@@ -136,8 +137,7 @@ function AttendancePage({ f7route }) {
   return (
     <Page
       onPageBeforeIn={() => PromHelpers.STATUS_BAR_COLOR("light")}
-      ptr
-      onPtrRefresh={(done) => refetch().then(() => done())}
+      noToolbar
     >
       <Navbar innerClass="!px-0 text-white" outline={false}>
         <NavLeft className="h-full">
@@ -186,13 +186,13 @@ function AttendancePage({ f7route }) {
             {moment(filters.filter.CreateDate).format("DD-MM-YYYY")}
           </div>
         </div>
-        <div className="grow">
+        <div className="overflow-auto grow pb-safe-b">
           {(isLoading || isLoadingClient) && (
             <>
               {Array(5)
                 .fill()
                 .map((_, index) => (
-                  <div className="flex border-b h-[80px]" key={index}>
+                  <div className="flex border-b h-[90px]" key={index}>
                     <div className="w-[160px] px-4 py-2 border-r font-semibold flex items-center">
                       <div className="w-10/12 h-3 bg-gray-200 rounded-full animate-pulse"></div>
                     </div>
@@ -210,10 +210,13 @@ function AttendancePage({ f7route }) {
               {data && data.length > 0 && (
                 <>
                   {data.map((member, index) => (
-                    <div className="flex border-b h-[80px]" key={index}>
-                      <div className="w-[160px] px-4 py-2 border-r font-semibold flex items-center">
+                    <div className="flex border-b h-[90px]" key={index}>
+                      <div className="w-[160px] px-4 py-2 border-r font-semibold flex flex-col justify-center">
                         <div className="line-clamp-2">
-                          {member.Member.FullName}
+                          {member?.Member?.FullName || "Chưa xác định"}
+                        </div>
+                        <div className="font-light">
+                          {member?.Member?.MobilePhone}
                         </div>
                       </div>
                       <div className="flex items-center justify-center flex-1 px-4 py-2">

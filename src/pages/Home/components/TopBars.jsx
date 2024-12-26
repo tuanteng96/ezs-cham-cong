@@ -18,7 +18,7 @@ function TopBars(props) {
     auth: Auth,
     CrStocks,
   });
-  
+
   const isFetchingProcess = useIsFetching(["Processings"]);
   const isFetchingNoti = useIsFetching(["Notifications"]);
   const isFetching = isFetchingProcess === 1 || isFetchingNoti === 1;
@@ -80,62 +80,81 @@ function TopBars(props) {
         </div>
       </div>
       <div className="flex">
-        {pos_mng?.hasRight && (
+        {Brand?.Global?.PosApp && (
           <>
-            <Link
-              popoverOpen=".popover-notifications"
-              className="relative flex items-center justify-center bg-white rounded-xl w-11 h-11"
-            >
-              <BellAlertIcon className="w-6 text-app" />
-              {!isFetching && (
-                <>
-                  {((Notifications && Notifications.length > 0) ||
-                    (Processings?.Count && Processings?.Count > 0)) && (
-                    <span className="absolute text-white bg-danger text-[10px] px-1 min-w-[15px] h-[15px] rounded-full flex items-center justify-center top-1.5 right-1.5">
-                      {Notifications.length + (Processings?.Count || 0)}
-                    </span>
-                  )}
-                </>
-              )}
-            </Link>
-            <Popover className="popover-notifications w-[170px]">
-              <div className="flex flex-col">
+            {pos_mng?.hasRight && (
+              <>
                 <Link
-                  className="relative px-4 py-3 border-b last:border-0"
-                  noLinkClass
-                  href="/notifications/"
-                  popoverClose
+                  popoverOpen=".popover-notifications"
+                  className="relative flex items-center justify-center bg-white rounded-xl w-11 h-11"
                 >
-                  <span>Thông báo</span>
-                  {Notifications && Notifications.length > 0 ? (
-                    <span className="absolute text-white bg-danger text-[10px] px-1 min-w-[15px] h-[15px] rounded-full flex items-center justify-center top-2/4 right-4 -translate-y-2/4">
-                      {Notifications.length}
-                    </span>
-                  ) : (
-                    <></>
+                  <BellAlertIcon className="w-6 text-app" />
+                  {!isFetching && (
+                    <>
+                      {(Notifications && Notifications.length > 0) ||
+                      (Processings?.Count && Processings?.Count > 0) ? (
+                        <span className="font-lato absolute text-white bg-danger text-[11px] px-1 min-w-[15px] h-[17px] leading-none rounded-full flex items-center justify-center top-1.5 right-1.5">
+                          {Notifications.length + (Processings?.Count || 0)}
+                        </span>
+                      ) : (
+                        <></>
+                      )}
+                    </>
                   )}
                 </Link>
-                <Link
-                  className="relative px-4 py-3 border-b last:border-0"
-                  noLinkClass
-                  href="/admin/processings/"
-                  popoverClose
-                >
-                  <span>Cần xử lý</span>
-                  {Processings?.Count && Processings?.Count > 0 ? (
-                    <span className="absolute text-white bg-danger text-[10px] px-1 min-w-[15px] h-[15px] rounded-full flex items-center justify-center top-2/4 right-4 -translate-y-2/4">
-                      {Processings?.Count}
-                    </span>
-                  ) : (
-                    <></>
-                  )}
-                </Link>
-              </div>
-            </Popover>
+                <Popover className="popover-notifications w-[170px]">
+                  <div className="flex flex-col">
+                    <Link
+                      className="relative px-4 py-3 font-medium border-b last:border-0"
+                      noLinkClass
+                      href="/notifications/"
+                      popoverClose
+                    >
+                      <span>Thông báo</span>
+                      {Notifications && Notifications.length > 0 ? (
+                        <span className="absolute text-white bg-danger font-lato text-[11px] px-1.5 min-w-[15px] h-[17px] leading-none rounded-full flex items-center justify-center top-2/4 right-4 -translate-y-2/4">
+                          {Notifications.length}
+                        </span>
+                      ) : (
+                        <></>
+                      )}
+                    </Link>
+                    <Link
+                      className="relative px-4 py-3 font-medium border-b last:border-0"
+                      noLinkClass
+                      href="/admin/processings/"
+                      popoverClose
+                    >
+                      <span>Cần xử lý</span>
+                      {Processings?.Count && Processings?.Count > 0 ? (
+                        <span className="absolute text-white bg-danger font-lato text-[11px] px-1.5 min-w-[15px] h-[17px] leading-none rounded-full flex items-center justify-center top-2/4 right-4 -translate-y-2/4">
+                          {Processings?.Count}
+                        </span>
+                      ) : (
+                        <></>
+                      )}
+                    </Link>
+                  </div>
+                </Popover>
+              </>
+            )}
+
+            {!pos_mng?.hasRight && (
+              <Link
+                href="/notifications/"
+                className="relative flex items-center justify-center bg-white rounded-xl w-11 h-11"
+              >
+                <BellAlertIcon className="w-6 text-app" />
+                {Notifications && Notifications.length > 0 && (
+                  <div className="absolute text-white bg-danger text-[10px] px-1 min-w-[15px] h-[15px] rounded-full flex items-center justify-center top-1.5 right-1.5">
+                    {Notifications.length}
+                  </div>
+                )}
+              </Link>
+            )}
           </>
         )}
-
-        {!pos_mng?.hasRight && (
+        {!Brand?.Global?.PosApp && (
           <Link
             href="/notifications/"
             className="relative flex items-center justify-center bg-white rounded-xl w-11 h-11"

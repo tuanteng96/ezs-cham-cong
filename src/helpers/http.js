@@ -4,7 +4,7 @@ class Http {
   constructor() {
     this.instance = axios.create({
       baseURL: StoreHelper.getDomain(),
-      timeout: 10000,
+      timeout: 50000,
       headers: {
         'content-type': 'application/x-www-form-urlencoded'
       },
@@ -25,7 +25,7 @@ class Http {
     // Add response interceptor
     this.instance.interceptors.response.use(
       ({
-        data, headers
+        data, headers, ...a
       }) => {
         return {
           data,

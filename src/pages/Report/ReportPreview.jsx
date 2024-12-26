@@ -14,7 +14,7 @@ import IframeComm from "react-iframe-comm";
 
 function ReportPreview({ f7router }) {
   const Auth = useStore("Auth");
-  const { Domain } = useStore("Brand");
+  const Brand = useStore("Brand");
   let CrStocks = useStore("CrStocks");
   
   return (
@@ -37,7 +37,7 @@ function ReportPreview({ f7router }) {
       </Navbar>
       <IframeComm
         attributes={{
-          src: `${Domain}/Admin/Reports/index.html`,
+          src: `${Brand?.Domain}/Admin/Reports/index.html`,
           width: "100%",
           height: "100%",
           frameBorder: 0,

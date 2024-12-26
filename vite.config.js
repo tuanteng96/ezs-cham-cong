@@ -21,24 +21,24 @@ export default async () => {
       //   renderLegacyChunks: false,
       // }),
       //manualChunksPlugin()
-      splitVendorChunkPlugin()
+      //splitVendorChunkPlugin()
     ],
     root: SRC_DIR,
     base: "",
     publicDir: PUBLIC_DIR,
     experimental: {
-      renderBuiltUrl(filename, {
-        hostType
-      }) {
-        if (hostType === 'js') {
-          return {
-            runtime: `window.cdnUrl(${JSON.stringify(filename)})`
-          };
-        }
-        return {
-          relative: true
-        }
-      }
+      // renderBuiltUrl(filename, {
+      //   hostType
+      // }) {
+      //   if (hostType === 'js') {
+      //     return {
+      //       runtime: `window.cdnUrl(${JSON.stringify(filename)})`
+      //     };
+      //   }
+      //   return {
+      //     relative: true
+      //   }
+      // }
     },
     build: {
       target: ['es2020', 'edge88', 'firefox78', 'chrome87', 'safari12'],

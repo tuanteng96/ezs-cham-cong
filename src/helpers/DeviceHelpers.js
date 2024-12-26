@@ -9,7 +9,7 @@ import PromHelpers from "./PromHelpers";
  */
 
 const get = ({ success, fail }) => {
-  if (import.meta.env.DEV) {
+  if (import.meta.env.DEV || window.DEV) {
     success && success({ deviceId: "66F19A60-9DA3-488A-805D-B3D290A023A3" });
   } else {
     PromHelpers.GET_DEVICE()

@@ -72,7 +72,7 @@ function PickerEditCheck({ children, data, refetch }) {
       { edit: [newValues] },
       {
         onSuccess: (data) => {
-          toast.success("Cập nhập thành công.", { autoClose: 300 });
+          toast.success("Cập nhật thành công.", { autoClose: 300 });
           close();
           f7.dialog.close();
         },
@@ -151,7 +151,7 @@ function PickerEditCheck({ children, data, refetch }) {
                               control={control}
                               render={({ field, fieldState }) => (
                                 <Input
-                                  className="[&_textarea]:rounded [&_textarea]:lowercase [&_textarea]:placeholder:normal-case text-input [&_textarea]:min-h-[100px]"
+                                  className="[&_textarea]:rounded [&_textarea]:lowercase [&_textarea]:placeholder:normal-case [&_textarea]:min-h-[100px]"
                                   type="textarea"
                                   placeholder="Nhập lý do của bạn"
                                   value={field.value}
@@ -172,7 +172,7 @@ function PickerEditCheck({ children, data, refetch }) {
                       </div>
                     </div>
                   </div>
-                  <div className="p-4 grid-cols-2 grid gap-3">
+                  <div className="grid grid-cols-2 gap-3 p-4">
                     <Button
                       type="button"
                       className="rounded-full bg-danger"
@@ -194,7 +194,7 @@ function PickerEditCheck({ children, data, refetch }) {
                       loading={editMutation.isLoading}
                       disabled={editMutation.isLoading}
                     >
-                      Cập nhập
+                      Cập nhật
                     </Button>
                   </div>
                 </form>

@@ -23,7 +23,6 @@ import {
 import { Controller, useForm } from "react-hook-form";
 import {
   DatePicker,
-  SelectPicker,
   SelectPickersGroup,
 } from "../../../../partials/forms";
 import KeyboardsHelper from "../../../../helpers/KeyboardsHelper";

@@ -12,6 +12,10 @@ let options = [
     label: "Chưa tốt nghiệp",
   },
   {
+    value: 4,
+    label: "Chờ tốt nghiệp",
+  },
+  {
     value: 1,
     label: "Đã tốt nghiệp",
   },
@@ -115,6 +119,7 @@ function PickerStudentFilter({ children, data, onChange }) {
                             }}
                             errorMessage={fieldState?.error?.message}
                             errorMessageForce={fieldState?.invalid}
+                            isMulti
                           />
                         )}
                       />

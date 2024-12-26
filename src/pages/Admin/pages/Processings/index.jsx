@@ -34,7 +34,7 @@ function ProcessingsAdmin({ f7router }) {
       ? Processings?.items[0]?.ID
       : ""
   );
-
+  
   const paymentedMutation = useMutation({
     mutationFn: async (body) => {
       let data = await AdminAPI.doPayedProcess(body);
@@ -193,8 +193,6 @@ function ProcessingsAdmin({ f7router }) {
       className="bg-white"
       name="Processings"
       onPageBeforeIn={() => PromHelpers.STATUS_BAR_COLOR("light")}
-      ptr
-      //onPtrRefresh={(done) => resultNotificationsQuery.refetch().then(() => done())}
     >
       <Navbar innerClass="!px-0 text-white" outline={false}>
         <NavLeft className="h-full">
@@ -265,7 +263,7 @@ function ProcessingsAdmin({ f7router }) {
                                   </span>
                                 </div>
                               )}
-                              {book.UserServiceIDs && (
+                              {book?.UserServices && (
                                 <div>
                                   NV:
                                   <span className="pl-1">
@@ -370,7 +368,7 @@ function ProcessingsAdmin({ f7router }) {
                                   </span>
                                 </div>
                               )}
-                              {book.UserServiceIDs && (
+                              {book.UserServices && (
                                 <div>
                                   NV:
                                   <span className="pl-1">
@@ -427,8 +425,8 @@ function ProcessingsAdmin({ f7router }) {
                             className="p-4 mb-4 bg-white rounded last:mb-0"
                             key={i}
                           >
-                            <div className="mb-1.5 flex justify-between items-center">
-                              <span className="text-base font-medium">
+                            <div className="mb-1.5 flex justify-between gap-3">
+                              <div className="flex-1 text-base font-medium">
                                 {order.Member &&
                                 order.Member.MobilePhone != "0000000000" ? (
                                   <>
@@ -437,10 +435,10 @@ function ProcessingsAdmin({ f7router }) {
                                 ) : (
                                   <>{order?.SenderName}</>
                                 )}
-                              </span>
-                              <span className="font-light">
+                              </div>
+                              <div className="font-light w-[100px] text-right pt-1">
                                 {moment(order.CreateDate).fromNow()}
-                              </span>
+                              </div>
                             </div>
                             <div className="font-light text-gray-800">
                               <div>
@@ -466,9 +464,12 @@ function ProcessingsAdmin({ f7router }) {
                               </div>
                             </div>
                             <div className="grid grid-cols-1 gap-4 pt-4 mt-4 border-t">
-                              <button className="py-2 text-white rounded shadow bg-success">
-                                Xác nhận
-                              </button>
+                              <Link
+                                href={`/admin/pos/orders/view/${order.ID}`}
+                                className="py-2 text-white rounded shadow bg-success"
+                              >
+                                Xem chi tiết
+                              </Link>
                             </div>
                           </div>
                         ))}
