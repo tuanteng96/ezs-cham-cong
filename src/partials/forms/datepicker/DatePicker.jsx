@@ -11,7 +11,7 @@ import clsx from "clsx";
 let months = Array.apply(0, Array(12)).map((_, i) =>
   moment().month(i).format("M")
 );
-const years = [...Array(2112 - 1990).keys()].map((i) => (i + 1990).toString());
+const years = [...Array(2112 - 1900).keys()].map((i) => (i + 1900).toString());
 const hoursList = Array(24)
   .fill()
   .map((_, i) => i.toString());

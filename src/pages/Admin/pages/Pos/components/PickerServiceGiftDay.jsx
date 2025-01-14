@@ -13,6 +13,7 @@ import clsx from "clsx";
 import { SelectClients } from "@/partials/forms/select";
 import { toast } from "react-toastify";
 import StringHelpers from "@/helpers/StringHelpers";
+import KeyboardsHelper from "@/helpers/KeyboardsHelper";
 
 const schema = yup.object().shape({
   day: yup.string().required("Vui lòng nhập số buổi tặng."),
@@ -132,7 +133,7 @@ function PickerServiceGiftDay({ children, data, MemberID }) {
                   className="flex flex-col h-full pb-safe-b"
                   onSubmit={handleSubmitWithoutPropagation}
                 >
-                  <div className="px-4 overflow-auto grow">
+                  <div className="px-4 overflow-auto grow scrollbar-modal">
                     <div className="mb-3.5 last:mb-0">
                       <div className="mb-px">
                         Số buổi tặng
@@ -165,6 +166,12 @@ function PickerServiceGiftDay({ children, data, MemberID }) {
                               value={field.value}
                               onValueChange={(val) =>
                                 field.onChange(val.floatValue || "")
+                              }
+                              onFocus={(e) =>
+                                KeyboardsHelper.setAndroid({
+                                  Type: "modal-scrollbar",
+                                  Event: e,
+                                })
                               }
                             />
                             {field.value ? (

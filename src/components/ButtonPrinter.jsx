@@ -1,6 +1,6 @@
 import { PrinterIcon } from "@heroicons/react/24/outline";
 import clsx from "clsx";
-import Dom7 from "dom7";
+import Dom7, { height } from "dom7";
 import { Button, Link, f7, useStore } from "framework7-react";
 import { forwardRef, useEffect, useRef } from "react";
 import { useMutation, useQuery } from "react-query";
@@ -230,13 +230,13 @@ const ButtonPrinter = forwardRef(
         text: "Đóng",
         color: "red",
       });
-      
-      actionsToPopover.current = f7.actions.create({
-        buttons: actions,
-        targetEl:
-          buttonToPopoverWrapper.current.querySelector(".button-to-print"),
-      });
-      
+      if (!actionsToPopover.current) {
+        actionsToPopover.current = f7.actions.create({
+          buttons: actions,
+          targetEl:
+            buttonToPopoverWrapper.current.querySelector(".button-to-print"),
+        });
+      }
       actionsToPopover.current.open();
     };
 
@@ -255,7 +255,7 @@ const ButtonPrinter = forwardRef(
       if (Type === "Service") {
         refCurrent = ServiceRef?.current;
       }
-      
+
       while (imageBase64.length < minDataLength && i < maxAttempts) {
         imageBase64 = await htmlToImage.toPng(refCurrent, {
           canvasWidth: 530,
@@ -268,55 +268,33 @@ const ButtonPrinter = forwardRef(
         });
         i += 1;
       }
-      console.log(imageBase64)
-      var bodyFormData = new FormData();
-      bodyFormData.append(
-        "title",
-        "hoa-don-" + ID + "-" + new Date().valueOf()
-      );
-      bodyFormData.append("base64", imageBase64);
-      
-      imageBase64Mutation.mutate(
-        {
-          data: bodyFormData,
-          Token: Auth?.token,
+
+      var p = {
+        ipAddress: print?.IPAdress || "192.168.1.251",
+        param: {
+          feedLine: true,
+          cutHalfAndFeed: 1,
+          cutPaper: true,
+          items: [
+            {
+              //imageUrl: AssetsHelpers.toAbsoluteUrl(rs?.data?.src),
+              base64: imageBase64.replaceAll("data:image/png;base64,", ""),
+              alignment: 1,
+              width: 600 || 0,
+              model: 0,
+            },
+          ],
         },
-        {
-          onSuccess: (rs) => {
-            if (rs?.data?.src) {
-              var p = {
-                ipAddress: print?.IPAdress || "192.168.1.199",
-                param: {
-                  feedLine: true,
-                  cutHalfAndFeed: 1,
-                  cutPaper: true,
-                  items: [
-                    {
-                      //imageUrl: AssetsHelpers.toAbsoluteUrl(rs?.data?.src),
-                      base64: imageBase64.replaceAll("data:image/png;base64,",""),
-                      alignment: 1,
-                      width: 600 || 0,
-                      model: 1,
-                    },
-                  ],
-                },
-              };
-              console.log(p)
-              PromHelpers.PRINTER(p)
-                .then((r) => {
-                  f7.dialog.close();
-                })
-                .catch((e) => {
-                  f7.dialog.close();
-                  f7.dialog.alert(JSON.stringify(e));
-                });
-            } else {
-              f7.dialog.close();
-              f7.dialog.alert("In không hợp lệ. Image Error 404");
-            }
-          },
-        }
-      );
+      };
+
+      PromHelpers.PRINTER(p)
+        .then((r) => {
+          f7.dialog.close();
+        })
+        .catch((e) => {
+          f7.dialog.close();
+          f7.dialog.alert("Không thể kết nối máy in.");
+        });
     };
 
     const onPrinter = () => {
@@ -352,6 +330,7 @@ const ButtonPrinter = forwardRef(
               fill
               large
               preloader
+              preloaderColor="black"
               loading={loading || Order.isLoading}
               disabled={disabled || Order.isLoading}
               {...props}

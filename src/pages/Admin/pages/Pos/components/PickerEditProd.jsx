@@ -231,7 +231,7 @@ function PickerEditProd({ children, item, CheckInID, MemberID, Order }) {
                   className="flex flex-col h-full pb-safe-b"
                   onSubmit={handleSubmitWithoutPropagation}
                 >
-                  <div className="px-4 overflow-auto grow">
+                  <div className="px-4 overflow-auto grow scrollbar-modal">
                     <div className="mb-3.5 last:mb-0">
                       <div className="mb-px font-light">Số lượng</div>
                       <Controller
@@ -250,7 +250,7 @@ function PickerEditProd({ children, item, CheckInID, MemberID, Order }) {
                               onInput={field.onChange}
                               onFocus={(e) =>
                                 KeyboardsHelper.setAndroid({
-                                  Type: "body",
+                                  Type: "modal-scrollbar",
                                   Event: e,
                                 })
                               }
@@ -310,6 +310,12 @@ function PickerEditProd({ children, item, CheckInID, MemberID, Order }) {
                                   field.onChange(val.floatValue || "")
                                 }
                                 disabled={isDisabled()}
+                                onFocus={(e) =>
+                                  KeyboardsHelper.setAndroid({
+                                    Type: "modal-scrollbar",
+                                    Event: e,
+                                  })
+                                }
                               />
                               {field.value && (
                                 <div
@@ -423,7 +429,13 @@ function PickerEditProd({ children, item, CheckInID, MemberID, Order }) {
                                       setValue("PriceOrder", item.PriceOrder);
                                     }
                                   }}
-                                  onBlur={field.onBlur}
+                                  onFocus={(e) =>
+                                    KeyboardsHelper.setAndroid({
+                                      Type: "modal-scrollbar",
+                                      Event: e,
+                                      success: field.onBlur
+                                    })
+                                  }
                                 />
                                 {field.value && (
                                   <div
@@ -460,9 +472,6 @@ function PickerEditProd({ children, item, CheckInID, MemberID, Order }) {
                                     field.onChange(val?.floatValue || "");
 
                                     if (val?.floatValue) {
-                                      console.log(
-                                        (item.ToPay - val.floatValue) / item.Qty
-                                      );
                                       setValue(
                                         "PriceOrder",
                                         Math.round(
@@ -476,7 +485,13 @@ function PickerEditProd({ children, item, CheckInID, MemberID, Order }) {
                                       setValue("PriceOrder", item.PriceOrder);
                                     }
                                   }}
-                                  onBlur={field.onBlur}
+                                  onFocus={(e) =>
+                                    KeyboardsHelper.setAndroid({
+                                      Type: "modal-scrollbar",
+                                      Event: e,
+                                      success: field.onBlur
+                                    })
+                                  }
                                 />
                                 {field.value && (
                                   <div

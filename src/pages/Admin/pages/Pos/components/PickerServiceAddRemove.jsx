@@ -13,6 +13,7 @@ import clsx from "clsx";
 import { toast } from "react-toastify";
 import StringHelpers from "@/helpers/StringHelpers";
 import { SelectPicker } from "@/partials/forms";
+import KeyboardsHelper from "@/helpers/KeyboardsHelper";
 
 let options = [
   {
@@ -208,7 +209,7 @@ function PickerServiceAddRemove({ children, data, MemberID }) {
                   className="flex flex-col h-full pb-safe-b"
                   onSubmit={handleSubmitWithoutPropagation}
                 >
-                  <div className="px-4 overflow-auto grow">
+                  <div className="px-4 overflow-auto grow scrollbar-modal">
                     <div className="mb-3.5 last:mb-0">
                       <div className="mb-px">Loại</div>
                       <Controller
@@ -298,6 +299,12 @@ function PickerServiceAddRemove({ children, data, MemberID }) {
                                 //     (floatValue > 0 && floatValue <= TotalSession)
                                 //   );
                                 // }}
+                                onFocus={(e) =>
+                                  KeyboardsHelper.setAndroid({
+                                    Type: "modal-scrollbar",
+                                    Event: e,
+                                  })
+                                }
                               />
 
                               {field.value ? (
@@ -351,6 +358,12 @@ function PickerServiceAddRemove({ children, data, MemberID }) {
                                   (floatValue > 0 && floatValue <= TotalPrice)
                                 );
                               }}
+                              onFocus={(e) =>
+                                KeyboardsHelper.setAndroid({
+                                  Type: "modal-scrollbar",
+                                  Event: e,
+                                })
+                              }
                             />
                             {field.value ? (
                               <div

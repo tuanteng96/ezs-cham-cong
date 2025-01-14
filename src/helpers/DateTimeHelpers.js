@@ -17,7 +17,8 @@ const formatTimeOpenClose = ({
     Date
 }) => {
     let Times = {
-        ...InitialTime
+        ...InitialTime,
+        TimeAdd: 0
     };
 
     let CommonTime = Array.from(Text.matchAll(/\[([^\][]*)]/g), (x) => x[1]);
@@ -26,6 +27,9 @@ const formatTimeOpenClose = ({
         let CommonTimeJs = CommonTime[0].split(";");
         Times.TimeOpen = CommonTimeJs[0];
         Times.TimeClose = CommonTimeJs[1];
+        if(CommonTimeJs.length > 1) {
+            Times.TimeAdd = Number(CommonTimeJs[2])
+        }
     }
 
     let PrivateTime = Array.from(Text.matchAll(/{+([^}]+)}+/g), (x) => x[1]);
@@ -33,6 +37,7 @@ const formatTimeOpenClose = ({
         DayName: x.split(";")[0],
         TimeOpen: x.split(";")[1],
         TimeClose: x.split(";")[2],
+        TimeAdd: x.split(";").length > 2 ? Number(x.split(";")[3]) : 0,
     }));
     if (Date) {
         let index = PrivateTime.findIndex(
@@ -42,6 +47,7 @@ const formatTimeOpenClose = ({
         if (index > -1) {
             Times.TimeOpen = PrivateTime[index].TimeOpen;
             Times.TimeClose = PrivateTime[index].TimeClose;
+            Times.TimeAdd = PrivateTime[index].TimeAdd;
         }
     }
 

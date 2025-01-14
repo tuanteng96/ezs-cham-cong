@@ -121,15 +121,15 @@ const AdminAPI = {
         },
       }
     ),
-    selectServiceProtocol: ({ Key = "", CurrentStockID, Token }) =>
-      http.get(
-        `/api/gl/select2?cmd=prod&onstock=${CurrentStockID}&only_root=1&_type=query&q=${Key}`,
-        {
-          headers: {
-            Authorization: `Bearer ${Token}`,
-          },
-        }
-      ),
+  selectServiceProtocol: ({ Key = "", CurrentStockID, Token }) =>
+    http.get(
+      `/api/gl/select2?cmd=prod&onstock=${CurrentStockID}&only_root=1&_type=query&q=${Key}`,
+      {
+        headers: {
+          Authorization: `Bearer ${Token}`,
+        },
+      }
+    ),
   selectMembersServices: ({ Key = "", CurrentStockID, Token }) =>
     http.get(
       `/api/gl/select2?cmd=user&roles=DV&crstockid=${CurrentStockID}&q=${Key}&all=1`,
@@ -623,12 +623,12 @@ const AdminAPI = {
         Authorization: `Bearer ${Token}`,
       },
     }),
-    clientsChangeServicesRegimen: ({ data, Token }) =>
-      http.post(`/api/v3/OrderService?cmd=caidat_phacdo`, data, {
-        headers: {
-          Authorization: `Bearer ${Token}`,
-        },
-      }),
+  clientsChangeServicesRegimen: ({ data, Token }) =>
+    http.post(`/api/v3/OrderService?cmd=caidat_phacdo`, data, {
+      headers: {
+        Authorization: `Bearer ${Token}`,
+      },
+    }),
   clientsTransfServicesItem: ({ data, Token }) =>
     http.post(`/api/v3/OrderService@DoConvert`, JSON.stringify(data), {
       headers: {
@@ -744,8 +744,32 @@ const AdminAPI = {
         Authorization: `Bearer ${Token}`,
       },
     }),
+  clientsCheckOutMc: ({ data, Token = "" }) =>
+    http.post(`/api/v3/MemberCheckIn@InCheckIn`, JSON.stringify(data), {
+      headers: {
+        Authorization: `Bearer ${Token}`,
+      },
+    }),
+  clientsCheckOutUpdateMc: ({ data, Token = "" }) =>
+    http.post(`/api/v3/MemberCheckIn@InCheckInUpdate`, JSON.stringify(data), {
+      headers: {
+        Authorization: `Bearer ${Token}`,
+      },
+    }),
+  clientsSignature: ({ data, Token = "" }) =>
+    http.post(`/api/v3/MemberCheckIn@ResendIpad`, JSON.stringify(data), {
+      headers: {
+        Authorization: `Bearer ${Token}`,
+      },
+    }),
   getCheckIn: ({ data, Token = "", StockID }) =>
     http.post(`/services/preview.aspx?cmd=getcheck&stockid=${StockID}`, data, {
+      headers: {
+        Authorization: `Bearer ${Token}`,
+      },
+    }),
+  getCheckInRecently: ({ data, Token = "" }) =>
+    http.post(`/api/v3/MemberCheckIn@Recent`, JSON.stringify(data), {
       headers: {
         Authorization: `Bearer ${Token}`,
       },

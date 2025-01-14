@@ -1,4 +1,5 @@
 import AdminAPI from "@/api/Admin.api";
+import KeyboardsHelper from "@/helpers/KeyboardsHelper";
 import PromHelpers from "@/helpers/PromHelpers";
 import {
   SelectMaterials,
@@ -225,7 +226,7 @@ function EditOsMaterials({ f7route }) {
             )}
             {fields && fields.length > 0 && (
               <>
-                <div className="p-4 overflow-auto grow">
+                <div className="p-4 overflow-auto grow page-scrollbar">
                   {fields &&
                     fields.map((item, index) => (
                       <div
@@ -285,6 +286,12 @@ function EditOsMaterials({ f7route }) {
                                     value={field.value}
                                     onValueChange={(val) =>
                                       field.onChange(val.floatValue || "")
+                                    }
+                                    onFocus={(e) =>
+                                      KeyboardsHelper.setAndroid({
+                                        Type: "body",
+                                        Event: e,
+                                      })
                                     }
                                   />
                                   {field.value ? (

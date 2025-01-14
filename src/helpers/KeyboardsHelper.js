@@ -23,19 +23,35 @@ const setAndroid = ({ Type, Event, success, fail }) => {
       ).getPropertyValue("--keyboard-translate-sheet-modal");
     }
 
+    if (Type === "modal-scrollbar") {
+      translateKeyboard = getComputedStyle(
+        document.querySelector("html")
+      ).getPropertyValue("--keyboard-translate-sheet-modal-scrollbar");
+    }
+
     let elementCrOffset = translateKeyboard ? parseInt(translateKeyboard) : 0;
+
     let elementHeight = element.outerHeight();
     let ElementOffsetTop = element.offset().top;
 
-    if (Type === "modal") {
+    if (Type === "modal" || Type === "modal-scrollbar") {
       elementCrOffset = -elementCrOffset;
     }
 
     let ElementOffsetBottom =
       height + elementCrOffset - elementHeight - ElementOffsetTop;
 
+    let offsetParents = 0;
+
+    if (
+      Type === "modal-scrollbar" &&
+      element.parents(".scrollbar-modal").next()
+    ) {
+      offsetParents = element.parents(".scrollbar-modal").next().outerHeight();
+    }
+
     if (Event.type === "focus") {
-      if (ElementOffsetBottom < heightKeyBoard) {
+      if (ElementOffsetBottom + offsetParents < heightKeyBoard) {
         if (Type === "body") {
           document.documentElement.style.setProperty(
             "--keyboard-translate",
@@ -52,6 +68,19 @@ const setAndroid = ({ Type, Event, success, fail }) => {
           document.documentElement.style.setProperty(
             "--keyboard-translate-sheet",
             `${heightKeyBoard - ElementOffsetBottom + elementHeight}px`
+          );
+        }
+        if (Type === "modal-scrollbar") {
+          let offsetValue =
+            heightKeyBoard - ElementOffsetBottom + elementHeight;
+          // if (element.parents(".scrollbar-modal").next()) {
+          //   offsetValue =
+          //     offsetValue -
+          //     element.parents(".scrollbar-modal").next().outerHeight();
+          // }
+          document.documentElement.style.setProperty(
+            "--keyboard-translate-sheet-modal-scrollbar",
+            `${offsetValue}px`
           );
         }
       }
@@ -95,6 +124,15 @@ const bodyEventListener = (event) => {
       ) {
         document.documentElement.style.removeProperty(
           "--keyboard-translate-sheet"
+        );
+      }
+      if (
+        getComputedStyle(document.querySelector("html")).getPropertyValue(
+          "--keyboard-translate-sheet-modal-scrollbar"
+        )
+      ) {
+        document.documentElement.style.removeProperty(
+          "--keyboard-translate-sheet-modal-scrollbar"
         );
       }
     }

@@ -109,7 +109,7 @@ function PickerDebtLockOrder({ children, OrderID, Order }) {
                   className="flex flex-col h-full pb-safe-b"
                   onSubmit={handleSubmitWithoutPropagation}
                 >
-                  <div className="px-4 overflow-auto grow">
+                  <div className="px-4 overflow-auto grow scrollbar-modal">
                     <div className="mb-3.5 last:mb-0">
                       <div className="mb-px font-light">Ghi chú</div>
                       <Controller
@@ -126,7 +126,7 @@ function PickerDebtLockOrder({ children, OrderID, Order }) {
                             onInput={field.onChange}
                             onFocus={(e) =>
                               KeyboardsHelper.setAndroid({
-                                Type: "body",
+                                Type: "modal-scrollbar",
                                 Event: e,
                               })
                             }

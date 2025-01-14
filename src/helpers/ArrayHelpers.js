@@ -47,6 +47,12 @@ const ArrayHelpers = {
         moment.utc(right.dayFull).diff(moment.utc(left.dayFull))
       );
   },
+  sortDateTime: (arr, name = "BookDate") => {
+    if (!arr) return [];
+    return arr.sort((left, right) =>
+      moment.utc(right[name]).diff(moment.utc(left[name]))
+    );
+  },
   findNodeByName: (data, name) => {
     let response = null;
     let findNameItem = (tree) => {

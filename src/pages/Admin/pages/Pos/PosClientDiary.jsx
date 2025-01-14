@@ -33,6 +33,7 @@ import clsx from "clsx";
 import AssetsHelpers from "@/helpers/AssetsHelpers";
 import { toast } from "react-toastify";
 import StringHelpers from "@/helpers/StringHelpers";
+import PullToRefresh from "react-simple-pull-to-refresh";
 
 let Menu = [
   {
@@ -46,10 +47,11 @@ let Menu = [
   {
     Index: 2,
     ID: "Attachments",
-    Title: "Hình ảnh & Clips",
+    Title: "Hình ảnh",
     children: [],
     items: [],
     Key: "Attachments",
+    visibleCount: true,
   },
   {
     Index: 3,
@@ -109,18 +111,25 @@ function PosClientDiary({ f7router, f7route }) {
               newMenu[index].items = ArrayHelpers.groupbyDDHHMM(
                 data?.data[property],
                 "CreateDate"
-              );
+              )
+                .map((x) => ({
+                  ...x,
+                  level: x.items.some((o) => o.IsImportant) ? 0 : 1,
+                }))
+                .sort((a, b) => a.level - b.level);
             } else if (property === "Attachments") {
+              
               let newItems = [];
               if (data?.data[property] && data?.data[property].length > 0) {
                 for (let obj of data?.data[property]) {
+                  
                   let idx = newItems.findIndex(
                     (x) =>
-                      moment(x.BookDate).format("DD-MM-YYYY") ===
-                      moment(obj?.OrderService?.BookDate).format("DD-MM-YYYY")
+                      moment(x.BookDate, "YYYY-MM-DD").format("DD-MM-YYYY") ===
+                      moment(obj?.OrderService?.BookDate, "YYYY-MM-DD").format("DD-MM-YYYY")
                   );
                   if (idx > -1) {
-                    newItems[idx].Items = [...newItems[idx].Items, obj.Items];
+                    newItems[idx].Items = [...newItems[idx].Items, ...obj.Items];
                   } else {
                     newItems.push({
                       ...obj,
@@ -129,9 +138,8 @@ function PosClientDiary({ f7router, f7route }) {
                   }
                 }
               }
-
               newMenu[index].children = data?.data[property];
-              newMenu[index].items = newItems;
+              newMenu[index].items = ArrayHelpers.sortDateTime(newItems);
             } else {
               newMenu[index].children = data?.data[property];
               newMenu[index].items = data?.data[property];
@@ -148,7 +156,7 @@ function PosClientDiary({ f7router, f7route }) {
     enabled: Number(f7route?.params?.id) > 0,
   });
 
-  const { isLoading: isLoadingProds } = useQuery({
+  const { isLoading: isLoadingProds, refetch: refetchProds } = useQuery({
     queryKey: ["ClientHisProdDiaryID", { ID: f7route?.params?.id }],
     queryFn: async () => {
       let { data } = await AdminAPI.clientCareHisProdDiaryId({
@@ -174,7 +182,7 @@ function PosClientDiary({ f7router, f7route }) {
     },
   });
 
-  const { isLoading: isLoadingService } = useQuery({
+  const { isLoading: isLoadingService, refetch: refetchService } = useQuery({
     queryKey: ["ClientHisServiceDiaryID", { ID: f7route?.params?.id }],
     queryFn: async () => {
       let { data } = await AdminAPI.clientCareHisServiceDiaryId({
@@ -214,7 +222,7 @@ function PosClientDiary({ f7router, f7route }) {
     },
   });
 
-  const { isLoading: isLoadingNotiDate } = useQuery({
+  const { isLoading: isLoadingNotiDate, refetch: refetchNoti } = useQuery({
     queryKey: ["ClientDiaryBooksID", { MemberID: f7route?.params?.id }],
     queryFn: async () => {
       const { data } = await AdminAPI.calendarBookings({
@@ -245,10 +253,21 @@ function PosClientDiary({ f7router, f7route }) {
   });
 
   useEffect(() => {
-    if(photos && photos.length > 0) {
-      standalone?.current?.open();
+    let index = Menus.findIndex((x) => x.Key === "Attachments");
+    if (index > -1 && Menus[index].children) {
+      let ListPhoto = [];
+      for (let item of Menus[index].children) {
+        ListPhoto = [
+          ...ListPhoto,
+          ...item.Items.map((x) => ({
+            ...x,
+            url: AssetsHelpers.toAbsoluteUrl(x.Src),
+          })),
+        ];
+      }
+      setPhotos(ListPhoto);
     }
-  }, [photos])
+  }, [Menus]);
 
   const doNotiMutation = useMutation({
     mutationFn: async (body) => {
@@ -270,12 +289,15 @@ function PosClientDiary({ f7router, f7route }) {
       var bodyFormData = new FormData();
       bodyFormData.append("noti_id", item?.ID);
 
-      doNotiMutation.mutate(bodyFormData, {
-        onSuccess: () => {
-          f7.dialog.close();
-          toast.success("Thực hiện thành công.");
-        },
-      });
+      doNotiMutation.mutate(
+        { data: bodyFormData, Token: Auth?.token },
+        {
+          onSuccess: () => {
+            f7.dialog.close();
+            toast.success("Thực hiện thành công.");
+          },
+        }
+      );
     });
   };
 
@@ -290,12 +312,48 @@ function PosClientDiary({ f7router, f7route }) {
     return newArr;
   };
 
+  const deleteMutation = useMutation({
+    mutationFn: async (body) => {
+      let data = await AdminAPI.clientDeleteNoteDiaryId(body);
+      await refetch();
+      return data;
+    },
+  });
+
+  const onDeleteNote = (item) => {
+    f7.dialog.confirm("Xác nhận xoá ?", () => {
+      f7.dialog.preloader("Đang thực hiện ...");
+      var bodyFormData = new FormData();
+      bodyFormData.append("id", item?.ID);
+      deleteMutation.mutate(
+        {
+          data: bodyFormData,
+          Token: Auth?.token,
+        },
+        {
+          onSuccess: ({ data }) => {
+            toast.success("Xoá thành công.");
+            f7.dialog.close();
+          },
+        }
+      );
+    });
+  };
+
   return (
     <Page
-      className="bg-white"
+      className="bg-[#f5f8fa]"
       name="Pos-client-diary"
       noToolbar
       onPageBeforeIn={() => PromHelpers.STATUS_BAR_COLOR("light")}
+      // ptr
+      // onPtrRefresh={async (done) => {
+      //   await refetch();
+      //   await refetchProds();
+      //   await refetchService();
+      //   await refetchNoti();
+      //   done();
+      // }}
     >
       <Navbar innerClass="!px-0 text-white" outline={false}>
         <NavLeft className="h-full">
@@ -436,420 +494,477 @@ function PosClientDiary({ f7router, f7route }) {
           {Menus &&
             Menus.map((item, index) => (
               <Tab
-                className="pt-0 pb-safe-b page-content"
+                className="h-full pt-0"
                 id={item.ID}
                 key={index}
                 tabActive={active === item.ID}
               >
-                {isLoading && (
-                  <div className="p-4">
-                    {Array(4)
-                      .fill()
-                      .map((_, index) => (
-                        <div
-                          className="p-4 mb-3.5 last:mb-0 bg-white rounded"
-                          key={index}
-                        >
-                          <div className="w-8/12 h-3 bg-gray-200 rounded-full animate-pulse"></div>
-                          <div className="mt-3">
-                            <div className="w-2/4 h-2 bg-gray-200 rounded-full animate-pulse"></div>
-                            <div className="w-7/12 h-2 mt-1.5 bg-gray-200 rounded-full animate-pulse"></div>
-                          </div>
-                        </div>
-                      ))}
-                  </div>
-                )}
-                {!isLoading && (
-                  <>
-                    {item.items && item.items.length > 0 && (
+                <PullToRefresh
+                  className="h-full ezs-ptr"
+                  onRefresh={() =>
+                    Promise.all([
+                      refetch(),
+                      refetchProds(),
+                    ])
+                  }
+                >
+                  <div className="h-full overflow-auto pb-safe-b no-scrollbar">
+                    {isLoading && (
                       <div className="p-4">
-                        {item.ID === "NotiServices" && (
-                          <>
-                            {item.items.map((note, index) => (
-                              <div className="mb-3.5 last:mb-0" key={index}>
-                                <div className="flex items-center">
-                                  <div className="w-1.5 h-1.5 mr-2 rounded-full bg-primary"></div>
-                                  <div className="px-2.5 py-1 font-medium rounded bg-primary-light text-primary">
-                                    {moment(note.dayFull).format(
-                                      "[Ngày] DD [Th]MM YYYY"
-                                    )}
-                                  </div>
-                                </div>
-                                <div>
-                                  {note?.items.map((item, idx) => (
-                                    <div
-                                      className="p-4 mt-3 bg-white rounded"
-                                      key={idx}
-                                    >
-                                      <div className="flex justify-between">
-                                        <div className="flex text-gray-500">
-                                          <div>
-                                            {moment(note.dayFull).format(
-                                              "HH:mm"
-                                            )}
-                                          </div>
-                                          <div className="px-1">-</div>
-                                          <div>{item?.User?.FullName}</div>
-                                        </div>
-                                        <PickerAddNoteDiary
-                                          MemberID={f7route?.params?.id}
-                                          data={item}
+                        {Array(4)
+                          .fill()
+                          .map((_, index) => (
+                            <div
+                              className="p-4 mb-3.5 last:mb-0 bg-white rounded"
+                              key={index}
+                            >
+                              <div className="w-8/12 h-3 bg-gray-200 rounded-full animate-pulse"></div>
+                              <div className="mt-3">
+                                <div className="w-2/4 h-2 bg-gray-200 rounded-full animate-pulse"></div>
+                                <div className="w-7/12 h-2 mt-1.5 bg-gray-200 rounded-full animate-pulse"></div>
+                              </div>
+                            </div>
+                          ))}
+                      </div>
+                    )}
+                    {!isLoading && (
+                      <>
+                        {item.items && item.items.length > 0 && (
+                          <div className="p-4">
+                            {item.ID === "NotiServices" && (
+                              <>
+                                {item.items.map((note, index) => (
+                                  <div className="mb-3.5 last:mb-0" key={index}>
+                                    <div className="flex items-center">
+                                      <div className="w-1.5 h-1.5 mr-2 rounded-full bg-primary"></div>
+                                      <div className="px-2.5 py-1 font-medium rounded bg-primary-light text-primary">
+                                        {moment(note.dayFull).format(
+                                          "[Ngày] DD [Th]MM YYYY"
+                                        )}
+                                      </div>
+                                    </div>
+                                    <div>
+                                      {note?.items.map((item, idx) => (
+                                        <div
+                                          className="p-4 mt-3 bg-white rounded"
+                                          key={idx}
                                         >
-                                          {({ open }) => (
-                                            <div onClick={open}>
+                                          <div className="flex justify-between">
+                                            <div className="flex text-gray-500">
+                                              <div>
+                                                {moment(note.dayFull).format(
+                                                  "HH:mm"
+                                                )}
+                                              </div>
+                                              <div className="px-1">-</div>
+                                              <div>{item?.User?.FullName}</div>
+                                            </div>
+
+                                            <Link
+                                              popoverOpen={`.popover-note-${item?.ID}`}
+                                            >
                                               <EllipsisHorizontalIcon className="w-6" />
+                                            </Link>
+                                            <Popover
+                                              className={`popover-note-${item?.ID} w-[120px]`}
+                                            >
+                                              <div className="flex flex-col py-1">
+                                                <PickerAddNoteDiary
+                                                  MemberID={f7route?.params?.id}
+                                                  data={item}
+                                                >
+                                                  {({ open }) => (
+                                                    <Link
+                                                      onClick={open}
+                                                      popoverClose
+                                                      className="flex flex-col p-3 font-medium border-b last:border-0"
+                                                      noLinkClass
+                                                    >
+                                                      Chỉnh sửa
+                                                    </Link>
+                                                  )}
+                                                </PickerAddNoteDiary>
+
+                                                <Link
+                                                  popoverClose
+                                                  className="flex flex-col p-3 font-medium border-b last:border-0 text-danger"
+                                                  noLinkClass
+                                                  onClick={() =>
+                                                    onDeleteNote(item)
+                                                  }
+                                                >
+                                                  Xoá
+                                                </Link>
+                                              </div>
+                                            </Popover>
+                                          </div>
+                                          {item.IsImportant && (
+                                            <div className="inline-flex px-2 py-px mt-2 text-xs rounded bg-danger-light text-danger">
+                                              Quan trọng
                                             </div>
                                           )}
-                                        </PickerAddNoteDiary>
-                                      </div>
-                                      <div
-                                        className={clsx(
-                                          "mt-2",
-                                          item?.IsImportant && "text-danger"
-                                        )}
-                                        dangerouslySetInnerHTML={{
-                                          __html:
-                                            StringHelpers.fixedContentDomain(
-                                              item.Content
-                                            ),
-                                        }}
-                                      ></div>
-                                    </div>
-                                  ))}
-                                </div>
-                              </div>
-                            ))}
-                          </>
-                        )}
-                        {item.ID === "Attachments" && (
-                          <>
-                            {SortedByTime &&
-                              item.items.map((attachments, index) => (
-                                <div className="mb-3.5 last:mb-0" key={index}>
-                                  <div className="flex items-center">
-                                    <div className="w-1.5 h-1.5 mr-2 rounded-full bg-primary"></div>
-                                    <div className="px-2.5 py-1 font-medium rounded bg-primary-light text-primary">
-                                      {moment(attachments?.BookDate).format(
-                                        "[Ngày] DD [Th]MM YYYY"
-                                      )}
+
+                                          <div
+                                            className={clsx(
+                                              "mt-2",
+                                              item?.IsImportant && "text-danger"
+                                            )}
+                                            dangerouslySetInnerHTML={{
+                                              __html:
+                                                StringHelpers.fixedContentDomain(
+                                                  item.Content
+                                                ),
+                                            }}
+                                          ></div>
+                                        </div>
+                                      ))}
                                     </div>
                                   </div>
-                                  <div className="grid grid-cols-2 gap-3 mt-3.5">
-                                    {attachments?.Items.map((item, idx) => (
-                                      <div
-                                        className="bg-white rounded"
-                                        key={idx}
-                                      >
-                                        <div className="flex items-center aspect-square">
-                                          {isPhoto(item.Src) ? (
-                                            <img
-                                              className="h-full rounded-t"
-                                              src={AssetsHelpers.toAbsoluteUrl(
-                                                item.Src
-                                              )}
-                                              onClick={() => {
-                                                setPhotos([
-                                                  {
-                                                    url: AssetsHelpers.toAbsoluteUrl(
-                                                      item.Src
-                                                    ),
-                                                    caption:
-                                                      attachments?.OrderService
-                                                        ?.Title,
-                                                  },
-                                                ]);
-                                                //standalone.current.open(0);
-                                              }}
-                                            />
-                                          ) : (
-                                            <video
-                                              className="w-full h-full rounded-t"
-                                              controls
-                                            >
-                                              <source
-                                                src={AssetsHelpers.toAbsoluteUrl(
-                                                  item.Src
-                                                )}
-                                                type="video/mp4"
-                                              />
-                                            </video>
+                                ))}
+                              </>
+                            )}
+                            {item.ID === "Attachments" && (
+                              <>
+                                {SortedByTime &&
+                                   item.items.map((attachments, index) => (
+                                    <div
+                                      className="mb-3.5 last:mb-0"
+                                      key={index}
+                                    >
+                                      <div className="flex items-center">
+                                        <div className="w-1.5 h-1.5 mr-2 rounded-full bg-primary"></div>
+                                        <div className="px-2.5 py-1 font-medium rounded bg-primary-light text-primary">
+                                          {moment(attachments?.BookDate).format(
+                                            "[Ngày] DD [Th]MM YYYY"
                                           )}
                                         </div>
-                                        <div className="px-2 py-3.5 text-center text-gray-700">
+                                      </div>
+                                      <div className="grid grid-cols-2 gap-3 mt-3.5">
+                                        {attachments?.Items.map((item, idx) => (
+                                          <div
+                                            className="bg-white rounded"
+                                            key={idx}
+                                          >
+                                            <div className="flex items-center justify-center aspect-square">
+                                              {isPhoto(item.Src) ? (
+                                                <img
+                                                  className="h-full rounded-t"
+                                                  src={AssetsHelpers.toAbsoluteUrl(
+                                                    item.Src
+                                                  )}
+                                                  onClick={() => {
+                                                    let index =
+                                                      photos.findIndex(
+                                                        (x) => x.ID === item.ID
+                                                      );
+                                                    standalone?.current?.open(
+                                                      index
+                                                    );
+                                                  }}
+                                                />
+                                              ) : (
+                                                <video
+                                                  className="w-full h-full rounded-t"
+                                                  controls
+                                                >
+                                                  <source
+                                                    src={AssetsHelpers.toAbsoluteUrl(
+                                                      item.Src
+                                                    )}
+                                                    type="video/mp4"
+                                                  />
+                                                </video>
+                                              )}
+                                            </div>
+                                            <div className="px-2 py-3.5 text-center text-gray-700">
+                                              {attachments?.OrderService?.Title}
+                                            </div>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  ))}
+                                {!SortedByTime &&
+                                  item.children.map((attachments, index) => (
+                                    <div
+                                      className="mb-3.5 last:mb-0"
+                                      key={index}
+                                    >
+                                      <div className="flex items-center">
+                                        <div className="w-1.5 h-1.5 mr-2 rounded-full bg-primary"></div>
+                                        <div className="px-2.5 py-1 font-medium rounded bg-primary-light text-primary">
                                           {attachments?.OrderService?.Title}
                                         </div>
                                       </div>
-                                    ))}
-                                  </div>
-                                </div>
-                              ))}
-                            {!SortedByTime &&
-                              item.children.map((attachments, index) => (
-                                <div className="mb-3.5 last:mb-0" key={index}>
-                                  <div className="flex items-center">
-                                    <div className="w-1.5 h-1.5 mr-2 rounded-full bg-primary"></div>
-                                    <div className="px-2.5 py-1 font-medium rounded bg-primary-light text-primary">
-                                      {attachments?.OrderService?.Title}
-                                    </div>
-                                  </div>
-                                  <div className="grid grid-cols-2 gap-3 mt-3.5">
-                                    {attachments?.Items.map((item, idx) => (
-                                      <div
-                                        className="bg-white rounded"
-                                        key={idx}
-                                      >
-                                        <div className="flex items-center aspect-square">
-                                          {isPhoto(item.Src) ? (
-                                            <img
-                                              className="object-cover h-full rounded-t"
-                                              src={AssetsHelpers.toAbsoluteUrl(
-                                                item.Src
-                                              )}
-                                              onClick={() => {
-                                                setPhotos([
-                                                  {
-                                                    url: AssetsHelpers.toAbsoluteUrl(
-                                                      item.Src
-                                                    ),
-                                                    caption:
-                                                      attachments?.OrderService
-                                                        ?.Title,
-                                                  },
-                                                ]);
-                                              }}
-                                            />
-                                          ) : (
-                                            <video
-                                              className="w-full h-full rounded-t"
-                                              controls
-                                            >
-                                              <source
-                                                src={AssetsHelpers.toAbsoluteUrl(
-                                                  item.Src
-                                                )}
-                                                type="video/mp4"
-                                              />
-                                            </video>
-                                          )}
-                                        </div>
-                                        <div className="px-2 py-3.5 text-center text-gray-700">
-                                          {moment(item?.CreateDate).format(
-                                            "DD-MM-YYYY"
-                                          )}
-                                        </div>
-                                      </div>
-                                    ))}
-                                  </div>
-                                </div>
-                              ))}
-                              
-                            <PhotoBrowser
-                              photos={photos}
-                              thumbs={photos.map((x) => x.url)}
-                              ref={standalone}
-                              navbarShowCount={true}
-                              toolbar={false}
-                            />
-                          </>
-                        )}
-                        {item.ID === "NotiDates" && (
-                          <>
-                            {item?.items.map((item, idx) => (
-                              <div
-                                className="p-4 mb-3.5 last:mb-0 bg-white rounded"
-                                key={idx}
-                              >
-                                {item.BookDate && (
-                                  <>
-                                    <div className="flex justify-between">
-                                      <div className="flex text-gray-500">
-                                        <div>Đặt lịch lúc</div>
-                                        <div className="pl-1.5">
-                                          {moment(item.BookDate).format(
-                                            "HH:mm DD-MM-YYYY"
-                                          )}
-                                        </div>
-                                      </div>
-                                    </div>
-                                    <div className="mt-2">
-                                      <div className="font-medium text-primary">
-                                        {item.RootTitles || "Chưa xác định"}
-                                      </div>
-                                      {item.Desc && (
-                                        <div className="mt-1 text-gray-500">
-                                          {item.Desc}
-                                        </div>
-                                      )}
-                                    </div>
-                                  </>
-                                )}
-                                {!item.BookDate && (
-                                  <>
-                                    <div className="flex justify-between">
-                                      <div className="flex text-gray-500">
-                                        <div>
-                                          {moment(item.NotiDate).format(
-                                            "HH:mm DD-MM-YYYY"
-                                          )}
-                                        </div>
-                                        <div className="px-1">-</div>
-                                        <div>{item?.User?.FullName}</div>
-                                      </div>
-                                      {item.IsEd !== 1 && (
-                                        <div onClick={() => onAlready(item)}>
-                                          <EllipsisHorizontalIcon className="w-6" />
-                                        </div>
-                                      )}
-                                    </div>
-                                    {item.IsEd === 1 && (
-                                      <div className="inline-flex px-2 py-px mt-2 text-xs rounded bg-success-light text-success">
-                                        Đã thực hiện nhắc
-                                      </div>
-                                    )}
-                                    <div
-                                      className={clsx(
-                                        "mt-2",
-                                        item?.IsImportant && "text-danger"
-                                      )}
-                                      dangerouslySetInnerHTML={{
-                                        __html: item.Content,
-                                      }}
-                                    ></div>
-                                  </>
-                                )}
-                              </div>
-                            ))}
-                          </>
-                        )}
-                        {item.ID === "ServicesHistory" && (
-                          <>
-                            {item.items.map((service, index) => (
-                              <div className="mb-3.5 last:mb-0" key={index}>
-                                <div className="flex items-center">
-                                  <div className="w-1.5 h-1.5 mr-2 rounded-full bg-primary"></div>
-                                  <div className="px-2.5 py-1 font-medium rounded bg-primary-light text-primary">
-                                    {moment(service.dayFull).format(
-                                      "[Ngày] DD [Th]MM YYYY"
-                                    )}
-                                  </div>
-                                </div>
-                                <div>
-                                  {service?.items.map((item, idx) => (
-                                    <div
-                                      className="p-4 mt-3 bg-white rounded"
-                                      key={idx}
-                                    >
-                                      <div className="flex justify-between">
-                                        <div className="flex text-gray-500">
-                                          <div>
-                                            {moment(item.dayFull).format(
-                                              "HH:mm"
-                                            )}
-                                          </div>
-                                        </div>
-                                      </div>
-                                      <div className="mt-2">
-                                        <div className="mb-1 font-medium text-primary">
-                                          {item.ProdTitle}
-                                        </div>
-                                        <div className="text-gray-500">
-                                          {item.ProdService ||
-                                            item.ProdService2}
-                                        </div>
-                                      </div>
-                                      {Number(item.Rate) > 0 && (
-                                        <div className="pt-3 mt-3 border-t border-dashed">
-                                          <div className="flex items-center">
-                                            <div className="flex items-center">
-                                              {[1, 2, 3, 4, 5].map((val, i) => (
-                                                <svg
-                                                  key={i}
-                                                  className={clsx(
-                                                    "w-4 h-4 mr-1",
-                                                    val <= Number(item.Rate)
-                                                      ? "text-yellow-300"
-                                                      : "text-gray-300"
+                                      <div className="grid grid-cols-2 gap-3 mt-3.5">
+                                        {attachments?.Items.map((item, idx) => (
+                                          <div
+                                            className="bg-white rounded"
+                                            key={idx}
+                                          >
+                                            <div className="flex items-center justify-center aspect-square">
+                                              {isPhoto(item.Src) ? (
+                                                <img
+                                                  className="object-cover h-full rounded-t"
+                                                  src={AssetsHelpers.toAbsoluteUrl(
+                                                    item.Src
                                                   )}
-                                                  aria-hidden="true"
-                                                  xmlns="http://www.w3.org/2000/svg"
-                                                  fill="currentColor"
-                                                  viewBox="0 0 22 20"
+                                                  onClick={() => {
+                                                    let index =
+                                                      photos.findIndex(
+                                                        (x) => x.ID === item.ID
+                                                      );
+                                                    standalone?.current?.open(
+                                                      index
+                                                    );
+                                                  }}
+                                                />
+                                              ) : (
+                                                <video
+                                                  className="w-full h-full rounded-t"
+                                                  controls
                                                 >
-                                                  <path d="M20.924 7.625a1.523 1.523 0 0 0-1.238-1.044l-5.051-.734-2.259-4.577a1.534 1.534 0 0 0-2.752 0L7.365 5.847l-5.051.734A1.535 1.535 0 0 0 1.463 9.2l3.656 3.563-.863 5.031a1.532 1.532 0 0 0 2.226 1.616L11 17.033l4.518 2.375a1.534 1.534 0 0 0 2.226-1.617l-.863-5.03L20.537 9.2a1.523 1.523 0 0 0 .387-1.575Z" />
-                                                </svg>
-                                              ))}
+                                                  <source
+                                                    src={AssetsHelpers.toAbsoluteUrl(
+                                                      item.Src
+                                                    )}
+                                                    type="video/mp4"
+                                                  />
+                                                </video>
+                                              )}
                                             </div>
-                                            <div className="pl-1 text-gray-500">
-                                              {item.Rate} trên 5
+                                            <div className="px-2 py-3.5 text-center text-gray-700">
+                                              {moment(item?.CreateDate).format(
+                                                "DD-MM-YYYY"
+                                              )}
                                             </div>
                                           </div>
-                                          {item.RateNote && (
-                                            <div className="mt-1 font-light text-gray-500">
-                                              {item.RateNote}
-                                            </div>
-                                          )}
-                                        </div>
-                                      )}
+                                        ))}
+                                      </div>
                                     </div>
                                   ))}
-                                </div>
-                              </div>
-                            ))}
-                          </>
-                        )}
-                        {item.ID === "SalesHistory" && (
-                          <>
-                            {getSaleHistory(item.items).length > 0 &&
-                              getSaleHistory(item.items).map((prod, index) => (
-                                <div className="mb-3.5 last:mb-0" key={index}>
-                                  <div className="flex items-center">
-                                    <div className="w-1.5 h-1.5 mr-2 rounded-full bg-primary"></div>
-                                    <div className="px-2.5 py-1 font-medium rounded bg-primary-light text-primary">
-                                      {moment(prod.dayFull).format(
-                                        "[Ngày] DD [Th]MM YYYY"
-                                      )}
-                                    </div>
-                                  </div>
-                                  <div>
-                                    {prod?.items.map((item, idx) => (
-                                      <div
-                                        className="p-4 mt-3 bg-white rounded"
-                                        key={idx}
-                                      >
+
+                                <PhotoBrowser
+                                  photos={photos}
+                                  thumbs={photos.map((x) => x.url)}
+                                  ref={standalone}
+                                  navbarShowCount={true}
+                                  toolbar={false}
+                                />
+                              </>
+                            )}
+                            {item.ID === "NotiDates" && (
+                              <>
+                                {item?.items.map((item, idx) => (
+                                  <div
+                                    className="p-4 mb-3.5 last:mb-0 bg-white rounded"
+                                    key={idx}
+                                  >
+                                    {item.BookDate && (
+                                      <>
+                                        <div className="flex justify-between">
+                                          <div className="flex text-gray-500">
+                                            <div>Đặt lịch lúc</div>
+                                            <div className="pl-1.5">
+                                              {moment(item.BookDate).format(
+                                                "HH:mm DD-MM-YYYY"
+                                              )}
+                                            </div>
+                                          </div>
+                                        </div>
+                                        <div className="mt-2">
+                                          <div className="font-medium text-primary">
+                                            {item.RootTitles || "Chưa xác định"}
+                                          </div>
+                                          {item.Desc && (
+                                            <div className="mt-1 text-gray-500">
+                                              {item.Desc}
+                                            </div>
+                                          )}
+                                        </div>
+                                      </>
+                                    )}
+                                    {!item.BookDate && (
+                                      <>
                                         <div className="flex justify-between">
                                           <div className="flex text-gray-500">
                                             <div>
-                                              {moment(item.CreateDate).format(
-                                                "HH:mm"
+                                              {moment(item.NotiDate).format(
+                                                "HH:mm DD-MM-YYYY"
                                               )}
                                             </div>
+                                            <div className="px-1">-</div>
+                                            <div>{item?.User?.FullName}</div>
+                                          </div>
+                                          {item.IsEd !== 1 && (
+                                            <div
+                                              onClick={() => onAlready(item)}
+                                            >
+                                              <EllipsisHorizontalIcon className="w-6" />
+                                            </div>
+                                          )}
+                                        </div>
+                                        {item.IsEd === 1 && (
+                                          <div className="inline-flex px-2 py-px mt-2 text-xs rounded bg-success-light text-success">
+                                            Đã nhắc
+                                          </div>
+                                        )}
+                                        <div
+                                          className={clsx(
+                                            "mt-2",
+                                            item?.IsImportant && "text-danger"
+                                          )}
+                                          dangerouslySetInnerHTML={{
+                                            __html: item.Content,
+                                          }}
+                                        ></div>
+                                      </>
+                                    )}
+                                  </div>
+                                ))}
+                              </>
+                            )}
+                            {item.ID === "ServicesHistory" && (
+                              <>
+                                {item.items.map((service, index) => (
+                                  <div className="mb-3.5 last:mb-0" key={index}>
+                                    <div className="flex items-center">
+                                      <div className="w-1.5 h-1.5 mr-2 rounded-full bg-primary"></div>
+                                      <div className="px-2.5 py-1 font-medium rounded bg-primary-light text-primary">
+                                        {moment(service.dayFull).format(
+                                          "[Ngày] DD [Th]MM YYYY"
+                                        )}
+                                      </div>
+                                    </div>
+                                    <div>
+                                      {service?.items.map((item, idx) => (
+                                        <div
+                                          className="p-4 mt-3 bg-white rounded"
+                                          key={idx}
+                                        >
+                                          <div className="flex justify-between">
+                                            <div className="flex text-gray-500">
+                                              <div>
+                                                {moment(item.dayFull).format(
+                                                  "HH:mm"
+                                                )}
+                                              </div>
+                                            </div>
+                                          </div>
+                                          <div className="mt-2">
+                                            <div className="mb-1 font-medium text-primary">
+                                              {item.ProdTitle}
+                                            </div>
+                                            <div className="text-gray-500">
+                                              {item.ProdService ||
+                                                item.ProdService2}
+                                            </div>
+                                          </div>
+                                          {Number(item.Rate) > 0 && (
+                                            <div className="pt-3 mt-3 border-t border-dashed">
+                                              <div className="flex items-center">
+                                                <div className="flex items-center">
+                                                  {[1, 2, 3, 4, 5].map(
+                                                    (val, i) => (
+                                                      <svg
+                                                        key={i}
+                                                        className={clsx(
+                                                          "w-4 h-4 mr-1",
+                                                          val <=
+                                                            Number(item.Rate)
+                                                            ? "text-yellow-300"
+                                                            : "text-gray-300"
+                                                        )}
+                                                        aria-hidden="true"
+                                                        xmlns="http://www.w3.org/2000/svg"
+                                                        fill="currentColor"
+                                                        viewBox="0 0 22 20"
+                                                      >
+                                                        <path d="M20.924 7.625a1.523 1.523 0 0 0-1.238-1.044l-5.051-.734-2.259-4.577a1.534 1.534 0 0 0-2.752 0L7.365 5.847l-5.051.734A1.535 1.535 0 0 0 1.463 9.2l3.656 3.563-.863 5.031a1.532 1.532 0 0 0 2.226 1.616L11 17.033l4.518 2.375a1.534 1.534 0 0 0 2.226-1.617l-.863-5.03L20.537 9.2a1.523 1.523 0 0 0 .387-1.575Z" />
+                                                      </svg>
+                                                    )
+                                                  )}
+                                                </div>
+                                                <div className="pl-1 text-gray-500">
+                                                  {item.Rate} trên 5
+                                                </div>
+                                              </div>
+                                              {item.RateNote && (
+                                                <div className="mt-1 font-light text-gray-500">
+                                                  {item.RateNote}
+                                                </div>
+                                              )}
+                                            </div>
+                                          )}
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
+                                ))}
+                              </>
+                            )}
+                            {item.ID === "SalesHistory" && (
+                              <>
+                                {getSaleHistory(item.items).length > 0 &&
+                                  getSaleHistory(item.items).map(
+                                    (prod, index) => (
+                                      <div
+                                        className="mb-3.5 last:mb-0"
+                                        key={index}
+                                      >
+                                        <div className="flex items-center">
+                                          <div className="w-1.5 h-1.5 mr-2 rounded-full bg-primary"></div>
+                                          <div className="px-2.5 py-1 font-medium rounded bg-primary-light text-primary">
+                                            {moment(prod.dayFull).format(
+                                              "[Ngày] DD [Th]MM YYYY"
+                                            )}
                                           </div>
                                         </div>
-                                        <div className="mt-2">{item.Title}</div>
+                                        <div>
+                                          {prod?.items.map((item, idx) => (
+                                            <div
+                                              className="p-4 mt-3 bg-white rounded"
+                                              key={idx}
+                                            >
+                                              <div className="flex justify-between">
+                                                <div className="flex text-gray-500">
+                                                  <div>
+                                                    {moment(
+                                                      item.CreateDate
+                                                    ).format("HH:mm")}
+                                                  </div>
+                                                </div>
+                                              </div>
+                                              <div className="mt-2">
+                                                {item.Title}
+                                              </div>
+                                            </div>
+                                          ))}
+                                        </div>
                                       </div>
-                                    ))}
-                                  </div>
-                                </div>
-                              ))}
-                            {(!getSaleHistory(item.items) ||
-                              getSaleHistory(item.items).length === 0) && (
-                              <NoFound
-                                Title="Không có kết quả nào."
-                                Desc="Rất tiếc ... Không tìm thấy dữ liệu nào"
-                              />
+                                    )
+                                  )}
+                                {(!getSaleHistory(item.items) ||
+                                  getSaleHistory(item.items).length === 0) && (
+                                  <NoFound
+                                    Title="Không có kết quả nào."
+                                    Desc="Rất tiếc ... Không tìm thấy dữ liệu nào"
+                                  />
+                                )}
+                              </>
                             )}
-                          </>
+                          </div>
                         )}
-                      </div>
+                        {(!item.items || item.items.length === 0) && (
+                          <NoFound
+                            Title="Không có kết quả nào."
+                            Desc="Rất tiếc ... Không tìm thấy dữ liệu nào"
+                          />
+                        )}
+                      </>
                     )}
-                    {(!item.items || item.items.length === 0) && (
-                      <NoFound
-                        Title="Không có kết quả nào."
-                        Desc="Rất tiếc ... Không tìm thấy dữ liệu nào"
-                      />
-                    )}
-                  </>
-                )}
+                  </div>
+                </PullToRefresh>
               </Tab>
             ))}
         </Tabs>

@@ -32,11 +32,20 @@ function PosClientWallet({ f7router, f7route }) {
       var bodyFormData = new FormData();
       bodyFormData.append("cmd", "list_money");
       bodyFormData.append("MemberID", f7route?.params?.id);
+      let rs = await appPOS.getMemberMoneys(f7route?.params?.id);
 
-      let { data } = await AdminAPI.clientWalletId({
-        data: bodyFormData,
-        Token: Auth?.token,
-      });
+      let data = rs
+        ? {
+            ...null,
+            data: rs.Items,
+          }
+        : null;
+
+      // let { data } = await AdminAPI.clientWalletId({
+      //   data: bodyFormData,
+      //   Token: Auth?.token,
+      // });
+
       let WalletTotal = {
         Total: 0,
         Available: 0,
@@ -240,10 +249,7 @@ function PosClientWallet({ f7router, f7route }) {
                               <div>{item?.Desc}</div>
                             </div>
 
-                            {!item?.ReturnOfID &&
-                            item.IsOrderRemainPay &&
-                            item.Type !== "THANH_TOAN_DH" &&
-                            item.Type !== "HOAN_TIEN" ? (
+                            {item.canh_bao_thanh_toan ? (
                               <div className="font-light text-danger">
                                 Chưa thanh toán hết
                               </div>

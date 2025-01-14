@@ -82,7 +82,7 @@ function PosClientManage({ f7route, f7router }) {
         Token: Auth.token,
         Key: "#" + f7route?.params?.id,
       });
-      
+
       let newPresent = null;
 
       if (data?.data && data?.data.length > 0) {
@@ -104,6 +104,27 @@ function PosClientManage({ f7route, f7router }) {
         StockID: CrStocks?.ID,
       });
 
+      let RecentlyCheckIn = null;
+
+      if (
+        !CheckIn ||
+        CheckIn.length === 0 ||
+        (CheckIn && CheckIn.length > 0 && CheckIn[0].CheckOutTime)
+      ) {
+        let recently = await AdminAPI.getCheckInRecently({
+          data: {
+            MemberID: f7route?.params?.id,
+            Top: 10,
+          },
+          Token: Auth.token,
+        });
+
+        RecentlyCheckIn =
+          recently?.data?.lst && recently?.data?.lst.length > 0
+            ? recently?.data?.lst[0]
+            : null;
+      }
+
       return data?.data && data.data.length > 0
         ? {
             ...data.data[0],
@@ -116,6 +137,7 @@ function PosClientManage({ f7route, f7router }) {
               newPresent?.data?.data?.Member.length > 0
                 ? newPresent?.data?.data?.Member[0].Present
                 : data.data[0].Present,
+            RecentlyCheckIn,
           }
         : null;
     },
@@ -229,10 +251,49 @@ function PosClientManage({ f7route, f7router }) {
   const checkoutMutation = useMutation({
     mutationFn: async (body) => {
       let data = await AdminAPI.clientsCheckOut(body);
+      if (
+        Brand?.Global?.Admin?.checkout_time &&
+        Brand?.Global?.Admin?.checkout_time.split(";").length > 1
+      ) {
+        var x = Brand?.Global?.Admin?.checkout_time.split(";")[1];
+        var z = data.data.mc.CheckOutTime;
+        var c = data.data.mc.CreateDate;
+
+        var z1 = moment().format("YYYY-MM-DD") + " " + x;
+        var d1 = new Date(z1);
+        var d = new Date(z);
+
+        var mc = moment(c).format("YYYY-MM-DD");
+        var mnow = moment().format("YYYY-MM-DD");
+
+        if (mc != mnow || d.getTime() < d1.getTime()) {
+          let CheckOutMc = await AdminAPI.clientsCheckOutMc({
+            data: {
+              mc: data.data.mc,
+            },
+            Token: Auth?.token,
+          });
+          data.data["rsMc"] = CheckOutMc?.data;
+        }
+      }
       await Client.refetch();
       await Order.refetch();
       await ServicesUse.refetch();
       await queryClient.invalidateQueries(["InvoiceProcessings"]);
+      return data;
+    },
+  });
+
+  const updateCheckoutMutation = useMutation({
+    mutationFn: async (body) => {
+      let data = await AdminAPI.clientsCheckOutUpdateMc(body);
+      return data;
+    },
+  });
+
+  const signatureMutation = useMutation({
+    mutationFn: async (body) => {
+      let data = await AdminAPI.clientsSignature(body);
       return data;
     },
   });
@@ -384,6 +445,53 @@ function PosClientManage({ f7route, f7router }) {
           onSuccess: ({ data }) => {
             toast.success("Khách hàng đã kết thúc.");
             f7.dialog.close();
+
+            if (data.rsMc) {
+              f7.dialog
+                .create({
+                  title: "Cập nhập CheckIn",
+                  content: `
+                  <div class="mt-2">
+                    Xác nhận thay đổi phiên CheckIn <span class="font-lato text-base font-medium">#${
+                      data.mc.ID
+                    }</span> gồm (<span class="font-lato text-base font-medium">${
+                    (data.rsMc?.Orders || []).length
+                  }</span>) đơn hàng, (<span class="font-lato text-base font-medium">${
+                    (data.rsMc?.OrderService || []).length
+                  }</span>) buổi dịch vụ về <span class="font-lato text-base font-medium text-danger">23:59</span> ngày hôm qua.
+                  </div>
+                `,
+                  buttons: [
+                    {
+                      text: "Cập nhập",
+                      close: true,
+                      onClick: () => {
+                        f7.dialog.preloader("Đang thực hiện ...");
+                        updateCheckoutMutation.mutate(
+                          {
+                            Token: Auth?.token,
+                            data: {
+                              InCheckIn: data.rsMc,
+                              ID: data.mc.ID,
+                            },
+                          },
+                          {
+                            onSuccess: () => {
+                              f7.dialog.close();
+                              toast.success("Cập nhập thành công.");
+                            },
+                          }
+                        );
+                      },
+                    },
+                    {
+                      text: "Đóng",
+                      close: true,
+                    },
+                  ],
+                })
+                .open();
+            }
           },
         }
       );
@@ -455,6 +563,26 @@ function PosClientManage({ f7route, f7router }) {
       f7.dialog.close();
       toast.error("Firebase chưa được kết nối.");
     }
+  };
+
+  const onSignature = () => {
+    f7.dialog.confirm("Xác nhận thực hiện ký lại ?", () => {
+      f7.dialog.preloader("Đang thực hiện ...");
+      signatureMutation.mutate(
+        {
+          data: {
+            mc: Client?.data?.RecentlyCheckIn,
+          },
+          Token: Auth?.token,
+        },
+        {
+          onSuccess: () => {
+            toast.success("Đã bật ký lại trên IPAD thành công.");
+            f7.dialog.close();
+          },
+        }
+      );
+    });
   };
 
   let DebtPay =
@@ -658,24 +786,31 @@ function PosClientManage({ f7route, f7router }) {
                                               e.stopPropagation();
                                               f7.views.main.router.navigate(
                                                 "/admin/pos/calendar/os/?formState=" +
-                                                  JSON.stringify({
-                                                    Os: {
-                                                      ID: item?.Os[0]
-                                                        .Services[0]?.ID,
-                                                      MemberID:
-                                                        item?.Os[0].Services[0]
-                                                          ?.MemberID || "",
-                                                      ProdService:
-                                                        item?.Os[0].Services[0]
-                                                          ?.ProdService || "",
-                                                      ProdService2:
-                                                        item?.Os[0].Services[0]
-                                                          ?.ProdService2 || "",
-                                                      Title:
-                                                        item?.Os[0].Services[0]
-                                                          ?.Title || "",
-                                                    },
-                                                  })
+                                                  encodeURIComponent(
+                                                    JSON.stringify({
+                                                      Os: {
+                                                        ID: item?.Os[0]
+                                                          .Services[0]?.ID,
+                                                        MemberID:
+                                                          item?.Os[0]
+                                                            .Services[0]
+                                                            ?.MemberID || "",
+                                                        ProdService:
+                                                          item?.Os[0]
+                                                            .Services[0]
+                                                            ?.ProdService || "",
+                                                        ProdService2:
+                                                          item?.Os[0]
+                                                            .Services[0]
+                                                            ?.ProdService2 ||
+                                                          "",
+                                                        Title:
+                                                          item?.Os[0]
+                                                            .Services[0]
+                                                            ?.Title || "",
+                                                      },
+                                                    })
+                                                  )
                                               );
                                             }}
                                           >
@@ -739,27 +874,31 @@ function PosClientManage({ f7route, f7router }) {
                                                       e.stopPropagation();
                                                       f7.views.main.router.navigate(
                                                         "/admin/pos/calendar/os/?formState=" +
-                                                          JSON.stringify({
-                                                            Os: {
-                                                              ID: os.Services[0]
-                                                                ?.ID,
-                                                              MemberID:
-                                                                os.Services[0]
-                                                                  ?.MemberID ||
-                                                                "",
-                                                              ProdService:
-                                                                os.Services[0]
-                                                                  ?.ProdService ||
-                                                                "",
-                                                              ProdService2:
-                                                                os.Services[0]
-                                                                  ?.ProdService2 ||
-                                                                "",
-                                                              Title:
-                                                                os.Services[0]
-                                                                  ?.Title || "",
-                                                            },
-                                                          })
+                                                          encodeURIComponent(
+                                                            JSON.stringify({
+                                                              Os: {
+                                                                ID: os
+                                                                  .Services[0]
+                                                                  ?.ID,
+                                                                MemberID:
+                                                                  os.Services[0]
+                                                                    ?.MemberID ||
+                                                                  "",
+                                                                ProdService:
+                                                                  os.Services[0]
+                                                                    ?.ProdService ||
+                                                                  "",
+                                                                ProdService2:
+                                                                  os.Services[0]
+                                                                    ?.ProdService2 ||
+                                                                  "",
+                                                                Title:
+                                                                  os.Services[0]
+                                                                    ?.Title ||
+                                                                  "",
+                                                              },
+                                                            })
+                                                          )
                                                       );
                                                     }}
                                                   >
@@ -898,15 +1037,17 @@ function PosClientManage({ f7route, f7router }) {
                     <Link
                       href={
                         "/admin/pos/calendar/os/?formState=" +
-                        JSON.stringify({
-                          Os: {
-                            ID: item?.ID,
-                            MemberID: item?.MemberID || "",
-                            ProdService: item?.ProdService || "",
-                            ProdService2: item?.ProdService2 || "",
-                            Title: item?.Title || "",
-                          },
-                        })
+                        encodeURIComponent(
+                          JSON.stringify({
+                            Os: {
+                              ID: item?.ID,
+                              MemberID: item?.MemberID || "",
+                              ProdService: item?.ProdService || "",
+                              ProdService2: item?.ProdService2 || "",
+                              Title: item?.Title || "",
+                            },
+                          })
+                        )
                       }
                       className="flex gap-3 p-4 border-b border-dashed last:border-0"
                       key={index}
@@ -1167,42 +1308,190 @@ function PosClientManage({ f7route, f7router }) {
                 fill
                 large
                 preloader
-                loading={Order?.isLoading}
+                loading={Order?.isLoading || Client.isLoading}
                 disabled={
                   Order?.isLoading ||
-                  !Client?.data?.CheckIn ||
-                  !Order?.data?.Order?.ID ||
-                  Order?.data?.OrderItems?.length === 0
+                  Client.isLoading ||
+                  (!Client?.data?.CheckIn && !Client?.data?.RecentlyCheckIn)
                 }
+                // disabled={
+                //   Order?.isLoading ||
+                //   !Client?.data?.CheckIn ||
+                //   !Order?.data?.Order?.ID ||
+                //   Order?.data?.OrderItems?.length === 0 ||
+                //   !Client?.data?.CheckIn
+                // }
               >
                 <EllipsisVerticalIcon className="w-6" />
               </Button>
 
               <Popover className="popover-order-paymented">
                 <div className="flex flex-col py-1">
-                  {!isDisabledEdit() && (
+                  {!Client?.data?.CheckIn && Client?.data?.RecentlyCheckIn && (
+                    <Link
+                      popoverClose
+                      className="flex justify-between p-3 font-medium border-b last:border-0"
+                      noLinkClass
+                      onClick={onSignature}
+                    >
+                      Ký lại
+                    </Link>
+                  )}
+
+                  {Client?.data?.CheckIn &&
+                  Order?.data?.Order?.ID &&
+                  Order?.data?.OrderItems?.length > 0 ? (
                     <>
+                      {!isDisabledEdit() && (
+                        <>
+                          <Link
+                            popoverClose
+                            className="flex justify-between p-3 font-medium border-b last:border-0"
+                            noLinkClass
+                            onClick={RemoveCTKM}
+                          >
+                            Áp dụng CTKM
+                            <div className="w-9 h-5 bg-[#EBEDF3] rounded-[30px] relative items-center">
+                              <div
+                                className={clsx(
+                                  "h-[15px] w-[15px] absolute shadow rounded-full top-2/4 -translate-y-2/4",
+                                  !Order?.data?.Order?.IsSkipPP
+                                    ? "right-1 bg-primary"
+                                    : "left-1 bg-white"
+                                )}
+                              ></div>
+                            </div>
+                          </Link>
+                          <PickerDiscountEnterOrder
+                            CheckIn={Client?.data?.CheckIn}
+                            Order={Order?.data?.Order}
+                          >
+                            {({ open }) => (
+                              <Link
+                                onClick={open}
+                                popoverClose
+                                className="flex justify-between p-3 font-medium border-b last:border-0"
+                                noLinkClass
+                              >
+                                Giảm giá
+                                {Order?.data?.Order?.CustomeDiscount > 0 ? (
+                                  <div className="px-1.5 font-semibold text-xs text-white rounded bg-danger font-lato flex items-center">
+                                    {Order?.data?.Order?.CustomeDiscount > 100
+                                      ? StringHelpers.formatVND(
+                                          Order?.data?.Order?.CustomeDiscount
+                                        )
+                                      : `${Order?.data?.Order?.CustomeDiscount}%`}
+                                  </div>
+                                ) : (
+                                  <></>
+                                )}
+                              </Link>
+                            )}
+                          </PickerDiscountEnterOrder>
+                        </>
+                      )}
+
+                      <PickerAff
+                        data={Order?.data?.Order?.AffM}
+                        Order={Order?.data?.Order}
+                        OrderItems={Order?.data?.OrderItems}
+                      >
+                        {({ open }) => (
+                          <Link
+                            popoverClose
+                            className="flex justify-between p-3 font-medium border-b last:border-0"
+                            noLinkClass
+                            onClick={open}
+                          >
+                            Giới thiệu
+                            {Order?.data?.Order?.AffM?.length > 0 && (
+                              <div className="px-1.5 font-semibold text-xs text-white rounded bg-danger font-lato flex items-center">
+                                {Order?.data?.Order?.AffM?.length}
+                              </div>
+                            )}
+                          </Link>
+                        )}
+                      </PickerAff>
+                      {Brand?.Global?.Admin?.Tips &&
+                        Client?.data?.CheckIn?.CreateDate && (
+                          <Link
+                            popoverClose
+                            className="flex justify-between p-3 font-medium border-b last:border-0"
+                            noLinkClass
+                            onClick={onTIP}
+                          >
+                            TIP
+                            {Client?.data?.CheckIn?.MemberTipAmount > 0 && (
+                              <div className="px-1.5 font-semibold text-xs text-white rounded bg-success font-lato flex items-center">
+                                {StringHelpers.formatVND(
+                                  Client?.data?.CheckIn?.MemberTipAmount
+                                )}
+                              </div>
+                            )}
+                          </Link>
+                        )}
+                      <PickerAccumulate
+                        data={Order?.data?.Order?.TAKE_MM}
+                        Order={Order?.data?.Order}
+                      >
+                        {({ open }) => (
+                          <Link
+                            popoverClose
+                            className="flex justify-between p-3 font-medium border-b last:border-0"
+                            noLinkClass
+                            onClick={open}
+                          >
+                            Tích luỹ
+                            {Order?.data?.Order?.TAKE_MM?.length > 0 && (
+                              <div className="px-1.5 font-semibold text-xs text-white rounded bg-danger font-lato flex items-center">
+                                {Order?.data?.Order?.TAKE_MM?.length}
+                              </div>
+                            )}
+                          </Link>
+                        )}
+                      </PickerAccumulate>
+
                       <Link
                         popoverClose
                         className="flex justify-between p-3 font-medium border-b last:border-0"
                         noLinkClass
-                        onClick={RemoveCTKM}
+                        href={`/admin/pos/orders/view/${Order?.data?.Order?.ID}/bonus-sales-commission/`}
                       >
-                        Áp dụng CTKM
-                        <div className="w-9 h-5 bg-[#EBEDF3] rounded-[30px] relative items-center">
-                          <div
-                            className={clsx(
-                              "h-[15px] w-[15px] absolute shadow rounded-full top-2/4 -translate-y-2/4",
-                              !Order?.data?.Order?.IsSkipPP
-                                ? "right-1 bg-primary"
-                                : "left-1 bg-white"
-                            )}
-                          ></div>
-                        </div>
+                        Hoa hồng & Doanh số
+                        {Order?.data?.Order?.Counter?.doanh_so +
+                          Order?.data?.Order?.Counter?.thuong >
+                          0 && (
+                          <div className="px-1.5 font-semibold text-xs text-white rounded bg-danger font-lato flex items-center">
+                            {Order?.data?.Order?.Counter?.doanh_so +
+                              Order?.data?.Order?.Counter?.thuong}
+                          </div>
+                        )}
                       </Link>
-                      <PickerDiscountEnterOrder
-                        CheckIn={Client?.data?.CheckIn}
+
+                      {(!Brand?.Global?.Admin?.ks_chuyen_ngay ||
+                        (Brand?.Global?.Admin?.ks_chuyen_ngay &&
+                          adminTools_byStock?.hasRight)) && (
+                        <PickerChangeDateOrder
+                          Order={Order?.data?.Order}
+                          OrderID={Order?.data?.Order?.ID}
+                          invalidateQueries={["OrderManageID"]}
+                        >
+                          {({ open }) => (
+                            <Link
+                              popoverClose
+                              className="flex justify-between p-3 font-medium border-b last:border-0"
+                              noLinkClass
+                              onClick={open}
+                            >
+                              Chuyển ngày đơn hàng
+                            </Link>
+                          )}
+                        </PickerChangeDateOrder>
+                      )}
+
+                      <PickerPaymentDateOrder
                         Order={Order?.data?.Order}
+                        OrderID={Order?.data?.Order?.ID}
                       >
                         {({ open }) => (
                           <Link
@@ -1211,154 +1500,31 @@ function PosClientManage({ f7route, f7router }) {
                             className="flex justify-between p-3 font-medium border-b last:border-0"
                             noLinkClass
                           >
-                            Giảm giá
-                            {Order?.data?.Order?.CustomeDiscount > 0 ? (
-                              <div className="px-1.5 font-semibold text-xs text-white rounded bg-danger font-lato flex items-center">
-                                {Order?.data?.Order?.CustomeDiscount > 100
-                                  ? StringHelpers.formatVND(
-                                      Order?.data?.Order?.CustomeDiscount
-                                    )
-                                  : `${Order?.data?.Order?.CustomeDiscount}%`}
-                              </div>
-                            ) : (
-                              <></>
-                            )}
+                            Ngày thanh toán dự kiến
                           </Link>
                         )}
-                      </PickerDiscountEnterOrder>
+                      </PickerPaymentDateOrder>
+
+                      <PickerPaymentNoteOrder
+                        Order={Order?.data?.Order}
+                        OrderID={Order?.data?.Order?.ID}
+                        invalidateQueries={["OrderManageID"]}
+                      >
+                        {({ open }) => (
+                          <Link
+                            onClick={open}
+                            popoverClose
+                            className="flex justify-between p-3 font-medium border-b last:border-0"
+                            noLinkClass
+                          >
+                            Ghi chú
+                          </Link>
+                        )}
+                      </PickerPaymentNoteOrder>
                     </>
+                  ) : (
+                    <></>
                   )}
-
-                  <PickerAff
-                    data={Order?.data?.Order?.AffM}
-                    Order={Order?.data?.Order}
-                    OrderItems={Order?.data?.OrderItems}
-                  >
-                    {({ open }) => (
-                      <Link
-                        popoverClose
-                        className="flex justify-between p-3 font-medium border-b last:border-0"
-                        noLinkClass
-                        onClick={open}
-                      >
-                        Giới thiệu
-                        {Order?.data?.Order?.AffM?.length > 0 && (
-                          <div className="px-1.5 font-semibold text-xs text-white rounded bg-danger font-lato flex items-center">
-                            {Order?.data?.Order?.AffM?.length}
-                          </div>
-                        )}
-                      </Link>
-                    )}
-                  </PickerAff>
-                  {Brand?.Global?.Admin?.Tips &&
-                    Client?.data?.CheckIn?.CreateDate && (
-                      <Link
-                        popoverClose
-                        className="flex justify-between p-3 font-medium border-b last:border-0"
-                        noLinkClass
-                        onClick={onTIP}
-                      >
-                        TIP
-                        {Client?.data?.CheckIn?.MemberTipAmount > 0 && (
-                          <div className="px-1.5 font-semibold text-xs text-white rounded bg-success font-lato flex items-center">
-                            {StringHelpers.formatVND(
-                              Client?.data?.CheckIn?.MemberTipAmount
-                            )}
-                          </div>
-                        )}
-                      </Link>
-                    )}
-                  <PickerAccumulate
-                    data={Order?.data?.Order?.TAKE_MM}
-                    Order={Order?.data?.Order}
-                  >
-                    {({ open }) => (
-                      <Link
-                        popoverClose
-                        className="flex justify-between p-3 font-medium border-b last:border-0"
-                        noLinkClass
-                        onClick={open}
-                      >
-                        Tích luỹ
-                        {Order?.data?.Order?.TAKE_MM?.length > 0 && (
-                          <div className="px-1.5 font-semibold text-xs text-white rounded bg-danger font-lato flex items-center">
-                            {Order?.data?.Order?.TAKE_MM?.length}
-                          </div>
-                        )}
-                      </Link>
-                    )}
-                  </PickerAccumulate>
-
-                  <Link
-                    popoverClose
-                    className="flex justify-between p-3 font-medium border-b last:border-0"
-                    noLinkClass
-                    href={`/admin/pos/orders/view/${Order?.data?.Order?.ID}/bonus-sales-commission/`}
-                  >
-                    Hoa hồng & Doanh số
-                    {Order?.data?.Order?.Counter?.doanh_so +
-                      Order?.data?.Order?.Counter?.thuong >
-                      0 && (
-                      <div className="px-1.5 font-semibold text-xs text-white rounded bg-danger font-lato flex items-center">
-                        {Order?.data?.Order?.Counter?.doanh_so +
-                          Order?.data?.Order?.Counter?.thuong}
-                      </div>
-                    )}
-                  </Link>
-
-                  {(!Brand?.Global?.Admin?.ks_chuyen_ngay ||
-                    (Brand?.Global?.Admin?.ks_chuyen_ngay &&
-                      adminTools_byStock?.hasRight)) && (
-                    <PickerChangeDateOrder
-                      Order={Order?.data?.Order}
-                      OrderID={Order?.data?.Order?.ID}
-                      invalidateQueries={["OrderManageID"]}
-                    >
-                      {({ open }) => (
-                        <Link
-                          popoverClose
-                          className="flex justify-between p-3 font-medium border-b last:border-0"
-                          noLinkClass
-                          onClick={open}
-                        >
-                          Chuyển ngày đơn hàng
-                        </Link>
-                      )}
-                    </PickerChangeDateOrder>
-                  )}
-
-                  <PickerPaymentDateOrder
-                    Order={Order?.data?.Order}
-                    OrderID={Order?.data?.Order?.ID}
-                  >
-                    {({ open }) => (
-                      <Link
-                        onClick={open}
-                        popoverClose
-                        className="flex justify-between p-3 font-medium border-b last:border-0"
-                        noLinkClass
-                      >
-                        Ngày thanh toán dự kiến
-                      </Link>
-                    )}
-                  </PickerPaymentDateOrder>
-
-                  <PickerPaymentNoteOrder
-                    Order={Order?.data?.Order}
-                    OrderID={Order?.data?.Order?.ID}
-                    invalidateQueries={["OrderManageID"]}
-                  >
-                    {({ open }) => (
-                      <Link
-                        onClick={open}
-                        popoverClose
-                        className="flex justify-between p-3 font-medium border-b last:border-0"
-                        noLinkClass
-                      >
-                        Ghi chú
-                      </Link>
-                    )}
-                  </PickerPaymentNoteOrder>
                 </div>
               </Popover>
               <PickerPayments Order={Order?.data?.Order} Client={Client?.data}>

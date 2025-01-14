@@ -13,6 +13,7 @@ import clsx from "clsx";
 import { toast } from "react-toastify";
 import ConfigsAPI from "@/api/Configs.api";
 import StringHelpers from "@/helpers/StringHelpers";
+import KeyboardsHelper from "@/helpers/KeyboardsHelper";
 
 const schema = yup.object().shape({
   Point: yup.string().required("Vui lòng nhập số điểm"),
@@ -196,7 +197,7 @@ function PickerExchangePoint({ children, MemberID, Points }) {
                   className="flex flex-col h-full pb-safe-b"
                   onSubmit={handleSubmitWithoutPropagation}
                 >
-                  <div className="px-4 overflow-auto grow">
+                  <div className="px-4 overflow-auto grow scrollbar-modal">
                     <div className="mb-3.5 last:mb-0">
                       <div className="mb-px">
                         Số điểm (Còn
@@ -239,6 +240,12 @@ function PickerExchangePoint({ children, MemberID, Points }) {
                                     });
                                   }
                                 }}
+                                onFocus={(e) =>
+                                  KeyboardsHelper.setAndroid({
+                                    Type: "modal-scrollbar",
+                                    Event: e,
+                                  })
+                                }
                               />
                               {field.value ? (
                                 <div
@@ -277,6 +284,12 @@ function PickerExchangePoint({ children, MemberID, Points }) {
                             errorMessage={fieldState?.error?.message}
                             errorMessageForce={fieldState?.invalid}
                             onChange={field.onChange}
+                            onFocus={(e) =>
+                              KeyboardsHelper.setAndroid({
+                                Type: "modal-scrollbar",
+                                Event: e,
+                              })
+                            }
                           />
                         )}
                       />

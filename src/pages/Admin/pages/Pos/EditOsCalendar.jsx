@@ -28,7 +28,12 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
 import { SelectMembersServices } from "@/partials/forms/select";
-import { DatePicker, SelectPicker, SelectPickersGroup } from "@/partials/forms";
+import {
+  DatePicker,
+  SelectPicker,
+  SelectPickersGroup,
+  UploadFiles,
+} from "@/partials/forms";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import ConfigsAPI from "@/api/Configs.api";
 import KeyboardsHelper from "@/helpers/KeyboardsHelper";
@@ -70,10 +75,11 @@ function EditOsCalendar({ f7route, f7router }) {
   let prevState = f7route?.query?.prevState
     ? JSON.parse(f7route?.query?.prevState)
     : null;
+    
   let formState = f7route?.query?.formState
     ? JSON.parse(f7route?.query?.formState)
     : null;
-
+  
   let [RoomsList, setRoomsList] = useState([]);
 
   const standalone = useRef(null);
@@ -325,6 +331,11 @@ function EditOsCalendar({ f7route, f7router }) {
   const resetOsMutation = useMutation({
     mutationFn: async (body) => {
       let data = await AdminAPI.clientsResetOsServicesItem(body);
+      await Promise.all([
+        queryClient.invalidateQueries(["ClientServicesID"]),
+        queryClient.invalidateQueries(["ServiceUseManageID"]),
+        queryClient.invalidateQueries(["OrderManageID"]),
+      ]);
       await OsImages.refetch();
       await Os?.refetch();
       return data;
@@ -372,7 +383,7 @@ function EditOsCalendar({ f7route, f7router }) {
     if (!val) return;
 
     f7.dialog.preloader("Đang Upload ...");
-    
+
     var bodyFormData = new FormData();
     bodyFormData.append("src", val);
     uploadImageOsMutation.mutate(
@@ -704,7 +715,7 @@ function EditOsCalendar({ f7route, f7router }) {
         )}
         {!Os?.isLoading && (
           <>
-            <div className="p-4 overflow-auto grow">
+            <div className="p-4 overflow-auto grow page-scrollbar">
               <div className="mb-3.5 last:mb-0">
                 <div className="mb-px">Thời gian / Cơ sở</div>
                 <Controller
@@ -943,6 +954,12 @@ function EditOsCalendar({ f7route, f7router }) {
                                         onValueChange={(val) =>
                                           field.onChange(val.floatValue || "")
                                         }
+                                        onFocus={(e) =>
+                                          KeyboardsHelper.setAndroid({
+                                            Type: "body",
+                                            Event: e,
+                                          })
+                                        }
                                       />
                                       {field.value ? (
                                         <div
@@ -987,6 +1004,12 @@ function EditOsCalendar({ f7route, f7router }) {
                                               field.onChange(
                                                 val.floatValue || ""
                                               )
+                                            }
+                                            onFocus={(e) =>
+                                              KeyboardsHelper.setAndroid({
+                                                Type: "body",
+                                                Event: e,
+                                              })
                                             }
                                           />
                                           {field.value ? (
@@ -1233,7 +1256,7 @@ function EditOsCalendar({ f7route, f7router }) {
                       onChange={field.onChange}
                       onFocus={(e) =>
                         KeyboardsHelper.setAndroid({
-                          Type: "modal",
+                          Type: "body",
                           Event: e,
                         })
                       }
@@ -1260,7 +1283,7 @@ function EditOsCalendar({ f7route, f7router }) {
                           onChange={field.onChange}
                           onFocus={(e) =>
                             KeyboardsHelper.setAndroid({
-                              Type: "modal",
+                              Type: "body",
                               Event: e,
                             })
                           }
@@ -1285,7 +1308,7 @@ function EditOsCalendar({ f7route, f7router }) {
                           onChange={field.onChange}
                           onFocus={(e) =>
                             KeyboardsHelper.setAndroid({
-                              Type: "modal",
+                              Type: "body",
                               Event: e,
                             })
                           }
@@ -1310,7 +1333,7 @@ function EditOsCalendar({ f7route, f7router }) {
                           onChange={field.onChange}
                           onFocus={(e) =>
                             KeyboardsHelper.setAndroid({
-                              Type: "modal",
+                              Type: "body",
                               Event: e,
                             })
                           }
@@ -1335,7 +1358,7 @@ function EditOsCalendar({ f7route, f7router }) {
                           onChange={field.onChange}
                           onFocus={(e) =>
                             KeyboardsHelper.setAndroid({
-                              Type: "modal",
+                              Type: "body",
                               Event: e,
                             })
                           }
@@ -1371,13 +1394,19 @@ function EditOsCalendar({ f7route, f7router }) {
                         </div>
                       </div>
                     ))}
-                  <UploadImages
+                  <UploadFiles
+                    onChange={(images) => UploadImagesOs(images)}
+                    wrapClass="aspect-square"
+                    widthClass="w-full"
+                    heightClass="h-full"
+                  />
+                  {/* <UploadImages
                     width="w-auto"
                     height="h-auto"
                     className="aspect-square"
                     onChange={(images) => UploadImagesOs(images)}
                     size="xs"
-                  />
+                  /> */}
                 </div>
                 <PhotoBrowser
                   photos={
@@ -1413,6 +1442,7 @@ function EditOsCalendar({ f7route, f7router }) {
             popoverOpen=".popover-os-more"
             disabled={Os?.isLoading || Os?.isFetching}
             loading={Os?.isLoading || Os?.isFetching}
+            preloaderColor="black"
           >
             <EllipsisVerticalIcon className="w-6" />
           </Button>

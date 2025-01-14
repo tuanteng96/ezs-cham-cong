@@ -13,6 +13,7 @@ import Dom7 from "dom7";
 import StringHelpers from "@/helpers/StringHelpers";
 import clsx from "clsx";
 import { NumericFormat } from "react-number-format";
+import KeyboardsHelper from "@/helpers/KeyboardsHelper";
 
 const schemaAdd = yup
   .object({
@@ -166,7 +167,7 @@ function PickerDiscountEnterOrder({
                       <XMarkIcon className="w-6" />
                     </div>
                   </div>
-                  <div className="px-4">
+                  <div className="px-4 scrollbar-modal">
                     <Controller
                       getInputRef={inputRef}
                       name="discount"
@@ -187,6 +188,12 @@ function PickerDiscountEnterOrder({
                             value={field.value}
                             onValueChange={(val) =>
                               field.onChange(val.floatValue || "")
+                            }
+                            onFocus={(e) =>
+                              KeyboardsHelper.setAndroid({
+                                Type: "modal-scrollbar",
+                                Event: e,
+                              })
                             }
                           />
                           <div className="absolute top-0 right-0 flex h-full">

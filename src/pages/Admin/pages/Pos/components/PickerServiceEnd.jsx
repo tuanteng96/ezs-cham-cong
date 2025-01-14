@@ -16,6 +16,7 @@ import { DatePicker, SelectPicker } from "@/partials/forms";
 import moment from "moment";
 import StringHelpers from "@/helpers/StringHelpers";
 import ArrayHelpers from "@/helpers/ArrayHelpers";
+import KeyboardsHelper from "@/helpers/KeyboardsHelper";
 
 const schema = yup.object().shape({
   // ToMember: yup.object().required("Vui lòng chọn khách hàng chuyển nhượng."),
@@ -407,7 +408,7 @@ function PickerServiceEnd({ children, data, MemberID }) {
                         )}
                         {!Info?.isFetching && (
                           <>
-                            <div className="p-4 overflow-auto grow">
+                            <div className="p-4 overflow-auto grow scrollbar-modal">
                               <div>
                                 <div className="mb-3.5 last:mb-0">
                                   <div className="mb-px">
@@ -424,6 +425,12 @@ function PickerServiceEnd({ children, data, MemberID }) {
                                       placeholder="Số tiền"
                                       value={Info?.data?.Sum?.GiveMember}
                                       disabled
+                                      onFocus={(e) =>
+                                        KeyboardsHelper.setAndroid({
+                                          Type: "modal-scrollbar",
+                                          Event: e,
+                                        })
+                                      }
                                     />
                                   </div>
                                 </div>
@@ -456,6 +463,12 @@ function PickerServiceEnd({ children, data, MemberID }) {
                                                   val.floatValue || ""
                                                 )
                                               }
+                                              // onFocus={(e) =>
+                                              //   KeyboardsHelper.setAndroid({
+                                              //     Type: "modal-scrollbar",
+                                              //     Event: e,
+                                              //   })
+                                              // }
                                             />
                                             {field.value ? (
                                               <div
@@ -498,6 +511,12 @@ function PickerServiceEnd({ children, data, MemberID }) {
                                           onValueChange={(val) =>
                                             field.onChange(val.floatValue || "")
                                           }
+                                          // onFocus={(e) =>
+                                          //   KeyboardsHelper.setAndroid({
+                                          //     Type: "modal-scrollbar",
+                                          //     Event: e,
+                                          //   })
+                                          // }
                                         />
                                         {field.value ? (
                                           <div
@@ -535,6 +554,12 @@ function PickerServiceEnd({ children, data, MemberID }) {
                                           onValueChange={(val) =>
                                             field.onChange(val.floatValue || "")
                                           }
+                                          // onFocus={(e) =>
+                                          //   KeyboardsHelper.setAndroid({
+                                          //     Type: "modal-scrollbar",
+                                          //     Event: e,
+                                          //   })
+                                          // }
                                         />
                                         {field.value ? (
                                           <div

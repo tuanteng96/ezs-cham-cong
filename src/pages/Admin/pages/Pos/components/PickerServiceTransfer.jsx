@@ -12,6 +12,7 @@ import { NumericFormat } from "react-number-format";
 import clsx from "clsx";
 import { SelectClients } from "@/partials/forms/select";
 import { toast } from "react-toastify";
+import KeyboardsHelper from "@/helpers/KeyboardsHelper";
 
 const schema = yup.object().shape({
   ToMember: yup.object().required("Vui lòng chọn khách hàng chuyển nhượng."),
@@ -161,7 +162,7 @@ function PickerServiceTransfer({ children, data, MemberID }) {
                   className="flex flex-col h-full pb-safe-b"
                   onSubmit={handleSubmitWithoutPropagation}
                 >
-                  <div className="px-4 overflow-auto grow">
+                  <div className="px-4 overflow-auto grow scrollbar-modal">
                     <div className="mb-3.5 last:mb-0">
                       <div className="mb-px">Khách hàng chuyển nhượng</div>
                       <Controller
@@ -204,6 +205,12 @@ function PickerServiceTransfer({ children, data, MemberID }) {
                               value={field.value}
                               onValueChange={(val) =>
                                 field.onChange(val.floatValue || "")
+                              }
+                              onFocus={(e) =>
+                                KeyboardsHelper.setAndroid({
+                                  Type: "modal-scrollbar",
+                                  Event: e,
+                                })
                               }
                             />
                             {field.value ? (

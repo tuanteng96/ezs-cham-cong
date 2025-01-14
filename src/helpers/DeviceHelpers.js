@@ -28,6 +28,9 @@ const get = ({ success, fail }) => {
           if (DevicesOption.MODEL) {
             DevicesOption.deviceId = DevicesOption.MODEL;
           }
+          if (DevicesOption.SECUREID) {
+            DevicesOption.deviceId = DevicesOption.deviceId + `-${DevicesOption.SECUREID.toUpperCase()}`;
+          }
           success && success(DevicesOption);
         } else {
           fail && fail(response.error || "Lỗi không xác định");
@@ -41,3 +44,5 @@ const get = ({ success, fail }) => {
 
 const DeviceHelpers = { get };
 export default DeviceHelpers;
+
+//SM-S901E-093B9C1A25C1A0F8

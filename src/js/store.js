@@ -245,6 +245,9 @@ const store = createStore({
                   f7.dialog.close();
                   callback && callback();
                 });
+              }).catch(() => {
+                f7.dialog.close();
+                f7.dialog.alert("Error : Provisional headers are shown ...")
               });
           } else {
             SubscribeHelpers.remove().then(() =>

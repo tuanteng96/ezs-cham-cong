@@ -189,7 +189,7 @@ function PosClientServices({ f7router, f7route }) {
 
   const onCancelAll = ({ Services }) => {
     let newServices = Services?.filter((x) => x.Status !== "done");
-    
+
     f7.dialog.confirm("Xác nhận huỷ cả liệu trình ?", () => {
       f7.dialog.preloader("Đang thực hiện ...");
 
@@ -485,15 +485,18 @@ function PosClientServices({ f7router, f7route }) {
                                   noLinkClass
                                   href={
                                     "/admin/pos/calendar/os/?formState=" +
-                                    JSON.stringify({
-                                      Os: {
-                                        ID: item?.ID,
-                                        MemberID: item?.MemberID || "",
-                                        ProdService: item?.ProdService || "",
-                                        ProdService2: item?.ProdService2 || "",
-                                        Title: item?.Title || "",
-                                      },
-                                    })
+                                    encodeURIComponent(
+                                      JSON.stringify({
+                                        Os: {
+                                          ID: item?.ID,
+                                          MemberID: item?.MemberID || "",
+                                          ProdService: item?.ProdService || "",
+                                          ProdService2:
+                                            item?.ProdService2 || "",
+                                          Title: item?.Title || "",
+                                        },
+                                      })
+                                    )
                                   }
                                   className={clsx(
                                     "relative flex items-center justify-center text-white rounded aspect-square shadow",

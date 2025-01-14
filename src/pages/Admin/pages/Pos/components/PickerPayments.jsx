@@ -275,7 +275,7 @@ function PickerPayments({ children, Order, Client }) {
         {children({ open, close })}
         {visible &&
           createPortal(
-            <div className="fixed z-[125001] inset-0 flex justify-end flex-col">
+            <div className="fixed z-[12501] inset-0 flex justify-end flex-col">
               <motion.div
                 key={visible}
                 className="absolute inset-0 bg-black/[.2] dark:bg-black/[.4] z-10"

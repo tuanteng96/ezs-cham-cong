@@ -1,10 +1,9 @@
 import {
   PhotoIcon,
-  VideoCameraIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
 import { AnimatePresence, motion } from "framer-motion";
-import { Button, Input, TextEditor, f7, useStore } from "framework7-react";
+import { Button, TextEditor, f7, useStore } from "framework7-react";
 import React, { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -14,10 +13,11 @@ import AdminAPI from "@/api/Admin.api";
 import { useMutation, useQueryClient } from "react-query";
 import { toast } from "react-toastify";
 import clsx from "clsx";
-import { DatePicker, SelectPicker } from "@/partials/forms";
+import { DatePicker } from "@/partials/forms";
 import moment from "moment";
 import MoresAPI from "@/api/Mores.api";
 import AssetsHelpers from "@/helpers/AssetsHelpers";
+import KeyboardsHelper from "@/helpers/KeyboardsHelper";
 
 const schemaAdd = yup.object().shape({
   Content: yup.string().required("Vui lòng nhập nội dung."),
@@ -91,14 +91,6 @@ function PickerAddNoteDiary({ children, data, MemberID }) {
     },
   });
 
-  const deleteMutation = useMutation({
-    mutationFn: async (body) => {
-      let data = await AdminAPI.clientDeleteNoteDiaryId(body);
-      await queryClient.invalidateQueries(["ClientDiaryID"]);
-      return data;
-    },
-  });
-
   const uploadMutation = useMutation({
     mutationFn: async ({ body }) => {
       const final = await Promise.all(body.map((e) => MoresAPI.upload(e)));
@@ -116,10 +108,11 @@ function PickerAddNoteDiary({ children, data, MemberID }) {
       Target: values?.Target?.value || "",
       NotiDate:
         values?.IsNoti && values?.NotiDate
-          ? moment(values?.NotiDate).format("DD-MM-YYYY HH:mm")
+          ? moment(values?.NotiDate).format("YYYY-MM-DD HH:mm")
           : "",
       IsEd: values.IsEd ? 1 : 0,
       IsPublic: values.IsPublic ? 1 : 0,
+      Content: values.Content ? encodeURI(values.Content) : ""
     };
 
     var bodyFormData = new FormData();
@@ -139,25 +132,6 @@ function PickerAddNoteDiary({ children, data, MemberID }) {
         },
       }
     );
-  };
-
-  const onDelete = () => {
-    f7.dialog.confirm("Xác nhận xoá ?", () => {
-      var bodyFormData = new FormData();
-      bodyFormData.append("id", data?.ID);
-      deleteMutation.mutate(
-        {
-          data: bodyFormData,
-          Token: Auth?.token,
-        },
-        {
-          onSuccess: ({ data }) => {
-            toast.success("Xoá thành công.");
-            close();
-          },
-        }
-      );
-    });
   };
 
   const uploadFileEditor = async (event) => {
@@ -206,7 +180,7 @@ function PickerAddNoteDiary({ children, data, MemberID }) {
     e.stopPropagation();
     handleSubmit(onSubmit)(e);
   };
-  console.log(watch().Content);
+  
   return (
     <AnimatePresence initial={false}>
       <>
@@ -241,7 +215,7 @@ function PickerAddNoteDiary({ children, data, MemberID }) {
                       <XMarkIcon className="w-6" />
                     </div>
                   </div>
-                  <div className="px-4 overflow-auto grow">
+                  <div className="px-4 overflow-auto grow scrollbar-modal">
                     <div className="mb-3.5 last:mb-0">
                       <div className="mb-px">Nội dụng</div>
                       <Controller
@@ -264,6 +238,12 @@ function PickerAddNoteDiary({ children, data, MemberID }) {
                                 errorMessage={fieldState?.error?.message}
                                 errorMessageForce={fieldState?.invalid}
                                 onTextEditorChange={field.onChange}
+                                onFocus={(e) =>
+                                  KeyboardsHelper.setAndroid({
+                                    Type: "modal-scrollbar",
+                                    Event: e,
+                                  })
+                                }
                               />
                               {fieldState?.invalid && (
                                 <div className="mt-1.5 text-xs font-light text-danger">
@@ -420,21 +400,6 @@ function PickerAddNoteDiary({ children, data, MemberID }) {
                     </div> */}
                   </div>
                   <div className="flex gap-2 p-4">
-                    {data?.ID && (
-                      <Button
-                        onClick={onDelete}
-                        type="button"
-                        className="rounded-full bg-danger w-[100px]"
-                        fill
-                        large
-                        preloader
-                        loading={deleteMutation.isLoading}
-                        disabled={deleteMutation.isLoading}
-                      >
-                        Xoá
-                      </Button>
-                    )}
-
                     <Button
                       type="submit"
                       className="flex-1 rounded-full bg-app"

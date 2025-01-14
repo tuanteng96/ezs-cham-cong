@@ -213,7 +213,7 @@ function PickerAddEditWallet({ children, data, MemberID }) {
                   className="flex flex-col h-full pb-safe-b"
                   onSubmit={handleSubmitWithoutPropagation}
                 >
-                  <div className="px-4 overflow-auto grow">
+                  <div className="px-4 overflow-auto grow scrollbar-modal">
                     {(!data?.ID ||
                       (data?.ID && adminTools_byStock?.hasRight)) && (
                       <>
@@ -263,6 +263,12 @@ function PickerAddEditWallet({ children, data, MemberID }) {
                                     value={field.value}
                                     onValueChange={(val) =>
                                       field.onChange(val.floatValue || "")
+                                    }
+                                    onFocus={(e) =>
+                                      KeyboardsHelper.setAndroid({
+                                        Type: "modal-scrollbar",
+                                        Event: e,
+                                      })
                                     }
                                   />
                                   {field.value && (
@@ -329,7 +335,7 @@ function PickerAddEditWallet({ children, data, MemberID }) {
                             onInput={field.onChange}
                             onFocus={(e) =>
                               KeyboardsHelper.setAndroid({
-                                Type: "body",
+                                Type: "modal-scrollbar",
                                 Event: e,
                               })
                             }

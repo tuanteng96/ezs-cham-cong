@@ -52,7 +52,7 @@ const Item = ({ itemId, selected, onClick, item }) => {
           "whitespace-nowrap h-full flex items-center text-[14px]"
         )}
       >
-        {item.Title} ({item?.children.length})
+        {item.Title} {!item.visibleCount && <>({item?.children.length})</>}
       </div>
     </div>
   );

@@ -168,8 +168,28 @@ function PosAdmin({ f7router }) {
           Date: moment(filters.day).format("DD-MM-YYYY"),
         });
 
-        setTimeOpen(TimesObj.TimeOpen);
-        setTimeClose(TimesObj.TimeClose);
+        let newTimeOpen = moment(TimesObj.TimeOpen, "HH:mm:ss");
+        setTimeOpen(
+          moment()
+            .set({
+              hour: newTimeOpen.get("hour"),
+              minute: newTimeOpen.get("minute"),
+              second: newTimeOpen.get("second"),
+            })
+            .subtract(TimesObj?.TimeAdd || 0, "minutes")
+            .format("HH:mm:ss")
+        );
+        let newTimeClose = moment(TimesObj.TimeClose, "HH:mm:ss");
+        setTimeClose(
+          moment()
+            .set({
+              hour: newTimeClose.get("hour"),
+              minute: newTimeClose.get("minute"),
+              second: newTimeClose.get("second"),
+            })
+            .add(TimesObj?.TimeAdd || 0, "minutes")
+            .format("HH:mm:ss")
+        );
       } else {
         setTimeOpen(Brand?.Global?.APP?.Working?.TimeOpen || "00:00:00");
         setTimeClose(Brand?.Global?.APP?.Working?.TimeClose || "23:59:00");
@@ -845,15 +865,17 @@ function PosAdmin({ f7router }) {
             if (extendedProps?.os) {
               f7.views.main.router.navigate(
                 "/admin/pos/calendar/os/?formState=" +
-                  JSON.stringify({
-                    Os: {
-                      ID: extendedProps.os?.ID,
-                      MemberID: extendedProps.os?.MemberID || "",
-                      ProdService: extendedProps.os?.ProdService || "",
-                      ProdService2: extendedProps.os?.ProdService2 || "",
-                      Title: extendedProps.os?.Title || "",
-                    },
-                  })
+                  encodeURIComponent(
+                    JSON.stringify({
+                      Os: {
+                        ID: extendedProps.os?.ID,
+                        MemberID: extendedProps.os?.MemberID || "",
+                        ProdService: extendedProps.os?.ProdService || "",
+                        ProdService2: extendedProps.os?.ProdService2 || "",
+                        Title: extendedProps.os?.Title || "",
+                      },
+                    })
+                  )
               );
             } else {
               if (!extendedProps.noEvent) {

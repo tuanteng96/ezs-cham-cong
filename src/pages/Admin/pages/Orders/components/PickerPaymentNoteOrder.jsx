@@ -129,7 +129,7 @@ function PickerPaymentNoteOrder({
                   className="flex flex-col h-full pb-safe-b"
                   onSubmit={handleSubmitWithoutPropagation}
                 >
-                  <div className="px-4 overflow-auto grow">
+                  <div className="px-4 overflow-auto grow scrollbar-modal">
                     <div className="mb-3.5 last:mb-0">
                       <div className="mb-px">Ghi chú</div>
                       <Controller
@@ -147,7 +147,7 @@ function PickerPaymentNoteOrder({
                             onChange={field.onChange}
                             onFocus={(e) =>
                               KeyboardsHelper.setAndroid({
-                                Type: "modal",
+                                Type: "modal-scrollbar",
                                 Event: e,
                               })
                             }

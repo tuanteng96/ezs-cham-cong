@@ -220,6 +220,11 @@ input:disabled {
     transition: padding 250ms ease;
 }
 
+.scrollbar-modal {
+    padding-bottom: var(--keyboard-translate-sheet-modal-scrollbar, 0);
+    transition: padding 250ms ease;
+}
+
 /* Actions */
 
 .actions-button {

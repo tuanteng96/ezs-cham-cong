@@ -26,7 +26,7 @@ import {
   SelectMembersCharge,
   SelectProvinces,
 } from "@/partials/forms/select";
-import { DatePicker, SelectPicker } from "@/partials/forms";
+import { DatePicker, SelectPicker, UploadFiles } from "@/partials/forms";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import KeyboardsHelper from "@/helpers/KeyboardsHelper";
 import moment from "moment";
@@ -417,12 +417,19 @@ function AddEditClients({ f7router, f7route }) {
                   name="Photo"
                   control={control}
                   render={({ field, fieldState }) => (
-                    <UploadImages
-                      width="w-[120px]"
-                      height="h-[120px]"
-                      onChange={field.onChange}
-                      value={field.value}
+                    <UploadFiles
+                      onChange={(val) => field.onChange(val)}
+                      wrapClass="w-[120px] h-[120px]"
+                      widthClass="w-[120px]"
+                      heightClass="h-[120px]"
+                      value={field.value ? "/upload/image/" + field.value : ""}
                     />
+                    // <UploadImages
+                    //   width="w-[120px]"
+                    //   height="h-[120px]"
+                    //   onChange={field.onChange}
+                    //   value={field.value}
+                    // />
                   )}
                 />
               </div>
