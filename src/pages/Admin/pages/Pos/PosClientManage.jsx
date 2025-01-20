@@ -446,13 +446,20 @@ function PosClientManage({ f7route, f7router }) {
             toast.success("Khách hàng đã kết thúc.");
             f7.dialog.close();
 
-            if (data.rsMc) {
+            if (data.rsMc && Brand?.Global?.Admin?.checkout_time) {
+              updateCheckoutMutation.mutate({
+                Token: Auth?.token,
+                data: {
+                  InCheckIn: data.rsMc,
+                  ID: data.mc.ID,
+                },
+              });
               f7.dialog
                 .create({
                   title: "Cập nhập CheckIn",
                   content: `
                   <div class="mt-2">
-                    Xác nhận thay đổi phiên CheckIn <span class="font-lato text-base font-medium">#${
+                    Thay đổi phiên CheckIn <span class="font-lato text-base font-medium">#${
                       data.mc.ID
                     }</span> gồm (<span class="font-lato text-base font-medium">${
                     (data.rsMc?.Orders || []).length
@@ -462,28 +469,6 @@ function PosClientManage({ f7route, f7router }) {
                   </div>
                 `,
                   buttons: [
-                    {
-                      text: "Cập nhập",
-                      close: true,
-                      onClick: () => {
-                        f7.dialog.preloader("Đang thực hiện ...");
-                        updateCheckoutMutation.mutate(
-                          {
-                            Token: Auth?.token,
-                            data: {
-                              InCheckIn: data.rsMc,
-                              ID: data.mc.ID,
-                            },
-                          },
-                          {
-                            onSuccess: () => {
-                              f7.dialog.close();
-                              toast.success("Cập nhập thành công.");
-                            },
-                          }
-                        );
-                      },
-                    },
                     {
                       text: "Đóng",
                       close: true,

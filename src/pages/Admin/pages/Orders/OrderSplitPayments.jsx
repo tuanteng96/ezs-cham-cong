@@ -18,6 +18,7 @@ import {
   EllipsisHorizontalIcon,
   EllipsisVerticalIcon,
   PencilSquareIcon,
+  PrinterIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
 import { useMutation, useQuery, useQueryClient } from "react-query";
@@ -37,7 +38,6 @@ import StringHelpers from "@/helpers/StringHelpers";
 import Dom7 from "dom7";
 import { toast } from "react-toastify";
 import { QrBanks } from "../Pos/components";
-import { ButtonPrinter } from "@/components";
 import PullToRefresh from "react-simple-pull-to-refresh";
 
 let TypeMethods = [
@@ -682,13 +682,22 @@ const Payments = ({
             {DebtPay === 0 && "Đã thanh toán"}
             {(DebtPay > 0 || DebtPay < 0) && "Thanh toán"}
           </Button>
-          <ButtonPrinter
+          <Button
+            type="button"
             className="w-[50px] bg-primary"
-            ID={data?.Order?.ID}
-            Type="Order"
+            fill
+            large
+            preloader
+            onClick={() => {
+              f7.views.main.router.navigate(
+                `/admin/printers/order/${data?.Order?.ID}/`
+              );
+            }}
             loading={isLoading}
             disabled={isLoading}
-          />
+          >
+            <PrinterIcon className="w-6" />
+          </Button>
         </div>
       </div>
     </form>
@@ -1176,13 +1185,22 @@ const PaymentsSplit = ({
             {DebtPay === 0 && "Đã thanh toán"}
             {(DebtPay > 0 || DebtPay < 0) && "Thanh toán"}
           </Button>
-          <ButtonPrinter
+          <Button
+            type="button"
             className="w-[50px] bg-primary"
-            ID={data?.Order?.ID}
-            Type="Order"
+            fill
+            large
+            preloader
+            onClick={() => {
+              f7.views.main.router.navigate(
+                `/admin/printers/order/${data?.Order?.ID}/`
+              );
+            }}
             loading={isLoading}
             disabled={isLoading}
-          />
+          >
+            <PrinterIcon className="w-6" />
+          </Button>
         </div>
       </div>
     </form>
@@ -1336,10 +1354,10 @@ function OrderSplitPayments({ f7route }) {
     let index = (data?.TypeMethods || TypeMethods).findIndex(
       (x) => Number(x.value) === Number(MethodID)
     );
-    if(index > -1) {
-      return (data?.TypeMethods || TypeMethods)[index].label.split("-")[0]
+    if (index > -1) {
+      return (data?.TypeMethods || TypeMethods)[index].label.split("-")[0];
     }
-    return "Chưa xác định"
+    return "Chưa xác định";
   };
 
   let DebtPay = data?.Order?.ToPay - data?.Payment?.TotalPayed;
@@ -1569,13 +1587,22 @@ function OrderSplitPayments({ f7route }) {
                         >
                           Đã thanh toán
                         </Button>
-                        <ButtonPrinter
+                        <Button
+                          type="button"
                           className="w-[50px] bg-primary"
-                          ID={data?.Order?.ID}
-                          Type="Order"
+                          fill
+                          large
+                          preloader
+                          onClick={() => {
+                            f7.views.main.router.navigate(
+                              `/admin/printers/order/${data?.Order?.ID}/`
+                            );
+                          }}
                           loading={isLoading}
                           disabled={isLoading}
-                        />
+                        >
+                          <PrinterIcon className="w-6" />
+                        </Button>
                       </div>
                     </div>
                   )}

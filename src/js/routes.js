@@ -65,6 +65,9 @@ import AddEditCalendarPage from "@/pages/Admin/pages/Pos/AddEditCalendar.jsx";
 import EditOsCalendarPage from "@/pages/Admin/pages/Pos/EditOsCalendar.jsx";
 import EditOsMaterialsPage from "@/pages/Admin/pages/Pos/EditOsMaterials.jsx";
 
+import PrinterOrderPage from "@/pages/Admin/pages/Printers/PrinterOrder.jsx";
+import PrinterServicePage from "@/pages/Admin/pages/Printers/PrinterService.jsx";
+
 import StocksPage from "../pages/Stocks/index.jsx";
 
 import CoursesPage from "../pages/Courses/index.jsx";
@@ -500,6 +503,25 @@ var routes = [
               transition: "f7-cover-v",
             },
           },
+        ],
+      },
+      {
+        path: "printers/",
+        routes: [
+          {
+            path: "/order/:id",
+            component: PrinterOrderPage,
+            options: {
+              transition: "f7-cover",
+            },
+          },
+          {
+            path: "/service/:id",
+            component: PrinterServicePage,
+            options: {
+              transition: "f7-cover",
+            },
+          }
         ],
       },
     ],

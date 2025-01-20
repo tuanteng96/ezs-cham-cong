@@ -7,6 +7,7 @@ import {
   CalculatorIcon,
   CreditCardIcon,
   CurrencyDollarIcon,
+  PrinterIcon,
   QrCodeIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
@@ -21,7 +22,6 @@ import { toast } from "react-toastify";
 import { PickerShowQrCodePay } from ".";
 import { getDatabase, ref, remove, set } from "firebase/database";
 import moment from "moment";
-import { ButtonPrinter } from "@/components";
 
 function PickerPayments({ children, Order, Client }) {
   let DebtPay =
@@ -53,21 +53,6 @@ function PickerPayments({ children, Order, Client }) {
 
   let openCalculator = () => {
     setVisibleCalculator(true);
-  };
-
-  let closeCalculator = () => {
-    setVisibleCalculator(false);
-    close();
-    if (endPayMutation.data.data) {
-      f7.dialog.confirm(
-        "Bạn có muốn thực hiện thưởng hoa hồng & doanh số cho lần thanh toán này ?",
-        () => {
-          f7.views.main.router.navigate(
-            `/admin/pos/orders/view/${Order?.ID}/bonus-sales-commission/`
-          );
-        }
-      );
-    }
   };
 
   let TypePayments = [
@@ -161,7 +146,7 @@ function PickerPayments({ children, Order, Client }) {
       return data;
     },
   });
-
+  
   const handleSubmitWithoutPropagation = (e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -185,7 +170,16 @@ function PickerPayments({ children, Order, Client }) {
           reset();
           toast.success("Đơn hàng đã được thanh toán thành công.");
           if (Type.MethodID === 1) {
-            openCalculator();
+            setVisibleCalculator(false);
+            close();
+            f7.dialog.confirm(
+              "Bạn có muốn thực hiện thưởng hoa hồng & doanh số cho lần thanh toán này ?",
+              () => {
+                f7.views.main.router.navigate(
+                  `/admin/pos/orders/view/${Order?.ID}/bonus-sales-commission/`
+                );
+              }
+            );
           }
           if (Type.MethodID === 2) {
             let p = {
@@ -313,7 +307,12 @@ function PickerPayments({ children, Order, Client }) {
                             {TypePayments.map((item, index) =>
                               item.ID === 2 ? (
                                 <Link
-                                  popoverOpen={Banks?.data?.ngan_hang && Banks?.data?.ngan_hang.length > 0 ? ".popover-banks-pay" : null}
+                                  popoverOpen={
+                                    Banks?.data?.ngan_hang &&
+                                    Banks?.data?.ngan_hang.length > 0
+                                      ? ".popover-banks-pay"
+                                      : null
+                                  }
                                   className={clsx(
                                     "flex flex-col items-center justify-center text-center border rounded h-[160px] transition-all",
                                     field.value?.ID === item.ID &&
@@ -387,9 +386,11 @@ function PickerPayments({ children, Order, Client }) {
                                         field.value &&
                                         field.value?.Title === item.Title
                                       ) {
-                                        //field.onChange(null);
                                       } else {
                                         field.onChange(item);
+                                      }
+                                      if (item.ID === 1) {
+                                        setVisibleCalculator(true);
                                       }
                                     } else {
                                       close();
@@ -434,17 +435,19 @@ function PickerPayments({ children, Order, Client }) {
                   </div>
                   <div className="p-4 border-t">
                     {Brand?.Global?.Admin?.Tips &&
-                      Client?.CheckIn?.MemberTipAmount ? (
-                        <div className="flex items-end justify-between mb-2.5">
-                          <div className="font-medium leading-3">Khách TIP</div>
-                          <div className="text-base font-bold leading-3 font-lato text-success">
-                            ₫
-                            {StringHelpers.formatVND(
-                              Client?.CheckIn?.MemberTipAmount
-                            )}
-                          </div>
+                    Client?.CheckIn?.MemberTipAmount ? (
+                      <div className="flex items-end justify-between mb-2.5">
+                        <div className="font-medium leading-3">Khách TIP</div>
+                        <div className="text-base font-bold leading-3 font-lato text-success">
+                          ₫
+                          {StringHelpers.formatVND(
+                            Client?.CheckIn?.MemberTipAmount
+                          )}
                         </div>
-                      ) : <></>}
+                      </div>
+                    ) : (
+                      <></>
+                    )}
 
                     <div className="flex items-end justify-between mb-2.5">
                       {DebtPay === 0 && Order?.ToPay > 0 && Order?.ID ? (
@@ -483,7 +486,7 @@ function PickerPayments({ children, Order, Client }) {
                       )}
                     </div>
                     <div className="flex gap-2">
-                      <Button
+                      {/* <Button
                         type="button"
                         className="bg-white max-w-[50px] text-black border border-[#d3d3d3]"
                         fill
@@ -492,17 +495,29 @@ function PickerPayments({ children, Order, Client }) {
                         onClick={openCalculator}
                       >
                         <CalculatorIcon className="w-6" />
-                      </Button>
-                      <ButtonPrinter
-                        ID={Order?.ID}
-                        Type="Order"
-                        loading={endPayMutation.isLoading}
-                        disabled={endPayMutation.isLoading}
-                        className="bg-white max-w-[50px] text-black border border-[#d3d3d3]"
-                      />
+                      </Button> */}
 
                       <Button
-                        type="submit"
+                        type="button"
+                        className="bg-white max-w-[50px] text-black border border-[#d3d3d3]"
+                        fill
+                        large
+                        preloader
+                        preloaderColor="black"
+                        onClick={() => {
+                          close();
+                          f7.views.main.router.navigate(
+                            `/admin/printers/order/${Order?.ID}/`
+                          );
+                        }}
+                        loading={endPayMutation.isLoading}
+                        disabled={endPayMutation.isLoading}
+                      >
+                        <PrinterIcon className="w-6" />
+                      </Button>
+
+                      <Button
+                        type="button"
                         className="flex-1 bg-success"
                         fill
                         large
@@ -512,8 +527,17 @@ function PickerPayments({ children, Order, Client }) {
                           !Type ||
                           endPayMutation.isLoading ||
                           (DebtPay === 0 && Order?.ID && Order?.ToPay > 0) ||
-                          (Type?.MethodID === 2 && Banks?.data?.ngan_hang.length > 0 && !BanksTransfer)
+                          (Type?.MethodID === 2 &&
+                            Banks?.data?.ngan_hang.length > 0 &&
+                            !BanksTransfer)
                         }
+                        onClick={() => {
+                          if (Type?.MethodID === 1) {
+                            openCalculator();
+                          } else {
+                            handleSubmit(onSubmit)();
+                          }
+                        }}
                       >
                         {DebtPay === 0 && Order?.ID && Order?.ToPay > 0
                           ? "Đã thanh toán"
@@ -533,7 +557,7 @@ function PickerPayments({ children, Order, Client }) {
                 <PickerShowQrCodePay
                   SubTitle="Đã thực hiện thanh toán"
                   onCloseQR={() => {
-                    if (endPayMutation.data.data) {
+                    if (endPayMutation?.data?.data) {
                       close();
                       f7.dialog.confirm(
                         "Bạn có muốn thực hiện thưởng hoa hồng & doanh số cho lần thanh toán này ?",
@@ -577,7 +601,7 @@ function PickerPayments({ children, Order, Client }) {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                onClick={closeCalculator}
+                onClick={() => setVisibleCalculator(false)}
               ></motion.div>
               <motion.div
                 className="relative flex flex-col z-20 bg-white rounded-t-[var(--f7-sheet-border-radius)] max-h-[92%]"
@@ -590,15 +614,10 @@ function PickerPayments({ children, Order, Client }) {
                   onSubmit={handleSubmitWithoutPropagation}
                 >
                   <div className="relative flex justify-center px-4 py-5 text-xl font-semibold text-center">
-                    <div>
-                      <div className="mb-1 text-sm font-normal text-center text-success">
-                        Đã thực hiện thanh toán
-                      </div>
-                      <div>Số tiền mặt khách trả</div>
-                    </div>
+                    <div>Số tiền khách trả</div>
                     <div
                       className="absolute top-0 right-0 flex items-center justify-center w-12 h-full"
-                      onClick={closeCalculator}
+                      onClick={() => setVisibleCalculator(false)}
                     >
                       <XMarkIcon className="w-6" />
                     </div>
@@ -703,13 +722,22 @@ function PickerPayments({ children, Order, Client }) {
 
                       <Button
                         type="button"
-                        className="w-[100px] bg-gray-900"
+                        className="w-[145px] bg-primary"
                         fill
                         large
                         preloader
-                        onClick={closeCalculator}
+                        onClick={() => handleSubmit(onSubmit)()}
+                        loading={endPayMutation.isLoading}
+                        disabled={
+                          !Type ||
+                          endPayMutation.isLoading ||
+                          (DebtPay === 0 && Order?.ID && Order?.ToPay > 0) ||
+                          (Type?.MethodID === 2 &&
+                            Banks?.data?.ngan_hang.length > 0 &&
+                            !BanksTransfer)
+                        }
                       >
-                        Đóng
+                        Thanh toán
                       </Button>
                     </div>
                   </div>

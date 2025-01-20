@@ -163,6 +163,12 @@ const PRINTER = (args) => {
   }
 };
 
+const PRINTER_CLEAR = (args) => {
+  if (typeof APP21.prom !== "undefined") {
+    return APP21.prom("XPRINT_CLEAR", args);
+  }
+};
+
 const GET_NETWORK_TYPE = () => {
   if (typeof APP21.prom !== "undefined") {
     return new Promise((resolve, reject) => {
@@ -308,6 +314,7 @@ const PromHelpers = {
   RELOAD_APP,
   GET_NETWORK_TYPE,
   PRINTER,
+  PRINTER_CLEAR,
   CHOOSE_FILES,
   CHOOSE_IMAGES,
 };

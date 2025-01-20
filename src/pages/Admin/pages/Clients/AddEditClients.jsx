@@ -847,6 +847,11 @@ function AddEditClients({ f7router, f7route }) {
                         }}
                         isFilter
                         isClearable={true}
+                        isDisabled={
+                          Brand?.Global?.Admin?.maffadmin
+                            ? Auth?.ID !== 1
+                            : Brand?.Global?.Admin?.maffadmin
+                        }
                       />
                     )}
                   />

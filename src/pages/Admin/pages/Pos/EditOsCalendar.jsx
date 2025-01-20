@@ -45,7 +45,6 @@ import AssetsHelpers from "@/helpers/AssetsHelpers";
 import { NumericFormat } from "react-number-format";
 import { RolesHelpers } from "@/helpers/RolesHelpers";
 import { PickerServiceChange, PickerServiceOsInfo } from "./components";
-import { ButtonPrinter } from "@/components";
 import { UploadImages } from "@/partials/forms/files";
 
 const AutoSalaryMethodOptions = [
@@ -75,11 +74,11 @@ function EditOsCalendar({ f7route, f7router }) {
   let prevState = f7route?.query?.prevState
     ? JSON.parse(f7route?.query?.prevState)
     : null;
-    
+
   let formState = f7route?.query?.formState
     ? JSON.parse(f7route?.query?.formState)
     : null;
-  
+
   let [RoomsList, setRoomsList] = useState([]);
 
   const standalone = useRef(null);
@@ -1448,25 +1447,22 @@ function EditOsCalendar({ f7route, f7router }) {
           </Button>
           <Popover className="popover-os-more">
             <div className="flex flex-col py-1">
-              <ButtonPrinter
-                ID={Os?.data?.ID}
-                Type="Service"
-                loading={Os?.isLoading}
-                disabled={Os?.isLoading}
-                ButtonType={false}
-                LinkTitle="In phiếu dịch vụ"
-                LinkWrapClass="flex justify-between font-medium border-b last:border-0 relative"
-              />
-              <ButtonPrinter
-                ID={Os?.data?.ID}
-                Type="Service"
-                ModeCard={true}
-                loading={Os?.isLoading}
-                disabled={Os?.isLoading}
-                ButtonType={false}
-                LinkTitle="In thẻ dịch vụ"
-                LinkWrapClass="flex justify-between font-medium border-b last:border-0 relative"
-              />
+              <Link
+                popoverClose
+                className="flex justify-between p-3 font-medium border-b last:border-0"
+                noLinkClass
+                href={`/admin/printers/service/${Os?.data?.ID}/`}
+              >
+                In phiếu dịch vụ
+              </Link>
+              <Link
+                popoverClose
+                className="flex justify-between p-3 font-medium border-b last:border-0"
+                noLinkClass
+                href={`/admin/printers/service/${Os?.data?.ID}/?mode=card`}
+              >
+                In thẻ dịch vụ
+              </Link>
               {Os?.data?.ConvertAddFeeID && (
                 <PickerServiceChange data={Os?.data}>
                   {({ open }) => (

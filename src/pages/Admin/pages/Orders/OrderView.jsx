@@ -3,6 +3,7 @@ import {
   ChevronUpIcon,
   EllipsisVerticalIcon,
   InformationCircleIcon,
+  PrinterIcon,
 } from "@heroicons/react/24/outline";
 import {
   Button,
@@ -32,7 +33,6 @@ import {
 } from "./components";
 import clsx from "clsx";
 import AssetsHelpers from "@/helpers/AssetsHelpers";
-import { ButtonPrinter } from "@/components";
 
 function OrderViewAdmin({ f7router, f7route }) {
   const queryClient = useQueryClient();
@@ -92,7 +92,7 @@ function OrderViewAdmin({ f7router, f7route }) {
       return data;
     },
   });
-  
+
   const deleteMutation = useMutation({
     mutationFn: async (body) => {
       let rs = await AdminAPI.clientDeleteOrderId(body);
@@ -944,13 +944,21 @@ function OrderViewAdmin({ f7router, f7route }) {
                   : "Đơn huỷ"}
               </Button>
             )}
-
-            <ButtonPrinter
-              ID={data?.Order?.ID}
-              Type="Order"
+            <Button
+              type="button"
+              className="w-[60px] bg-primary"
+              fill
+              large
+              preloader
+              preloaderColor="black"
+              onClick={() =>
+                f7router.navigate(`/admin/printers/order/${data?.Order?.ID}/`)
+              }
               loading={isLoading}
               disabled={isLoading}
-            />
+            >
+              <PrinterIcon className="w-6" />
+            </Button>
           </div>
         </div>
       </div>
