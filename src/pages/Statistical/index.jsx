@@ -545,135 +545,146 @@ function Statistical({ f7router }) {
               </div>
             </div>
 
-            {(data.DOANH_SO.length > 0 || data?.KpiTourResult?.Value > 0) && (
-              <div className="bg-white mb-1.5">
-                <div className="py-3 font-bold text-center uppercase border-b">
-                  KPI
-                  {data?.DOANH_SO?.length > 0 && (
-                    <span className="pl-1">({data.DOANH_SO.length})</span>
-                  )}
-                </div>
-                <div className="grid grid-cols-5 font-medium text-gray-400 border-b">
-                  <div className="px-4 py-2.5 border-r col-span-3">
-                    Hạng mục
-                  </div>
-                  <div className="px-4 py-2.5 text-right col-span-2">
-                    Giá trị
-                  </div>
-                </div>
-
-                <div>
-                  {data?.DOANH_SO.map((item, index) => (
-                    <div
-                      className="grid grid-cols-5 font-medium border-b"
-                      key={index}
-                    >
-                      <div className="px-4 py-2.5 border-r font-light col-span-3">
-                        {item.Desc || "Doanh số"} - ({" "}
-                        {moment(item.CreateDate).format("llll")} )
-                        <div>{item.ProdTitle}</div>
+            {(data?.CHI_LUONG && data.CHI_LUONG.length > 0) ||
+            (data?.CHI_LUONG_TAT_CA && data?.CHI_LUONG_TAT_CA.length > 0) ? (
+              <></>
+            ) : (
+              <>
+                {(data.DOANH_SO.length > 0 ||
+                  data?.KpiTourResult?.Value > 0) && (
+                  <div className="bg-white mb-1.5">
+                    <div className="py-3 font-bold text-center uppercase border-b">
+                      KPI
+                      {data?.DOANH_SO?.length > 0 && (
+                        <span className="pl-1">({data.DOANH_SO.length})</span>
+                      )}
+                    </div>
+                    <div className="grid grid-cols-5 font-medium text-gray-400 border-b">
+                      <div className="px-4 py-2.5 border-r col-span-3">
+                        Hạng mục
                       </div>
                       <div className="px-4 py-2.5 text-right col-span-2">
-                        {StringHelpers.formatVND(item.Value)}
+                        Giá trị
                       </div>
                     </div>
-                  ))}
-                </div>
-                <div className="grid grid-cols-5">
-                  <div className="px-4 py-2.5 text-sm font-semibold uppercase border-r col-span-3">
-                    Tổng doanh số
-                  </div>
-                  <div className="px-4 py-2.5 font-semibold text-right text-danger col-span-2">
-                    {StringHelpers.formatVND(
-                      ArrayHelpers.sumTotal(data?.DOANH_SO, "Value")
+
+                    <div>
+                      {data?.DOANH_SO.map((item, index) => (
+                        <div
+                          className="grid grid-cols-5 font-medium border-b"
+                          key={index}
+                        >
+                          <div className="px-4 py-2.5 border-r font-light col-span-3">
+                            {item.Desc || "Doanh số"} - ({" "}
+                            {moment(item.CreateDate).format("llll")} )
+                            <div>{item.ProdTitle}</div>
+                          </div>
+                          <div className="px-4 py-2.5 text-right col-span-2">
+                            {StringHelpers.formatVND(item.Value)}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="grid grid-cols-5">
+                      <div className="px-4 py-2.5 text-sm font-semibold uppercase border-r col-span-3">
+                        Tổng doanh số
+                      </div>
+                      <div className="px-4 py-2.5 font-semibold text-right text-danger col-span-2">
+                        {StringHelpers.formatVND(
+                          ArrayHelpers.sumTotal(data?.DOANH_SO, "Value")
+                        )}
+                      </div>
+                    </div>
+
+                    {data?.Kpi2Result?.ItemList &&
+                      data?.Kpi2Result?.ItemList.length > 0 &&
+                      data?.Kpi2Result?.ItemList.map((item, index) => (
+                        <div
+                          className="grid grid-cols-5 font-medium border-t"
+                          key={index}
+                        >
+                          <div className="px-4 py-2.5 border-r font-light col-span-3">
+                            <div>{item.CachTinh}</div>
+                            <div>{item.Dieukien}</div>
+                          </div>
+                          <div className="px-4 py-2.5 text-right col-span-2">
+                            {StringHelpers.formatVND(item.BonusValue)}
+                          </div>
+                        </div>
+                      ))}
+
+                    {data?.THUONG_HOA_HONG_DOANH_SO &&
+                      data?.THUONG_HOA_HONG_DOANH_SO?.ApplyList &&
+                      data?.THUONG_HOA_HONG_DOANH_SO?.ApplyList.map(
+                        (appy, index) => (
+                          <div
+                            className="grid grid-cols-5 font-medium border-t"
+                            key={index}
+                          >
+                            <div className="px-4 py-2.5 border-r font-light col-span-3">
+                              {appy.Type === 0
+                                ? "KPI Chung"
+                                : `KPI nhóm ${appy.Type}`}
+                            </div>
+                            <div className="px-4 py-2.5 text-right col-span-2">
+                              {StringHelpers.formatVND(appy.Value)}
+                            </div>
+                          </div>
+                        )
+                      )}
+
+                    {data?.KpiTourResult?.KpiTour?.Condts &&
+                      data?.KpiTourResult?.KpiTour?.Condts.length > 0 && (
+                        <div className="grid grid-cols-5 font-medium border-t">
+                          <div className="px-4 py-2.5 border-r font-light col-span-3">
+                            KPI lương Tour <br />{" "}
+                            {data?.KpiTourResult?.KpiTour?.Condts &&
+                              data?.KpiTourResult?.KpiTour?.Condts.length >
+                                0 && (
+                                <>
+                                  {data?.KpiTourResult?.KpiTour?.Condts.map(
+                                    (x) => `${x.From} - ${x.To} : ${x.CalValue}`
+                                  ).join(", ")}
+                                </>
+                              )}
+                          </div>
+                          <div className="px-4 py-2.5 text-right col-span-2">
+                            {StringHelpers.formatVND(
+                              data?.KpiTourResult?.Value
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    {Global?.Admin?.kpi2 ? (
+                      <div className="grid grid-cols-5 border-t">
+                        <div className="px-4 py-2.5 text-sm font-semibold uppercase border-r col-span-3">
+                          Tổng *
+                        </div>
+                        <div className="px-4 py-2.5 font-semibold text-right text-danger col-span-2">
+                          {StringHelpers.formatVND(
+                            (data?.Kpi2Result?.Value || 0) +
+                              (data?.KpiTourResult?.Value || 0)
+                          )}
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-5 border-t">
+                        <div className="px-4 py-2.5 text-sm font-semibold uppercase border-r col-span-3">
+                          Tổng *
+                        </div>
+                        <div className="px-4 py-2.5 font-semibold text-right text-danger col-span-2">
+                          {StringHelpers.formatVND(
+                            ArrayHelpers.sumTotal(
+                              data?.THUONG_HOA_HONG_DOANH_SO?.ApplyList,
+                              "Value"
+                            ) + (data?.KpiTourResult?.Value || 0)
+                          )}
+                        </div>
+                      </div>
                     )}
                   </div>
-                </div>
-
-                {data?.Kpi2Result?.ItemList &&
-                  data?.Kpi2Result?.ItemList.length > 0 &&
-                  data?.Kpi2Result?.ItemList.map((item, index) => (
-                    <div
-                      className="grid grid-cols-5 font-medium border-t"
-                      key={index}
-                    >
-                      <div className="px-4 py-2.5 border-r font-light col-span-3">
-                        <div>{item.CachTinh}</div>
-                        <div>{item.Dieukien}</div>
-                      </div>
-                      <div className="px-4 py-2.5 text-right col-span-2">
-                        {StringHelpers.formatVND(item.BonusValue)}
-                      </div>
-                    </div>
-                  ))}
-
-                {data?.THUONG_HOA_HONG_DOANH_SO &&
-                  data?.THUONG_HOA_HONG_DOANH_SO?.ApplyList &&
-                  data?.THUONG_HOA_HONG_DOANH_SO?.ApplyList.map(
-                    (appy, index) => (
-                      <div
-                        className="grid grid-cols-5 font-medium border-t"
-                        key={index}
-                      >
-                        <div className="px-4 py-2.5 border-r font-light col-span-3">
-                          {appy.Type === 0
-                            ? "KPI Chung"
-                            : `KPI nhóm ${appy.Type}`}
-                        </div>
-                        <div className="px-4 py-2.5 text-right col-span-2">
-                          {StringHelpers.formatVND(appy.Value)}
-                        </div>
-                      </div>
-                    )
-                  )}
-
-                {data?.KpiTourResult?.KpiTour?.Condts &&
-                  data?.KpiTourResult?.KpiTour?.Condts.length > 0 && (
-                    <div className="grid grid-cols-5 font-medium border-t">
-                      <div className="px-4 py-2.5 border-r font-light col-span-3">
-                        KPI lương Tour <br />{" "}
-                        {data?.KpiTourResult?.KpiTour?.Condts &&
-                          data?.KpiTourResult?.KpiTour?.Condts.length > 0 && (
-                            <>
-                              {data?.KpiTourResult?.KpiTour?.Condts.map(
-                                (x) => `${x.From} - ${x.To} : ${x.CalValue}`
-                              ).join(", ")}
-                            </>
-                          )}
-                      </div>
-                      <div className="px-4 py-2.5 text-right col-span-2">
-                        {StringHelpers.formatVND(data?.KpiTourResult?.Value)}
-                      </div>
-                    </div>
-                  )}
-                {Global?.Admin?.kpi2 ? (
-                  <div className="grid grid-cols-5 border-t">
-                    <div className="px-4 py-2.5 text-sm font-semibold uppercase border-r col-span-3">
-                      Tổng *
-                    </div>
-                    <div className="px-4 py-2.5 font-semibold text-right text-danger col-span-2">
-                      {StringHelpers.formatVND(
-                        (data?.Kpi2Result?.Value || 0) +
-                          (data?.KpiTourResult?.Value || 0)
-                      )}
-                    </div>
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-5 border-t">
-                    <div className="px-4 py-2.5 text-sm font-semibold uppercase border-r col-span-3">
-                      Tổng *
-                    </div>
-                    <div className="px-4 py-2.5 font-semibold text-right text-danger col-span-2">
-                      {StringHelpers.formatVND(
-                        ArrayHelpers.sumTotal(
-                          data?.THUONG_HOA_HONG_DOANH_SO?.ApplyList,
-                          "Value"
-                        ) + (data?.KpiTourResult?.Value || 0)
-                      )}
-                    </div>
-                  </div>
                 )}
-              </div>
+              </>
             )}
 
             <div className="bg-white mb-1.5">
