@@ -50,6 +50,10 @@ function Report({ f7router }) {
             rightsSum: Auth?.Info?.rightsSum,
           },
           token: Auth?.token,
+          isApp: true,
+          AppNavigation: (href) => {
+            console.log(href)
+          }
         })}
         handleReady={() => {
           if (f7.views.main.router.url === "/report/") {

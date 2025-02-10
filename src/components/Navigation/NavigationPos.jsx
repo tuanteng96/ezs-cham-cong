@@ -10,6 +10,7 @@ import {
 } from "@heroicons/react/24/outline";
 import RouterHelpers from "../../helpers/RouterHelpers";
 import { useIsFetching } from "react-query";
+import moment from "moment";
 
 function NavigationPos({ pathname }) {
   let InvoiceProcessings = useStore("InvoiceProcessings");
@@ -127,7 +128,8 @@ function NavigationPos({ pathname }) {
               {(InvoiceProcessings && InvoiceProcessings.length > 0) ||
               CountProcessings > 0 ? (
                 <div className="absolute top-2 right-2 font-lato font-bold text-white bg-danger text-[11px] px-1 py-[2px] leading-none rounded">
-                  {InvoiceProcessings.filter(x => !x?.CheckIn?.CheckOutTime).length + (CountProcessings || 0)}
+                  {InvoiceProcessings.filter((x) => !x?.CheckIn?.CheckOutTime)
+                    .length + (CountProcessings || 0)}
                 </div>
               ) : (
                 <></>
@@ -153,7 +155,10 @@ function NavigationPos({ pathname }) {
                 <>
                   {InvoiceProcessings && InvoiceProcessings.length > 0 ? (
                     <span className="absolute text-white bg-danger text-[11px] px-1.5 min-w-[15px] h-[17px] leading-none rounded-full flex items-center justify-center top-2/4 right-4 -translate-y-2/4 font-lato">
-                      {InvoiceProcessings && InvoiceProcessings.filter(x => !x?.CheckIn?.CheckOutTime).length}
+                      {InvoiceProcessings &&
+                        InvoiceProcessings.filter(
+                          (x) => !x?.CheckIn?.CheckOutTime
+                        ).length}
                     </span>
                   ) : (
                     <></>
@@ -195,11 +200,22 @@ function NavigationPos({ pathname }) {
               noLinkClass
             >
               Khách sinh nhật
-              {ClientBirthDay && ClientBirthDay.length > 0 && (
-                <span className="absolute text-white bg-danger text-[11px] px-1.5 min-w-[15px] h-[17px] leading-none rounded-full flex items-center justify-center top-2/4 right-4 -translate-y-2/4 font-lato">
-                  {ClientBirthDay.length}
-                </span>
-              )}
+              {ClientBirthDay &&
+                ClientBirthDay.filter(
+                  (x) =>
+                    moment(x.Birth).format("DD-MM") ===
+                    moment().format("DD-MM")
+                ).length > 0 && (
+                  <span className="absolute text-white bg-danger text-[11px] px-1.5 min-w-[15px] h-[17px] leading-none rounded-full flex items-center justify-center top-2/4 right-4 -translate-y-2/4 font-lato">
+                    {
+                      ClientBirthDay.filter(
+                        (x) =>
+                          moment(x.Birth).format("DD-MM") ===
+                          moment().format("DD-MM")
+                      ).length
+                    }
+                  </span>
+                )}
             </Link>
           </div>
         </Popover>

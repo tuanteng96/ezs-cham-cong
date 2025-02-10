@@ -26,7 +26,7 @@ const AdminAPI = {
     ),
   ClientBirthDay: ({ Token, pi = 1, ps = 15, StockID = "" }) =>
     http.get(
-      `/services/preview.aspx?cmd=search_member&key=&typeSearch=sell&ps=${ps}&pi=${pi}&searchId=4&__MemberCheckin=&__MemberMoney=0&__MyNoti=0&__AllNoti=0&__Birth=1&__MBirth=0&__Cate=false&__HasOrderService=0&__MemberGroups=false&__StaffID=0&__StockID=${StockID}&__Source=&__Tags=`,
+      `/services/preview.aspx?cmd=search_member&key=&typeSearch=sell&ps=${ps}&pi=${pi}&searchId=4&__MemberCheckin=&__MemberMoney=0&__MyNoti=0&__AllNoti=0&__Birth=0&__MBirth=1&__Cate=false&__HasOrderService=0&__MemberGroups=false&__StaffID=0&__StockID=${StockID}&__Source=&__Tags=`,
       {
         headers: {
           Authorization: `Bearer ${Token}`,
@@ -800,6 +800,12 @@ const AdminAPI = {
         },
       }
     ),
+  memberAff: ({ data, Token }) =>
+    http.post(`/api/v3/member23@MemberByAffMemberID`, JSON.stringify(data), {
+      headers: {
+        Authorization: `Bearer ${Token}`,
+      },
+    }),
 };
 
 export default AdminAPI;

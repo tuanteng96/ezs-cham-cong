@@ -48,9 +48,10 @@ function ReportPreview({ f7router }) {
             CrStockID: CrStocks?.ID,
             Stocks: Auth?.Info?.StockRights,
             rightsSum: Auth?.Info?.rightsSum,
-            token: Auth?.token
+            token: Auth?.token,
           },
           token: Auth?.token,
+          isApp: true
         })}
         handleReady={() => {
           if (f7.views.main.router.url === "/report-preview/") {

@@ -25,7 +25,7 @@ import { MenuSubNavbar, PickerAddNoteDiary } from "./components";
 import NoFound from "@/components/NoFound";
 import Dom7 from "dom7";
 import PromHelpers from "@/helpers/PromHelpers";
-import { useMutation, useQuery } from "react-query";
+import { useInfiniteQuery, useMutation, useQuery } from "react-query";
 import AdminAPI from "@/api/Admin.api";
 import ArrayHelpers from "@/helpers/ArrayHelpers";
 import moment from "moment";
@@ -77,6 +77,14 @@ let Menu = [
     items: [],
     Key: "SalesHistory",
   },
+  {
+    Index: 6,
+    ID: "MemberAff",
+    Title: "Người giới thiệu",
+    children: [],
+    items: [],
+    Key: "MemberAff",
+  },
 ];
 
 function PosClientDiary({ f7router, f7route }) {
@@ -90,6 +98,8 @@ function PosClientDiary({ f7router, f7route }) {
   const [photos, setPhotos] = useState([]);
 
   const standalone = useRef(null);
+
+  const listInnerRef = useRef();
 
   let Auth = useStore("Auth");
   let CrStocks = useStore("CrStocks");
@@ -118,18 +128,21 @@ function PosClientDiary({ f7router, f7route }) {
                 }))
                 .sort((a, b) => a.level - b.level);
             } else if (property === "Attachments") {
-              
               let newItems = [];
               if (data?.data[property] && data?.data[property].length > 0) {
                 for (let obj of data?.data[property]) {
-                  
                   let idx = newItems.findIndex(
                     (x) =>
                       moment(x.BookDate, "YYYY-MM-DD").format("DD-MM-YYYY") ===
-                      moment(obj?.OrderService?.BookDate, "YYYY-MM-DD").format("DD-MM-YYYY")
+                      moment(obj?.OrderService?.BookDate, "YYYY-MM-DD").format(
+                        "DD-MM-YYYY"
+                      )
                   );
                   if (idx > -1) {
-                    newItems[idx].Items = [...newItems[idx].Items, ...obj.Items];
+                    newItems[idx].Items = [
+                      ...newItems[idx].Items,
+                      ...obj.Items,
+                    ];
                   } else {
                     newItems.push({
                       ...obj,
@@ -251,6 +264,69 @@ function PosClientDiary({ f7router, f7route }) {
       setMenus(data);
     },
   });
+
+  const MemberAff = useInfiniteQuery({
+    queryKey: [
+      "MemberAff",
+      {
+        AFFMemberID: f7route?.params?.id,
+      },
+    ],
+    queryFn: async ({ pageParam = 1 }) => {
+      const { data } = await AdminAPI.memberAff({
+        data: {
+          AFFMemberID: f7route?.params?.id,
+          Pi: pageParam,
+          Ps: 10,
+        },
+        Token: Auth?.token,
+      });
+      return data;
+    },
+    getNextPageParam: (lastPage, pages) =>
+      lastPage.Pi === lastPage.Pcount ? undefined : lastPage.Pi + 1,
+  });
+
+  const Lists = ArrayHelpers.useInfiniteQuery(MemberAff?.data?.pages, "Items");
+
+  const onScroll = () => {
+    if (listInnerRef.current) {
+      
+      const { scrollTop, scrollHeight, clientHeight } = listInnerRef.current;
+      const isNearBottom = scrollTop + clientHeight >= scrollHeight;
+
+      if (isNearBottom) {
+        if (active === "MemberAff" && !MemberAff.isFetchingNextPage) {
+          MemberAff.fetchNextPage().then(() => {});
+        }
+      }
+    }
+  };
+
+  useEffect(() => {
+    const listInnerElement = listInnerRef.current;
+
+    if (listInnerElement) {
+      listInnerElement?.scrollTo(0, 0);
+
+      listInnerElement.addEventListener("scroll", onScroll);
+
+      // Clean-up
+      return () => {
+        listInnerElement.removeEventListener("scroll", onScroll);
+      };
+    }
+  }, [active]);
+
+  useEffect(() => {
+    let newMenu = [...Menus];
+    let index = newMenu.findIndex((x) => x.Key === "MemberAff");
+    if (index > -1) {
+      newMenu[index].children = Lists;
+      newMenu[index].items = Lists;
+      newMenu[index].Total = MemberAff?.data?.pages[0]?.Total
+    }
+  }, [Lists]);
 
   useEffect(() => {
     let index = Menus.findIndex((x) => x.Key === "Attachments");
@@ -505,10 +581,14 @@ function PosClientDiary({ f7router, f7route }) {
                     Promise.all([
                       refetch(),
                       refetchProds(),
+                      MemberAff.refetch(),
                     ])
                   }
                 >
-                  <div className="h-full overflow-auto pb-safe-b no-scrollbar">
+                  <div
+                    className="h-full overflow-auto pb-safe-b no-scrollbar"
+                    ref={listInnerRef}
+                  >
                     {isLoading && (
                       <div className="p-4">
                         {Array(4)
@@ -626,7 +706,7 @@ function PosClientDiary({ f7router, f7route }) {
                             {item.ID === "Attachments" && (
                               <>
                                 {SortedByTime &&
-                                   item.items.map((attachments, index) => (
+                                  item.items.map((attachments, index) => (
                                     <div
                                       className="mb-3.5 last:mb-0"
                                       key={index}
@@ -950,6 +1030,42 @@ function PosClientDiary({ f7router, f7route }) {
                                     Title="Không có kết quả nào."
                                     Desc="Rất tiếc ... Không tìm thấy dữ liệu nào"
                                   />
+                                )}
+                              </>
+                            )}
+                            {item.ID === "MemberAff" && (
+                              <>
+                                {item.items.map((member, i) => (
+                                  <div
+                                    className="flex items-center p-4 mb-4 bg-white rounded last:mb-0"
+                                    key={i}
+                                  >
+                                    <div className="w-11">
+                                      <img
+                                        className="object-cover w-full rounded-full aspect-square"
+                                        src={AssetsHelpers.toAbsoluteUrlCore(
+                                          "/AppCore/images/blank.png",
+                                          ""
+                                        )}
+                                      />
+                                    </div>
+                                    <div className="flex-1 pl-4">
+                                      <div className="flex mb-px font-medium">
+                                        {member?.FullName}
+                                      </div>
+                                      <div className="flex items-center text-gray-500 font-lato">
+                                        {member?.MobilePhone}
+                                      </div>
+                                    </div>
+                                  </div>
+                                ))}
+                                {MemberAff.isFetchingNextPage && (
+                                  <div className="flex items-center justify-center space-x-2 h-14">
+                                    <span className="sr-only">Loading...</span>
+                                    <div className="h-2.5 w-2.5 bg-app rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+                                    <div className="h-2.5 w-2.5 bg-app rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+                                    <div className="w-2.5 h-2.5 rounded-full bg-app animate-bounce"></div>
+                                  </div>
                                 )}
                               </>
                             )}

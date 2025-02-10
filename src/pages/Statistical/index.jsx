@@ -799,12 +799,7 @@ function Statistical({ f7router }) {
                     Tạm ứng còn lại
                   </div>
                   <div className="px-4 py-2.5 font-semibold text-right text-danger col-span-2">
-                    {StringHelpers.formatVND(
-                      Math.abs(ArrayHelpers.sumTotal(data.TAM_UNG, "Value")) -
-                        Math.abs(
-                          ArrayHelpers.sumTotal(data.THU_HOAN_UNG, "Value")
-                        )
-                    )}
+                    {StringHelpers.formatVND(Math.abs(data.TON_TAM_UNG))}
                   </div>
                 </div>
                 <div className="grid grid-cols-5">
@@ -818,13 +813,8 @@ function Statistical({ f7router }) {
                           ? data.TY_LE_GIU_LUONG
                           : Math.ceil(
                               (SalaryTotal() / 100) * data.TY_LE_GIU_LUONG
-                            )) -
-                        (Math.abs(
-                          ArrayHelpers.sumTotal(data.TAM_UNG, "Value")
-                        ) -
-                          Math.abs(
-                            ArrayHelpers.sumTotal(data.THU_HOAN_UNG, "Value")
-                          ))
+                            )) +
+                        data.TON_TAM_UNG
                     )}
                   </div>
                 </div>
