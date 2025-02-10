@@ -30,12 +30,10 @@ import NoFound from "../../components/NoFound";
 import Dom7 from "dom7";
 import KeyboardsHelper from "../../helpers/KeyboardsHelper";
 import AssetsHelpers from "../../helpers/AssetsHelpers";
-import Resizer from "react-image-file-resizer";
-import MoresAPI from "../../api/Mores.api";
-import PromHelpers from "../../helpers/PromHelpers";
 import { toast } from "react-toastify";
 import clsx from "clsx";
 import { useForm, Controller } from "react-hook-form";
+import { UploadImages } from "@/partials/forms/files";
 
 const Photos = ({ PhotoList, Title }) => {
   const Brand = useStore("Brand");
@@ -318,7 +316,7 @@ const ScheduleItem = ({ item, checkStatus, index }) => {
   );
 };
 
-function TechniciansService({ id, memberid, itemid }) {
+function TechniciansService({ id, itemid }) {
   const Auth = useStore("Auth");
   const CrStocks = useStore("CrStocks");
   const Brand = useStore("Brand");
@@ -420,19 +418,9 @@ function TechniciansService({ id, memberid, itemid }) {
 
   const uploadOsMutation = useMutation({
     mutationFn: async (body) => {
-      let { data } = await MoresAPI.uploadMultiple({
-        Token: body?.Token,
-        Files: body.Files,
-      });
-      return await StaffsAPI.updateImageOs({
-        ID: body.ID,
-        data: {
-          srcList:
-            data?.lst && data?.lst.length > 0
-              ? data?.lst.map((x) => x.result).toString()
-              : "",
-        },
-      });
+      let rs = await StaffsAPI.updateImageOs(body);
+      await ImagesOsfetch();
+      return rs;
     },
   });
 
@@ -452,92 +440,23 @@ function TechniciansService({ id, memberid, itemid }) {
     mutationFn: (body) => StaffsAPI.deleteImagesOs(body),
   });
 
-  const uploadAll = async (files, dialog) => {
-    const results = [];
+  const handleUpload = (images) => {
+    if (!images || images.length === 0) return;
+    f7.dialog.preloader("Đang Upload ...");
 
-    for (const i in files) {
-      let formData = new FormData();
-      formData.append(files[i].index, files[i].file);
-
-      const data = await uploadOsMutation.mutateAsync({
-        Token: Auth?.token,
-        Files: formData,
+    uploadOsMutation.mutate(
+      {
         ID: id,
-      });
-
-      //console.log(data);
-
-      results.push(data);
-
-      progress += 100 / files.length;
-
-      dialog.setProgress(progress);
-      dialog.setText(`${files[i].index + 1} trên ${files.length}`);
-
-      if (files[i].index === files.length - 1) {
-        await ImagesOsfetch();
+        data: {
+          srcList: images.toString(),
+        },
+      },
+      {
+        onSuccess: () => {
+          f7.dialog.close();
+        },
       }
-    }
-
-    return results;
-  };
-
-  const handleUpload = async (e) => {
-    const files = e.target.files;
-    if (!files || files.length === 0) return;
-
-    const dialog = f7.dialog.progress("Đang Upload ...", progress);
-    dialog.setText(`0 trên ${files.length}`);
-
-    let newImages = [];
-
-    for (let i = 0; i < files.length; i++) {
-      let val = await new Promise((resolve) => {
-        Resizer.imageFileResizer(
-          files[i],
-          600,
-          600,
-          "JPEG",
-          100,
-          0,
-          (uri) => {
-            resolve(uri);
-          },
-          "file",
-          300,
-          300
-        );
-      });
-      newImages.push({ index: i, file: val });
-    }
-
-    uploadAll(newImages, dialog)
-      .then((results) => {
-        f7.dialog.close();
-        progress = 0;
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-  };
-
-  const openCameraUpload = () => {
-    PromHelpers.CHOOSE_FILE_SERVER()
-      .then(({ data }) => {
-        f7.dialog.preloader("Đang Upload...");
-        updateOsMutation.mutate(
-          {
-            ID: id,
-            data: { src: data },
-          },
-          {
-            onSuccess: (data) => {
-              ImagesOsfetch().then(() => f7.dialog.close());
-            },
-          }
-        );
-      })
-      .catch((error) => console.log(error));
+    );
   };
 
   const onUpdateDescOs = (e) => {
@@ -642,24 +561,8 @@ function TechniciansService({ id, memberid, itemid }) {
     }
   };
 
-  const loadRefresh = (done) => {
-    if (active === "#thong-tin") {
-      refetch().then(() => {
-        StaffsRefetch().then(() => done());
-      });
-    }
-    if (active === "#lich-trinh") {
-      Schedulerefetch().then(() => done());
-    }
-  };
-
   return (
-    <Page
-      name="Technicians-profile"
-      noToolbar={data?.Status === "done"}
-      // ptr
-      // onPtrRefresh={loadRefresh}
-    >
+    <Page name="Technicians-profile" noToolbar={data?.Status === "done"}>
       <Navbar innerClass="!px-0 text-white" outline={false}>
         <NavLeft className="h-full">
           <Link
@@ -735,7 +638,7 @@ function TechniciansService({ id, memberid, itemid }) {
             </div>
           )}
           {!isLoading && (
-            <>
+            <div className="pb-safe-b">
               <div className="py-2 mb-3 bg-white rounded last:mb-0">
                 <div className="px-4 py-2">
                   <div className="text-muted">Dịch vụ</div>
@@ -856,33 +759,17 @@ function TechniciansService({ id, memberid, itemid }) {
                         </div>
                       </div>
                     ))}
-                  <div className="relative flex items-center justify-center bg-white rounded aspect-square text-muted">
-                    <div className="flex flex-col items-center">
-                      <ArrowUpTrayIcon className="w-6" />
-                      <div className="mt-px text-[11px]">Upload</div>
-                    </div>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleUpload}
-                      className="absolute w-full h-full opacity-0"
-                      id="file"
-                      name="files[]"
-                      multiple
-                    />
-                  </div>
-                  <div
-                    className="relative flex items-center justify-center bg-white rounded aspect-square text-muted"
-                    onClick={openCameraUpload}
-                  >
-                    <div className="flex flex-col items-center">
-                      <CameraIcon className="w-6" />
-                      <div className="mt-px text-[11px]">Chụp ảnh</div>
-                    </div>
-                  </div>
+                  <UploadImages
+                    isMultiple
+                    width="w-auto"
+                    height="h-auto"
+                    onChange={(images) => handleUpload(images)}
+                    className="bg-white aspect-square"
+                    size="xs"
+                  />
                 </div>
               </div>
-            </>
+            </div>
           )}
         </Tab>
         <Tab
@@ -916,7 +803,7 @@ function TechniciansService({ id, memberid, itemid }) {
             </div>
           )}
           {!ScheduleLoading && (
-            <>
+            <div className="pb-safe-b">
               {Schedule && Schedule.length > 0 && (
                 <div className="timeline">
                   {Schedule &&
@@ -936,7 +823,7 @@ function TechniciansService({ id, memberid, itemid }) {
                   Desc="Rất tiếc ... Không tìm thấy dữ liệu nào."
                 />
               )}
-            </>
+            </div>
           )}
         </Tab>
       </Tabs>

@@ -207,7 +207,6 @@ const CHOOSE_FILES = (args) => {
         .then(({ data }) => {
           let newData = Array.isArray(data) ? data : data?.values || [];
           if (newData && newData.length > 0) {
-            console.log(newData);
             f7.dialog.preloader("Đang thực hiện ...");
             let images = [];
             Promise.all(
@@ -221,7 +220,6 @@ const CHOOSE_FILES = (args) => {
                   })
                 )
                   .then((s1) => {
-                    console.log(s1);
                     var rs = JSON.parse(s1.data);
                     images.push(rs);
                   })
@@ -256,7 +254,6 @@ const CHOOSE_IMAGES = (args) => {
         .then(({ data }) => {
           let newData = Array.isArray(data) ? data : data?.values || [];
           if (newData && newData.length > 0) {
-            console.log(newData);
             f7.dialog.preloader("Đang thực hiện ...");
             let images = [];
             Promise.all(
@@ -270,7 +267,6 @@ const CHOOSE_IMAGES = (args) => {
                   })
                 )
                   .then((s1) => {
-                    console.log(s1);
                     var rs = JSON.parse(s1.data);
                     images.push(rs);
                   })

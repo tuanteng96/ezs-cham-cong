@@ -7,10 +7,8 @@ import {
 } from "@heroicons/react/24/outline";
 import clsx from "clsx";
 import React, { useState } from "react";
-import { toast } from "react-toastify";
 import { f7, Link, Popover, useStore } from "framework7-react";
 import { useMutation } from "react-query";
-import Resizer from "react-image-file-resizer";
 import AssetsHelpers from "@/helpers/AssetsHelpers";
 import MoresAPI from "@/api/Mores.api";
 import PromHelpers from "@/helpers/PromHelpers";
@@ -28,6 +26,7 @@ const UploadImages = ({
   buttonText = "Thêm ảnh",
   isMultiple = false,
   accept = "",
+  popoverOpen = "popover-upload-images",
   ...props
 }) => {
   const Auth = useStore("Auth");
@@ -39,48 +38,6 @@ const UploadImages = ({
         setCompleted(progress);
       }),
   });
-
-  const handleFileChange = async (event) => {
-    // const [file] = event.target.files;
-    // if (file) {
-    //   let val = await new Promise((resolve) => {
-    //     Resizer.imageFileResizer(
-    //       file,
-    //       600,
-    //       600,
-    //       "JPEG",
-    //       100,
-    //       0,
-    //       (uri) => {
-    //         resolve(uri);
-    //       },
-    //       "file",
-    //       300,
-    //       300
-    //     );
-    //   });
-    //   var bodyFormData = new FormData();
-    //   bodyFormData.append("file", val);
-    //   uploadMutation.mutate(
-    //     {
-    //       Token: Auth?.token,
-    //       File: bodyFormData,
-    //     },
-    //     {
-    //       onSuccess: ({ data }) => {
-    //         if (data?.error) {
-    //           toast.error(data.error);
-    //         } else {
-    //           onChange(data.data);
-    //         }
-    //       },
-    //       onError: (error) => {
-    //         console.log(error);
-    //       },
-    //     }
-    //   );
-    // }
-  };
 
   const onPhotoLibrary = () => {
     const arg = {
@@ -156,7 +113,7 @@ const UploadImages = ({
             "relative flex flex-col items-center justify-center h-full text-center border border-primarylight rounded",
             errorMessageForce && "border-danger"
           )}
-          popoverOpen=".popover-upload-images"
+          popoverOpen={`.${popoverOpen}`}
         >
           <svg
             className="w-9"
@@ -237,7 +194,12 @@ const UploadImages = ({
       {placeholder && (
         <div className="mt-3 text-xs text-muted font-inter">{placeholder}</div>
       )}
-      <Popover className="popover-upload-images min-w-[200px]">
+      <Popover
+        className={clsx(
+          "min-w-[200px]",
+          popoverOpen && "popover-upload-images"
+        )}
+      >
         <div className="flex flex-col py-1">
           <Link
             className="relative flex justify-between px-4 py-3 font-medium border-b last:border-0"

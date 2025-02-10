@@ -38,25 +38,35 @@ function PickerOneEmployees({ children, Order }) {
   });
 
   const { control, handleSubmit, setValue, reset, watch } = methods;
-  
+
   const { fields, remove, append } = useFieldArray({
     control,
     name: "Equally",
   });
-  
+
   const { fields: fieldsValues, remove: removeFieldsValues } = useFieldArray({
     control,
     name: "EquallyValues",
   });
 
   useEffect(() => {
-    let newGroup = [{ value: "TU_VAN", label: "Hoa hồng tư vấn" }];
+    let newGroup = [
+      {
+        value: "TU_VAN",
+        label: Brand?.Global?.Admin?.hoa_hong_tu_van || "Hoa hồng tư vấn",
+      },
+    ];
     if (!Brand?.Global?.Admin?.hoa_hong_tu_van_ktv_an) {
       newGroup = [
-        { value: "TU_VAN", label: "Hoa hồng tư vấn" },
+        {
+          value: "TU_VAN",
+          label: Brand?.Global?.Admin?.hoa_hong_tu_van || "Hoa hồng tư vấn",
+        },
         {
           value: "KY_THUAT_VIEN",
-          label: "Hoa hồng tư vấn ( KH mới )",
+          label:
+            Brand?.Global?.Admin?.hoa_hong_tu_van_khm ||
+            "Hoa hồng tư vấn ( KH mới )",
         },
       ];
     }
@@ -80,7 +90,7 @@ function PickerOneEmployees({ children, Order }) {
 
   let closeValues = () => {
     setValue("EquallyValues", []);
-    
+
     setVisibleValues(false);
   };
 

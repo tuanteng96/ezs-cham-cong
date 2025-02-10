@@ -1297,7 +1297,10 @@ function PosClientManage({ f7route, f7router }) {
                 disabled={
                   Order?.isLoading ||
                   Client.isLoading ||
-                  (!Client?.data?.CheckIn && !Client?.data?.RecentlyCheckIn)
+                  (!Client?.data?.CheckIn && !Client?.data?.RecentlyCheckIn) ||
+                  !Client?.data?.CheckIn ||
+                  !Order?.data?.Order?.ID ||
+                  Order?.data?.OrderItems?.length === 0
                 }
                 // disabled={
                 //   Order?.isLoading ||

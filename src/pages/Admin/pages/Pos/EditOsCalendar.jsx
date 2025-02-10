@@ -28,12 +28,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
 import { SelectMembersServices } from "@/partials/forms/select";
-import {
-  DatePicker,
-  SelectPicker,
-  SelectPickersGroup,
-  UploadFiles,
-} from "@/partials/forms";
+import { DatePicker, SelectPicker, SelectPickersGroup } from "@/partials/forms";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import ConfigsAPI from "@/api/Configs.api";
 import KeyboardsHelper from "@/helpers/KeyboardsHelper";
@@ -327,6 +322,13 @@ function EditOsCalendar({ f7route, f7router }) {
     },
   });
 
+  const uploadImagesOsMutation = useMutation({
+    mutationFn: async (body) => {
+      let data = await AdminAPI.clientsUploadImagesServicesItem(body);
+      return data;
+    },
+  });
+
   const resetOsMutation = useMutation({
     mutationFn: async (body) => {
       let data = await AdminAPI.clientsResetOsServicesItem(body);
@@ -378,25 +380,28 @@ function EditOsCalendar({ f7route, f7router }) {
     },
   });
 
-  const UploadImagesOs = (val) => {
-    if (!val) return;
+  const UploadImagesOs = async (images) => {
+    if (!images) return;
 
     f7.dialog.preloader("Đang Upload ...");
 
-    var bodyFormData = new FormData();
-    bodyFormData.append("src", val);
-    uploadImageOsMutation.mutate(
-      {
-        OsID: formState?.Os?.ID,
-        Token: Auth?.Token,
-        data: bodyFormData,
-      },
-      {
-        onSuccess: () => {
-          f7.dialog.close();
-        },
-      }
-    );
+    const promiseArray = images.map(async (arr) => {
+      await Promise.all(
+        images.map(async (image) => {
+          var bodyFormData = new FormData();
+          bodyFormData.append("src", image);
+          
+          await uploadImagesOsMutation.mutateAsync({
+            OsID: formState?.Os?.ID,
+            Token: Auth?.Token,
+            data: bodyFormData,
+          });
+        })
+      );
+    });
+    await await Promise.all(promiseArray);
+    await OsImages.refetch();
+    f7.dialog.close();
   };
 
   const onRemoveImagesID = (ID) => {
@@ -1393,19 +1398,14 @@ function EditOsCalendar({ f7route, f7router }) {
                         </div>
                       </div>
                     ))}
-                  <UploadFiles
-                    onChange={(images) => UploadImagesOs(images)}
-                    wrapClass="aspect-square"
-                    widthClass="w-full"
-                    heightClass="h-full"
-                  />
-                  {/* <UploadImages
+                  <UploadImages
                     width="w-auto"
                     height="h-auto"
                     className="aspect-square"
                     onChange={(images) => UploadImagesOs(images)}
                     size="xs"
-                  /> */}
+                    isMultiple={true}
+                  />
                 </div>
                 <PhotoBrowser
                   photos={

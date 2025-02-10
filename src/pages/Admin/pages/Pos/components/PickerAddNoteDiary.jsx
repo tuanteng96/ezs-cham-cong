@@ -1,7 +1,4 @@
-import {
-  PhotoIcon,
-  XMarkIcon,
-} from "@heroicons/react/24/outline";
+import { PhotoIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { AnimatePresence, motion } from "framer-motion";
 import { Button, TextEditor, f7, useStore } from "framework7-react";
 import React, { useEffect, useRef, useState } from "react";
@@ -18,6 +15,7 @@ import moment from "moment";
 import MoresAPI from "@/api/Mores.api";
 import AssetsHelpers from "@/helpers/AssetsHelpers";
 import KeyboardsHelper from "@/helpers/KeyboardsHelper";
+import { UploadImagesIcon } from "@/partials/forms/files";
 
 const schemaAdd = yup.object().shape({
   Content: yup.string().required("Vui lòng nhập nội dung."),
@@ -112,7 +110,7 @@ function PickerAddNoteDiary({ children, data, MemberID }) {
           : "",
       IsEd: values.IsEd ? 1 : 0,
       IsPublic: values.IsPublic ? 1 : 0,
-      Content: values.Content ? encodeURI(values.Content) : ""
+      Content: values.Content ? encodeURI(values.Content) : "",
     };
 
     var bodyFormData = new FormData();
@@ -134,44 +132,17 @@ function PickerAddNoteDiary({ children, data, MemberID }) {
     );
   };
 
-  const uploadFileEditor = async (event) => {
-    f7.dialog.preloader("Đang upload...");
-    const files = [...event.target.files];
-
-    let body = [];
-    for (let file of files) {
-      var bodyFormData = new FormData();
-      bodyFormData.append("file", file);
-      body.push({
-        Token: Auth?.token,
-        File: bodyFormData,
-      });
-    }
-    uploadMutation.mutate(
-      {
-        body,
-      },
-      {
-        onSuccess: ({ data }) => {
-          if (data) {
-            setValue(
-              "Content",
-              `${watch().Content} <div>${data
-                .map(
-                  (x) =>
-                    `<div><img class="w-full" src="${AssetsHelpers.toAbsoluteUrl(
-                      x
-                    )}" /></div>`
-                )
-                .join("")}</div>`
-            );
-          }
-          f7.dialog.close();
-        },
-        onError: (error) => {
-          console.log(error);
-        },
-      }
+  const uploadFileEditor = async (images) => {
+    setValue(
+      "Content",
+      `${watch().Content} <div>${images
+        .map(
+          (x) =>
+            `<div><img class="w-full" src="${AssetsHelpers.toAbsoluteUrl(
+              x
+            )}" /></div>`
+        )
+        .join("")}</div>`
     );
   };
 
@@ -180,7 +151,7 @@ function PickerAddNoteDiary({ children, data, MemberID }) {
     e.stopPropagation();
     handleSubmit(onSubmit)(e);
   };
-  
+
   return (
     <AnimatePresence initial={false}>
       <>
@@ -252,22 +223,13 @@ function PickerAddNoteDiary({ children, data, MemberID }) {
                               )}
                             </div>
                             <div className="absolute flex h-11 top-0  z-[10000] right-0 pr-2">
-                              <input
-                                type="file"
-                                name="uploadfile"
-                                accept="image/*"
-                                className="hidden w-full h-full opacity-0"
-                                ref={inputFileRef}
-                                onChange={uploadFileEditor}
-                                multiple
-                                value=""
-                              />
-                              <div
+                              <UploadImagesIcon
+                                isMultiple={true}
                                 className="flex items-center justify-center h-full w-11 text-[#333]"
-                                onClick={() => inputFileRef?.current.click()}
+                                onChange={(images) => uploadFileEditor(images)}
                               >
                                 <PhotoIcon className="w-7" />
-                              </div>
+                              </UploadImagesIcon>
                             </div>
                           </div>
                         )}
