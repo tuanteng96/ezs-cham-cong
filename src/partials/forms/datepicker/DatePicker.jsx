@@ -12,10 +12,10 @@ let months = Array.apply(0, Array(12)).map((_, i) =>
   moment().month(i).format("M")
 );
 const years = [...Array(2112 - 1900).keys()].map((i) => (i + 1900).toString());
-const hoursList = Array(24)
+const hoursLists = Array(24)
   .fill()
   .map((_, i) => i.toString());
-const minuteList = Array(60)
+const minuteLists = Array(60)
   .fill()
   .map((_, i) => (i < 10 ? "0" + i : i.toString()));
 
@@ -31,6 +31,7 @@ function DatePicker({
   placeholder = "Chọn thời gian",
   defaultValue,
   minDate = null,
+  icon = null,
   ...props
 }) {
   const [visible, setVisible] = useState(false);
@@ -43,6 +44,9 @@ function DatePicker({
     months: "",
     years: "",
   });
+
+  const [hoursList, setHoursList] = useState(hoursLists);
+  const [minuteList, setMinuteList] = useState(minuteLists);
 
   useEffect(() => {
     setPickerValue((prevState) => ({
@@ -102,10 +106,13 @@ function DatePicker({
           onClick={() => !props?.disabled && open()}
           //onMouseDown={(e) => e.stopPropagation()}
         >
+          {icon && icon()}
+
           <input
             className={clsx(
-              "no-keyboard w-full py-3 px-4 border transition focus:border-primary font-normal shadow-[0_4px_6px_0_rgba(16,25,40,.06)] rounded",
-              errorMessageForce ? "border-danger" : "border-[#d5d7da]"
+              "no-keyboard w-full py-3 border transition focus:border-primary font-normal shadow-[0_4px_6px_0_rgba(16,25,40,.06)] rounded",
+              errorMessageForce ? "border-danger" : "border-[#d5d7da]",
+              icon ? "pr-4 pl-10" : "px-4"
             )}
             type="text"
             placeholder={placeholder}
@@ -251,6 +258,7 @@ function DatePicker({
                                     : "opacity-70"
                                 )}
                               >
+                                {Number(hour) >= 10 ? <></> : 0}
                                 {hour}
                               </div>
                             )}

@@ -382,6 +382,7 @@ function LayoutProvider({ children }) {
       Count: 0,
     },
   });
+  window.refetchProcessings = refetchProcessings
 
   useQuery({
     queryKey: ["InvoiceProcessings", { ID: Auth?.ID, StockID: CrStocks?.ID }],
@@ -430,7 +431,6 @@ function LayoutProvider({ children }) {
 
   const handleBzReceive = ({ data }) => {
     if (!Auth) return;
-
     let newData = JSON.parse(data.data);
     if (!newData?.subject) return;
 

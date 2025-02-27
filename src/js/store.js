@@ -12,6 +12,7 @@ const store = createStore({
     Brand: JSON.parse(localStorage.getItem("Brand")) || null,
     Auth: JSON.parse(localStorage.getItem("Auth")) || null,
     Stocks: JSON.parse(localStorage.getItem("Stocks")) || null,
+    StocksAll: [],
     CrStocks: JSON.parse(localStorage.getItem("CrStocks")) || null,
     WorkTimeSettings:
       JSON.parse(localStorage.getItem("WorkTimeSettings")) || null,
@@ -30,6 +31,9 @@ const store = createStore({
     },
     Stocks({ state }) {
       return state.Stocks;
+    },
+    StocksAll({ state }) {
+      return state.StocksAll;
     },
     CrStocks({ state }) {
       return state.CrStocks;
@@ -125,6 +129,7 @@ const store = createStore({
               label: x.Title,
             })
           ),
+          StocksAll: value?.Info?.Stocks,
         },
         success: () => {
           if (
@@ -180,6 +185,7 @@ const store = createStore({
             value: x.ID,
             label: x.Title,
           }));
+          state.StocksAll = value?.Info?.Stocks;
           // state.Stocks =
           //   (value?.Info?.StockRights &&
           //     value?.Info?.StockRights.length > 0 &&
@@ -245,9 +251,10 @@ const store = createStore({
                   f7.dialog.close();
                   callback && callback();
                 });
-              }).catch(() => {
+              })
+              .catch(() => {
                 f7.dialog.close();
-                f7.dialog.alert("Error : Provisional headers are shown ...")
+                f7.dialog.alert("Error : Provisional headers are shown ...");
               });
           } else {
             SubscribeHelpers.remove().then(() =>

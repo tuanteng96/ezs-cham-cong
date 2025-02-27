@@ -32,6 +32,7 @@ module.exports = {
         lg: '0px 0px 50px 0px rgba(82, 63, 105, 0.15)',
         sm: '0px 0px 20px 0px rgba(76, 87, 125, 0.02)',
         '3xl': 'rgba(0, 0, 0, 0.16) 0px 3px 6px',
+        'input': '0 4px 6px 0 rgba(16,25,40,.06)'
       },
       padding: {
         "safe-t": "var(--ezs-safe-area-top, 0px)",

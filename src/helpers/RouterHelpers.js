@@ -28,6 +28,7 @@ const BOTTOM_NAVIGATION_PAGES = [
   "/admin/pos/clients/birthday/",
   "/admin/pos/invoice-processings/",
   "/admin/printers/",
+  "/admin/timekeepings/",
   "/debug/"
 ];
 

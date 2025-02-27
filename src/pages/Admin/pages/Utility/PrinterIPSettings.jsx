@@ -9,7 +9,7 @@ import {
   f7,
   useStore,
 } from "framework7-react";
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import PromHelpers from "../../../../helpers/PromHelpers";
 import {
   ChevronLeftIcon,
@@ -18,10 +18,8 @@ import {
 } from "@heroicons/react/24/outline";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
 import KeyboardsHelper from "../../../../helpers/KeyboardsHelper";
-import { useMutation, useQuery, useQueryClient } from "react-query";
+import { useMutation, useQuery } from "react-query";
 import { toast } from "react-toastify";
-import { PatternFormat } from "react-number-format";
-import clsx from "clsx";
 import ConfigsAPI from "@/api/Configs.api";
 
 function PrinterIPSettings(props) {

@@ -17,10 +17,12 @@ import ConfigsAPI from "@/api/Configs.api";
 import moment from "moment";
 import * as htmlToImage from "html-to-image";
 
+var pIndex = 0;
+
 function PrinterService({ f7route }) {
   const Auth = useStore("Auth");
-  
-  let Mode = f7route?.query?.mode || ""
+
+  let Mode = f7route?.query?.mode || "";
 
   const CrStocks = useStore("CrStocks");
 
@@ -220,8 +222,14 @@ function PrinterService({ f7route }) {
         f7.dialog.close();
       })
       .catch((e) => {
-        f7.dialog.close();
-        f7.dialog.alert("Không thể kết nối máy in.");
+        if (pIndex === 0) {
+          pIndex = 1;
+          f7.dialog.close();
+          onConnectPrinter(print);
+        } else {
+          f7.dialog.close();
+          f7.dialog.alert("Không thể kết nối máy in.");
+        }
       });
   };
 
@@ -257,7 +265,10 @@ function PrinterService({ f7route }) {
             <ChevronLeftIcon className="w-6" />
           </Link>
         </NavLeft>
-        <NavTitle> {Mode ? "Thẻ dịch vụ" : "Phiếu dịch vụ"} #{f7route?.params?.id}</NavTitle>
+        <NavTitle>
+          {" "}
+          {Mode ? "Thẻ dịch vụ" : "Phiếu dịch vụ"} #{f7route?.params?.id}
+        </NavTitle>
         <div className="absolute h-[2px] w-full bottom-0 left-0 bg-[rgba(255,255,255,0.3)]"></div>
       </Navbar>
       <div className="flex flex-col h-full pb-safe-b">

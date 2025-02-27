@@ -10,6 +10,7 @@ import {
   TvIcon,
   ChevronDownIcon,
   CodeBracketIcon,
+  RectangleStackIcon,
 } from "@heroicons/react/24/outline";
 import { Link, Panel, f7, f7ready, useStore } from "framework7-react";
 import React, { useEffect, useRef, useState } from "react";
@@ -98,8 +99,17 @@ function Panels(props) {
         ActiveLink: ["/", "/home/"],
         active: true,
         Id: f7.utils.id("xxxx-xxxx-xxxx-xxxx"),
-        hasRight: Brand?.Global?.PosApp,
+        hasRight: true,
         Icon: <HomeIcon className="w-5" />,
+      },
+      {
+        Title: "Quản lý chấm công",
+        Link: "/admin/timekeepings/",
+        ActiveLink: ["/admin/timekeepings/"],
+        active: false,
+        Id: f7.utils.id("xxxx-xxxx-xxxx-xxxx"),
+        hasRight: true,
+        Icon: <RectangleStackIcon className="w-5" />,
       },
       {
         Title: "Thu ngân",
@@ -113,8 +123,7 @@ function Panels(props) {
         active: false,
         Id: f7.utils.id("xxxx-xxxx-xxxx-xxxx"),
         Icon: <TvIcon className="w-5" />,
-        hasRight: Brand?.Global?.PosApp && pos_mng?.hasRight,
-        //hasRight: pos_mng?.hasRight || false,
+        hasRight: pos_mng?.hasRight || false,
       },
       {
         Title: "Gửi tin nhắn APP",
@@ -249,16 +258,9 @@ function Panels(props) {
         Icon: <EllipsisHorizontalCircleIcon className="w-5" />,
         ActiveLink: [
           "/admin/utility/",
-          "/admin/utility/timekeeping-setting/",
           "/admin/utility/printerip-setting/",
         ],
         SubMenu: [
-          {
-            Title: "Cài đặt Công ca - Wifi",
-            Link: "/admin/utility/timekeeping-setting/",
-            active: false,
-            hasRight: cong_ca?.hasRight || false,
-          },
           {
             Title: "Cài đặt IP máy in",
             Link: "/admin/utility/printerip-setting/",

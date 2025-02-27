@@ -75,7 +75,7 @@ const AuthInit = async () =>
           Logo: rsConfig.data.filter((x) => x.Name === "logo.mau")[0]["Src"],
           Stocks: rsStocks?.data?.all
             ? rsStocks?.data?.all.filter((x) => x.ParentID !== 0)
-            : [],
+            : []
         });
       }
     }

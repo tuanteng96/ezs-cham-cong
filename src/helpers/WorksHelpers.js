@@ -192,14 +192,14 @@ const WorksHelpers = {
             duration > 0 ? "Hôm nay bạn đi sớm?" : "Hôm nay bạn đi muộn?";
 
           if (WorkShiftDuration[indexShift].Value < 0) {
-            if (Number(WorkShiftDuration[indexShift].Value === -60)) {
+            if (Number(WorkShiftDuration[indexShift].Value) === -60) {
               initialValues[duration > 0 ? "DI_SOM" : "DI_MUON"] = {
                 ...WorkShiftDuration[indexShift],
                 Value: Math.round(
                   Math.abs(duration) * ((WorkTimeToday.SalaryHours || 0) / 60)
                 ),
               };
-            } else if (WorkShiftDuration[indexShift].Value > -10) {
+            } else if (WorkShiftDuration[indexShift].Value >= -10) {
               initialValues[duration > 0 ? "DI_SOM" : "DI_MUON"] = {
                 ...WorkShiftDuration[indexShift],
                 Value: 0,
@@ -260,7 +260,7 @@ const WorksHelpers = {
               initialValues[duration > 0 ? "VE_SOM" : "VE_MUON"] = {
                 ...WorkShiftDuration[indexShift],
                 Value: Math.round(
-                  Math.abs(duration) * (WorkTimeToday.SalaryHours / 60)
+                  Math.abs(duration) * ((WorkTimeToday.SalaryHours || 0) / 60)
                 ),
               };
             } else if (WorkShiftDuration[indexShift].Value > -10) {
@@ -305,6 +305,123 @@ const WorksHelpers = {
       }
       resolve(Object.keys(initialValues).length === 0 ? null : initialValues);
     }),
+  getTimekeepingType: (info) => {
+    let obj = {
+      Value: "",
+      Option: "",
+    };
+    if (!info) return obj;
+    if (info["DI_SOM"]) {
+      obj = {
+        Value: info["DI_SOM"]?.Value,
+        Option: {
+          label: "Đi sớm",
+          value: "DI_SOM",
+        },
+      };
+    }
+    if (info["DI_MUON"]) {
+      obj = {
+        Value: info["DI_MUON"]?.Value
+          ? info?.Type === "CA_NHAN"
+            ? -Math.abs(info["DI_MUON"].Value)
+            : info["DI_MUON"].Value
+          : 0,
+        Option: {
+          label: "Đi muộn",
+          value: "DI_MUON",
+        },
+      };
+    }
+    if (info["VE_SOM"]) {
+      obj = {
+        Value: info["VE_SOM"]?.Value
+          ? info?.Type === "CONG_TY"
+            ? Math.abs(info["VE_SOM"].Value)
+            : -Math.abs(info["VE_SOM"].Value)
+          : 0,
+        Option: {
+          label: "Về sớm",
+          value: "VE_SOM",
+        },
+      };
+    }
+    if (info["VE_MUON"]) {
+      obj = {
+        Value: info["VE_MUON"]?.Value,
+        Option: {
+          label: "Về muộn",
+          value: "VE_MUON",
+        },
+      };
+    }
+    return obj;
+  },
+  getTimekeepingOption: (info) => {
+    let obj = {
+      Value: "",
+      Option: "",
+    };
+    if (!info) return obj;
+    if (info["DI_SOM"]) {
+      obj = {
+        Value: info["DI_SOM"]?.Value,
+        Option: {
+          label: "Đi sớm",
+          value: "DI_SOM",
+        },
+      };
+    }
+    if (info["DI_MUON"]) {
+      obj = {
+        Value: info["DI_MUON"]?.Value ? -Math.abs(info["DI_MUON"].Value) : 0,
+        Option: {
+          label: "Đi muộn",
+          value: "DI_MUON",
+        },
+      };
+    }
+    if (info["VE_SOM"]) {
+      obj = {
+        Value: info["VE_SOM"]?.Value ? -Math.abs(info["VE_SOM"].Value) : 0,
+        Option: {
+          label: "Về sớm",
+          value: "VE_SOM",
+        },
+      };
+    }
+    if (info["VE_MUON"]) {
+      obj = {
+        Value: info["VE_MUON"]?.Value,
+        Option: {
+          label: "Về muộn",
+          value: "VE_MUON",
+        },
+      };
+    }
+    return obj;
+  },
+  getTimeWork: ({ WorkTimeSetting, CA_LAM_VIEC, INDEX_NGAY }) => {
+    if (!WorkTimeSetting || !CA_LAM_VIEC || INDEX_NGAY < 0) return;
+    let index = CA_LAM_VIEC.findIndex((x) => x.ID === WorkTimeSetting.ShiftID);
+    if (index < 0) return;
+    let Day =
+      CA_LAM_VIEC[index].Days &&
+      CA_LAM_VIEC[index].Days.findIndex((d) => d.index === INDEX_NGAY);
+    if (Day > -1) {
+      return `${CA_LAM_VIEC[index].Name} : ${CA_LAM_VIEC[index].Days[Day].TimeFrom} - ${CA_LAM_VIEC[index].Days[Day].TimeTo}`;
+    }
+  },
+  getCountWorkTime : ({ CheckIn, CheckOut }) => {
+    if (!CheckIn || !CheckOut) return 0
+
+    let duration = moment(moment(CheckOut).format('HH:mm:ss'), 'HH:mm:ss').diff(
+      moment(moment(CheckIn).format('HH:mm:ss'), 'HH:mm:ss'),
+      'minute'
+    )
+    if (duration < 0) return 0
+    return duration
+  }
 };
 
 export default WorksHelpers;

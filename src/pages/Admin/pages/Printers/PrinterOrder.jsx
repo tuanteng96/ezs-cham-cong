@@ -19,6 +19,8 @@ import StringHelpers from "@/helpers/StringHelpers";
 import clsx from "clsx";
 import * as htmlToImage from "html-to-image";
 
+var pIndex = 0;
+
 function PrinterOrder({ f7route }) {
   const Auth = useStore("Auth");
   const Brand = useStore("Brand");
@@ -29,10 +31,10 @@ function PrinterOrder({ f7route }) {
 
   const actionsIPToPopover = useRef(null);
   const IpToPopoverWrapper = useRef(null);
-  
+
   const actionsToPopover = useRef(null);
   const buttonToPopoverWrapper = useRef(null);
-  
+
   useEffect(() => {
     return () => {
       if (actionsToPopover.current) {
@@ -235,8 +237,14 @@ function PrinterOrder({ f7route }) {
         f7.dialog.close();
       })
       .catch((e) => {
-        f7.dialog.close();
-        f7.dialog.alert("Không thể kết nối máy in.");
+        if (pIndex === 0) {
+          pIndex = 1;
+          f7.dialog.close();
+          onConnectPrinter(print);
+        } else {
+          f7.dialog.close();
+          f7.dialog.alert("Không thể kết nối máy in.");
+        }
       });
   };
 
@@ -287,7 +295,9 @@ function PrinterOrder({ f7route }) {
                   __html: Order?.data?.BillAddress,
                 }}
               ></div>
-              <h1 className="mt-2 text-base font-bold uppercase">Hóa đơn bán hàng</h1>
+              <h1 className="mt-2 text-base font-bold uppercase">
+                Hóa đơn bán hàng
+              </h1>
               <div>
                 <p>
                   #<span className="order-id">{Order?.data?.OrderEnt?.ID}</span>

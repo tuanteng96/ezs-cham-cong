@@ -57,7 +57,7 @@ const SelectPickersGroup = forwardRef(
           >
             <div
               className={clsx(
-                "no-keyboard flex w-full pl-4 pr-24 py-3 border rounded focus:border-primary shadow-[0_4px_6px_0_rgba(16,25,40,.06)",
+                "no-keyboard flex w-full pl-4 pr-24 py-3 border rounded focus:border-primary shadow-input",
                 errorMessageForce ? "border-danger" : "border-[#d5d7da]",
                 isDisabled && "bg-[#f0f0f0]"
               )}

@@ -55,7 +55,6 @@ import OrderBonusSalesCommissionAutoPage from "@/pages/Admin/pages/Orders/OrderB
 import OrderSplitPaymentsPage from "@/pages/Admin/pages/Orders/OrderSplitPayments.jsx";
 import OrderReturnPage from "@/pages/Admin/pages/Orders/OrderReturn.jsx";
 
-import TimekeepingSettingsPage from "../pages/Admin/pages/Utility/TimekeepingSettings.jsx";
 import PrinterIPSettingsPage from "@/pages/Admin/pages/Utility/PrinterIPSettings.jsx";
 
 import PosLocksCalendarPage from "@/pages/Admin/pages/Pos/PosLocksCalendar.jsx";
@@ -68,6 +67,15 @@ import EditOsMaterialsPage from "@/pages/Admin/pages/Pos/EditOsMaterials.jsx";
 import PrinterOrderPage from "@/pages/Admin/pages/Printers/PrinterOrder.jsx";
 import PrinterServicePage from "@/pages/Admin/pages/Printers/PrinterService.jsx";
 
+import TimekeepingsPage from "@/pages/Admin/pages/Timekeepings/index.jsx";
+import TimekeepingsShiftPage from "@/pages/Admin/pages/Timekeepings/TimekeepingsShift.jsx";
+import TimekeepingsWifiLocaitonPage from "@/pages/Admin/pages/Timekeepings/TimekeepingsWifiLocaiton.jsx";
+import TimekeepingsMonthlyPage from "@/pages/Admin/pages/Timekeepings/TimekeepingsMonthly.jsx";
+import TimekeepingsTakePage from "@/pages/Admin/pages/Timekeepings/TimekeepingsTake.jsx";
+import TimekeepingsWorkPage from "@/pages/Admin/pages/Timekeepings/TimekeepingsWork.jsx";
+import TimekeepingsUserPage from "@/pages/Admin/pages/Timekeepings/TimekeepingsUser.jsx";
+import TimekeepingsPunishmentPage from "@/pages/Admin/pages/Timekeepings/TimekeepingsPunishment.jsx";
+
 import StocksPage from "../pages/Stocks/index.jsx";
 
 import CoursesPage from "../pages/Courses/index.jsx";
@@ -75,6 +83,7 @@ import AttendancePage from "../pages/Courses/Attendance.jsx";
 import StudentPage from "../pages/Courses/Student.jsx";
 
 import DebugPage from "@/pages/Debug/index.jsx";
+
 
 var routes = [
   {
@@ -230,18 +239,11 @@ var routes = [
       },
       {
         path: "utility/",
-        component: TimekeepingSettingsPage,
+        component: PrinterIPSettingsPage,
         options: {
           transition: "f7-cover",
         },
         routes: [
-          {
-            path: "timekeeping-setting/",
-            component: TimekeepingSettingsPage,
-            options: {
-              transition: "f7-cover",
-            },
-          },
           {
             path: "printerip-setting/",
             component: PrinterIPSettingsPage,
@@ -521,7 +523,65 @@ var routes = [
             options: {
               transition: "f7-cover",
             },
-          }
+          },
+        ],
+      },
+      {
+        path: "timekeepings/",
+        component: TimekeepingsPage,
+        options: {
+          transition: "f7-cover",
+        },
+        routes: [
+          {
+            path: "/shift",
+            component: TimekeepingsShiftPage,
+            options: {
+              transition: "f7-cover",
+            },
+          },
+          {
+            path: "/wifi-location",
+            component: TimekeepingsWifiLocaitonPage,
+            options: {
+              transition: "f7-cover",
+            },
+          },
+          {
+            path: "/monthly",
+            component: TimekeepingsMonthlyPage,
+            options: {
+              transition: "f7-cover",
+            },
+          },
+          {
+            path: "/take-break",
+            component: TimekeepingsTakePage,
+            options: {
+              transition: "f7-cover",
+            },
+          },
+          {
+            path: "/work",
+            component: TimekeepingsWorkPage,
+            options: {
+              transition: "f7-cover",
+            },
+          },
+          {
+            path: "/punishment",
+            component: TimekeepingsPunishmentPage,
+            options: {
+              transition: "f7-cover",
+            }
+          },
+          {
+            path: "/:MemberID",
+            component: TimekeepingsUserPage,
+            options: {
+              transition: "f7-cover",
+            }
+          },
         ],
       },
     ],

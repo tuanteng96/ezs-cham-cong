@@ -130,6 +130,15 @@ const AdminAPI = {
         },
       }
     ),
+  selectMembers: ({ Key = "", CurrentStockID, Token }) =>
+    http.get(
+      `/api/gl/select2?cmd=user&crstockid=${CurrentStockID}&q=${Key}&all=1`,
+      {
+        headers: {
+          Authorization: `Bearer ${Token}`,
+        },
+      }
+    ),
   selectMembersServices: ({ Key = "", CurrentStockID, Token }) =>
     http.get(
       `/api/gl/select2?cmd=user&roles=DV&crstockid=${CurrentStockID}&q=${Key}&all=1`,
@@ -802,6 +811,64 @@ const AdminAPI = {
     ),
   memberAff: ({ data, Token }) =>
     http.post(`/api/v3/member23@MemberByAffMemberID`, JSON.stringify(data), {
+      headers: {
+        Authorization: `Bearer ${Token}`,
+      },
+    }),
+  getTimekeepingsMonthly: ({ data, Token }) =>
+    http.post(`/api/v3/UserSalary24@get`, JSON.stringify(data), {
+      headers: {
+        Authorization: `Bearer ${Token}`,
+      },
+    }),
+  getTimekeepingsTakeBreak: ({ data, Token }) =>
+    http.post(
+      `/api/v3/userwork23@workoffList?stockid=${data?.filter?.StockID || ""}`,
+      JSON.stringify(data),
+      {
+        headers: {
+          Authorization: `Bearer ${Token}`,
+        },
+      }
+    ),
+  actionTimekeepingsTakeBreak: ({ data, Token }) =>
+    http.post(`/api/v3/userwork23@workoffEdit`, JSON.stringify(data), {
+      headers: {
+        Authorization: `Bearer ${Token}`,
+      },
+    }),
+  getTimekeepingsWork: ({ data, Token }) =>
+    http.post(`/api/v3/WorkTrack@UserDaily`, JSON.stringify(data), {
+      headers: {
+        Authorization: `Bearer ${Token}`,
+      },
+    }),
+  getTimekeepingsSheet: ({ data, Token }) =>
+    http.post(`/api/v3/userwork23@workList`, JSON.stringify(data), {
+      headers: {
+        Authorization: `Bearer ${Token}`,
+      },
+    }),
+  resetPwdMember: ({ data, Token }) =>
+    http.post(`/api/v3/User24@ResetPwd`, JSON.stringify(data), {
+      headers: {
+        Authorization: `Bearer ${Token}`,
+      },
+    }),
+  saveMachineCode: ({ data, Token }) =>
+    http.post(`/api/v3/user24@devices`, JSON.stringify(data), {
+      headers: {
+        Authorization: `Bearer ${Token}`,
+      },
+    }),
+  saveTypeShift: ({ data, Token }) =>
+    http.post(`/api/v3/user24@WorkTimeSetting`, JSON.stringify(data), {
+      headers: {
+        Authorization: `Bearer ${Token}`,
+      },
+    }),
+  actionInOutTimeKeeping: ({ data, Token }) =>
+    http.post(`/api/v3/worktrack@adminedit`, JSON.stringify(data), {
       headers: {
         Authorization: `Bearer ${Token}`,
       },

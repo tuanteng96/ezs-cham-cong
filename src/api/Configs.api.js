@@ -5,7 +5,9 @@ const ConfigsAPI = {
     setValue: ({
         name,
         data
-    }) => http.post(`/api/v3/ConfigJson@save?name=${name}`, JSON.stringify(data))
+    }) => http.post(`/api/v3/ConfigJson@save?name=${name}`, JSON.stringify(data)),
+    updateLatLng: body =>
+        http.post(`/api/v3/cate25@UpdateLatLng`, JSON.stringify(body)),
 }
 
 export default ConfigsAPI;

@@ -65,7 +65,9 @@ const MyApp = () => {
 
   window.addEventListener("click", KeyboardsHelper.bodyEventListener);
 
-  const onAppForceIn = () => {};
+  const onAppForceIn = () => {
+    window.refetchProcessings && window.refetchProcessings();
+  };
 
   const onAppForceOut = () => {
     KeyboardsHelper.forceOutListener();
@@ -114,7 +116,13 @@ const MyApp = () => {
         </LayoutProvider>
         <Panels />
       </App>
-      <ToastContainer icon={false} theme="colored" limit={1} autoClose={800} draggable={false}/>
+      <ToastContainer
+        icon={false}
+        theme="colored"
+        limit={1}
+        autoClose={800}
+        draggable={false}
+      />
     </QueryClientProvider>
   );
 };

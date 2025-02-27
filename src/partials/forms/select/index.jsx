@@ -5,6 +5,7 @@ import SelectDistricts from "./SelectDistricts";
 import SelectGender from "./SelectGender";
 import SelectMaterials from "./SelectMaterials";
 import SelectMaterialsFromCard from "./SelectMaterialsFromCard";
+import SelectMembers from "./SelectMembers";
 import SelectMembersCharge from "./SelectMembersCharge";
 import SelectMembersServices from "./SelectMembersServices";
 import SelectMoneyCardClients from "./SelectMoneyCardClients";
@@ -35,5 +36,6 @@ export {
   SelectServiceCardClients,
   SelectMoneyCardClients,
   SelectServicesTransfer,
-  SelectServiceProtocol
+  SelectServiceProtocol,
+  SelectMembers
 };
