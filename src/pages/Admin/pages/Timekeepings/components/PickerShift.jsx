@@ -41,15 +41,6 @@ function PickerShift({ children, initialValues, data }) {
   const [visible, setVisible] = useState(false);
   const [visibleSetup, setVisibleSetup] = useState(false);
 
-  const Auth = useStore("Auth");
-  const CrStocks = useStore("CrStocks");
-
-  const { cong_ca } = RolesHelpers.useRoles({
-    nameRoles: ["cong_ca"],
-    auth: Auth,
-    CrStocks,
-  });
-
   const { control, handleSubmit, reset, watch, setError } = useForm({
     defaultValues: {
       Title: "",
@@ -127,6 +118,10 @@ function PickerShift({ children, initialValues, data }) {
     if (!initialValues) {
       newValues.push(values);
     } else {
+      let index = newValues.findIndex(x => x.ID === initialValues.ID)
+      if(index > -1) {
+        newValues[index] = values
+      }
     }
 
     updateMutation.mutate(

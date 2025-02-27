@@ -1,8 +1,6 @@
 import React, {
   Fragment,
-  useContext,
   useEffect,
-  useRef,
   useState,
 } from "react";
 import PromHelpers from "@/helpers/PromHelpers";
@@ -19,16 +17,12 @@ import {
   useStore,
 } from "framework7-react";
 import {
-  AdjustmentsVerticalIcon,
   CalendarDaysIcon,
-  ChevronDownIcon,
   ChevronLeftIcon,
   ChevronUpIcon,
-  EllipsisHorizontalIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
-import { useInfiniteQuery, useMutation, useQuery } from "react-query";
-import NoFound from "@/components/NoFound";
+import { useMutation, useQuery } from "react-query";
 import moment from "moment";
 import AdminAPI from "@/api/Admin.api";
 import { DatePickerWrap } from "@/partials/forms";

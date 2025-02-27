@@ -1,16 +1,18 @@
 import React, { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "framer-motion";
-import { XMarkIcon } from "@heroicons/react/24/outline";
+import { ExclamationCircleIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { Controller, useForm } from "react-hook-form";
-import { Button, f7, useStore } from "framework7-react";
+import { Button, f7 } from "framework7-react";
 import clsx from "clsx";
 import { SelectPicker } from "@/partials/forms";
-import { RolesHelpers } from "@/helpers/RolesHelpers";
 import { NumericFormat } from "react-number-format";
 import ConfigsAPI from "@/api/Configs.api";
 import { useMutation, useQueryClient } from "react-query";
 import { toast } from "react-toastify";
+import { PickerPunishmentSuggest } from ".";
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as yup from "yup";
 
 const options = [
   {
@@ -31,6 +33,14 @@ const options = [
   },
 ];
 
+const schemaConfirm = yup
+  .object({
+    FromMinute: yup.string().required("Vui lòng nhập số phút."),
+    ToMinute: yup.string().required("Vui lòng nhập số phút."),
+    Value: yup.string().required("Vui lòng nhập giá trị."),
+  })
+  .required();
+
 function PickerPunishment({
   children,
   initialValues,
@@ -43,13 +53,14 @@ function PickerPunishment({
 
   const [visible, setVisible] = useState(false);
 
-  const { control, handleSubmit, reset, watch, setError } = useForm({
+  const { control, handleSubmit, reset, setValue } = useForm({
     defaultValues: {
       FromMinute: "",
       ToMinute: "",
       Value: "",
       Type: options[0],
     },
+    resolver: yupResolver(schemaConfirm),
   });
 
   useEffect(() => {
@@ -97,13 +108,20 @@ function PickerPunishment({
 
   const onSubmit = (values) => {
     let newData = { ...data };
-    let newValues = { ...values };
+    let newValues = {
+      ...values,
+      FromMinute: Number(values.FromMinute),
+      ToMinute: Number(values.ToMinute),
+      Value: Number(values.Value),
+    };
     if (initialValues) {
+      delete newValues.Type;
       newData[values.Type?.value][index] = newValues;
     } else {
       delete newValues.Type;
       newData[values.Type?.value].push(newValues);
     }
+    
     updateMutation.mutate(
       { data: newData, name: "congcaconfig" },
       {
@@ -196,6 +214,7 @@ function PickerPunishment({
                             }}
                             errorMessage={fieldState?.error?.message}
                             errorMessageForce={fieldState?.invalid}
+                            autoHeight
                           />
                         )}
                       />
@@ -293,7 +312,7 @@ function PickerPunishment({
                           <div className="relative">
                             <NumericFormat
                               className={clsx(
-                                "w-full input-number-format border shadow-[0_4px_6px_0_rgba(16,25,40,.06)] rounded py-3 px-4 focus:border-primary",
+                                "w-full input-number-format border shadow-[0_4px_6px_0_rgba(16,25,40,.06)] rounded py-3 pl-4 pr-24 focus:border-primary",
                                 fieldState?.invalid
                                   ? "border-danger"
                                   : "border-[#d5d7da]"
@@ -312,16 +331,30 @@ function PickerPunishment({
                               }
                               allowLeadingZeros={true}
                             />
-                            {field.value ? (
-                              <div
-                                className="absolute top-0 right-0 flex items-center justify-center w-12 h-full"
-                                onClick={() => field.onChange("")}
+                            <div className="absolute top-0 right-0 flex h-full">
+                              {field.value ? (
+                                <div
+                                  className="flex items-center justify-center w-12 h-full"
+                                  onClick={() => field.onChange("")}
+                                >
+                                  <XMarkIcon className="w-5" />
+                                </div>
+                              ) : (
+                                <></>
+                              )}
+                              <PickerPunishmentSuggest
+                                onChange={(val) => setValue("Value", val)}
                               >
-                                <XMarkIcon className="w-5" />
-                              </div>
-                            ) : (
-                              <></>
-                            )}
+                                {({ open }) => (
+                                  <div
+                                    className="flex items-center justify-center w-12 h-full border-l text-warning"
+                                    onClick={open}
+                                  >
+                                    <ExclamationCircleIcon className="w-5" />
+                                  </div>
+                                )}
+                              </PickerPunishmentSuggest>
+                            </div>
                           </div>
                         )}
                       />

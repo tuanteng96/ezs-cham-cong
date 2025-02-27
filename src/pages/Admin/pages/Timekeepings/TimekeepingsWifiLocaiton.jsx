@@ -15,14 +15,9 @@ import {
 } from "framework7-react";
 import {
   ChevronLeftIcon,
-  EllipsisHorizontalIcon,
-  EllipsisVerticalIcon,
 } from "@heroicons/react/24/outline";
-import { PickerFilter, PickerShift } from "./components";
-import { useMutation, useQuery, useQueryClient } from "react-query";
+import { useMutation, useQueryClient } from "react-query";
 import ConfigsAPI from "@/api/Configs.api";
-import NoFound from "@/components/NoFound";
-import clsx from "clsx";
 import { toast } from "react-toastify";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
 import KeyboardsHelper from "@/helpers/KeyboardsHelper";
@@ -32,7 +27,7 @@ function TimekeepingsWifiLocaiton({ f7route }) {
 
   const StocksAll = useStore("StocksAll");
 
-  const { control, handleSubmit, reset, watch, setError } = useForm({
+  const { control, handleSubmit, reset, setValue } = useForm({
     defaultValues: {
       Updated: [],
     },
@@ -284,7 +279,7 @@ function TimekeepingsWifiLocaiton({ f7route }) {
                           PromHelpers.GET_NETWORK_TYPE()
                             .then(({ data }) => {
                               setValue(
-                                `Updated[${index}].WifiName`,
+                                `Updated[${index}].WifiID`,
                                 data.BSSID
                               );
                             })

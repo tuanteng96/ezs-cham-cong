@@ -16,29 +16,22 @@ import {
   useStore,
 } from "framework7-react";
 import {
-  AdjustmentsVerticalIcon,
   CalendarDaysIcon,
-  ChevronDownIcon,
   ChevronLeftIcon,
-  EllipsisHorizontalIcon,
 } from "@heroicons/react/24/outline";
-import { PickerFilterMonthly } from "./components";
-import { useInfiniteQuery, useQuery } from "react-query";
-import NoFound from "@/components/NoFound";
-import ArrayHelpers from "@/helpers/ArrayHelpers";
 import moment from "moment";
 import AdminAPI from "@/api/Admin.api";
-import StringHelpers from "@/helpers/StringHelpers";
 import clsx from "clsx";
 import { Swiper, SwiperSlide } from "swiper/react";
 import {
   ScrollMenu,
   VisibilityContext,
   getItemsPos,
-  slidingWindow,
 } from "react-horizontal-scrolling-menu";
 import { useDrag } from "@/hooks";
 import { DatePickerWrap } from "@/partials/forms";
+import WorksHelpers from "@/helpers/WorksHelpers";
+import { useQuery } from "react-query";
 
 function ItemDate({ itemId, selected, onClick, item }) {
   const visibility = useContext(VisibilityContext);

@@ -36,7 +36,18 @@ let optionsReason = [
   },
 ];
 
-let optionsType = [
+let optionsTypeIn = [
+  {
+    value: "DI_SOM",
+    label: "Đi sớm",
+  },
+  {
+    value: "DI_MUON",
+    label: "Đi muộn",
+  },
+];
+
+let optionsTypeOut = [
   {
     value: "VE_SOM",
     label: "Về sớm",
@@ -327,7 +338,7 @@ function PickerTimekeeping({ children, user, filters }) {
                                     isClearable
                                     placeholder="Chọn loại"
                                     value={field.value}
-                                    options={optionsType}
+                                    options={optionsTypeIn}
                                     label="Loại"
                                     onChange={(val) => {
                                       field.onChange(val || null);
@@ -432,13 +443,14 @@ function PickerTimekeeping({ children, user, filters }) {
                                     isClearable
                                     placeholder="Chọn loại"
                                     value={field.value}
-                                    options={optionsType}
+                                    options={optionsTypeOut}
                                     label="Loại"
                                     onChange={(val) => {
                                       field.onChange(val || null);
                                     }}
                                     errorMessage={fieldState?.error?.message}
                                     errorMessageForce={fieldState?.invalid}
+                                    autoHeight
                                   />
                                 )}
                               />

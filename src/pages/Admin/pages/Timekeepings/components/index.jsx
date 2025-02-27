@@ -8,6 +8,7 @@ import PickerJobType from "./PickerJobType";
 import PickerChangeStock from "./PickerChangeStock";
 import PickerTimekeeping from "./PickerTimekeeping";
 import PickerPunishment from "./PickerPunishment";
+import PickerPunishmentSuggest from "./PickerPunishmentSuggest";
 
 export {
   PickerFilter,
@@ -19,5 +20,6 @@ export {
   PickerJobType,
   PickerChangeStock,
   PickerTimekeeping,
-  PickerPunishment
+  PickerPunishment,
+  PickerPunishmentSuggest
 };

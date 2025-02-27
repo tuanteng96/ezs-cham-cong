@@ -8,12 +8,10 @@ import {
   NavRight,
   NavTitle,
   Page,
-  Popover,
 } from "framework7-react";
 import {
   ChevronLeftIcon,
   EllipsisHorizontalIcon,
-  PencilIcon,
   PencilSquareIcon,
   PlusIcon,
 } from "@heroicons/react/24/outline";
@@ -267,7 +265,8 @@ function TimekeepingsPunishment({ f7route }) {
                                       <PencilSquareIcon className="w-4 ml-1" />
                                     </div>
                                     <div className="font-lato text-[15px] font-semibold">
-                                      {StringHelpers.formatVND(item.Value)}
+                                      {console.log(item)}
+                                      {/* {StringHelpers.formatVND(item.Value)} */}
                                     </div>
                                   </div>
                                   <div className="text-gray-600 font-lato">

@@ -216,6 +216,11 @@ const SelectPicker = forwardRef(
                           key={index}
                         >
                           {item?.label}
+                          {item?.desc && (
+                            <div className="text-gray-400 mt-1 text-[13px]">
+                              {item?.desc}
+                            </div>
+                          )}
                           {item?.sub && (
                             <div className="text-gray-400 mt-1 text-[13px]">
                               {item?.sub}

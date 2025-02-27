@@ -297,7 +297,7 @@ function Timekeepings({ f7route }) {
                 popoverClose
                 noLinkClass
               >
-                Xem chấm công theo tháng
+                Xem chấm công tháng
               </Link>
               <Link
                 href="/admin/timekeepings/work/"
@@ -312,180 +312,177 @@ function Timekeepings({ f7route }) {
         </Popover>
         <div className="absolute h-[2px] w-full bottom-0 left-0 bg-[rgba(255,255,255,0.3)]"></div>
       </Navbar>
-      <div className="flex flex-col h-full">
-        <div className="p-4 overflow-auto grow">
-          {isLoading && (
-            <>
-              {Array(3)
-                .fill()
-                .map((_, i) => (
-                  <div
-                    className="border mb-3.5 last:mb-0 p-4 rounded flex items-start"
-                    key={i}
-                  >
-                    <div className="flex-1">
-                      <div className="mb-2.5 font-medium text-[15px] text-primary">
-                        <div className="w-2/4 h-3.5 bg-gray-200 rounded-full animate-pulse"></div>
-                      </div>
-                      <div className="text-gray-500">
-                        <div className="animate-pulse h-2.5 bg-gray-200 rounded-full w-full mb-1"></div>
-                        <div className="animate-pulse h-2.5 bg-gray-200 rounded-full w-8/12 mb-1"></div>
-                        <div className="animate-pulse h-2.5 bg-gray-200 rounded-full w-full"></div>
-                      </div>
+      <div className="p-4">
+        {isLoading && (
+          <>
+            {Array(3)
+              .fill()
+              .map((_, i) => (
+                <div
+                  className="border mb-3.5 last:mb-0 p-4 rounded flex items-start"
+                  key={i}
+                >
+                  <div className="flex-1">
+                    <div className="mb-2.5 font-medium text-[15px] text-primary">
+                      <div className="w-2/4 h-3.5 bg-gray-200 rounded-full animate-pulse"></div>
+                    </div>
+                    <div className="text-gray-500">
+                      <div className="animate-pulse h-2.5 bg-gray-200 rounded-full w-full mb-1"></div>
+                      <div className="animate-pulse h-2.5 bg-gray-200 rounded-full w-8/12 mb-1"></div>
+                      <div className="animate-pulse h-2.5 bg-gray-200 rounded-full w-full"></div>
                     </div>
                   </div>
-                ))}
-            </>
-          )}
-          {data?.list &&
-            data.list.map((user, index) => (
-              <PickerTimekeeping user={user} filters={filters} key={index}>
-                {({ open: opens }) => (
-                  <div className="border rounded mb-3.5 last:mb-0">
-                    <div className="flex border-b bg-gray-50">
-                      <Link
-                        href={`/admin/timekeepings/${user?.UserID}/?FullName=${user?.FullName}&Month=${filters.CrDate}`}
-                        className="flex-1 py-3.5 pl-4 flex-col items-start"
-                      >
-                        <div className="mb-px font-medium text-[15px] text-primary">
-                          {user?.FullName}
-                        </div>
-                        <div className="text-gray-500">{user?.UserName}</div>
-                      </Link>
-                      <Link
-                        noLinkClass
-                        className="flex items-center justify-center w-12"
-                        popoverOpen={`.popover-sheet-${user.UserID}`}
-                      >
-                        <EllipsisHorizontalIcon className="w-6" />
-                      </Link>
-                      <Popover
-                        className={clsx(
-                          "w-[150px]",
-                          `popover-sheet-${user.UserID}`
-                        )}
-                      >
-                        <div className="flex flex-col py-2">
-                          <Link
-                            popoverClose
-                            className="flex justify-between px-3 py-2.5 font-medium"
-                            noLinkClass
-                            onClick={opens}
-                          >
-                            Chấm công
-                          </Link>
-                          <PickerJobType user={user}>
-                            {({ open }) => (
-                              <Link
-                                popoverClose
-                                className="flex justify-between px-3 py-2.5 font-medium"
-                                noLinkClass
-                                onClick={open}
-                              >
-                                Loại công ca
-                              </Link>
-                            )}
-                          </PickerJobType>
-                          <PickerMachine user={user}>
-                            {({ open }) => (
-                              <Link
-                                popoverClose
-                                className="flex justify-between px-3 py-2.5 font-medium"
-                                noLinkClass
-                                onClick={open}
-                              >
-                                Mã máy
-                              </Link>
-                            )}
-                          </PickerMachine>
+                </div>
+              ))}
+          </>
+        )}
+        {data?.list &&
+          data.list.map((user, index) => (
+            <PickerTimekeeping user={user} filters={filters} key={index}>
+              {({ open: opens }) => (
+                <div className="border rounded mb-3.5 last:mb-0">
+                  <div className="flex border-b bg-gray-50">
+                    <Link
+                      href={`/admin/timekeepings/${user?.UserID}/?FullName=${user?.FullName}&Month=${filters.CrDate}`}
+                      className="flex-1 py-3.5 pl-4 flex-col items-start"
+                    >
+                      <div className="mb-px font-medium text-[15px] text-primary">
+                        {user?.FullName}
+                      </div>
+                      <div className="text-gray-500">{user?.UserName}</div>
+                    </Link>
+                    <Link
+                      noLinkClass
+                      className="flex items-center justify-center w-12"
+                      popoverOpen={`.popover-sheet-${user.UserID}`}
+                    >
+                      <EllipsisHorizontalIcon className="w-6" />
+                    </Link>
+                    <Popover
+                      className={clsx(
+                        "w-[150px]",
+                        `popover-sheet-${user.UserID}`
+                      )}
+                    >
+                      <div className="flex flex-col py-2">
+                        <Link
+                          popoverClose
+                          className="flex justify-between px-3 py-2.5 font-medium"
+                          noLinkClass
+                          onClick={opens}
+                        >
+                          Chấm công
+                        </Link>
+                        <PickerJobType user={user}>
+                          {({ open }) => (
+                            <Link
+                              popoverClose
+                              className="flex justify-between px-3 py-2.5 font-medium"
+                              noLinkClass
+                              onClick={open}
+                            >
+                              Loại công ca
+                            </Link>
+                          )}
+                        </PickerJobType>
+                        <PickerMachine user={user}>
+                          {({ open }) => (
+                            <Link
+                              popoverClose
+                              className="flex justify-between px-3 py-2.5 font-medium"
+                              noLinkClass
+                              onClick={open}
+                            >
+                              Mã máy
+                            </Link>
+                          )}
+                        </PickerMachine>
 
-                          <Link
-                            popoverClose
-                            className="flex justify-between px-3 py-2.5 font-medium text-danger"
-                            noLinkClass
-                            onClick={() => onResetPwd(user)}
-                          >
-                            Reset mật khẩu
-                          </Link>
-                        </div>
-                      </Popover>
-                    </div>
-                    {user.Dates &&
-                      user.Dates.map((item, i) => (
-                        <div className="p-4" key={i}>
-                          <div className="flex justify-between" onClick={opens}>
-                            <div>
-                              <div className="text-muted">Vào làm</div>
-                              <div className="text-base font-semibold text-success font-lato">
-                                {item?.WorkTrack?.CheckIn
-                                  ? moment(item?.WorkTrack?.CheckIn).format(
-                                      "HH:mm"
-                                    )
-                                  : "--:--"}
-                              </div>
-                            </div>
-                            <div>
-                              <div className="text-muted">Ra về</div>
-                              <div className="text-base font-semibold text-danger font-lato">
-                                {item?.WorkTrack?.CheckOut
-                                  ? moment(item?.WorkTrack?.CheckOut).format(
-                                      "HH:mm"
-                                    )
-                                  : "--:--"}
-                              </div>
+                        <Link
+                          popoverClose
+                          className="flex justify-between px-3 py-2.5 font-medium text-danger"
+                          noLinkClass
+                          onClick={() => onResetPwd(user)}
+                        >
+                          Reset mật khẩu
+                        </Link>
+                      </div>
+                    </Popover>
+                  </div>
+                  {user.Dates &&
+                    user.Dates.map((item, i) => (
+                      <div className="p-4" key={i}>
+                        <div className="flex justify-between" onClick={opens}>
+                          <div>
+                            <div className="text-muted">Vào làm</div>
+                            <div className="text-base font-semibold text-success font-lato">
+                              {item?.WorkTrack?.CheckIn
+                                ? moment(item?.WorkTrack?.CheckIn).format(
+                                    "HH:mm"
+                                  )
+                                : "--:--"}
                             </div>
                           </div>
-                          {item.WorkTrack?.StockID && (
-                            <PickerChangeStock user={user} item={item}>
-                              {({ open }) => (
-                                <div
-                                  className="pt-2 mt-3 border-t border-dashed"
-                                  onClick={open}
-                                >
-                                  {item.WorkTrack?.StockID !== item.StockID ? (
-                                    <div className="mt-1 text-sm font-medium cursor-pointer text-danger">
-                                      <span className="pr-2">Khác điểm :</span>
-                                      {item.WorkTrack?.StockTitle ||
-                                        "Không xác định"}
-                                    </div>
-                                  ) : (
-                                    <>
-                                      {item.WorkTrack?.CheckIn ? (
-                                        <div className="mt-1 text-sm font-medium cursor-pointer text-muted">
-                                          Đúng điểm
-                                        </div>
-                                      ) : (
-                                        <></>
-                                      )}
-                                    </>
-                                  )}
-                                </div>
-                              )}
-                            </PickerChangeStock>
-                          )}
-                          {item.WorkTrack?.Info?.WorkToday?.Title && (
-                            <div className="text-sm capitalize text-muted">
-                              {item.WorkTrack?.Info?.WorkToday?.Title} (
-                              {item.WorkTrack?.Info?.WorkToday?.TimeFrom ? (
-                                <span className="font-lato">
-                                  {item.WorkTrack?.Info?.WorkToday?.TimeFrom}
-                                  <span className="px-1">-</span>
-                                  {item.WorkTrack?.Info?.WorkToday?.TimeTo}
-                                </span>
-                              ) : (
-                                <>Theo giờ</>
-                              )}
-                              )
+                          <div>
+                            <div className="text-muted">Ra về</div>
+                            <div className="text-base font-semibold text-danger font-lato">
+                              {item?.WorkTrack?.CheckOut
+                                ? moment(item?.WorkTrack?.CheckOut).format(
+                                    "HH:mm"
+                                  )
+                                : "--:--"}
                             </div>
-                          )}
+                          </div>
                         </div>
-                      ))}
-                  </div>
-                )}
-              </PickerTimekeeping>
-            ))}
-        </div>
-        <div></div>
+                        {item.WorkTrack?.StockID && (
+                          <PickerChangeStock user={user} item={item}>
+                            {({ open }) => (
+                              <div
+                                className="pt-2 mt-3 border-t border-dashed"
+                                onClick={open}
+                              >
+                                {item.WorkTrack?.StockID !== item.StockID ? (
+                                  <div className="mt-1 text-sm font-medium cursor-pointer text-danger">
+                                    <span className="pr-2">Khác điểm :</span>
+                                    {item.WorkTrack?.StockTitle ||
+                                      "Không xác định"}
+                                  </div>
+                                ) : (
+                                  <>
+                                    {item.WorkTrack?.CheckIn ? (
+                                      <div className="mt-1 text-sm font-medium cursor-pointer text-muted">
+                                        Đúng điểm
+                                      </div>
+                                    ) : (
+                                      <></>
+                                    )}
+                                  </>
+                                )}
+                              </div>
+                            )}
+                          </PickerChangeStock>
+                        )}
+                        {item.WorkTrack?.Info?.WorkToday?.Title && (
+                          <div className="text-sm capitalize text-muted">
+                            {item.WorkTrack?.Info?.WorkToday?.Title} (
+                            {item.WorkTrack?.Info?.WorkToday?.TimeFrom ? (
+                              <span className="font-lato">
+                                {item.WorkTrack?.Info?.WorkToday?.TimeFrom}
+                                <span className="px-1">-</span>
+                                {item.WorkTrack?.Info?.WorkToday?.TimeTo}
+                              </span>
+                            ) : (
+                              <>Theo giờ</>
+                            )}
+                            )
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                </div>
+              )}
+            </PickerTimekeeping>
+          ))}
       </div>
     </Page>
   );
