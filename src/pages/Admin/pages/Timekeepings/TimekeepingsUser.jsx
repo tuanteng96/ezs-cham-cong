@@ -1,8 +1,4 @@
-import React, {
-  Fragment,
-  useEffect,
-  useState,
-} from "react";
+import React, { Fragment, useEffect, useState } from "react";
 import PromHelpers from "@/helpers/PromHelpers";
 import {
   Button,
@@ -33,6 +29,7 @@ import { Controller, useForm } from "react-hook-form";
 import { NumericFormat } from "react-number-format";
 import clsx from "clsx";
 import { toast } from "react-toastify";
+import PullToRefresh from "react-simple-pull-to-refresh";
 
 function TimekeepingsUser({ f7route }) {
   let { params, query } = f7route;
@@ -317,24 +314,24 @@ function TimekeepingsUser({ f7route }) {
   };
 
   const getNoticeHolidays = () => {
-    if (!data?.list || data?.list.length === 0) return <></>
-    let newData = data?.list[0].Dates.filter(x => {
-      let date1 = moment(new Date()).format('DD-MM-YYYY')
-      let date2 = moment(x.Date, 'YYYY-MM-DD').format('DD-MM-YYYY')
+    if (!data?.list || data?.list.length === 0) return <></>;
+    let newData = data?.list[0].Dates.filter((x) => {
+      let date1 = moment(new Date()).format("DD-MM-YYYY");
+      let date2 = moment(x.Date, "YYYY-MM-DD").format("DD-MM-YYYY");
       return (
-        moment(date1, 'DD-MM-YYYY').diff(moment(date2, 'DD-MM-YYYY'), 'day') >=
+        moment(date1, "DD-MM-YYYY").diff(moment(date2, "DD-MM-YYYY"), "day") >=
         0
-      )
-    })
-    let dataDayOff = newData.filter(x => !x.WorkTrack.CheckIn)
+      );
+    });
+    let dataDayOff = newData.filter((x) => !x.WorkTrack.CheckIn);
     let dataT7 = newData.filter(
-      x => moment(x.Date, 'YYYY-MM-DD').format('ddd') === 'T7'
-    )
+      (x) => moment(x.Date, "YYYY-MM-DD").format("ddd") === "T7"
+    );
     let dataCN = newData.filter(
-      x => moment(x.Date, 'YYYY-MM-DD').format('ddd') === 'CN'
-    )
-    return `Số ngày nghỉ : ${dataDayOff.length} ngày (${dataT7.length} Thứ 7 & ${dataCN.length} CN)`
-  }
+      (x) => moment(x.Date, "YYYY-MM-DD").format("ddd") === "CN"
+    );
+    return `Số ngày nghỉ : ${dataDayOff.length} ngày (${dataT7.length} Thứ 7 & ${dataCN.length} CN)`;
+  };
 
   const updateTimeKeepMutation = useMutation({
     mutationFn: async (body) => {
@@ -502,8 +499,8 @@ function TimekeepingsUser({ f7route }) {
       name="Timekeepings-work-user"
       noToolbar
       onPageBeforeIn={() => PromHelpers.STATUS_BAR_COLOR("light")}
-      ptr
-      onPtrRefresh={(done) => refetch().then(() => done())}
+      // ptr
+      // onPtrRefresh={(done) => refetch().then(() => done())}
       noSwipeback
     >
       <Navbar innerClass="!px-0 text-white" outline={false}>
@@ -550,213 +547,226 @@ function TimekeepingsUser({ f7route }) {
         onSubmit={handleSubmit(onSubmit)}
         className="flex flex-col h-full pb-safe-b"
       >
-        <div className="p-4 overflow-auto grow">
-          {isLoading && (
-            <>
-              {Array(3)
-                .fill()
-                .map((_, i) => (
-                  <div
-                    className="border mb-3.5 last:mb-0 p-4 rounded flex items-start"
-                    key={i}
-                  >
-                    <div className="flex-1">
-                      <div className="mb-2.5 font-medium text-[15px] text-primary">
-                        <div className="w-2/4 h-3.5 bg-gray-200 rounded-full animate-pulse"></div>
-                      </div>
-                      <div className="text-gray-500">
-                        <div className="animate-pulse h-2.5 bg-gray-200 rounded-full w-full mb-1"></div>
-                        <div className="animate-pulse h-2.5 bg-gray-200 rounded-full w-8/12 mb-1"></div>
-                        <div className="animate-pulse h-2.5 bg-gray-200 rounded-full w-full"></div>
+        <PullToRefresh
+          className="overflow-auto grow ezs-ptr"
+          onRefresh={refetch}
+        >
+          <div className="h-full p-4 overflow-auto">
+            {isLoading && (
+              <>
+                {Array(3)
+                  .fill()
+                  .map((_, i) => (
+                    <div
+                      className="border mb-3.5 last:mb-0 p-4 rounded flex items-start"
+                      key={i}
+                    >
+                      <div className="flex-1">
+                        <div className="mb-2.5 font-medium text-[15px] text-primary">
+                          <div className="w-2/4 h-3.5 bg-gray-200 rounded-full animate-pulse"></div>
+                        </div>
+                        <div className="text-gray-500">
+                          <div className="animate-pulse h-2.5 bg-gray-200 rounded-full w-full mb-1"></div>
+                          <div className="animate-pulse h-2.5 bg-gray-200 rounded-full w-8/12 mb-1"></div>
+                          <div className="animate-pulse h-2.5 bg-gray-200 rounded-full w-full"></div>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
-            </>
-          )}
-          {data?.list &&
-            data?.list.map((user, i) => (
-              <Fragment key={i}>
-                <div className="mb-3">{getNoticeHolidays()}</div>
-                {user?.Dates.map((item, index) => (
-                  <div className="border rounded mb-3.5 last:mb-0" key={index}>
-                    <div className="px-4 py-3 border-b bg-gray-50">
-                      <div className="flex justify-between">
-                        <div className="text-[15px] font-bold font-lato">
-                          {moment(item.Date).format("DD/MM/YYYY")}
-                        </div>
-                        {item.WorkTrack?.Info?.WorkToday?.Title && (
-                          <div className="text-sm capitalize text-muted">
-                            {item.WorkTrack?.Info?.WorkToday?.Title} (
-                            {item.WorkTrack?.Info?.WorkToday?.TimeFrom ? (
-                              <span className="font-lato">
-                                {item.WorkTrack?.Info?.WorkToday?.TimeFrom}
-                                <span className="px-1">-</span>
-                                {item.WorkTrack?.Info?.WorkToday?.TimeTo}
-                              </span>
-                            ) : (
-                              <>Theo giờ</>
-                            )}
-                            )
+                  ))}
+              </>
+            )}
+            {data?.list &&
+              data?.list.map((user, i) => (
+                <Fragment key={i}>
+                  <div className="mb-3">{getNoticeHolidays()}</div>
+                  {user?.Dates.map((item, index) => (
+                    <div
+                      className="border rounded mb-3.5 last:mb-0"
+                      key={index}
+                    >
+                      <div className="px-4 py-3 border-b bg-gray-50">
+                        <div className="flex justify-between">
+                          <div className="text-[15px] font-bold font-lato">
+                            {moment(item.Date).format("DD/MM/YYYY")}
                           </div>
-                        )}
+                          {item.WorkTrack?.Info?.WorkToday?.Title && (
+                            <div className="text-sm capitalize text-muted">
+                              {item.WorkTrack?.Info?.WorkToday?.Title} (
+                              {item.WorkTrack?.Info?.WorkToday?.TimeFrom ? (
+                                <span className="font-lato">
+                                  {item.WorkTrack?.Info?.WorkToday?.TimeFrom}
+                                  <span className="px-1">-</span>
+                                  {item.WorkTrack?.Info?.WorkToday?.TimeTo}
+                                </span>
+                              ) : (
+                                <>Theo giờ</>
+                              )}
+                              )
+                            </div>
+                          )}
+                        </div>
+                        <div>
+                          {item.WorkTrack?.StockID ? (
+                            <PickerChangeStock user={user} item={item}>
+                              {({ open }) => (
+                                <div onClick={open}>
+                                  {item.WorkTrack?.StockID !== user.StockID ? (
+                                    <div className="mt-1 text-sm font-medium cursor-pointer text-danger">
+                                      <span className="pr-2">Khác điểm :</span>
+                                      {item.WorkTrack?.StockTitle ||
+                                        "Không xác định"}
+                                    </div>
+                                  ) : (
+                                    <>
+                                      {item.WorkTrack?.CheckIn ? (
+                                        <div className="mt-1 text-sm font-medium cursor-pointer text-muted">
+                                          Đúng điểm
+                                        </div>
+                                      ) : (
+                                        <></>
+                                      )}
+                                    </>
+                                  )}
+                                </div>
+                              )}
+                            </PickerChangeStock>
+                          ) : (
+                            <></>
+                          )}
+                        </div>
                       </div>
-                      <div>
-                        {item.WorkTrack?.StockID ? (
-                          <PickerChangeStock user={user} item={item}>
-                            {({ open }) => (
-                              <div onClick={open}>
-                                {item.WorkTrack?.StockID !== item.StockID ? (
-                                  <div className="mt-1 text-sm font-medium cursor-pointer text-danger">
-                                    <span className="pr-2">Khác điểm :</span>
-                                    {item.WorkTrack?.StockTitle ||
-                                      "Không xác định"}
-                                  </div>
+                      <div className="grid grid-cols-2">
+                        <div className="p-4 border-r">
+                          <div className="mb-3">
+                            <div className="mb-px text-gray-600">Vào</div>
+                            <div className="flex items-end justify-between">
+                              <div className="font-bold font-lato text-[15px] text-success">
+                                {item.WorkTrack.CheckIn
+                                  ? moment(item.WorkTrack.CheckIn).format(
+                                      "HH:mm:ss"
+                                    )
+                                  : "--:--:--"}
+                              </div>
+                              <div className="font-medium">
+                                {!item.WorkTrack.Info.TimekeepingType ? (
+                                  <></>
                                 ) : (
                                   <>
-                                    {item.WorkTrack?.CheckIn ? (
-                                      <div className="mt-1 text-sm font-medium cursor-pointer text-muted">
-                                        Đúng điểm
-                                      </div>
-                                    ) : (
-                                      <></>
-                                    )}
+                                    {item.WorkTrack.Info.TimekeepingType
+                                      ?.label || ""}
                                   </>
                                 )}
                               </div>
-                            )}
-                          </PickerChangeStock>
-                        ) : (
-                          <></>
-                        )}
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-2">
-                      <div className="p-4 border-r">
-                        <div className="mb-3">
-                          <div className="mb-px text-gray-600">Vào</div>
-                          <div className="flex items-end justify-between">
-                            <div className="font-bold font-lato text-[15px] text-success">
-                              {item.WorkTrack.CheckIn
-                                ? moment(item.WorkTrack.CheckIn).format(
-                                    "HH:mm:ss"
-                                  )
-                                : "--:--:--"}
                             </div>
-                            <div className="font-medium">
-                              {!item.WorkTrack.Info.TimekeepingType ? (
-                                <></>
-                              ) : (
-                                <>
-                                  {item.WorkTrack.Info.TimekeepingType?.label ||
-                                    ""}
-                                </>
+                          </div>
+                          <div className="mb-3">
+                            <div className="mb-px text-gray-600">
+                              Thưởng / Phạt
+                            </div>
+                            <div className="font-lato text-[15px] font-bold">
+                              {StringHelpers.formatVND(
+                                item.WorkTrack.Info.TimekeepingTypeValue
                               )}
                             </div>
                           </div>
-                        </div>
-                        <div className="mb-3">
-                          <div className="mb-px text-gray-600">
-                            Thưởng / Phạt
-                          </div>
-                          <div className="font-lato text-[15px] font-bold">
-                            {StringHelpers.formatVND(
-                              item.WorkTrack.Info.TimekeepingTypeValue
-                            )}
-                          </div>
-                        </div>
-                        <div>
-                          <div className="mb-px text-gray-600">Lý do</div>
-                          <div>{item.WorkTrack.Info.Type?.label || "----"}</div>
-                          <div>{item.WorkTrack.Info.Desc}</div>
-                        </div>
-                      </div>
-                      <div className="p-4">
-                        <div className="mb-3">
-                          <div className="mb-px text-gray-600">Ra</div>
-                          <div className="flex items-end justify-between">
-                            <div className="font-bold font-lato text-[15px] text-danger">
-                              {item.WorkTrack.CheckOut
-                                ? moment(item.WorkTrack.CheckOut).format(
-                                    "HH:mm:ss"
-                                  )
-                                : "--:--:--"}
-                            </div>
-                            <div className="font-medium">
-                              {!item.WorkTrack.Info.CheckOut.TimekeepingType ? (
-                                <></>
-                              ) : (
-                                <>
-                                  {
-                                    item.WorkTrack.Info.CheckOut.TimekeepingType
-                                      ?.label
-                                  }
-                                </>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                        <div className="mb-3">
-                          <div className="mb-px text-gray-600">
-                            Thưởng / Phạt
-                          </div>
-                          <div className="font-lato text-[15px] font-bold">
-                            {StringHelpers.formatVND(
-                              item.WorkTrack.Info.CheckOut?.TimekeepingTypeValue
-                            )}
-                          </div>
-                        </div>
-                        <div>
-                          <div className="mb-px text-gray-600">Lý do</div>
                           <div>
-                            {item.WorkTrack.Info.CheckOut?.Type?.label ||
-                              "----"}
+                            <div className="mb-px text-gray-600">Lý do</div>
+                            <div>
+                              {item.WorkTrack.Info.Type?.label || "----"}
+                            </div>
+                            <div>{item.WorkTrack.Info.Desc}</div>
                           </div>
-                          <div>{item.WorkTrack.Info.CheckOut?.Desc}</div>
+                        </div>
+                        <div className="p-4">
+                          <div className="mb-3">
+                            <div className="mb-px text-gray-600">Ra</div>
+                            <div className="flex items-end justify-between">
+                              <div className="font-bold font-lato text-[15px] text-danger">
+                                {item.WorkTrack.CheckOut
+                                  ? moment(item.WorkTrack.CheckOut).format(
+                                      "HH:mm:ss"
+                                    )
+                                  : "--:--:--"}
+                              </div>
+                              <div className="font-medium">
+                                {!item.WorkTrack.Info.CheckOut
+                                  .TimekeepingType ? (
+                                  <></>
+                                ) : (
+                                  <>
+                                    {
+                                      item.WorkTrack.Info.CheckOut
+                                        .TimekeepingType?.label
+                                    }
+                                  </>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                          <div className="mb-3">
+                            <div className="mb-px text-gray-600">
+                              Thưởng / Phạt
+                            </div>
+                            <div className="font-lato text-[15px] font-bold">
+                              {StringHelpers.formatVND(
+                                item.WorkTrack.Info.CheckOut
+                                  ?.TimekeepingTypeValue
+                              )}
+                            </div>
+                          </div>
+                          <div>
+                            <div className="mb-px text-gray-600">Lý do</div>
+                            <div>
+                              {item.WorkTrack.Info.CheckOut?.Type?.label ||
+                                "----"}
+                            </div>
+                            <div>{item.WorkTrack.Info.CheckOut?.Desc}</div>
+                          </div>
                         </div>
                       </div>
+                      {item.WorkTrack.CheckIn || item.WorkTrack.CheckOut ? (
+                        <div>
+                          <div className="flex justify-between px-4 py-3 border-t">
+                            <div>Tổng công</div>
+                            <div className="font-lato text-[15px] font-bold">
+                              {item.WorkTrack.Info.CountWork}
+                            </div>
+                          </div>
+                          <div className="flex justify-between px-4 py-3 border-t">
+                            <div>Số phút làm</div>
+                            <div className="font-lato text-[15px] font-bold">
+                              {item.WorkTrack.Info.CountWorkTime} (Phút)
+                            </div>
+                          </div>
+                          <div className="flex justify-between px-4 py-3 border-t">
+                            <div>Phụ cấp ngày</div>
+                            <div className="font-lato text-[15px] font-bold">
+                              {item.WorkTrack.Info?.CountWork >=
+                              (Brand?.Global?.Admin?.phu_cap_ngay_cong ||
+                                0.1) ? (
+                                StringHelpers.formatVND(
+                                  user?.SalaryConfigMons[0].Values?.TRO_CAP_NGAY
+                                )
+                              ) : (
+                                <></>
+                              )}
+                            </div>
+                          </div>
+                          {item.WorkTrack.Info.Note && (
+                            <div className="px-4 py-3 border-t">
+                              {item.WorkTrack.Info.Note}
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        <></>
+                      )}
                     </div>
-                    {item.WorkTrack.CheckIn || item.WorkTrack.CheckOut ? (
-                      <div>
-                        <div className="flex justify-between px-4 py-3 border-t">
-                          <div>Tổng công</div>
-                          <div className="font-lato text-[15px] font-bold">
-                            {item.WorkTrack.Info.CountWork}
-                          </div>
-                        </div>
-                        <div className="flex justify-between px-4 py-3 border-t">
-                          <div>Số phút làm</div>
-                          <div className="font-lato text-[15px] font-bold">
-                            {item.WorkTrack.Info.CountWorkTime} (Phút)
-                          </div>
-                        </div>
-                        <div className="flex justify-between px-4 py-3 border-t">
-                          <div>Phụ cấp ngày</div>
-                          <div className="font-lato text-[15px] font-bold">
-                            {item.WorkTrack.Info?.CountWork >=
-                            (Brand?.Global?.Admin?.phu_cap_ngay_cong || 0.1) ? (
-                              StringHelpers.formatVND(
-                                user?.SalaryConfigMons[0].Values?.TRO_CAP_NGAY
-                              )
-                            ) : (
-                              <></>
-                            )}
-                          </div>
-                        </div>
-                        {item.WorkTrack.Info.Note && (
-                          <div className="px-4 py-3 border-t">
-                            {item.WorkTrack.Info.Note}
-                          </div>
-                        )}
-                      </div>
-                    ) : (
-                      <></>
-                    )}
-                  </div>
-                ))}
-              </Fragment>
-            ))}
-        </div>
+                  ))}
+                </Fragment>
+              ))}
+          </div>
+        </PullToRefresh>
         <div className="shadow-2xl">
           <div className="grid grid-cols-1 gap-2 px-4 pt-4">
             <div className="flex justify-between">

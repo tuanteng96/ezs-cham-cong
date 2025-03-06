@@ -108,7 +108,7 @@ function Panels(props) {
         ActiveLink: ["/admin/timekeepings/"],
         active: false,
         Id: f7.utils.id("xxxx-xxxx-xxxx-xxxx"),
-        hasRight: true,
+        hasRight: cong_ca?.hasRight,
         Icon: <RectangleStackIcon className="w-5" />,
       },
       {

@@ -178,15 +178,15 @@ function TimekeepingsPunishment({ f7route }) {
           </Link>
         </NavLeft>
         <NavTitle>Thưởng / Phạt</NavTitle>
-        <NavRight className="h-full pr-4">
+        <NavRight className="h-full">
           <PickerPunishment data={data}>
             {({ open }) => (
               <Link
                 onClick={open}
                 noLinkClass
-                className="!text-white flex item-center justify-center bg-success text-[14px] h-8 px-2 rounded items-center"
+                className="!text-white flex item-center justify-center rounded items-center h-full w-12"
               >
-                Thêm mới
+                <PlusIcon className="w-6" />
               </Link>
             )}
           </PickerPunishment>

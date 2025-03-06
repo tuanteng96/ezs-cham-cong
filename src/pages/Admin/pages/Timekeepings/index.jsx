@@ -441,7 +441,7 @@ function Timekeepings({ f7route }) {
                                 className="pt-2 mt-3 border-t border-dashed"
                                 onClick={open}
                               >
-                                {item.WorkTrack?.StockID !== item.StockID ? (
+                                {item.WorkTrack?.StockID !== user.StockID ? (
                                   <div className="mt-1 text-sm font-medium cursor-pointer text-danger">
                                     <span className="pr-2">Khác điểm :</span>
                                     {item.WorkTrack?.StockTitle ||
