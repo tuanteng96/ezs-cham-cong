@@ -196,7 +196,6 @@ function PickerOTP({ children }) {
                           <OtpInput
                             containerStyle="gap-3 mt-8 justify-center"
                             value={field.value}
-                            placeholder="."
                             onChange={field.onChange}
                             numInputs={4}
                             renderSeparator={<></>}
