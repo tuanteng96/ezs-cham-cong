@@ -47,6 +47,12 @@ function TechniciansBookItem({ item }) {
         Text: "Khách đến",
       };
     }
+    if (Status === "TU_CHOI") {
+      return {
+        Color: "danger",
+        Text: "Khách huỷ lịch",
+      };
+    }
     if (Status === "doing") {
       return {
         Color: "success",
@@ -59,6 +65,10 @@ function TechniciansBookItem({ item }) {
         Text: "Hoàn thành",
       };
     }
+    return {
+      Color: "warning",
+      Text: "Chưa xác định",
+    };
   };
 
   return (
