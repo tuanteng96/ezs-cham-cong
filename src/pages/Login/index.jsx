@@ -63,12 +63,50 @@ function LoginPage({ f7router }) {
               if (data && data?.acc_type && data?.acc_type !== "M") {
                 if (data?.Status !== -1) {
                   if (data.ID === 1 || data?.DeviceIDs === deviceId) {
-                    open({
-                      Token: data?.etoken,
-                      Auth: data,
-                      USN: values.USN,
-                      PWD: values.PWD,
-                    });
+                    if (data?.opt_token) {
+                      open({
+                        Token: data?.opt_token,
+                        Auth: data,
+                        USN: values.USN,
+                        PWD: values.PWD,
+                      });
+                    } else {
+                      PromHelpers.SEND_TOKEN_FIREBASE().then(
+                        ({ token, error }) => {
+                          if (!error) {
+                            var bodyFormData = new FormData();
+                            bodyFormData.append("token", token);
+                            AuthAPI.sendTokenFirebase({
+                              ID: data.ID,
+                              Type: data.acc_type,
+                              bodyFormData,
+                            }).then(() =>
+                              store.dispatch("setAuth", data).then(() => {
+                                f7router.navigate("/home/");
+                                StorageHelpers.set({
+                                  data: {
+                                    _historyU: values.USN,
+                                    _historyP: values.PWD,
+                                  },
+                                });
+                              })
+                            );
+                          } else {
+                            SubscribeHelpers.set(data).then(() =>
+                              store.dispatch("setAuth", data).then(() => {
+                                f7router.navigate("/home/");
+                                StorageHelpers.set({
+                                  data: {
+                                    _historyU: values.USN,
+                                    _historyP: values.PWD,
+                                  },
+                                });
+                              })
+                            );
+                          }
+                        }
+                      );
+                    }
                   } else {
                     setError("USN", {
                       type: "Server",

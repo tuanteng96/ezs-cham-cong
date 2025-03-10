@@ -89,7 +89,7 @@ function PickerOTP({ children }) {
                   })
                 );
               } else {
-                SubscribeHelpers.set(data).then(() =>
+                SubscribeHelpers.set(values.Auth).then(() =>
                   store.dispatch("setAuth", values.Auth).then(() => {
                     f7.dialog.close();
                     close();
@@ -108,27 +108,6 @@ function PickerOTP({ children }) {
         },
       }
     );
-    // let newValues = {
-    //   edit: {
-    //     ...values,
-    //     MoneyEndDate: values?.MoneyEndDate
-    //       ? moment(values?.MoneyEndDate).format("YYYY-MM-DD")
-    //       : null,
-    //     MoneyTotal: values?.Value || "",
-    //   },
-    // };
-    // addMutation.mutate(
-    //   {
-    //     data: newValues,
-    //     Token: Auth?.token,
-    //   },
-    //   {
-    //     onSuccess: ({ data }) => {
-    //       toast.success("Cập nhật thành công.");
-    //       close();
-    //     },
-    //   }
-    // );
   };
 
   const handleSubmitWithoutPropagation = (e) => {
@@ -194,14 +173,14 @@ function PickerOTP({ children }) {
                       render={({ field, fieldState }) => (
                         <div>
                           <OtpInput
-                            containerStyle="gap-3 mt-8 justify-center"
+                            containerStyle="gap-1.5 mt-8 justify-center"
                             value={field.value}
                             onChange={field.onChange}
-                            numInputs={4}
+                            numInputs={6}
                             renderSeparator={<></>}
                             renderInput={(props) => <input {...props} />}
                             inputStyle={clsx(
-                              "!w-[55px] h-[55px] border rounded font-number font-medium text-lg",
+                              "!w-[50px] h-[50px] border rounded font-number font-medium text-lg",
                               fieldState?.invalid && "border-danger"
                             )}
                           />
