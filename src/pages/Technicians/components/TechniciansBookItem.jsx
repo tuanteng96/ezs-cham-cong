@@ -1,3 +1,4 @@
+import clsx from "clsx";
 import {
   Actions,
   ActionsButton,
@@ -13,6 +14,53 @@ function TechniciansBookItem({ item }) {
 
   const close = () => setVisible(false);
 
+  const getStatusClass = (Status, item) => {
+    const isAuto =
+      item?.Desc && item.Desc.toUpperCase().indexOf("TỰ ĐỘNG ĐẶT LỊCH");
+
+    if (Status === "XAC_NHAN") {
+      if (isAuto !== "" && isAuto > -1)
+        return {
+          Color: "primary-2",
+          Text: "Xác nhận",
+        };
+      return {
+        Color: "primary",
+        Text: "Xác nhận",
+      };
+    }
+    if (Status === "CHUA_XAC_NHAN") {
+      return {
+        Color: "warning",
+        Text: "Chưa xác nhận",
+      };
+    }
+    if (Status === "KHACH_KHONG_DEN") {
+      return {
+        Color: "danger",
+        Text: "Khách không đến",
+      };
+    }
+    if (Status === "KHACH_DEN") {
+      return {
+        Color: "info",
+        Text: "Khách đến",
+      };
+    }
+    if (Status === "doing") {
+      return {
+        Color: "success",
+        Text: "Đang thực hiện",
+      };
+    }
+    if (Status === "done") {
+      return {
+        Color: "secondary",
+        Text: "Hoàn thành",
+      };
+    }
+  };
+
   return (
     <div
       className="p-4 mb-4 bg-white rounded last:mb-0"
@@ -22,9 +70,14 @@ function TechniciansBookItem({ item }) {
         <div className="font-semibold">
           {item.RootTitles} {item.AtHome && " - Tại nhà"}
         </div>
-        <div className="flex items-center mt-2 text-xs font-medium rounded text-success">
-          <div className="w-1.5 h-1.5 rounded-full bg-success mr-1.5"></div>
-          {item.Stock.Title}
+        <div className="flex items-center mt-2 text-xs font-medium rounded">
+          <div className={clsx("w-1.5 h-1.5 rounded-full mr-1.5", `bg-${getStatusClass(item.Status, item).Color}`)}></div>
+          <span
+            className={clsx(`text-${getStatusClass(item.Status, item).Color}`)}
+          >
+            {getStatusClass(item.Status, item).Text}
+          </span>
+          <span className="pl-1"> - Tại {item.Stock.Title}</span>
         </div>
       </div>
       <div className="grid grid-cols-2 gap-2 mb-2">
@@ -42,9 +95,7 @@ function TechniciansBookItem({ item }) {
         </div>
         {item.Desc && (
           <div className="col-span-2">
-            <div className="mb-px font-light text-muted">
-              Chi chú
-            </div>
+            <div className="mb-px font-light text-muted">Chi chú</div>
             <div className="font-medium">{item?.Desc}</div>
           </div>
         )}
