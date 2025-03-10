@@ -178,14 +178,14 @@ const store = createStore({
             }
           }
           state.Auth = value;
-          state.Stocks = value?.Info?.Stocks?.filter(
+          state.Stocks = value?.Info?.Stocks ? value?.Info?.Stocks.filter(
             (x) => x.ParentID !== 0
           ).map((x) => ({
             ...x,
             value: x.ID,
             label: x.Title,
-          }));
-          state.StocksAll = value?.Info?.Stocks;
+          })) : [];
+          state.StocksAll = value?.Info?.Stocks || [];
           // state.Stocks =
           //   (value?.Info?.StockRights &&
           //     value?.Info?.StockRights.length > 0 &&

@@ -1,6 +1,6 @@
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import { AnimatePresence, motion } from "framer-motion";
-import { Button, f7, useStore } from "framework7-react";
+import { Button, f7, Input, useStore } from "framework7-react";
 import React, { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -73,7 +73,7 @@ function PickerOTP({ children }) {
                 bodyFormData.append("token", token);
                 AuthAPI.sendTokenFirebase({
                   ID: values.Auth.ID,
-                  Type: value.Auth.acc_type,
+                  Type: values.Auth.acc_type,
                   bodyFormData,
                 }).then(() =>
                   store.dispatch("setAuth", values.Auth).then(() => {
@@ -145,7 +145,7 @@ function PickerOTP({ children }) {
                 onClick={close}
               ></motion.div>
               <motion.div
-                className="relative flex flex-col z-20 bg-white rounded-t-[var(--f7-sheet-border-radius)] h-[60vh]"
+                className="relative flex flex-col z-20 bg-white rounded-t-[var(--f7-sheet-border-radius)]"
                 initial={{ opacity: 0, translateY: "100%" }}
                 animate={{ opacity: 1, translateY: "0%" }}
                 exit={{ opacity: 0, translateY: "100%" }}
@@ -163,28 +163,24 @@ function PickerOTP({ children }) {
                   className="flex flex-col h-full pb-safe-b"
                   onSubmit={handleSubmitWithoutPropagation}
                 >
-                  <div className="px-4 overflow-auto grow">
-                    <div className="px-6 text-center text-muted">
+                  <div className="px-6 overflow-auto grow">
+                    <div className="px-8 text-center mb-7 text-muted">
                       Nhập mã OTP Code nhận được từ Email Quản trị viên.
                     </div>
                     <Controller
                       name="Value"
                       control={control}
                       render={({ field, fieldState }) => (
-                        <div>
-                          <OtpInput
-                            containerStyle="gap-1.5 mt-8 justify-center"
-                            value={field.value}
-                            onChange={field.onChange}
-                            numInputs={6}
-                            renderSeparator={<></>}
-                            renderInput={(props) => <input {...props} />}
-                            inputStyle={clsx(
-                              "!w-[50px] h-[50px] border rounded font-number font-medium text-lg",
-                              fieldState?.invalid && "border-danger"
-                            )}
-                          />
-                        </div>
+                        <Input
+                          className="[&_input]:rounded [&_input]:placeholder:normal-case [&_input]:text-center"
+                          type="text"
+                          placeholder="Nhập mã OTP"
+                          value={field.value}
+                          errorMessage={fieldState?.error?.message}
+                          errorMessageForce={fieldState?.invalid}
+                          clearButton={true}
+                          onInput={field.onChange}
+                        />
                       )}
                     />
                   </div>
