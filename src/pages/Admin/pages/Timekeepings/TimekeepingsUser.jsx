@@ -325,10 +325,10 @@ function TimekeepingsUser({ f7route }) {
     });
     let dataDayOff = newData.filter((x) => !x.WorkTrack.CheckIn);
     let dataT7 = newData.filter(
-      (x) => moment(x.Date, "YYYY-MM-DD").format("ddd") === "T7"
+      (x) => !x.WorkTrack.CheckIn && moment(x.Date, "YYYY-MM-DD").format("ddd") === "T7"
     );
     let dataCN = newData.filter(
-      (x) => moment(x.Date, "YYYY-MM-DD").format("ddd") === "CN"
+      (x) => !x.WorkTrack.CheckIn && moment(x.Date, "YYYY-MM-DD").format("ddd") === "CN"
     );
     return `Số ngày nghỉ : ${dataDayOff.length} ngày (${dataT7.length} Thứ 7 & ${dataCN.length} CN)`;
   };
