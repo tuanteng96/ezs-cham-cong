@@ -221,7 +221,7 @@ const WorksHelpers = {
             } else {
               initialValues[duration > 0 ? "DI_SOM" : "DI_MUON"] = {
                 ...WorkShiftDuration[indexShift],
-                Value: Math.abs(duration) * WorkShiftDuration[indexShift].Value,
+                Value: Math.abs(duration) * Math.abs(WorkShiftDuration[indexShift].Value),
               };
             }
           } else {
@@ -285,7 +285,7 @@ const WorksHelpers = {
             } else {
               initialValues[duration > 0 ? "VE_SOM" : "VE_MUON"] = {
                 ...WorkShiftDuration[indexShift],
-                Value: Math.abs(duration) * WorkShiftDuration[indexShift].Value,
+                Value: Math.abs(duration) * Math.abs(WorkShiftDuration[indexShift].Value),
               };
             }
           } else {
