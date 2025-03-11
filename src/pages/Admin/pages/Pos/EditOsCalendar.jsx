@@ -390,7 +390,7 @@ function EditOsCalendar({ f7route, f7router }) {
         images.map(async (image) => {
           var bodyFormData = new FormData();
           bodyFormData.append("src", image);
-          
+
           await uploadImagesOsMutation.mutateAsync({
             OsID: formState?.Os?.ID,
             Token: Auth?.Token,
@@ -736,7 +736,8 @@ function EditOsCalendar({ f7route, f7router }) {
                       showHeader
                       clear
                       minDate={
-                        Brand?.Global?.Admin?.minbookdate === "now"
+                        Brand?.Global?.Admin?.minbookdate === "now" &&
+                        !adminTools_byStock?.hasRight
                           ? new Date()
                           : null
                       }
