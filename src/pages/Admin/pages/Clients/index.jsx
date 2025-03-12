@@ -72,6 +72,8 @@ function ClientsAdmin({ f7router }) {
     "data"
   );
 
+  window.SearchMembers = Lists;
+
   const OrdersQuery = useInfiniteQuery({
     queryKey: ["OrdersList", filters],
     queryFn: async ({ pageParam = 1 }) => {
