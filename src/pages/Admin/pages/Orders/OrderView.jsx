@@ -194,6 +194,11 @@ function OrderViewAdmin({ f7router, f7route }) {
             f7.dialog.close();
             f7router.back();
             toast.success("Huỷ đơn hàng thành công.");
+            noti27?.TIN_NHAN &&
+              noti27.TIN_NHAN({
+                type: "CANCEL_ORDER_ONLINE_POS",
+                data: data,
+              });
           },
         }
       );
@@ -216,6 +221,11 @@ function OrderViewAdmin({ f7router, f7route }) {
           onSuccess: () => {
             f7.dialog.close();
             toast.success("Đơn hàng đã hoàn thành.");
+            noti27?.TIN_NHAN &&
+              noti27.TIN_NHAN({
+                type: "COMPLETE_ORDER_POS",
+                data: data,
+              });
           },
         }
       );
@@ -269,6 +279,11 @@ function OrderViewAdmin({ f7router, f7route }) {
             onSuccess: () => {
               f7.dialog.close();
               toast.success("Đơn hàng đã hoàn thành.");
+              noti27?.TIN_NHAN &&
+                noti27.TIN_NHAN({
+                  type: "ANONYMOUS_COMPLETE_ORDER_POS",
+                  data: data,
+                });
             },
           }
         );

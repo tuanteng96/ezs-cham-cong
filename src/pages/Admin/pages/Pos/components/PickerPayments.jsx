@@ -146,7 +146,7 @@ function PickerPayments({ children, Order, Client }) {
       return data;
     },
   });
-  
+
   const handleSubmitWithoutPropagation = (e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -241,6 +241,18 @@ function PickerPayments({ children, Order, Client }) {
               }
             );
           }
+          noti27?.TIN_NHAN &&
+            noti27.TIN_NHAN({
+              type: "PAYMENT_ALL_POS",
+              data: {
+                MethodID: Type.MethodID,
+                OrderID: Order?.ID,
+                Order: Order,
+                BankNumber: BanksTransfer
+                  ? `${BanksTransfer?.ngan_hang}|${BanksTransfer?.ten}|${BanksTransfer?.stk}`
+                  : "",
+              },
+            });
         },
       }
     );

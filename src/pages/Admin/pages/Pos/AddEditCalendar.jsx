@@ -362,6 +362,11 @@ function AddEditCalendar({ f7route, f7router }) {
       },
       {
         onSuccess: (data) => {
+          noti27?.TIN_NHAN &&
+            noti27?.TIN_NHAN({
+              type: values.ID ? "UPDATE_BOOK_POS" : "ADD_BOOK_POS",
+              data: obj,
+            });
           toast.success("Lịch đã được đặt thành công.");
           f7router.back();
         },
@@ -388,6 +393,8 @@ function AddEditCalendar({ f7route, f7router }) {
       },
       {
         onSuccess: (data) => {
+          noti27?.TIN_NHAN &&
+            noti27?.TIN_NHAN({ type: "UPDATE_BOOK_POS", data: obj });
           toast.success("Lịch đã được cập nhật thành công.");
           f7router.back();
         },
@@ -420,6 +427,8 @@ function AddEditCalendar({ f7route, f7router }) {
       },
       {
         onSuccess: (data) => {
+          noti27?.TIN_NHAN &&
+            noti27?.TIN_NHAN({ type: "UPDATE_BOOK_POS", data: obj });
           toast.success("Xác nhận khách đến thành công.");
           f7router.back();
           //f7.views.main.router.navigate("/admin/pos/calendar/");

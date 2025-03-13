@@ -369,6 +369,14 @@ const Payments = ({
       );
     }
     toast.success("Thanh toán thành công.");
+    noti27?.TIN_NHAN &&
+      noti27.TIN_NHAN({
+        type: "PAYMENT_POS",
+        data: {
+          ...data,
+          Payments: newPayments,
+        },
+      });
   };
 
   const { PaymentsAll } = watch();
@@ -863,7 +871,7 @@ const PaymentsSplit = ({
     bodyFormData.append("set_desc", 1);
     bodyFormData.append("desc", data?.Order?.Desc || "");
     bodyFormData.append("add", JSON.stringify(newPayment));
-
+    let rsData = data
     paymentMutation.mutate(
       {
         OrderID: data?.Order?.ID,
@@ -893,6 +901,14 @@ const PaymentsSplit = ({
             );
           }
           toast.success("Thanh toán thành công.");
+          noti27?.TIN_NHAN &&
+            noti27.TIN_NHAN({
+              type: "PAYMENT_POS",
+              data: {
+                ...rsData,
+                Payments: newPayments,
+              },
+            });
         },
       }
     );

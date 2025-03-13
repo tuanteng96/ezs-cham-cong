@@ -141,7 +141,7 @@ function PickerAddEditWallet({ children, data, MemberID }) {
       {
         data: bodyFormData,
         Token: Auth?.token,
-        StockID: CrStocks?.ID
+        StockID: CrStocks?.ID,
       },
       {
         onSuccess: ({ data }) => {
@@ -149,6 +149,12 @@ function PickerAddEditWallet({ children, data, MemberID }) {
             values?.ID ? "Cập nhật thành công." : "Nạp ví thành công."
           );
           close();
+
+          noti27?.TIN_NHAN &&
+            noti27.TIN_NHAN({
+              type: values?.ID ? "EDIT_WALLET_POS" : "ADD_WALLET_POS",
+              data: values,
+            });
         },
       }
     );
