@@ -7,6 +7,7 @@ import {
   ActionsGroup,
   ActionsLabel,
   ActionsButton,
+  Popover,
 } from "framework7-react";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import clsx from "clsx";
@@ -494,17 +495,44 @@ function NavigationDivide({ pathname }) {
             </>
           )}
         </PickerConfirmDivide>
-        <Link href="/statistical/">
+        <Link popoverOpen=".popover-salary">
           <div
             className={clsx(
               "flex flex-col items-center justify-center pt-1",
-              pathname === "/statistical/" ? "text-app" : "text-gray-700"
+              pathname.includes("statistical") ? "text-app" : "text-gray-700"
             )}
           >
             <ChartBarIcon className="w-6" />
             <span className="text-[10px] mt-px leading-4">Bảng lương</span>
           </div>
         </Link>
+
+        <Popover className="popover-salary w-[210px]">
+          <div className="flex flex-col py-1">
+            <Link
+              href="/statistical/"
+              className={clsx(
+                "relative px-4 py-3 font-medium border-b last:border-0",
+                pathname === "/statistical/" && "text-app"
+              )}
+              popoverClose
+              noLinkClass
+            >
+              Bảng lương theo tháng
+            </Link>
+            <Link
+              href="/statistical/day/"
+              popoverClose
+              className={clsx(
+                "relative px-4 py-3 font-medium border-b last:border-0",
+                pathname === "/statistical/day/" && "text-app"
+              )}
+              noLinkClass
+            >
+              Bảng lương theo ngày
+            </Link>
+          </div>
+        </Popover>
         <Link panelOpen="right">
           <div
             className={clsx(

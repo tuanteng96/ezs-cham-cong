@@ -557,6 +557,7 @@ function EditOsCalendar({ f7route, f7router }) {
         },
         {
           onSuccess: (data) => {
+            noti27 && noti27.DICH_VU_HUY({ Service: newValues, OrderService: newValues });
             toast.success("Huỷ buổi thành công.");
             f7.dialog.close();
           },

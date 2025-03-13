@@ -11,9 +11,8 @@ import React, { useState } from "react";
 import PromHelpers from "../../helpers/PromHelpers";
 import {
   CalendarDaysIcon,
-  CalendarIcon,
+  ChevronLeftIcon,
   ExclamationCircleIcon,
-  HomeIcon,
 } from "@heroicons/react/24/outline";
 import { useQuery } from "react-query";
 import StatisticalAPI from "../../api/Statistical.api";
@@ -89,6 +88,16 @@ function Statistical({ f7router }) {
     >
       <Navbar innerClass="!px-0 text-white" outline={false}>
         <NavLeft className="!justify-center w-12 h-full">
+          <Link
+            back
+            noLinkClass
+            className="!text-white h-full flex item-center justify-center"
+          >
+            <ChevronLeftIcon className="w-6" />
+          </Link>
+        </NavLeft>
+        <NavTitle>Thống kê ({moment(filters.mon).format("MM-YYYY")})</NavTitle>
+        <NavRight className="!justify-center w-12 h-full">
           <DatePickerWrap
             value={filters.mon}
             format="MM/YYYY"
@@ -109,16 +118,6 @@ function Statistical({ f7router }) {
               </div>
             )}
           </DatePickerWrap>
-        </NavLeft>
-        <NavTitle>Thống kê ({moment(filters.mon).format("MM-YYYY")})</NavTitle>
-        <NavRight className="!justify-center w-12 h-full">
-          <Link
-            href="/statistical/day/"
-            noLinkClass
-            className="!text-white h-full flex item-center justify-center"
-          >
-            <CalendarIcon className="w-6" />
-          </Link>
         </NavRight>
         <div className="absolute h-[2px] w-full bottom-0 left-0 bg-[rgba(255,255,255,0.3)]"></div>
       </Navbar>

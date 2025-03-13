@@ -7,6 +7,7 @@ import {
   ActionsGroup,
   ActionsLabel,
   ActionsButton,
+  Popover,
 } from "framework7-react";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import clsx from "clsx";
@@ -31,7 +32,6 @@ import DateTimeHelpers from "../../helpers/DateTimeHelpers";
 import RouterHelpers from "../../helpers/RouterHelpers";
 
 function NavigationBase({ pathname }) {
-  
   const [visible, setVisible] = useState(false);
   const [actionsGridOpened, setActionsGridOpened] = useState(false);
   const [ListHoursWork, setListHoursWork] = useState([]);
@@ -47,10 +47,10 @@ function NavigationBase({ pathname }) {
   };
   const queryClient = useQueryClient();
   let { CheckIn, CheckOut } = useCheckInOut();
-  
+
   const actionsToPopover = useRef(null);
   const buttonToPopoverWrapper = useRef(null);
-  
+
   useEffect(() => {
     return () => {
       if (actionsToPopover.current) {
@@ -817,66 +817,44 @@ function NavigationBase({ pathname }) {
             </>
           )}
         </PickerConfirm>
-        {/* <Link href="/take-break/">
+        <Link popoverOpen=".popover-salary">
           <div
             className={clsx(
               "flex flex-col items-center justify-center pt-1",
-              pathname === "/take-break/" ? "text-app" : "text-gray-700"
-            )}
-          >
-            <svg
-              viewBox="0 0 20 20"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-              className="w-[22px]"
-            >
-              <path
-                d="M17.5 5.83335V14.1667C17.5 16.6667 16.25 18.3334 13.3333 18.3334H6.66667C3.75 18.3334 2.5 16.6667 2.5 14.1667V5.83335C2.5 3.33335 3.75 1.66669 6.66667 1.66669H13.3333C16.25 1.66669 17.5 3.33335 17.5 5.83335Z"
-                className="stroke-current"
-                strokeWidth="1.25"
-                strokeMiterlimit={10}
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-              <path
-                d="M12.0833 3.75V5.41667C12.0833 6.33333 12.8333 7.08333 13.7499 7.08333H15.4166"
-                className="stroke-current"
-                strokeWidth="1.25"
-                strokeMiterlimit={10}
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-              <path
-                d="M6.66675 10.8333H10.0001"
-                className="stroke-current"
-                strokeWidth="1.25"
-                strokeMiterlimit={10}
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-              <path
-                d="M6.66675 14.1667H13.3334"
-                className="stroke-current"
-                strokeWidth="1.25"
-                strokeMiterlimit={10}
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-            <span className="text-[10px] mt-px leading-4">Xin nghỉ</span>
-          </div>
-        </Link> */}
-        <Link href="/statistical/">
-          <div
-            className={clsx(
-              "flex flex-col items-center justify-center pt-1",
-              pathname === "/statistical/" ? "text-app" : "text-gray-700"
+              pathname.includes("statistical") ? "text-app" : "text-gray-700"
             )}
           >
             <ChartBarIcon className="w-6" />
             <span className="text-[10px] mt-px leading-4">Bảng lương</span>
           </div>
         </Link>
+
+        <Popover className="popover-salary w-[210px]">
+          <div className="flex flex-col py-1">
+            <Link
+              href="/statistical/"
+              className={clsx(
+                "relative px-4 py-3 font-medium border-b last:border-0",
+                pathname === "/statistical/" && "text-app"
+              )}
+              popoverClose
+              noLinkClass
+            >
+              Bảng lương theo tháng
+            </Link>
+            <Link
+              href="/statistical/day/"
+              popoverClose
+              className={clsx(
+                "relative px-4 py-3 font-medium border-b last:border-0",
+                pathname === "/statistical/day/" && "text-app"
+              )}
+              noLinkClass
+            >
+              Bảng lương theo ngày
+            </Link>
+          </div>
+        </Popover>
         <Link panelOpen="right">
           <div
             className={clsx(

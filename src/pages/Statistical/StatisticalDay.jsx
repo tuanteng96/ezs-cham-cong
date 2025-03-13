@@ -73,7 +73,6 @@ function StatisticalDay({ f7router }) {
       onPageBeforeIn={() => PromHelpers.STATUS_BAR_COLOR("light")}
       ptr
       onPtrRefresh={(done) => refetch().then(() => done())}
-      noToolbar
     >
       <Navbar innerClass="!px-0 text-white" outline={false}>
         <NavLeft className="!justify-center w-12 h-full">
@@ -110,7 +109,7 @@ function StatisticalDay({ f7router }) {
         </NavRight>
         <div className="absolute h-[2px] w-full bottom-0 left-0 bg-[rgba(255,255,255,0.3)]"></div>
       </Navbar>
-      <div>
+      <div className="pb-1.5">
         {isLoading && (
           <>
             {Array(3)

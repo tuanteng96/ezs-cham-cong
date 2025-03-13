@@ -5,7 +5,7 @@ const BOTTOM_NAVIGATION_PAGES = [
   "/technicians/profile/",
   "/technicians/service/",
   "/technicians/history/",
-  "/statistical/day/",
+  //"/statistical/day/",
   "/notifications/",
   "/notifications/view/",
   "/admin/notifications/add/",
@@ -29,7 +29,7 @@ const BOTTOM_NAVIGATION_PAGES = [
   "/admin/pos/invoice-processings/",
   "/admin/printers/",
   "/admin/timekeepings/",
-  "/debug/"
+  "/debug/",
 ];
 
 const PATH_NAVIGATION_PAGES = [
@@ -38,6 +38,7 @@ const PATH_NAVIGATION_PAGES = [
   "/statistical/",
   "/technicians/",
   "/technicians/?Type=dl",
+  "/statistical/day/",
 ];
 
 const RouterHelpers = {
