@@ -75,10 +75,12 @@ function PickerTimeKeep({ children, item }) {
                 </div>
               )}
               {data?.CheckIn && (
-                <PickerChangeStocks data={{
-                  ...data,
-                  StockTitle: data?.StockTitle || getStocksAdv()
-                }}>
+                <PickerChangeStocks
+                  data={{
+                    ...data,
+                    StockTitle: data?.StockTitle || getStocksAdv(),
+                  }}
+                >
                   {({ open }) => (
                     <div className="mt-2.5 mb-3 flex">
                       <div className="mb-px font-light text-gray-500">
@@ -98,6 +100,17 @@ function PickerTimeKeep({ children, item }) {
                   )}
                 </PickerChangeStocks>
               )}
+              {data?.CheckIn && (
+                <div className="flex items-center justify-between p-4 mb-3 border rounded">
+                  <div className="text-gray-500">Số công</div>
+                  <div className="text-base font-semibold font-lato">
+                    {data?.CheckOut
+                      ? data?.Info?.CheckOut?.WorkToday?.Value
+                      : data?.Info?.WorkToday?.Value}
+                  </div>
+                </div>
+              )}
+
               <div className="p-4 mb-4 border rounded">
                 <div className="relative flex items-center justify-between mb-2">
                   <div>

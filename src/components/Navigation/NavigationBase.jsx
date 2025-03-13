@@ -773,12 +773,12 @@ function NavigationBase({ pathname }) {
                   setOption({});
                 }}
               >
-                <div className="px-4">
+                <div className="px-4 pb-4">
                   <div className="bg-white rounded-xl">
                     <div className="flex items-center justify-center h-12 border-b text-[#8a8a8a]">
                       Chọn thời gian làm
                     </div>
-                    <div className="grid grid-cols-3 gap-4 p-4">
+                    <div className="grid grid-cols-3 gap-4 p-4 max-h-[80vh] overflow-auto">
                       {ListHoursWork &&
                         ListHoursWork.map((x, index) => (
                           <div
