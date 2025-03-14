@@ -440,6 +440,11 @@ function EditOsCalendar({ f7route, f7router }) {
             onSuccess: () => {
               f7.dialog.close();
               toast.success("Reset buổi dịch vụ thành công.");
+              noti27?.TIN_NHAN &&
+                noti27.TIN_NHAN({
+                  type: "RESET_OS",
+                  data: Os?.data,
+                });
             },
           }
         );
@@ -557,7 +562,11 @@ function EditOsCalendar({ f7route, f7router }) {
         },
         {
           onSuccess: (data) => {
-            noti27 && noti27.DICH_VU_HUY({ Service: newValues, OrderService: newValues });
+            noti27 &&
+              noti27.DICH_VU_HUY({
+                Service: newValues,
+                OrderService: newValues,
+              });
             toast.success("Huỷ buổi thành công.");
             f7.dialog.close();
           },
