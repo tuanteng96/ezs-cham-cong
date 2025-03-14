@@ -60,6 +60,7 @@ const getQueryPost = (values) => {
     RootIdS: values?.RootIdS
       ? values.RootIdS.map((item) => item.value).toString()
       : "",
+    Roots: values?.RootIdS,
     UserServiceIDs:
       values?.UserServiceIDs && values?.UserServiceIDs.length > 0
         ? values.UserServiceIDs.map((item) => item.value).toString()
