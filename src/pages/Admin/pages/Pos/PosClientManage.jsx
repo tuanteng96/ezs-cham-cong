@@ -483,6 +483,7 @@ function PosClientManage({ f7route, f7router }) {
                 Member: {
                   ...(Client?.data || {}),
                 },
+                result: data
               });
           },
         }

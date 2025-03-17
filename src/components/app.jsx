@@ -70,6 +70,7 @@ const MyApp = () => {
   };
 
   const onAppForceOut = () => {
+    window.refetchProcessings && window.refetchProcessings();
     KeyboardsHelper.forceOutListener();
   };
 

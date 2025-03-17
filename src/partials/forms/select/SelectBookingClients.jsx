@@ -33,6 +33,8 @@ const SelectBookingClients = forwardRef((props, ref) => {
     keepPreviousData: true,
   });
 
+  window.SelectMembers = data
+
   return (
     <SelectBookingPicker
       options={data || []}

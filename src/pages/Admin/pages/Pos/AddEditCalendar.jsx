@@ -56,6 +56,7 @@ const getQueryPost = (values) => {
   const obj = {
     ...values,
     MemberID: values?.MemberID?.value,
+    Member: values?.MemberID,
     StockID: values?.StockID?.value,
     RootIdS: values?.RootIdS
       ? values.RootIdS.map((item) => item.value).toString()
@@ -438,7 +439,63 @@ function AddEditCalendar({ f7route, f7router }) {
     );
   };
 
-  let { MemberID, Status } = watch();
+  let { MemberID, Status, Desc, ID } = watch();
+
+  const getStatusClass = (Status) => {
+    const isAuto = Desc && Desc.toUpperCase().indexOf("TỰ ĐỘNG ĐẶT LỊCH");
+
+    if (Status === "XAC_NHAN") {
+      if (isAuto !== "" && isAuto > -1)
+        return {
+          Color: "primary-2",
+          Text: "Xác nhận",
+        };
+      return {
+        Color: "primary",
+        Text: "Xác nhận",
+      };
+    }
+    if (Status === "CHUA_XAC_NHAN") {
+      return {
+        Color: "warning",
+        Text: "Chưa xác nhận",
+      };
+    }
+    if (Status === "KHACH_KHONG_DEN") {
+      return {
+        Color: "danger",
+        Text: "Khách không đến",
+      };
+    }
+    if (Status === "KHACH_DEN") {
+      return {
+        Color: "info",
+        Text: "Khách đến",
+      };
+    }
+    if (Status === "TU_CHOI") {
+      return {
+        Color: "danger",
+        Text: "Khách huỷ lịch",
+      };
+    }
+    if (Status === "doing") {
+      return {
+        Color: "success",
+        Text: "Đang thực hiện",
+      };
+    }
+    if (Status === "done") {
+      return {
+        Color: "secondary",
+        Text: "Hoàn thành",
+      };
+    }
+    return {
+      Color: "warning",
+      Text: "Chưa xác định",
+    };
+  };
 
   return (
     <Page
@@ -589,6 +646,39 @@ function AddEditCalendar({ f7route, f7router }) {
               )}
             />
           </div>
+          {!isAddMode && (
+            <div className="mb-3.5 last:mb-0">
+              <div className="mb-px">Trạng thái</div>
+              <Controller
+                name="Status"
+                control={control}
+                render={({ field: { ref, ...field }, fieldState }) => (
+                  <Input
+                    //clearButton
+                    className={clsx(
+                      "[&_input]:rounded [&_input]:capitalize [&_input]:placeholder:normal-case text-danger [&_input]:font-medium",
+                      "text-" + getStatusClass(field.value).Color
+                    )}
+                    type="input"
+                    placeholder="Nhập trạng thái"
+                    value={getStatusClass(field.value).Text}
+                    errorMessage={fieldState?.error?.message}
+                    errorMessageForce={fieldState?.invalid}
+                    onInput={field.onChange}
+                    onFocus={(e) =>
+                      KeyboardsHelper.setAndroid({
+                        Type: "body",
+                        Event: e,
+                      })
+                    }
+                    readonly
+                    disabled
+                  />
+                )}
+              />
+            </div>
+          )}
+
           <div className="mb-3.5 last:mb-0">
             <div className="mb-px">Cơ sở</div>
             <Controller
@@ -755,107 +845,109 @@ function AddEditCalendar({ f7route, f7router }) {
             />
           </div>
         </div>
-        <div className="p-4">
-          {isAddMode && (
-            <Button
-              type="submit"
-              className="rounded-full bg-app"
-              fill
-              large
-              preloader
-              loading={addMutation.isLoading}
-              disabled={addMutation.isLoading}
-            >
-              Đặt lịch ngay
-            </Button>
-          )}
-
-          {!isAddMode && (
-            <div className="flex gap-2">
+        {Status !== "CHUA_XAC_NHAN" && (
+          <div className="p-4">
+            {isAddMode && (
               <Button
                 type="submit"
-                className={clsx(
-                  "bg-app",
-                  Status === "KHACH_DEN" && "rounded-full"
-                )}
+                className="rounded-full bg-app"
                 fill
                 large
                 preloader
                 loading={addMutation.isLoading}
                 disabled={addMutation.isLoading}
               >
-                {Status === "CHUA_XAC_NHAN" ? "Xác nhận" : "Cập nhật"}
+                Đặt lịch ngay
               </Button>
-              {Status === "CHUA_XAC_NHAN" ? (
-                <>
-                  <Button
-                    type="button"
-                    className="bg-danger max-w-[110px]"
-                    fill
-                    large
-                    preloader
-                    loading={changeMutation.isLoading}
-                    disabled={changeMutation.isLoading}
-                    onClick={() => onChangeStatus("KHACH_KHONG_DEN")}
-                  >
-                    Huỷ lịch
-                  </Button>
-                </>
-              ) : (
-                <>
-                  {Status !== "KHACH_DEN" && (
-                    <>
-                      <Button
-                        popoverOpen=".popover-booking-status"
-                        type="button"
-                        className="bg-danger max-w-[80px]"
-                        fill
-                        large
-                        preloader
-                        loading={changeMutation.isLoading}
-                        disabled={changeMutation.isLoading}
-                      >
-                        Huỷ <ChevronUpIcon className="w-5 ml-1" />
-                      </Button>
-                      <Popover className="popover-booking-status">
-                        <div className="flex flex-col py-1 text-center">
-                          <Link
-                            popoverClose
-                            className="py-3 font-medium border-b last:border-0"
-                            noLinkClass
-                            onClick={() => onChangeStatus("KHACH_KHONG_DEN")}
-                          >
-                            Khách không đến
-                          </Link>
-                          <Link
-                            popoverClose
-                            className="py-3 font-medium border-b last:border-0 text-danger"
-                            noLinkClass
-                            onClick={() => onChangeStatus("TU_CHOI")}
-                          >
-                            Khách huỷ lịch
-                          </Link>
-                        </div>
-                      </Popover>
-                      <Button
-                        type="button"
-                        className="bg-primary"
-                        fill
-                        large
-                        preloader
-                        loading={checkinMutation.isLoading}
-                        disabled={checkinMutation.isLoading}
-                        onClick={onCheckIn}
-                      >
-                        Khách đến
-                      </Button>
-                    </>
+            )}
+
+            {!isAddMode && (
+              <div className="flex gap-2">
+                <Button
+                  type="submit"
+                  className={clsx(
+                    "bg-app",
+                    Status === "KHACH_DEN" && "rounded-full"
                   )}
-                </>
-              )}
-            </div>
-          )}
-        </div>
+                  fill
+                  large
+                  preloader
+                  loading={addMutation.isLoading}
+                  disabled={addMutation.isLoading}
+                >
+                  {Status === "CHUA_XAC_NHAN" ? "Xác nhận" : "Cập nhật"}
+                </Button>
+                {Status === "CHUA_XAC_NHAN" ? (
+                  <>
+                    <Button
+                      type="button"
+                      className="bg-danger max-w-[110px]"
+                      fill
+                      large
+                      preloader
+                      loading={changeMutation.isLoading}
+                      disabled={changeMutation.isLoading}
+                      onClick={() => onChangeStatus("KHACH_KHONG_DEN")}
+                    >
+                      Huỷ lịch
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    {Status !== "KHACH_DEN" && (
+                      <>
+                        <Button
+                          popoverOpen=".popover-booking-status"
+                          type="button"
+                          className="bg-danger max-w-[80px]"
+                          fill
+                          large
+                          preloader
+                          loading={changeMutation.isLoading}
+                          disabled={changeMutation.isLoading}
+                        >
+                          Huỷ <ChevronUpIcon className="w-5 ml-1" />
+                        </Button>
+                        <Popover className="popover-booking-status">
+                          <div className="flex flex-col py-1 text-center">
+                            <Link
+                              popoverClose
+                              className="py-3 font-medium border-b last:border-0"
+                              noLinkClass
+                              onClick={() => onChangeStatus("KHACH_KHONG_DEN")}
+                            >
+                              Khách không đến
+                            </Link>
+                            <Link
+                              popoverClose
+                              className="py-3 font-medium border-b last:border-0 text-danger"
+                              noLinkClass
+                              onClick={() => onChangeStatus("TU_CHOI")}
+                            >
+                              Khách huỷ lịch
+                            </Link>
+                          </div>
+                        </Popover>
+                        <Button
+                          type="button"
+                          className="bg-primary"
+                          fill
+                          large
+                          preloader
+                          loading={checkinMutation.isLoading}
+                          disabled={checkinMutation.isLoading}
+                          onClick={onCheckIn}
+                        >
+                          Khách đến
+                        </Button>
+                      </>
+                    )}
+                  </>
+                )}
+              </div>
+            )}
+          </div>
+        )}
       </form>
     </Page>
   );

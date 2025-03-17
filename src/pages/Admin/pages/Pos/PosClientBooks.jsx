@@ -75,6 +75,63 @@ function PosClientBooks({ f7router, f7route }) {
     }
   }, [scrollRef]);
 
+  const getStatusClass = (Status, item) => {
+    const isAuto =
+      item?.Desc && item.Desc.toUpperCase().indexOf("TỰ ĐỘNG ĐẶT LỊCH");
+
+    if (Status === "XAC_NHAN") {
+      if (isAuto !== "" && isAuto > -1)
+        return {
+          Color: "primary-2",
+          Text: "Xác nhận",
+        };
+      return {
+        Color: "primary",
+        Text: "Xác nhận",
+      };
+    }
+    if (Status === "CHUA_XAC_NHAN") {
+      return {
+        Color: "warning",
+        Text: "Chưa xác nhận",
+      };
+    }
+    if (Status === "KHACH_KHONG_DEN") {
+      return {
+        Color: "danger",
+        Text: "Khách không đến",
+      };
+    }
+    if (Status === "KHACH_DEN") {
+      return {
+        Color: "info",
+        Text: "Khách đến",
+      };
+    }
+    if (Status === "TU_CHOI") {
+      return {
+        Color: "danger",
+        Text: "Khách huỷ lịch",
+      };
+    }
+    if (Status === "doing") {
+      return {
+        Color: "success",
+        Text: "Đang thực hiện",
+      };
+    }
+    if (Status === "done") {
+      return {
+        Color: "secondary",
+        Text: "Hoàn thành",
+      };
+    }
+    return {
+      Color: "warning",
+      Text: "Chưa xác định",
+    };
+  };
+
   return (
     <Page
       className="bg-white"
@@ -169,6 +226,17 @@ function PosClientBooks({ f7router, f7route }) {
                       Thời gian
                       <span className="pl-1 font-medium text-danger">
                         {moment(item.BookDate).format("HH:mm DD-MM-YYYY")}
+                      </span>
+                    </div>
+                    <div className="mb-1 text-sm text-gray-700">
+                      Trạng thái
+                      <span
+                        className={clsx(
+                          "pl-1 font-medium",
+                          "text-" + getStatusClass(item.Status, item).Color
+                        )}
+                      >
+                        {getStatusClass(item.Status, item).Text}
                       </span>
                     </div>
                     <div className="mb-1 text-sm text-gray-700">
