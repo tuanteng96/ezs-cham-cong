@@ -578,14 +578,30 @@ function AddEditCalendar({ f7route, f7router }) {
                   />
                 )}
                 {MemberID?.label !== "Khách vãng lai" && (
-                  <Input
-                    className="[&_input]:rounded [&_input]:capitalize [&_input]:placeholder:normal-case"
-                    type="input"
-                    placeholder="Nhập tên khách"
-                    value={MemberID?.label}
-                    readonly
-                    disabled
-                  />
+                  <div
+                    className="relative"
+                    onClick={() =>
+                      f7router.navigate(
+                        `/admin/pos/manage/${
+                          MemberID?.ID
+                        }/?state=${JSON.stringify({
+                          MobilePhone:
+                            MemberID?.MobilePhone || MemberID?.suffix,
+                          FullName: MemberID?.FullName || MemberID?.label,
+                        })}`
+                      )
+                    }
+                  >
+                    <Input
+                      className="[&_input]:rounded [&_input]:capitalize [&_input]:placeholder:normal-case"
+                      type="input"
+                      placeholder="Nhập tên khách"
+                      value={MemberID?.label}
+                      readonly
+                      disabled
+                    />
+                    <div className="absolute top-0 left-0 w-full h-full"></div>
+                  </div>
                 )}
               </div>
               <div>
@@ -615,14 +631,30 @@ function AddEditCalendar({ f7route, f7router }) {
                   />
                 )}
                 {MemberID?.label !== "Khách vãng lai" && (
-                  <Input
-                    className="[&_input]:rounded [&_input]:capitalize [&_input]:placeholder:normal-case"
-                    type="input"
-                    placeholder="Nhập số điện thoại"
-                    value={MemberID?.suffix}
-                    readonly
-                    disabled
-                  />
+                  <div
+                    className="relative"
+                    onClick={() =>
+                      f7router.navigate(
+                        `/admin/pos/manage/${
+                          MemberID?.ID
+                        }/?state=${JSON.stringify({
+                          MobilePhone:
+                            MemberID?.MobilePhone || MemberID?.suffix,
+                          FullName: MemberID?.FullName || MemberID?.label,
+                        })}`
+                      )
+                    }
+                  >
+                    <Input
+                      className="[&_input]:rounded [&_input]:capitalize [&_input]:placeholder:normal-case"
+                      type="input"
+                      placeholder="Nhập số điện thoại"
+                      value={MemberID?.suffix}
+                      readonly
+                      disabled
+                    />
+                    <div className="absolute top-0 left-0 w-full h-full"></div>
+                  </div>
                 )}
               </div>
             </div>
