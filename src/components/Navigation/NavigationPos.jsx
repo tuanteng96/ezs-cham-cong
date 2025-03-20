@@ -11,6 +11,7 @@ import {
 import RouterHelpers from "../../helpers/RouterHelpers";
 import { useIsFetching } from "react-query";
 import moment from "moment";
+import Dom7 from "dom7";
 
 function NavigationPos({ pathname }) {
   let InvoiceProcessings = useStore("InvoiceProcessings");
@@ -137,7 +138,15 @@ function NavigationPos({ pathname }) {
             </>
           )}
         </Link>
-        <Popover className="popover-processings w-[210px]">
+
+        <Popover
+          className="popover-processings w-[210px]"
+          onPopoverClose={(e) => {
+            if (Dom7(e.el).hasClass("modal-out")) {
+              Dom7(e.el).remove();
+            }
+          }}
+        >
           <div className="flex flex-col py-1">
             <Link
               href="/admin/pos/invoice-processings/"
@@ -203,8 +212,7 @@ function NavigationPos({ pathname }) {
               {ClientBirthDay &&
                 ClientBirthDay.filter(
                   (x) =>
-                    moment(x.Birth).format("DD-MM") ===
-                    moment().format("DD-MM")
+                    moment(x.Birth).format("DD-MM") === moment().format("DD-MM")
                 ).length > 0 && (
                   <span className="absolute text-white bg-danger text-[11px] px-1.5 min-w-[15px] h-[17px] leading-none rounded-full flex items-center justify-center top-2/4 right-4 -translate-y-2/4 font-lato">
                     {
@@ -219,6 +227,7 @@ function NavigationPos({ pathname }) {
             </Link>
           </div>
         </Popover>
+
         <Link panelOpen="right">
           <div
             className={clsx(

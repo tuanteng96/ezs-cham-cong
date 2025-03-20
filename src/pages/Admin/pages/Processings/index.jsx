@@ -116,7 +116,9 @@ function ProcessingsAdmin({ f7router }) {
             noti27?.TIN_NHAN &&
               noti27.TIN_NHAN({
                 type: "CANCEL_BOOK_WEB_APP",
-                data: values,
+                data: {
+                  mbookID: item.ID,
+                },
               });
           },
         }
