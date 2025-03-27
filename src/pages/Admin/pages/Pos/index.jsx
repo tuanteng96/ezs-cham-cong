@@ -881,7 +881,7 @@ function PosAdmin({ f7router }) {
               if (!extendedProps.noEvent) {
                 f7.views.main.router.navigate(
                   "/admin/pos/calendar/add/?formState=" +
-                    JSON.stringify({
+                  encodeURIComponent(JSON.stringify({
                       ...extendedProps,
                       Member: {
                         FullName: extendedProps?.Member?.FullName,
@@ -894,7 +894,7 @@ function PosAdmin({ f7router }) {
                             ID: x.ID,
                           }))
                         : [],
-                    })
+                    }))
                 );
               }
             }

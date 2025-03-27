@@ -156,7 +156,7 @@ function PosClientBooks({ f7router, f7route }) {
           <Link
             href={
               `/admin/pos/calendar/add/?client=` +
-              JSON.stringify(client || null) +
+              encodeURIComponent(JSON.stringify(client || null)) +
               "&prevState=" +
               JSON.stringify({ invalidateQueries: ["ClientBooksCareID"] })
             }
@@ -198,20 +198,22 @@ function PosClientBooks({ f7router, f7route }) {
                   )}
                   href={
                     "/admin/pos/calendar/add/?formState=" +
-                    JSON.stringify({
-                      ...item,
-                      Member: {
-                        FullName: item?.Member?.FullName,
-                        MobilePhone: item.Member?.MobilePhone,
-                        ID: item.Member?.ID,
-                      },
-                      Roots: item.Roots
-                        ? item.Roots.map((x) => ({
-                            Title: x.Title,
-                            ID: x.ID,
-                          }))
-                        : [],
-                    }) +
+                    encodeURIComponent(
+                      JSON.stringify({
+                        ...item,
+                        Member: {
+                          FullName: item?.Member?.FullName,
+                          MobilePhone: item.Member?.MobilePhone,
+                          ID: item.Member?.ID,
+                        },
+                        Roots: item.Roots
+                          ? item.Roots.map((x) => ({
+                              Title: x.Title,
+                              ID: x.ID,
+                            }))
+                          : [],
+                      })
+                    ) +
                     "&prevState=" +
                     JSON.stringify({ invalidateQueries: ["ClientBooksCareID"] })
                   }
