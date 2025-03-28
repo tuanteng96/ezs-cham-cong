@@ -25,6 +25,7 @@ import store from "../js/store";
 import Dom7 from "dom7";
 import clsx from "clsx";
 import { RolesHelpers } from "../helpers/RolesHelpers";
+import AssetsHelpers from "@/helpers/AssetsHelpers";
 
 function CSubMenu({ children, defaultOpen, ...props }) {
   const [open, setOpen] = useState(defaultOpen);
@@ -256,10 +257,7 @@ function Panels(props) {
       {
         Title: "Tiện ích",
         Icon: <EllipsisHorizontalCircleIcon className="w-5" />,
-        ActiveLink: [
-          "/admin/utility/",
-          "/admin/utility/printerip-setting/",
-        ],
+        ActiveLink: ["/admin/utility/", "/admin/utility/printerip-setting/"],
         SubMenu: [
           {
             Title: "Cài đặt IP máy in",
@@ -389,20 +387,29 @@ function Panels(props) {
             noLinkClass
             className="w-11 h-11"
           >
-            <div className="relative h-full overflow-hidden bg-gray-100 w-11 rounded-xl">
-              <svg
-                className="absolute w-12 h-12 text-gray-400 -bottom-2 left-2/4 -translate-x-2/4"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
-                  clipRule="evenodd"
+            {Auth?.Avatar ? (
+              <div className="w-full h-full overflow-hidden rounded-xl">
+                <img
+                  src={AssetsHelpers.toAbsoluteUrl(Auth?.Avatar)}
+                  alt={Auth?.FullName}
                 />
-              </svg>
-            </div>
+              </div>
+            ) : (
+              <div className="relative h-full overflow-hidden bg-gray-100 w-11 rounded-xl">
+                <svg
+                  className="absolute w-12 h-12 text-gray-400 -bottom-2 left-2/4 -translate-x-2/4"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+              </div>
+            )}
           </Link>
           <div className="flex-1 pl-3" ref={buttonToPopoverWrapper}>
             <div className="font-medium">{splitName(Auth?.FullName)}</div>

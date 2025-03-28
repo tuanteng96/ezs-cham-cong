@@ -16,6 +16,7 @@ import {
   PowerIcon,
 } from "@heroicons/react/24/outline";
 import store from "../../js/store";
+import AssetsHelpers from "@/helpers/AssetsHelpers";
 
 function Account({ f7router }) {
   const Auth = useStore("Auth");
@@ -59,21 +60,30 @@ function Account({ f7router }) {
       </Navbar>
       <div className="p-4">
         <div className="flex items-center p-4 mb-4 bg-white last:mb-0 rounded-xl">
-          <div className="w-16 h-12">
-            <div className="relative w-12 h-full overflow-hidden bg-gray-100 rounded-full">
-              <svg
-                className="absolute text-gray-400 w-14 h-14 -bottom-2 left-2/4 -translate-x-2/4"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
-                  clipRule="evenodd"
+          <div className="h-12 w-14">
+            {Auth?.Avatar ? (
+              <div className="w-12 h-full overflow-hidden rounded-full">
+                <img
+                  src={AssetsHelpers.toAbsoluteUrl(Auth?.Avatar)}
+                  alt={Auth?.FullName}
                 />
-              </svg>
-            </div>
+              </div>
+            ) : (
+              <div className="relative w-12 h-full overflow-hidden bg-gray-100 rounded-full">
+                <svg
+                  className="absolute text-gray-400 w-14 h-14 -bottom-2 left-2/4 -translate-x-2/4"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+              </div>
+            )}
           </div>
           <div className="flex-1 pl-2">
             <div className="text-base font-medium">{Auth?.FullName}</div>
