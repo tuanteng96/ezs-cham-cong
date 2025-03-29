@@ -23,6 +23,12 @@ function BonusSales({ name, adminTools_byStock }) {
     control,
     name: name,
   });
+
+  let isHiddenPrice = false;
+  if (Brand?.Global?.Admin.hoa_hong_an_gia) {
+    if (!adminTools_byStock?.hasRight) isHiddenPrice = true;
+  }
+
   if (!fields || fields.length === 0)
     return (
       <div className="p-4 font-light leading-6 text-gray-500">
@@ -97,7 +103,7 @@ function BonusSales({ name, adminTools_byStock }) {
                             ? "border-danger"
                             : "border-[#d5d7da]"
                         )}
-                        type="text"
+                        type={isHiddenPrice ? "password" : "text"}
                         autoComplete="off"
                         thousandSeparator={true}
                         placeholder="Nhập số tiền"
@@ -106,13 +112,13 @@ function BonusSales({ name, adminTools_byStock }) {
                           field.onChange(val.floatValue || "")
                         }
                         disabled={
-                          Brand?.Global?.Admin?.thuong_ds_nang_cao
+                          (Brand?.Global?.Admin?.thuong_ds_nang_cao
                             ? Auth?.ID !== 1
                             : !(
                                 adminTools_byStock?.hasRight ||
                                 moment(item.CreateDate).format("DD-MM-YYYY") ===
                                   moment().format("DD-MM-YYYY")
-                              )
+                              )) || isHiddenPrice
                         }
                       />
                       {field.value &&
@@ -120,7 +126,8 @@ function BonusSales({ name, adminTools_byStock }) {
                         ? Auth?.ID === 1
                         : adminTools_byStock?.hasRight ||
                           moment(item.CreateDate).format("DD-MM-YYYY") ===
-                            moment().format("DD-MM-YYYY")) ? (
+                            moment().format("DD-MM-YYYY")) &&
+                      !isHiddenPrice ? (
                         <div
                           className="absolute top-0 right-0 flex items-center justify-center w-12 h-full"
                           onClick={() => field.onChange("")}

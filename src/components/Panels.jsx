@@ -392,6 +392,12 @@ function Panels(props) {
                 <img
                   src={AssetsHelpers.toAbsoluteUrl(Auth?.Avatar)}
                   alt={Auth?.FullName}
+                  onError={(e) =>
+                    (e.target.src = AssetsHelpers.toAbsoluteUrlCore(
+                      "/AppCore/images/blank.png",
+                      ""
+                    ))
+                  }
                 />
               </div>
             ) : (

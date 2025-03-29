@@ -19,15 +19,23 @@ import { NumericFormat } from "react-number-format";
 import clsx from "clsx";
 import StringHelpers from "@/helpers/StringHelpers";
 import { BonusRose, BonusSales, SelectMembersBouns } from ".";
+import { RolesHelpers } from "@/helpers/RolesHelpers";
 
 function PickerOneEmployees({ children, Order }) {
   const queryClient = useQueryClient();
   let Brand = useStore("Brand");
   let Auth = useStore("Auth");
+  let CrStocks = useStore("CrStocks");
 
   const [visible, setVisible] = useState(false);
   const [visibleValues, setVisibleValues] = useState(false);
   let [GroupUsers, setGroupUsers] = useState([]);
+
+  const { adminTools_byStock } = RolesHelpers.useRoles({
+    nameRoles: ["adminTools_byStock"],
+    auth: Auth,
+    CrStocks,
+  });
 
   const methods = useForm({
     defaultValues: {
@@ -202,6 +210,7 @@ function PickerOneEmployees({ children, Order }) {
       }
     );
   };
+
   return (
     <AnimatePresence initial={false}>
       <>
@@ -447,7 +456,7 @@ function PickerOneEmployees({ children, Order }) {
                                 </div>
                                 <BonusRose
                                   name={`EquallyValues[${index}].Hoa_Hong`}
-                                  adminTools_byStock={true}
+                                  adminTools_byStock={adminTools_byStock}
                                 />
                               </div>
                               <div>
@@ -456,7 +465,7 @@ function PickerOneEmployees({ children, Order }) {
                                 </div>
                                 <BonusSales
                                   name={`EquallyValues[${index}].Doanh_So`}
-                                  adminTools_byStock={true}
+                                  adminTools_byStock={adminTools_byStock}
                                 />
                               </div>
                             </div>
