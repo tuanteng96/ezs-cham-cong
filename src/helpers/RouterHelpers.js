@@ -24,6 +24,7 @@ const BOTTOM_NAVIGATION_PAGES = [
   "/admin/pos/calendar/os/",
   "/admin/pos/clients/edit/",
   "/admin/pos/orders/view/",
+  "/admin/pos/calendar/care-schedule/",
   "/pos/manage/",
   "/admin/pos/clients/birthday/",
   "/admin/pos/invoice-processings/",

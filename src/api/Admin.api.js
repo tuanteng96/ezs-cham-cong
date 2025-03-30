@@ -873,6 +873,12 @@ const AdminAPI = {
         Authorization: `Bearer ${Token}`,
       },
     }),
+  getCareSchedule: ({ data, Token }) =>
+    http.post(`/api/v3/OSNR@afterservice`, JSON.stringify(data), {
+      headers: {
+        Authorization: `Bearer ${Token}`,
+      },
+    }),
 };
 
 export default AdminAPI;

@@ -550,7 +550,7 @@ function PosAdmin({ f7router }) {
                   </Link>
                 ))}
               </div>
-              <div className="flex flex-col">
+              <div className="flex flex-col pb-2 mb-2 border-b">
                 <Link
                   className="relative px-4 py-2"
                   noLinkClass
@@ -574,6 +574,16 @@ function PosAdmin({ f7router }) {
                   popoverClose
                 >
                   <span>Cài đặt phòng</span>
+                </Link>
+              </div>
+              <div className="py-1.5">
+                <Link
+                  className="relative px-4 py-2"
+                  noLinkClass
+                  href="/admin/pos/calendar/care-schedule/"
+                  popoverClose
+                >
+                  <span>Lịch chăm sóc</span>
                 </Link>
               </div>
             </div>
@@ -881,20 +891,22 @@ function PosAdmin({ f7router }) {
               if (!extendedProps.noEvent) {
                 f7.views.main.router.navigate(
                   "/admin/pos/calendar/add/?formState=" +
-                  encodeURIComponent(JSON.stringify({
-                      ...extendedProps,
-                      Member: {
-                        FullName: extendedProps?.Member?.FullName,
-                        MobilePhone: extendedProps.Member?.MobilePhone,
-                        ID: extendedProps.Member?.ID,
-                      },
-                      Roots: extendedProps.Roots
-                        ? extendedProps.Roots.map((x) => ({
-                            Title: x.Title,
-                            ID: x.ID,
-                          }))
-                        : [],
-                    }))
+                    encodeURIComponent(
+                      JSON.stringify({
+                        ...extendedProps,
+                        Member: {
+                          FullName: extendedProps?.Member?.FullName,
+                          MobilePhone: extendedProps.Member?.MobilePhone,
+                          ID: extendedProps.Member?.ID,
+                        },
+                        Roots: extendedProps.Roots
+                          ? extendedProps.Roots.map((x) => ({
+                              Title: x.Title,
+                              ID: x.ID,
+                            }))
+                          : [],
+                      })
+                    )
                 );
               }
             }

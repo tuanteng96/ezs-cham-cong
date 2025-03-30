@@ -186,6 +186,7 @@ function PosRoomsCalendar(props) {
       className="bg-white"
       name="Pos-locks-calendar"
       onPageBeforeIn={() => PromHelpers.STATUS_BAR_COLOR("light")}
+      noToolbar
     >
       <Navbar innerClass="!px-0 text-white" outline={false}>
         <NavLeft className="h-full">

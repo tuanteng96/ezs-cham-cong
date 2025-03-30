@@ -60,6 +60,7 @@ import PrinterIPSettingsPage from "@/pages/Admin/pages/Utility/PrinterIPSettings
 import PosLocksCalendarPage from "@/pages/Admin/pages/Pos/PosLocksCalendar.jsx";
 import PosRoomsCalendarPage from "@/pages/Admin/pages/Pos/PosRoomsCalendar.jsx";
 import PosSettingsCalendarPage from "@/pages/Admin/pages/Pos/PosSettingsCalendar.jsx";
+import PosCareSchedulePage from "@/pages/Admin/pages/Pos/PosCareSchedule.jsx";
 import AddEditCalendarPage from "@/pages/Admin/pages/Pos/AddEditCalendar.jsx";
 import EditOsCalendarPage from "@/pages/Admin/pages/Pos/EditOsCalendar.jsx";
 import EditOsMaterialsPage from "@/pages/Admin/pages/Pos/EditOsMaterials.jsx";
@@ -294,6 +295,13 @@ var routes = [
           {
             path: "rooms",
             component: PosRoomsCalendarPage,
+            options: {
+              transition: "f7-cover",
+            },
+          },
+          {
+            path: "care-schedule",
+            component: PosCareSchedulePage,
             options: {
               transition: "f7-cover",
             },

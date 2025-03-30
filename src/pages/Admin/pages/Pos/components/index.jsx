@@ -5,6 +5,7 @@ import PickerAddEditWallet from "./PickerAddEditWallet";
 import PickerAddMember from "./PickerAddMember";
 import PickerAddNoteDiary from "./PickerAddNoteDiary";
 import PickerAff from "./PickerAff";
+import PickerCareScheduleFilter from "./PickerCareScheduleFilter";
 import PickerDebt from "./PickerDebt";
 import PickerEditCard from "./PickerEditCard";
 import PickerEditDateCard from "./PickerEditDateCard";
@@ -61,5 +62,6 @@ export {
   PickerEditPoint,
   PickerExchangePoint,
   PickerServiceOsInfo,
-  PickerServiceRegimen
+  PickerServiceRegimen,
+  PickerCareScheduleFilter
 };
