@@ -41,6 +41,10 @@ const RenderItem = ({ item }) => {
         <div className="flex-1 font-medium text-right">{item.StockTitle}</div>
       </div>
       <div className="flex justify-between px-4 py-3 border-b">
+        <div className="text-gray-600 w-[100px]">Ngày chăm sóc</div>
+        <div className="flex-1 font-medium text-right">{moment(item.SendDate).format("DD-MM-YYYY")}</div>
+      </div>
+      <div className="flex justify-between px-4 py-3 border-b">
         <div className="text-gray-600 w-[100px]">ID Khách hàng</div>
         <div className="flex-1 font-medium text-right">{item.MemberID}</div>
       </div>

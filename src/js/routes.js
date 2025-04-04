@@ -83,8 +83,10 @@ import CoursesPage from "../pages/Courses/index.jsx";
 import AttendancePage from "../pages/Courses/Attendance.jsx";
 import StudentPage from "../pages/Courses/Student.jsx";
 
-import DebugPage from "@/pages/Debug/index.jsx";
+import OsClassPage from "@/pages/OsClass/index.jsx";
+import OsClassViewPage from "@/pages/OsClass/OsClassView.jsx";
 
+import DebugPage from "@/pages/Debug/index.jsx";
 
 var routes = [
   {
@@ -581,14 +583,14 @@ var routes = [
             component: TimekeepingsPunishmentPage,
             options: {
               transition: "f7-cover",
-            }
+            },
           },
           {
             path: "/:MemberID",
             component: TimekeepingsUserPage,
             options: {
               transition: "f7-cover",
-            }
+            },
           },
         ],
       },
@@ -627,6 +629,22 @@ var routes = [
       {
         path: "student/:id",
         component: StudentPage,
+        options: {
+          transition: "f7-cover",
+        },
+      },
+    ],
+  },
+  {
+    path: "/osclass/",
+    component: OsClassPage,
+    options: {
+      transition: "f7-cover",
+    },
+    routes: [
+      {
+        path: ":id",
+        component: OsClassViewPage,
         options: {
           transition: "f7-cover",
         },

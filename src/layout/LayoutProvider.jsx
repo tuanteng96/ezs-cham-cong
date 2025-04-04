@@ -50,7 +50,7 @@ function LayoutProvider({ children }) {
   }, []);
 
   useQuery({
-    queryKey: ["Auth", { Token: Auth?.Token, WorkTrackStockID: CrStocks?.ID }],
+    queryKey: ["Auth", { Token: Auth?.token, WorkTrackStockID: CrStocks?.ID }],
     queryFn: async () => {
       let { data } = await AuthAPI.checkToken({
         Token: Auth?.token,

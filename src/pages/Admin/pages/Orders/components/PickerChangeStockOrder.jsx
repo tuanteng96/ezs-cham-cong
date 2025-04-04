@@ -51,7 +51,6 @@ function PickerChangeStockOrder({ children, OrderID }) {
         : null;
     },
     onSuccess: (data) => {
-      console.log(data)
       reset({
         ShipCode: data?.order?.ShipCode,
         Shipper: {

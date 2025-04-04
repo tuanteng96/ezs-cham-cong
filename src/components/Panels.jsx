@@ -11,6 +11,7 @@ import {
   ChevronDownIcon,
   CodeBracketIcon,
   RectangleStackIcon,
+  Squares2X2Icon,
 } from "@heroicons/react/24/outline";
 import { Link, Panel, f7, f7ready, useStore } from "framework7-react";
 import React, { useEffect, useRef, useState } from "react";
@@ -111,6 +112,15 @@ function Panels(props) {
         Id: f7.utils.id("xxxx-xxxx-xxxx-xxxx"),
         hasRight: cong_ca?.hasRight,
         Icon: <RectangleStackIcon className="w-5" />,
+      },
+      {
+        Title: "Quản lý lớp",
+        Link: "/osclass/",
+        ActiveLink: ["/osclass/"],
+        active: false,
+        Id: f7.utils.id("xxxx-xxxx-xxxx-xxxx"),
+        hasRight: Brand?.Global?.Admin?.lop_hoc_pt,
+        Icon: <Squares2X2Icon className="w-5" />,
       },
       {
         Title: "Thu ngân",

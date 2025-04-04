@@ -393,7 +393,7 @@ function EditOsCalendar({ f7route, f7router }) {
 
           await uploadImagesOsMutation.mutateAsync({
             OsID: formState?.Os?.ID,
-            Token: Auth?.Token,
+            Token: Auth?.token,
             data: bodyFormData,
           });
         })
@@ -412,7 +412,7 @@ function EditOsCalendar({ f7route, f7router }) {
       uploadImageOsMutation.mutate(
         {
           OsID: formState?.Os?.ID,
-          Token: Auth?.Token,
+          Token: Auth?.token,
           data: bodyFormData,
         },
         {
@@ -433,7 +433,7 @@ function EditOsCalendar({ f7route, f7router }) {
         bodyFormData.append("osid", formState?.Os?.ID);
         resetOsMutation.mutate(
           {
-            Token: Auth?.Token,
+            Token: Auth?.token,
             data: bodyFormData,
           },
           {

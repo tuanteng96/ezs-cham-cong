@@ -390,7 +390,7 @@ function AddEditCalendar({ f7route, f7router }) {
         data: {
           booking: [obj],
         },
-        Token: Auth?.Token,
+        Token: Auth?.token,
         CrStockID: CrStocks?.ID,
       },
       {
@@ -424,7 +424,7 @@ function AddEditCalendar({ f7route, f7router }) {
           booking: [obj],
         },
         CheckIn: dataCheckin,
-        Token: Auth?.Token,
+        Token: Auth?.token,
         CrStockID: CrStocks?.ID,
       },
       {
