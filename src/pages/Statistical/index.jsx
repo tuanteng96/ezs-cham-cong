@@ -30,6 +30,10 @@ function Statistical({ f7router }) {
     mon: new Date(),
     userid: Auth?.ID,
   });
+  let [SwitchOf, setSwitchOf] = useState({
+    Sales: false,
+    Rose: false,
+  });
 
   const { data, isLoading, refetch } = useQuery({
     queryKey: ["Statistical", filters],
@@ -77,6 +81,44 @@ function Statistical({ f7router }) {
       return dataConfig[index].Value;
     }
     return 0;
+  };
+
+  const getBonusWrap = ({ Items, Key }) => {
+    if (Key === "SourceID" && !SwitchOf.Rose) {
+      return Items;
+    }
+    if (Key === "OrderID" && !SwitchOf.Sales) {
+      return Items;
+    }
+    let newArr = [];
+    for (let item of Items) {
+      let indexDay = newArr.findIndex(
+        (x) =>
+          moment(x.CreateDate).format("DD-MM-YYYY") ===
+            moment(item.CreateDate).format("DD-MM-YYYY") && item[Key] === x[Key]
+      );
+      if (indexDay > -1) {
+        newArr[indexDay].Value += item.Value;
+        newArr[indexDay].ProdTitle = [
+          ...newArr[indexDay].ProdTitles,
+          item.ProdTitle,
+        ].join(", ");
+        newArr[indexDay].ProdTitles = [
+          ...newArr[indexDay].ProdTitles,
+          item.ProdTitle,
+        ];
+      } else {
+        let obj = {
+          ...item,
+          CreateDate: item.CreateDate,
+          Value: item.Value,
+          ProdTitle: item.ProdTitle,
+          ProdTitles: [item.ProdTitle],
+        };
+        newArr.push(obj);
+      }
+    }
+    return newArr;
   };
 
   return (
@@ -505,11 +547,25 @@ function Statistical({ f7router }) {
             </div>
 
             <div className="bg-white mb-1.5">
-              <div className="py-3 font-bold text-center uppercase border-b">
+              <div className="relative py-3 pl-4 font-bold uppercase border-b">
                 Hoa hồng bán hàng
                 {data?.BonusSales?.length > 0 && (
                   <span className="pl-1">({data?.BonusSales?.length})</span>
                 )}
+                <label className="absolute inline-flex items-center cursor-pointer right-4 top-[13px]">
+                  <input
+                    type="checkbox"
+                    className="sr-only peer"
+                    checked={SwitchOf.Rose}
+                    onChange={(e) =>
+                      setSwitchOf((prevState) => ({
+                        ...prevState,
+                        Rose: e.target.checked,
+                      }))
+                    }
+                  />
+                  <div className="relative w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary dark:peer-checked:bg-primary" />
+                </label>
               </div>
               <div className="grid grid-cols-5 font-medium text-gray-400 border-b">
                 <div className="px-4 py-2.5 border-r col-span-3">Hạng mục</div>
@@ -517,7 +573,10 @@ function Statistical({ f7router }) {
               </div>
 
               <div>
-                {data?.BonusSales.map((item, index) => (
+                {getBonusWrap({
+                  Items: data?.BonusSales || [],
+                  Key: "SourceID",
+                }).map((item, index) => (
                   <div
                     className="grid grid-cols-5 font-medium border-b"
                     key={index}
@@ -552,11 +611,25 @@ function Statistical({ f7router }) {
                 {(data.DOANH_SO.length > 0 ||
                   data?.KpiTourResult?.Value > 0) && (
                   <div className="bg-white mb-1.5">
-                    <div className="py-3 font-bold text-center uppercase border-b">
+                    <div className="relative py-3 pl-4 font-bold uppercase border-b">
                       KPI
                       {data?.DOANH_SO?.length > 0 && (
                         <span className="pl-1">({data.DOANH_SO.length})</span>
                       )}
+                      <label className="absolute inline-flex items-center cursor-pointer right-4 top-[13px]">
+                        <input
+                          type="checkbox"
+                          checked={SwitchOf.Sales}
+                          onChange={(e) =>
+                            setSwitchOf((prevState) => ({
+                              ...prevState,
+                              Sales: e.target.checked,
+                            }))
+                          }
+                          className="sr-only peer"
+                        />
+                        <div className="relative w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary dark:peer-checked:bg-primary" />
+                      </label>
                     </div>
                     <div className="grid grid-cols-5 font-medium text-gray-400 border-b">
                       <div className="px-4 py-2.5 border-r col-span-3">
@@ -568,7 +641,10 @@ function Statistical({ f7router }) {
                     </div>
 
                     <div>
-                      {data?.DOANH_SO.map((item, index) => (
+                      {getBonusWrap({
+                        Items: data?.DOANH_SO || [],
+                        Key: "OrderID",
+                      }).map((item, index) => (
                         <div
                           className="grid grid-cols-5 font-medium border-b"
                           key={index}

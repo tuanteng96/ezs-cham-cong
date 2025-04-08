@@ -1919,7 +1919,7 @@ function ChangePasswordPage({ f7router }) {
               render={({ field, fieldState }) => (
                 <div className="relative">
                   <Input
-                    className="[&_input]:rounded [&_input]:lowercase [&_input]:placeholder:normal-case"
+                    className="[&_input]:rounded [&_input]:placeholder:normal-case"
                     type={hiddenPassword ? "password" : "text"}
                     placeholder="Nhập mật khẩu mới"
                     value={field.value}

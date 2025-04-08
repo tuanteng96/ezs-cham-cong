@@ -30,6 +30,7 @@ import WorksHelpers from "../../helpers/WorksHelpers";
 import { getDistance } from "geolib";
 import DateTimeHelpers from "../../helpers/DateTimeHelpers";
 import RouterHelpers from "../../helpers/RouterHelpers";
+import Dom7 from "dom7";
 
 function NavigationBase({ pathname }) {
   const [visible, setVisible] = useState(false);
@@ -125,6 +126,12 @@ function NavigationBase({ pathname }) {
               buttonToPopoverWrapper.current.querySelector(
                 ".button-to-popover"
               ),
+            cssClass: "actions-ctv",
+            on: {
+              open: () => {
+                Dom7(".actions-ctv").find(".actions-button").removeClass("actions-button").addClass("bg-white h-[50px] border-b border-[#dddddd] flex items-center justify-center")
+              }
+            },
           });
 
           actionsToPopover.current.open();

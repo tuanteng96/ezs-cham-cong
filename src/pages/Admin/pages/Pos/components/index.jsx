@@ -13,6 +13,7 @@ import PickerEditPoint from "./PickerEditPoint";
 import PickerEditProd from "./PickerEditProd";
 import PickerExchangePoint from "./PickerExchangePoint";
 import PickerFilter from "./PickerFilter";
+import PickerFilterClientBook from "./PickerFilterClientBook";
 import PickerPayments from "./PickerPayments";
 import PickerPreviewOldCard from "./PickerPreviewOldCard";
 import PickerServiceAddRemove from "./PickerServiceAddRemove";
@@ -63,5 +64,6 @@ export {
   PickerExchangePoint,
   PickerServiceOsInfo,
   PickerServiceRegimen,
-  PickerCareScheduleFilter
+  PickerCareScheduleFilter,
+  PickerFilterClientBook
 };

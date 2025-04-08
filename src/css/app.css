@@ -478,3 +478,16 @@ input:disabled {
     aspect-ratio: 1;
     clip-path: polygon(0 0, 100% 0, 0 100%);
 }
+
+.actions-ctv > .actions-group:first-child {
+    max-height: 80vh;
+    overflow: auto;;
+}
+
+.actions-ctv > .actions-group > div:last-child {
+    border: 0 !important;
+}
+
+.actions-ctv .color-red > .actions-button-text {
+    @apply text-danger font-medium
+}

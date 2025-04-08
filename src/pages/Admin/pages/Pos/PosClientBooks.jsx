@@ -1,7 +1,7 @@
 import {
   ChevronLeftIcon,
   ChevronRightIcon,
-  PlusIcon,
+  EllipsisVerticalIcon,
 } from "@heroicons/react/24/outline";
 import {
   Link,
@@ -10,6 +10,7 @@ import {
   NavTitle,
   Navbar,
   Page,
+  Popover,
   useStore,
 } from "framework7-react";
 import React, { useEffect, useRef, useState } from "react";
@@ -17,30 +18,33 @@ import NoFound from "@/components/NoFound";
 import PromHelpers from "@/helpers/PromHelpers";
 import { useQuery } from "react-query";
 import AdminAPI from "@/api/Admin.api";
-import ArrayHelpers from "@/helpers/ArrayHelpers";
 import moment from "moment";
 import clsx from "clsx";
+import { PickerFilterClientBook } from "./components";
 
 function PosClientBooks({ f7router, f7route }) {
   let client = f7route?.query?.client
     ? JSON.parse(f7route?.query?.client)
     : null;
   let Auth = useStore("Auth");
-  let CrStocks = useStore("CrStocks");
 
   const [idRef, setIdRef] = useState(0);
+  let [filters, setFilters] = useState({
+    From: moment().subtract(15, "days").toDate(),
+    To: moment().add(15, "days").toDate(),
+  });
 
   const scrollRef = useRef("");
 
   const ClientBooks = useQuery({
-    queryKey: ["ClientBooksCareID", { ID: f7route?.params?.id }],
+    queryKey: ["ClientBooksCareID", { ID: f7route?.params?.id, filters }],
     queryFn: async () => {
       let { data } = await AdminAPI.clientBooksId({
         MemberID: f7route?.params?.id,
         Token: Auth?.token,
         StockID: "",
-        From: moment().subtract(15, "days").format("YYYY-MM-DD"),
-        To: moment().add(15, "days").format("YYYY-MM-DD"),
+        From: moment(filters.From).format("YYYY-MM-DD"),
+        To: moment(filters.To).format("YYYY-MM-DD"),
       });
       return data?.books
         ? data?.books
@@ -154,17 +158,45 @@ function PosClientBooks({ f7router, f7route }) {
         <NavTitle>Quản lý đặt lịch</NavTitle>
         <NavRight className="h-full">
           <Link
-            href={
-              `/admin/pos/calendar/add/?client=` +
-              encodeURIComponent(JSON.stringify(client || null)) +
-              "&prevState=" +
-              JSON.stringify({ invalidateQueries: ["ClientBooksCareID"] })
-            }
+            popoverOpen=".popover-client-book"
             noLinkClass
             className="!text-white h-full flex item-center justify-center w-12"
           >
-            <PlusIcon className="w-6" />
+            <EllipsisVerticalIcon className="w-6" />
           </Link>
+
+          <Popover className="popover-client-book w-[170px]">
+            <div className="flex flex-col py-1.5">
+              <Link
+                className="relative px-4 py-3 border-b"
+                noLinkClass
+                href={
+                  `/admin/pos/calendar/add/?client=` +
+                  encodeURIComponent(JSON.stringify(client || null)) +
+                  "&prevState=" +
+                  JSON.stringify({ invalidateQueries: ["ClientBooksCareID"] })
+                }
+                popoverClose
+              >
+                <span>Tạo mới đặt lịch</span>
+              </Link>
+              <PickerFilterClientBook
+                initialValues={filters}
+                onChange={(val) => setFilters(val)}
+              >
+                {({ open }) => (
+                  <Link
+                    className="relative px-4 py-3"
+                    noLinkClass
+                    popoverClose
+                    onClick={open}
+                  >
+                    <span>Bộ lọc</span>
+                  </Link>
+                )}
+              </PickerFilterClientBook>
+            </div>
+          </Popover>
         </NavRight>
         <div className="absolute h-[2px] w-full bottom-0 left-0 bg-[rgba(255,255,255,0.3)]"></div>
       </Navbar>

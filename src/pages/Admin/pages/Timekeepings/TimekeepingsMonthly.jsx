@@ -92,7 +92,33 @@ const ItemRender = ({ item }) => {
             </div>
           </div>
           <div className="flex justify-between pb-3 mb-3 border-b border-dashed last:mb-0 last:pb-0 last:border-0">
-            <div className="flex-1 text-gray-500">Tổng phạt (Đi muộn, về sớm)</div>
+            <div className="flex-1 text-gray-500">Đi muộn việc cá nhân</div>
+            <div className="font-semibold font-lato w-[110px] text-right">
+              {item?.TrackValue.SO_LAN_DI_MUON_CN}
+            </div>
+          </div>
+          <div className="flex justify-between pb-3 mb-3 border-b border-dashed last:mb-0 last:pb-0 last:border-0">
+            <div className="flex-1 text-gray-500">Đi sớm việc công ty</div>
+            <div className="font-semibold font-lato w-[110px] text-right">
+              {item?.TrackValue.SO_LAN_DI_SOM_CTY}
+            </div>
+          </div>
+          <div className="flex justify-between pb-3 mb-3 border-b border-dashed last:mb-0 last:pb-0 last:border-0">
+            <div className="flex-1 text-gray-500">Về muộn việc công ty</div>
+            <div className="font-semibold font-lato w-[110px] text-right">
+              {item?.TrackValue.SO_LAN_VE_MUON_CTY}
+            </div>
+          </div>
+          <div className="flex justify-between pb-3 mb-3 border-b border-dashed last:mb-0 last:pb-0 last:border-0">
+            <div className="flex-1 text-gray-500">Về sớm việc cá nhân</div>
+            <div className="font-semibold font-lato w-[110px] text-right">
+              {item?.TrackValue.SO_LAN_VE_SOM_CN}
+            </div>
+          </div>
+          <div className="flex justify-between pb-3 mb-3 border-b border-dashed last:mb-0 last:pb-0 last:border-0">
+            <div className="flex-1 text-gray-500">
+              Tổng phạt (Đi muộn, về sớm)
+            </div>
             <div className="font-semibold font-lato w-[110px] text-right">
               {item?.TrackValue.DI_MUON + item?.TrackValue.VE_SOM > 0
                 ? `-${StringHelpers.formatVND(
@@ -161,11 +187,11 @@ function TimekeepingsMonthly({ f7route }) {
 
         return {
           ...data,
-          pi: pageParam
+          pi: pageParam,
         };
       },
       getNextPageParam: (lastPage, pages) => {
-        return lastPage.pi === lastPage.pcount ? undefined : lastPage.pi + 1
+        return lastPage.pi === lastPage.pcount ? undefined : lastPage.pi + 1;
       },
       keepPreviousData: true,
     });
@@ -180,7 +206,7 @@ function TimekeepingsMonthly({ f7route }) {
       allowInfinite.current = true;
     });
   };
-  
+
   return (
     <Page
       className="!bg-white"
