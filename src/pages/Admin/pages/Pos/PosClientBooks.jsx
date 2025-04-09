@@ -27,7 +27,7 @@ function PosClientBooks({ f7router, f7route }) {
     ? JSON.parse(f7route?.query?.client)
     : null;
   let Auth = useStore("Auth");
-
+  
   const [idRef, setIdRef] = useState(0);
   let [filters, setFilters] = useState({
     From: moment().subtract(15, "days").toDate(),

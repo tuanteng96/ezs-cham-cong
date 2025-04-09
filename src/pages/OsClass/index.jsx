@@ -78,7 +78,7 @@ function OsClass(props) {
       onPtrRefresh={(done) => refetch().then(() => done())}
       noToolbar
     >
-      <Navbar innerclassName="!px-0 text-white" outline={false}>
+      <Navbar innerClass="!px-0 text-white" outline={false}>
         <NavLeft className="h-full">
           <Link
             noLinkClass

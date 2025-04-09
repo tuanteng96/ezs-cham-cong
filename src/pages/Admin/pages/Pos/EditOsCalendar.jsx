@@ -737,7 +737,18 @@ function EditOsCalendar({ f7route, f7router }) {
           <Link
             noLinkClass
             className="!text-white h-full flex item-center justify-center w-12"
-            back
+            onClick={() => {
+              if (f7router.previousRoute.path.includes("add-prods")) {
+                f7.view.main.router.back(
+                  f7router.history[f7router.history.length - 4],
+                  {
+                    force: true,
+                  }
+                );
+              } else {
+                f7router.back();
+              }
+            }}
           >
             <ChevronLeftIcon className="w-6" />
           </Link>

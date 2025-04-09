@@ -243,7 +243,7 @@ function PosAddProd({ f7route, f7router }) {
       allowInfinite.current = true;
     });
   };
-  
+
   const onChange = async () => {
     if (CheckIn?.data?.ID) {
       var bodyFormData = new FormData();
@@ -269,16 +269,22 @@ function PosAddProd({ f7route, f7router }) {
         {
           onSuccess: (data) => {
             toast.success("Thêm vào hoá đơn thành công.");
-            f7router.navigate(
-              `${f7router.previousRoute.url}&prevFee=${JSON.stringify(
-                selected
-                  .filter((x) => x.IsAddFee)
-                  .map((x) => ({
-                    Title: x.Title,
-                    Qty: x.Qty,
-                  }))
-              )}`
-            );
+            
+            if (selected.filter((x) => x.IsAddFee).length > 0) {
+              f7router.navigate(
+                `${f7router.previousRoute.url}&prevFee=${JSON.stringify(
+                  selected
+                    .filter((x) => x.IsAddFee)
+                    .map((x) => ({
+                      Title: x.Title,
+                      Qty: x.Qty,
+                    }))
+                )}`
+              );
+            } else {
+              f7router.back();
+            }
+
             if (data?.prePayedValue) {
               f7.dialog
                 .create({
@@ -315,16 +321,20 @@ function PosAddProd({ f7route, f7router }) {
         {
           onSuccess: (data) => {
             toast.success("Thêm vào hoá đơn thành công.");
-            f7router.navigate(
-              `${f7router.previousRoute.url}&prevFee=${JSON.stringify(
-                selected
-                  .filter((x) => x.IsAddFee)
-                  .map((x) => ({
-                    Title: x.Title,
-                    Qty: x.Qty,
-                  }))
-              )}`
-            );
+            if (selected.filter((x) => x.IsAddFee).length > 0) {
+              f7router.navigate(
+                `${f7router.previousRoute.url}&prevFee=${JSON.stringify(
+                  selected
+                    .filter((x) => x.IsAddFee)
+                    .map((x) => ({
+                      Title: x.Title,
+                      Qty: x.Qty,
+                    }))
+                )}`
+              );
+            } else {
+              f7router.back();
+            }
 
             if (data?.prePayedValue) {
               f7.dialog
