@@ -78,7 +78,7 @@ function OsClass(props) {
       onPtrRefresh={(done) => refetch().then(() => done())}
       noToolbar
     >
-      <Navbar innerClass="!px-0 text-white" outline={false}>
+      <Navbar innerclassName="!px-0 text-white" outline={false}>
         <NavLeft className="h-full">
           <Link
             noLinkClass
@@ -134,10 +134,10 @@ function OsClass(props) {
                 >
                   <div className="px-4 py-2.5 border-b bg-gray-50 relative">
                     <div className="mb-1 font-semibold text-primary">
-                      <div class="animate-pulse h-3.5 bg-gray-200 rounded-full w-8/12"></div>
+                      <div className="animate-pulse h-3.5 bg-gray-200 rounded-full w-8/12"></div>
                     </div>
                     <div className="font-medium text-gray-700 font-lato">
-                      <div class="animate-pulse h-2 bg-gray-200 rounded-full w-2/4"></div>
+                      <div className="w-2/4 h-2 bg-gray-200 rounded-full animate-pulse"></div>
                     </div>
                     <ChevronRightIcon className="absolute w-6 text-gray-300 right-3 top-2/4 -translate-y-2/4" />
                   </div>
@@ -145,19 +145,19 @@ function OsClass(props) {
                     <div className="flex items-center justify-between px-4 py-3 border-b border-dashed last:border-0">
                       <div className="text-gray-600">Tổng học viên</div>
                       <div className="font-semibold font-lato text-[15px]">
-                        <div class="animate-pulse h-3.5 bg-gray-200 rounded-full w-6"></div>
+                        <div className="animate-pulse h-3.5 bg-gray-200 rounded-full w-6"></div>
                       </div>
                     </div>
                     <div className="flex items-center justify-between px-4 py-3 border-b border-dashed last:border-0">
                       <div className="text-gray-600">Điểm danh đến</div>
                       <div className="font-semibold font-lato text-[15px]">
-                        <div class="animate-pulse h-3.5 bg-gray-200 rounded-full w-6"></div>
+                        <div className="animate-pulse h-3.5 bg-gray-200 rounded-full w-6"></div>
                       </div>
                     </div>
                     <div className="flex items-center justify-between px-4 py-3 border-b border-dashed last:border-0">
                       <div className="text-gray-600">Điểm danh không đến</div>
                       <div className="font-semibold font-lato text-[15px]">
-                        <div class="animate-pulse h-3.5 bg-gray-200 rounded-full w-6"></div>
+                        <div className="animate-pulse h-3.5 bg-gray-200 rounded-full w-6"></div>
                       </div>
                     </div>
                   </div>

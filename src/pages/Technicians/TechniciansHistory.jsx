@@ -208,6 +208,7 @@ function TechniciansHistory({ memberid }) {
                 ))}
             </div>
           )}
+          
           {!isLoading && (
             <>
               {data && data.length > 0 && (
@@ -301,10 +302,10 @@ function TechniciansHistory({ memberid }) {
                       <div className="pb-4 timeline-item" key={index}>
                         <div className="timeline-item-date">
                           <span className="font-semibold">
-                            {moment(item.CreateDate).format("DD")}
+                            {moment(item.dayFull).format("DD")}
                           </span>
                           <small className="pl-[2px]">
-                            {moment(item.CreateDate).format("MMM")}
+                            {moment(item.dayFull).format("MMM")}
                           </small>
                         </div>
                         <div className="timeline-item-divider"></div>

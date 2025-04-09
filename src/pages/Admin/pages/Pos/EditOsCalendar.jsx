@@ -66,8 +66,8 @@ function EditOsCalendar({ f7route, f7router }) {
     auth: Auth,
     CrStocks,
   });
-  let prevState = f7route?.query?.prevState
-    ? JSON.parse(f7route?.query?.prevState)
+  let prevFee = f7route?.query?.prevFee
+    ? JSON.parse(f7route?.query?.prevFee)
     : null;
 
   let formState = f7route?.query?.formState
@@ -154,8 +154,14 @@ function EditOsCalendar({ f7route, f7router }) {
       return rs ? { ...rs, Materials } : null;
     },
     onSuccess: (data) => {
+      let AutoSalaryMethod = data?.AutoSalaryMethod
+        ? AutoSalaryMethodOptions.filter(
+            (x) => Number(x.value) === data?.AutoSalaryMethod
+          )[0]
+        : AutoSalaryMethodOptions[0];
       let index = Stocks.findIndex((x) => x.value === data?.StockID);
       let newFee = null;
+
       if (data.feeList && data?.feeList?.length > 0) {
         newFee = data.feeList.filter((x) => x.Remain > 0 || x.Assign > 0);
         if (newFee.length > 0) {
@@ -196,6 +202,71 @@ function EditOsCalendar({ f7route, f7router }) {
           }))
         : null;
 
+      if (prevFee && prevFee.length > 0) {
+        for (let fee of prevFee) {
+          let indexFee = newFee.findIndex(
+            (x) => x.Title.replace("(Gốc)", "") === fee.Title
+          );
+          if (indexFee > -1) {
+            newFee[indexFee].Remain = {
+              label: fee.Qty,
+              value: fee.Qty,
+            };
+          }
+        }
+        if (appPOS) {
+          appPOS
+            .setOs(
+              {
+                ...data,
+                AutoSalaryMethod: AutoSalaryMethod?.value,
+              },
+              {
+                action: "TINH_LUONG",
+                data: {
+                  feeList: newFee
+                    ? newFee.map((x) => ({
+                        ...x,
+                        Assign: x?.Remain?.value || 0,
+                      }))
+                    : [],
+                  Staffs: newStaffs
+                    ? newStaffs.map((m) => ({
+                        UserID: m?.value,
+                        FullName: m?.label,
+                        Value: 0,
+                        feeList: newFee
+                          ? newFee
+                              .filter((x) => Number(x?.Remain?.value) > 0)
+                              .map((x) => ({
+                                ...x,
+                                Assign: x?.Remain?.value || 0,
+                              }))
+                          : [],
+                      }))
+                    : [],
+                },
+              }
+            )
+            .then((os) => {
+              newStaffs = os?.Staffs?.map((x) => ({
+                ...x,
+                label: x.FullName,
+                value: x.UserID,
+                Value: x.Salary || x.Value,
+                raw: x.Salary || x.Value,
+                feeList: x.feeList
+                  ? x.feeList.map((f) => ({
+                      ...f,
+                      raw: f.Value,
+                    }))
+                  : [],
+              }));
+            })
+            .catch((e) => console.log(e));
+        }
+      }
+
       let InfoJSON = data?.InfoJSON ? JSON.parse(data?.InfoJSON) : null;
       reset({
         ServiceID: data?.ID,
@@ -213,7 +284,7 @@ function EditOsCalendar({ f7route, f7router }) {
               value: CrStocks?.ID,
               label: CrStocks?.Title,
             },
-        AutoSalaryMethod: AutoSalaryMethodOptions[0],
+        AutoSalaryMethod: AutoSalaryMethod,
         btn: !data?.Status ? "CHUYEN" : "HOAN_THANH",
         salaryUpdate: null,
         roomid: data?.RoomID && data?.RoomID !== "0" ? data?.RoomID : "",
@@ -812,7 +883,7 @@ function EditOsCalendar({ f7route, f7router }) {
                 <div className="p-4">
                   {fieldsFee &&
                     fieldsFee?.map((item, index) => (
-                      <div className="mb-2 last:mb-0" key={item.id}>
+                      <div className="mb-3.5 last:mb-0" key={item.id}>
                         <div className="mb-px text-gray-500">{item.Title}</div>
                         <div>
                           <Controller

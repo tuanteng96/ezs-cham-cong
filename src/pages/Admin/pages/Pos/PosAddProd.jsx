@@ -78,7 +78,7 @@ function PosAddProd({ f7route, f7router }) {
   const [filters, setFilters] = useState({
     pi: 1,
     key: "",
-    cateid: filtersState?.cateid || 0,
+    cateid: Number(filtersState?.cateid) || 0,
     ps: 10,
     stockid: CrStocks?.ID || "",
     getid: 1,
@@ -243,7 +243,7 @@ function PosAddProd({ f7route, f7router }) {
       allowInfinite.current = true;
     });
   };
-
+  
   const onChange = async () => {
     if (CheckIn?.data?.ID) {
       var bodyFormData = new FormData();
@@ -269,8 +269,16 @@ function PosAddProd({ f7route, f7router }) {
         {
           onSuccess: (data) => {
             toast.success("Thêm vào hoá đơn thành công.");
-            f7router.back();
-
+            f7router.navigate(
+              `${f7router.previousRoute.url}&prevFee=${JSON.stringify(
+                selected
+                  .filter((x) => x.IsAddFee)
+                  .map((x) => ({
+                    Title: x.Title,
+                    Qty: x.Qty,
+                  }))
+              )}`
+            );
             if (data?.prePayedValue) {
               f7.dialog
                 .create({
@@ -307,7 +315,16 @@ function PosAddProd({ f7route, f7router }) {
         {
           onSuccess: (data) => {
             toast.success("Thêm vào hoá đơn thành công.");
-            f7router.back();
+            f7router.navigate(
+              `${f7router.previousRoute.url}&prevFee=${JSON.stringify(
+                selected
+                  .filter((x) => x.IsAddFee)
+                  .map((x) => ({
+                    Title: x.Title,
+                    Qty: x.Qty,
+                  }))
+              )}`
+            );
 
             if (data?.prePayedValue) {
               f7.dialog
