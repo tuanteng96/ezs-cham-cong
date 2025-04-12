@@ -644,6 +644,12 @@ const AdminAPI = {
         Authorization: `Bearer ${Token}`,
       },
     }),
+  clientsTransfFeeServicesItem: ({ data, Token }) =>
+    http.post(`admin/smart.aspx?orderarr=1`, data, {
+      headers: {
+        Authorization: `Bearer ${Token}`,
+      },
+    }),
   clientsGetServicesItemEnd: ({ data, Token, StockID = "" }) =>
     http.post(`/api/v3/OrderService?cmd=ended&StockID=${StockID}`, data, {
       headers: {

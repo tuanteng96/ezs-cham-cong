@@ -371,6 +371,7 @@ function AddEditClients({ f7router, f7route }) {
             } else {
               f7router.back();
             }
+            document.body.click();
           }
         },
       }
@@ -406,7 +407,7 @@ function AddEditClients({ f7router, f7route }) {
       </Navbar>
       <FormProvider {...methods}>
         <form
-          className="flex flex-col h-full pb-safe-b"
+          className="relative flex flex-col h-full pb-safe-b"
           onSubmit={handleSubmit(onSubmit)}
         >
           {(isAddMode || !isLoading) && (
@@ -435,7 +436,7 @@ function AddEditClients({ f7router, f7route }) {
                     <Input
                       clearButton
                       className="[&_input]:rounded [&_input]:placeholder:normal-case"
-                      type="input"
+                      type="text"
                       placeholder="Nhập tên khách"
                       value={field.value}
                       errorMessage={fieldState?.error?.message}
@@ -447,6 +448,7 @@ function AddEditClients({ f7router, f7route }) {
                           Event: e,
                         })
                       }
+                      enterkeyhint="next"
                     />
                   )}
                 />

@@ -13,7 +13,6 @@ import {
   AdjustmentsVerticalIcon,
   ArrowRightIcon,
   ChevronLeftIcon,
-  PlusIcon,
 } from "@heroicons/react/24/outline";
 import NoFound from "@/components/NoFound";
 import moment from "moment";

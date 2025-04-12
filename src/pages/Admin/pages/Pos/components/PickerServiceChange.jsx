@@ -20,6 +20,7 @@ function PickerServiceChange({ children, data }) {
   const [visible, setVisible] = useState(false);
 
   let Auth = useStore("Auth");
+  let CrStocks = useStore("CrStocks");
 
   const { control, handleSubmit, reset } = useForm({
     defaultValues: {
@@ -64,16 +65,35 @@ function PickerServiceChange({ children, data }) {
 
   const changeMutation = useMutation({
     mutationFn: async (body) => {
-      let data = await AdminAPI.clientsTransfServicesItem(body);
+      let rs = await AdminAPI.clientsTransfServicesItem(body);
+
+      var bodyFormData = new FormData();
+      bodyFormData.append("orderarr", 1);
+      bodyFormData.append(
+        "prods",
+        JSON.stringify([[data?.ConvertAddFeeID, 1, rs?.data?.addPrice]])
+      );
+      bodyFormData.append("after", "set_fee");
+      bodyFormData.append("orderserviceid", data?.ID);
+      bodyFormData.append("MemberID", data?.MemberID);
+      bodyFormData.append("StockID", CrStocks?.ID || data?.StockID);
+      bodyFormData.append("convert_fee", 1);
+      bodyFormData.append("convert_osid", data?.ID);
+      bodyFormData.append("OrderServiceAddFee", 1);
+      await AdminAPI.clientsTransfFeeServicesItem({
+        data: bodyFormData,
+        Token: body.Token,
+      });
+
       await queryClient.invalidateQueries(["ClientServicesID"]);
       await queryClient.invalidateQueries(["ServiceUseManageID"]);
       await queryClient.invalidateQueries(["CalendarBookings"]);
-      return data;
+      return rs;
     },
   });
 
   const onSubmit = (values) => {
-    f7.dialog.preloader("Đang thực hiện ...")
+    f7.dialog.preloader("Đang thực hiện ...");
     let newValues = {
       osid: values.osid,
       prodid: values?.prodid?.value || "",
@@ -93,8 +113,9 @@ function PickerServiceChange({ children, data }) {
       {
         onSuccess: async () => {
           await queryClient.invalidateQueries(["OsDetailID"]);
-          f7.dialog.close()
-          toast.success("Chuyển đổi thành công.")
+          f7.dialog.close();
+          toast.success("Chuyển đổi thành công.");
+          setVisible(false);
         },
       }
     );

@@ -38,6 +38,7 @@ import AdminAPI from "@/api/Admin.api";
 import { toast } from "react-toastify";
 import clsx from "clsx";
 import Dom7 from "dom7";
+import { PickerPriceProdAdd } from "./components";
 
 const getNameType = (type) => {
   switch (type) {
@@ -251,12 +252,18 @@ function PosAddProd({ f7route, f7router }) {
       bodyFormData.append(
         "arr",
         JSON.stringify(
-          selected.map((x) => ({
-            id: x.ID,
-            qty: x.Qty,
-            IsService: x.IsService,
-            IsAddFee: x.IsAddFee,
-          }))
+          selected.map((x) => {
+            let obj = {
+              id: x.ID,
+              qty: x.Qty,
+              IsService: x.IsService,
+              IsAddFee: x.IsAddFee,
+            };
+            if (x.priceorder) {
+              obj.priceorder = x.priceorder;
+            }
+            return obj;
+          })
         )
       );
 
@@ -269,9 +276,12 @@ function PosAddProd({ f7route, f7router }) {
         {
           onSuccess: (data) => {
             toast.success("Thêm vào hoá đơn thành công.");
-            
-            if (selected.filter((x) => x.IsAddFee).length > 0) {
-              f7router.navigate(
+
+            if (
+              selected.filter((x) => x.IsAddFee).length > 0 &&
+              f7router.previousRoute.path.includes("/admin/pos/calendar/os")
+            ) {
+              f7.view.main.router.back(
                 `${f7router.previousRoute.url}&prevFee=${JSON.stringify(
                   selected
                     .filter((x) => x.IsAddFee)
@@ -279,7 +289,10 @@ function PosAddProd({ f7route, f7router }) {
                       Title: x.Title,
                       Qty: x.Qty,
                     }))
-                )}`
+                )}`,
+                {
+                  force: true,
+                }
               );
             } else {
               f7router.back();
@@ -308,12 +321,18 @@ function PosAddProd({ f7route, f7router }) {
       addCheckInMutation.mutate(
         {
           arr: JSON.stringify(
-            selected.map((x) => ({
-              id: x.ID,
-              qty: x.Qty,
-              IsService: x.IsService,
-              IsAddFee: x.IsAddFee,
-            }))
+            selected.map((x) => {
+              let obj = {
+                id: x.ID,
+                qty: x.Qty,
+                IsService: x.IsService,
+                IsAddFee: x.IsAddFee,
+              };
+              if (x.priceorder) {
+                obj.priceorder = x.priceorder;
+              }
+              return obj;
+            })
           ),
           Token: Auth?.token,
           StockID: CrStocks?.ID,
@@ -321,8 +340,11 @@ function PosAddProd({ f7route, f7router }) {
         {
           onSuccess: (data) => {
             toast.success("Thêm vào hoá đơn thành công.");
-            if (selected.filter((x) => x.IsAddFee).length > 0) {
-              f7router.navigate(
+            if (
+              selected.filter((x) => x.IsAddFee).length > 0 &&
+              f7router.previousRoute.path.includes("/admin/pos/calendar/os")
+            ) {
+              f7.view.main.router(
                 `${f7router.previousRoute.url}&prevFee=${JSON.stringify(
                   selected
                     .filter((x) => x.IsAddFee)
@@ -330,7 +352,10 @@ function PosAddProd({ f7route, f7router }) {
                       Title: x.Title,
                       Qty: x.Qty,
                     }))
-                )}`
+                )}`,
+                {
+                  force: true,
+                }
               );
             } else {
               f7router.back();
@@ -393,7 +418,7 @@ function PosAddProd({ f7route, f7router }) {
 
   return (
     <Page
-      id="pos-add-prod"
+      id="Pos-add-prod"
       className="bg-white"
       name="Pos-add-prod"
       onPageBeforeIn={() => PromHelpers.STATUS_BAR_COLOR("light")}
@@ -453,96 +478,23 @@ function PosAddProd({ f7route, f7router }) {
           {Lists && Lists.length > 0 && (
             <div className="grid grid-cols-2 gap-4 p-4">
               {Lists.map((item, index) => (
-                <div className="overflow-hidden border rounded" key={index}>
-                  <div
-                    className="relative aspect-square"
-                    onClick={() => {
-                      let newSelected = [...selected];
-                      let index = newSelected.findIndex(
-                        (x) => x.ID === item.ID
-                      );
-                      if (index > -1) {
-                        newSelected[index].Qty = newSelected[index].Qty + 1;
-                      } else {
-                        newSelected.push({ ...item, Qty: 1 });
-                      }
-                      setSelected(newSelected);
-                    }}
-                  >
-                    <img
-                      className="object-cover w-full h-full"
-                      src={AssetsHelpers.toAbsoluteUrl(item.Thumbnail)}
-                      alt={item.Title}
-                      onError={(e) => {
-                        e.currentTarget.src = AssetsHelpers.toAbsoluteUrlCore(
-                          "no-product.png",
-                          "/images/"
-                        );
-                      }}
-                    />
-                    {!item.IsMoney &&
-                      !item.IsService &&
-                      !item.IsNVL &&
-                      !item.IsAddFee &&
-                      !item.IsCourse && (
-                        <div className="absolute text-white bg-danger top-2 right-2 font-lato px-1.5 rounded">
-                          {item.stockCount}
-                        </div>
-                      )}
-                  </div>
-                  <div className="px-2 py-3 text-center">
-                    <div className="font-medium line-clamp-2 min-h-[42px]">
-                      {item.Title}
-                    </div>
-                    <div
-                      className={clsx(
-                        "mt-1 font-medium font-lato group",
-                        isCheckSales({
-                          SaleBegin: item.SaleBegin,
-                          SaleEnd: item.SaleEnd,
-                          PriceSale: item.PriceSale,
-                        }) && "is-sale"
-                      )}
-                    >
-                      <div className="hidden group-[.is-sale]:block">
-                        {StringHelpers.formatVND(item.PriceSale)}
-                      </div>
-                      <div className="group-[.is-sale]:line-through group-[.is-sale]:text-gray-400">
-                        {StringHelpers.formatVND(item.PriceProduct)}
-                      </div>
-                    </div>
-                    <div className="px-3 mt-2.5 flex">
-                      <button
-                        type="button"
-                        className="flex items-center justify-center h-8 text-white rounded-l w-9 bg-danger border-danger disabled:opacity-60"
-                        onClick={() => {
-                          let newSelected = [...selected];
-                          let index = newSelected.findIndex(
-                            (x) => x.ID === item.ID
-                          );
-                          if (index > -1) {
-                            if (newSelected[index].Qty <= 1) {
-                              newSelected = newSelected.filter(
-                                (x) => x.ID !== newSelected[index].ID
-                              );
-                            } else {
-                              newSelected[index].Qty =
-                                newSelected[index].Qty - 1;
-                            }
-                          }
-                          setSelected(newSelected);
-                        }}
-                        disabled={isDisabled({ Item: item, Type: "Minus" })}
-                      >
-                        <MinusIcon className="w-4" />
-                      </button>
-                      <div className="flex items-center justify-center flex-1 w-12 border-y font-lato">
-                        {getValues(item)}
-                      </div>
-                      <button
-                        type="button"
-                        className="flex items-center justify-center h-8 text-white rounded-r w-9 bg-success border-danger"
-                        disabled={isDisabled({ Item: item, Type: "Plus" })}
+                <PickerPriceProdAdd
+                  data={item}
+                  onChange={(price) => {
+                    let newSelected = [...selected];
+                    newSelected.push({
+                      ...item,
+                      Qty: 1,
+                      priceorder: Number(price),
+                    });
+                    setSelected(newSelected);
+                  }}
+                  key={index}
+                >
+                  {({ open }) => (
+                    <div className="overflow-hidden border rounded">
+                      <div
+                        className="relative aspect-square"
                         onClick={() => {
                           let newSelected = [...selected];
                           let index = newSelected.findIndex(
@@ -551,16 +503,115 @@ function PosAddProd({ f7route, f7router }) {
                           if (index > -1) {
                             newSelected[index].Qty = newSelected[index].Qty + 1;
                           } else {
-                            newSelected.push({ ...item, Qty: 1 });
+                            if (item.PriceProduct) {
+                              newSelected.push({ ...item, Qty: 1 });
+                            } else {
+                              open();
+                            }
                           }
                           setSelected(newSelected);
                         }}
                       >
-                        <PlusIcon className="w-4" />
-                      </button>
+                        <img
+                          className="object-cover w-full h-full"
+                          src={AssetsHelpers.toAbsoluteUrl(item.Thumbnail)}
+                          alt={item.Title}
+                          onError={(e) => {
+                            e.currentTarget.src =
+                              AssetsHelpers.toAbsoluteUrlCore(
+                                "no-product.png",
+                                "/images/"
+                              );
+                          }}
+                        />
+                        {!item.IsMoney &&
+                          !item.IsService &&
+                          !item.IsNVL &&
+                          !item.IsAddFee &&
+                          !item.IsCourse && (
+                            <div className="absolute text-white bg-danger top-2 right-2 font-lato px-1.5 rounded">
+                              {item.stockCount}
+                            </div>
+                          )}
+                      </div>
+                      <div className="px-2 py-3 text-center">
+                        <div className="font-medium line-clamp-2 min-h-[42px]">
+                          {item.Title}
+                        </div>
+                        <div
+                          className={clsx(
+                            "mt-1 font-medium font-lato group",
+                            isCheckSales({
+                              SaleBegin: item.SaleBegin,
+                              SaleEnd: item.SaleEnd,
+                              PriceSale: item.PriceSale,
+                            }) && "is-sale"
+                          )}
+                        >
+                          <div className="hidden group-[.is-sale]:block">
+                            {StringHelpers.formatVND(item.PriceSale)}
+                          </div>
+                          <div className="group-[.is-sale]:line-through group-[.is-sale]:text-gray-400">
+                            {StringHelpers.formatVND(item.PriceProduct)}
+                          </div>
+                        </div>
+                        <div className="px-3 mt-2.5 flex">
+                          <button
+                            type="button"
+                            className="flex items-center justify-center h-8 text-white rounded-l w-9 bg-danger border-danger disabled:opacity-60"
+                            onClick={() => {
+                              let newSelected = [...selected];
+                              let index = newSelected.findIndex(
+                                (x) => x.ID === item.ID
+                              );
+                              if (index > -1) {
+                                if (newSelected[index].Qty <= 1) {
+                                  newSelected = newSelected.filter(
+                                    (x) => x.ID !== newSelected[index].ID
+                                  );
+                                } else {
+                                  newSelected[index].Qty =
+                                    newSelected[index].Qty - 1;
+                                }
+                              }
+                              setSelected(newSelected);
+                            }}
+                            disabled={isDisabled({ Item: item, Type: "Minus" })}
+                          >
+                            <MinusIcon className="w-4" />
+                          </button>
+                          <div className="flex items-center justify-center flex-1 w-12 border-y font-lato">
+                            {getValues(item)}
+                          </div>
+                          <button
+                            type="button"
+                            className="flex items-center justify-center h-8 text-white rounded-r w-9 bg-success border-danger"
+                            disabled={isDisabled({ Item: item, Type: "Plus" })}
+                            onClick={() => {
+                              let newSelected = [...selected];
+                              let index = newSelected.findIndex(
+                                (x) => x.ID === item.ID
+                              );
+                              if (index > -1) {
+                                newSelected[index].Qty =
+                                  newSelected[index].Qty + 1;
+                              } else {
+                                if (item.PriceProduct) {
+                                  newSelected.push({ ...item, Qty: 1 });
+                                } else {
+                                  open();
+                                }
+                              }
+                              setSelected(newSelected);
+                            }}
+                          >
+                            <PlusIcon className="w-4" />
+                          </button>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                </div>
+                  )}
+                </PickerPriceProdAdd>
               ))}
             </div>
           )}
@@ -605,7 +656,7 @@ function PosAddProd({ f7route, f7router }) {
         left
         floating
         swipeOnlyClose
-        containerEl="#Pos-add-prod"
+        containerEl="#pos-add-prod"
         id="panel-cate-prod"
       >
         <div className="flex flex-col h-full">

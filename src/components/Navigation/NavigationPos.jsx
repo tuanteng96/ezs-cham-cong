@@ -9,11 +9,14 @@ import {
   UserGroupIcon,
 } from "@heroicons/react/24/outline";
 import RouterHelpers from "../../helpers/RouterHelpers";
-import { useIsFetching } from "react-query";
+import { useIsFetching, useQueryClient } from "react-query";
 import moment from "moment";
 import Dom7 from "dom7";
 
 function NavigationPos({ pathname }) {
+
+  const queryClient = useQueryClient();
+
   let InvoiceProcessings = useStore("InvoiceProcessings");
   let Processings = useStore("Processings");
   let ClientBirthDay = useStore("ClientBirthDay");
@@ -121,16 +124,14 @@ function NavigationPos({ pathname }) {
             <Square3Stack3DIcon className="w-6" />
             <span className="text-[10px] mt-px leading-4">Cần xử lý</span>
           </div>
-          {(isLoadingProcessings || isLoadingInvoice) && (
+          {isLoadingProcessings && (
             <div className="absolute top-2 right-2 font-lato font-bold text-white bg-danger text-[11px] px-1 py-[2px] w-5 h-[15px] animate-pulse leading-none rounded"></div>
           )}
-          {!isLoadingProcessings && !isLoadingInvoice && (
+          {!isLoadingProcessings && (
             <>
-              {(InvoiceProcessings && InvoiceProcessings.length > 0) ||
-              CountProcessings > 0 ? (
+              {CountProcessings > 0 ? (
                 <div className="absolute top-2 right-2 font-lato font-bold text-white bg-danger text-[11px] px-1 py-[2px] leading-none rounded">
-                  {InvoiceProcessings.filter((x) => !x?.CheckIn?.CheckOutTime)
-                    .length + (CountProcessings || 0)}
+                  {CountProcessings}
                 </div>
               ) : (
                 <></>
@@ -142,12 +143,39 @@ function NavigationPos({ pathname }) {
         <Popover
           className="popover-processings w-[210px]"
           onPopoverClose={(e) => {
-            if (Dom7(e.el).hasClass("modal-out")) {
-              Dom7(e.el).remove();
-            }
+            // if (Dom7(e.el).hasClass("modal-out")) {
+            //   Dom7(e.el).remove();
+            // }
+          }}
+          onPopoverOpen={() => {
+            queryClient.invalidateQueries(["InvoiceProcessings"]);
           }}
         >
           <div className="flex flex-col py-1">
+            <Link
+              href="/admin/processings/"
+              popoverClose
+              className={clsx(
+                "relative px-4 py-3 font-medium border-b last:border-0",
+                pathname === "/admin/processings/" && "text-app"
+              )}
+              noLinkClass
+            >
+              Cần xử lý
+              {isLoadingProcessings ? (
+                <span className="w-5 animate-pulse absolute text-white bg-danger text-[11px] px-1.5 min-w-[15px] h-[17px] leading-none rounded-full flex items-center justify-center top-2/4 right-4 -translate-y-2/4 font-lato"></span>
+              ) : (
+                <>
+                  {CountProcessings > 0 ? (
+                    <span className="absolute text-white bg-danger text-[11px] px-1.5 min-w-[15px] h-[17px] leading-none rounded-full flex items-center justify-center top-2/4 right-4 -translate-y-2/4 font-lato">
+                      {CountProcessings}
+                    </span>
+                  ) : (
+                    <></>
+                  )}
+                </>
+              )}
+            </Link>
             <Link
               href="/admin/pos/invoice-processings/"
               className={clsx(
@@ -168,30 +196,6 @@ function NavigationPos({ pathname }) {
                         InvoiceProcessings.filter(
                           (x) => !x?.CheckIn?.CheckOutTime
                         ).length}
-                    </span>
-                  ) : (
-                    <></>
-                  )}
-                </>
-              )}
-            </Link>
-            <Link
-              href="/admin/processings/"
-              popoverClose
-              className={clsx(
-                "relative px-4 py-3 font-medium border-b last:border-0",
-                pathname === "/admin/processings/" && "text-app"
-              )}
-              noLinkClass
-            >
-              Cần xử lý
-              {isLoadingProcessings ? (
-                <span className="w-5 animate-pulse absolute text-white bg-danger text-[11px] px-1.5 min-w-[15px] h-[17px] leading-none rounded-full flex items-center justify-center top-2/4 right-4 -translate-y-2/4 font-lato"></span>
-              ) : (
-                <>
-                  {CountProcessings > 0 ? (
-                    <span className="absolute text-white bg-danger text-[11px] px-1.5 min-w-[15px] h-[17px] leading-none rounded-full flex items-center justify-center top-2/4 right-4 -translate-y-2/4 font-lato">
-                      {CountProcessings}
                     </span>
                   ) : (
                     <></>

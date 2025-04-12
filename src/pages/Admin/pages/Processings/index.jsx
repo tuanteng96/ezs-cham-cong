@@ -8,9 +8,10 @@ import {
   Tab,
   Tabs,
   f7,
+  f7ready,
   useStore,
 } from "framework7-react";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import PromHelpers from "../../../../helpers/PromHelpers";
 import { ChevronLeftIcon } from "@heroicons/react/24/outline";
 import MenuSubNavbar from "./MenuNavbar/MenuSubNavbar";
@@ -28,6 +29,12 @@ function ProcessingsAdmin({ f7router }) {
   let Auth = useStore("Auth");
   let Processings = useStore("Processings");
   let CrStocks = useStore("CrStocks");
+
+  useEffect(() => {
+    f7ready((f7) => {
+      queryClient.invalidateQueries(["Processings"]);
+    });
+  });
 
   const [active, setActive] = useState(
     Processings?.items && Processings?.items.length > 0

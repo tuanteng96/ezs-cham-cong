@@ -16,6 +16,7 @@ import PickerFilter from "./PickerFilter";
 import PickerFilterClientBook from "./PickerFilterClientBook";
 import PickerPayments from "./PickerPayments";
 import PickerPreviewOldCard from "./PickerPreviewOldCard";
+import PickerPriceProdAdd from "./PickerPriceProdAdd";
 import PickerServiceAddRemove from "./PickerServiceAddRemove";
 import PickerServiceChange from "./PickerServiceChange";
 import PickerServiceChangeStock from "./PickerServiceChangeStock";
@@ -65,5 +66,6 @@ export {
   PickerServiceOsInfo,
   PickerServiceRegimen,
   PickerCareScheduleFilter,
-  PickerFilterClientBook
+  PickerFilterClientBook,
+  PickerPriceProdAdd
 };

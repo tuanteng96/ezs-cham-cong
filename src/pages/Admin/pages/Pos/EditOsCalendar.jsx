@@ -591,6 +591,7 @@ function EditOsCalendar({ f7route, f7router }) {
           onSuccess: (data) => {
             toast.success("Cập nhập thành công.");
             f7.dialog.close();
+            onToBack();
           },
         }
       );
@@ -640,6 +641,7 @@ function EditOsCalendar({ f7route, f7router }) {
               });
             toast.success("Huỷ buổi thành công.");
             f7.dialog.close();
+            onToBack();
           },
         }
       );
@@ -710,6 +712,7 @@ function EditOsCalendar({ f7route, f7router }) {
           onSuccess: (data) => {
             toast.success("Hoàn thành ca thành công.");
             f7.dialog.close();
+            onToBack();
           },
         }
       );
@@ -723,6 +726,16 @@ function EditOsCalendar({ f7route, f7router }) {
       return true;
     }
     return true;
+  };
+
+  const onToBack = () => {
+    if (f7router.previousRoute.path.includes("add-prods")) {
+      f7.view.main.router.back(f7router.history[f7router.history.length - 4], {
+        force: true,
+      });
+    } else {
+      f7router.back();
+    }
   };
 
   return (
@@ -740,10 +753,7 @@ function EditOsCalendar({ f7route, f7router }) {
             onClick={() => {
               if (f7router.previousRoute.path.includes("add-prods")) {
                 f7.view.main.router.back(
-                  f7router.history[f7router.history.length - 4],
-                  {
-                    force: true,
-                  }
+                  f7router.history[f7router.history.length - 2]
                 );
               } else {
                 f7router.back();
@@ -1294,29 +1304,31 @@ function EditOsCalendar({ f7route, f7router }) {
                   </div>
                 )}
               </div>
-              {Brand?.Global?.Admin?.isRooms && (
-                <div className="mb-3.5 last:mb-0">
-                  <div className="mb-px">Giường</div>
-                  <Controller
-                    name="roomid"
-                    control={control}
-                    render={({ field, fieldState }) => (
-                      <SelectPickersGroup
-                        isRequired={true}
-                        placeholder="Chọn giường"
-                        value={field.value}
-                        options={RoomsList || []}
-                        label="Chọn giường"
-                        onChange={(val) => {
-                          field.onChange(val);
-                        }}
-                        errorMessage={fieldState?.error?.message}
-                        errorMessageForce={fieldState?.invalid}
-                      />
-                    )}
-                  />
-                </div>
-              )}
+              {Brand?.Global?.Admin?.isRooms &&
+                RoomsList &&
+                RoomsList.length > 0 && (
+                  <div className="mb-3.5 last:mb-0">
+                    <div className="mb-px">Giường</div>
+                    <Controller
+                      name="roomid"
+                      control={control}
+                      render={({ field, fieldState }) => (
+                        <SelectPickersGroup
+                          isRequired={true}
+                          placeholder="Chọn giường"
+                          value={field.value}
+                          options={RoomsList || []}
+                          label="Chọn giường"
+                          onChange={(val) => {
+                            field.onChange(val);
+                          }}
+                          errorMessage={fieldState?.error?.message}
+                          errorMessageForce={fieldState?.invalid}
+                        />
+                      )}
+                    />
+                  </div>
+                )}
 
               <div className="flex items-end justify-between mb-3.5 last:mb-0">
                 <div>Khách hàng chọn nhân viên</div>

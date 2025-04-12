@@ -310,7 +310,7 @@ function PosClientManage({ f7route, f7router }) {
         (!ServicesUse?.data || ServicesUse?.data.length === 0)
       ) {
         if (
-          f7.panel.get(Dom7("#panel-pos"))?.containerEl?.f7Page.position !==
+          f7.panel.get(Dom7("#panel-pos"))?.containerEl?.f7Page?.position !==
             "previous" &&
           !f7.panel.get(Dom7("#panel-pos"))?.opened
         ) {
@@ -476,6 +476,29 @@ function PosClientManage({ f7route, f7router }) {
                   ],
                 })
                 .open();
+            } else {
+              f7.dialog
+                .create({
+                  title: "Thông báo",
+                  content:
+                    "Thao tác tiếp tục với khách hàng này hay Quay về trang danh sách khách hàng ?",
+                  buttons: [
+                    {
+                      text: "Tiếp tục",
+                      close: true,
+                    },
+                    {
+                      text: "DS. Khách hàng",
+                      close: true,
+                      onClick: () => {
+                        f7router.navigate("/admin/pos/clients/", {
+                          clearPreviousHistory: true,
+                        });
+                      },
+                    },
+                  ],
+                })
+                .open();
             }
 
             noti27?.DH_LETAN_CHECKOUT &&
@@ -483,7 +506,7 @@ function PosClientManage({ f7route, f7router }) {
                 Member: {
                   ...(Client?.data || {}),
                 },
-                result: data
+                result: data,
               });
           },
         }
@@ -608,7 +631,9 @@ function PosClientManage({ f7route, f7router }) {
             className="!text-white h-full flex item-center justify-center w-12"
             onClick={() =>
               f7router?.previousRoute?.path === "/admin/pos/clients/add/"
-                ? f7router.navigate("/admin/pos/clients/")
+                ? f7.view.main.router.back("/admin/pos/clients", {
+                    force: true,
+                  })
                 : f7router.back()
             }
           >
