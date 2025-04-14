@@ -202,6 +202,43 @@ function OsClassView({ f7route }) {
     );
   };
 
+  const onUpdateOverTime = (ck) => {
+    f7.dialog.confirm(
+      `Xác nhận ngoài giờ cho lớp ${prevState?.ClassTitle} (${moment(prevState?.TimeBegin).format(
+        "HH:mm"
+      )}-${moment(prevState?.TimeBegin)
+        .add(prevState?.Minutes, "minute")
+        .format("HH:mm")})`,
+      () => {
+        f7.dialog.preloader("Đang thực hiện ...");
+        let newValues = {
+          arr: [
+            {
+              ...initialValues,
+              Member: {
+                ...initialValues.Member,
+                IsOverTime: ck,
+              },
+            },
+          ],
+        };
+
+        addEditMutation.mutate(
+          {
+            data: newValues,
+            Token: Auth?.token,
+          },
+          {
+            onSuccess: () => {
+              f7.dialog.close();
+              toast.success("Cập nhật thành công.");
+            },
+          }
+        );
+      }
+    );
+  };
+
   return (
     <Page
       className="bg-white"
@@ -252,10 +289,10 @@ function OsClassView({ f7route }) {
                   <div className="flex border-b" key={index}>
                     <div className="flex-1 px-4 py-4 border-r">
                       <div className="text-[15px] font-semibold mb-1.5">
-                        <div class="animate-pulse h-3 bg-gray-200 rounded-full w-8/12"></div>
+                        <div className="w-8/12 h-3 bg-gray-200 rounded-full animate-pulse"></div>
                       </div>
                       <div className="text-gray-500 font-lato">
-                        <div class="animate-pulse h-2.5 bg-gray-200 rounded-full w-2/4"></div>
+                        <div className="animate-pulse h-2.5 bg-gray-200 rounded-full w-2/4"></div>
                       </div>
                     </div>
                     <div className="w-[100px] flex items-center justify-center">
@@ -354,7 +391,9 @@ function OsClassView({ f7route }) {
                             <div
                               className={clsx(
                                 "relative w-6 h-6 text-white rounded shadow-lg",
-                                item.Status !== "DIEM_DANH_KHONG_DEN" ? "bg-primary" : "bg-danger"
+                                item.Status !== "DIEM_DANH_KHONG_DEN"
+                                  ? "bg-primary"
+                                  : "bg-danger"
                               )}
                               onClick={() => {
                                 if (adminTools_byStock?.hasRight) {
@@ -393,10 +432,26 @@ function OsClassView({ f7route }) {
           )}
         </div>
         {!data?.Member?.Status && (
-          <div className="border-t pb-safe-b">
+          <div className="flex border-t pb-safe-b">
+            <div className="flex items-center flex-1 pl-4">
+              <div className="flex">
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    className="sr-only peer"
+                    onChange={(e) => {
+                      onUpdateOverTime(e.target.checked);
+                    }}
+                    checked={data?.Member?.IsOverTime}
+                  />
+                  <div className="relative w-11 h-6 bg-gray-200 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600" />
+                </label>
+                <div className="pl-2.5 text-gray-800 font-lato">Ngoài giờ</div>
+              </div>
+            </div>
             <button
               disabled={isLoading}
-              className="h-12 px-5 font-medium text-white bg-success disabled:opacity-50"
+              className="h-12 px-5 font-medium text-white bg-success disabled:opacity-50 w-[200px]"
               type="button"
               onClick={() => {
                 if (

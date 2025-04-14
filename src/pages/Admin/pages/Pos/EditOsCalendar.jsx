@@ -176,13 +176,10 @@ function EditOsCalendar({ f7route, f7router }) {
                   label: "Không sử dụng",
                   value: "-1",
                 },
-            Remains: Array.from(
-              { length: x.Remain + x.Assign + 1 },
-              (_, i) => ({
-                label: i === 0 ? "Không sử dụng" : i,
-                value: i === 0 ? "-1" : i,
-              })
-            ),
+            Remains: Array.from({ length: x.Remain + 1 }, (_, i) => ({
+              label: i === 0 ? "Không sử dụng" : i,
+              value: i === 0 ? "-1" : i,
+            })),
           }));
         }
       }
@@ -881,120 +878,126 @@ function EditOsCalendar({ f7route, f7router }) {
                   )}
                 </div>
               </div>
-              <div className="mb-3.5 last:mb-0 border rounded">
-                <div className="flex justify-between p-4 mb-px bg-gray-100">
-                  <div className="font-medium">Phụ phí</div>
-                  {isAddFreeShow() && (
-                    <Link
-                      noLinkClass
-                      className="flex font-medium text-primary"
-                      href={`/admin/pos/manage/${
-                        Os?.data?.MemberID
-                      }/add-prods?filters=${JSON.stringify({
-                        cateid: "890",
-                      })}&prevState=${JSON.stringify({
-                        invalidateQueries: ["OsDetailID"],
-                      })}`}
-                    >
-                      <PlusIcon className="w-4 mr-1" />
-                      Mua mới phụ phí
-                    </Link>
-                  )}
-                </div>
-                <div className="p-4">
-                  {fieldsFee &&
-                    fieldsFee?.map((item, index) => (
-                      <div className="mb-3.5 last:mb-0" key={item.id}>
-                        <div className="mb-px text-gray-500">{item.Title}</div>
-                        <div>
-                          <Controller
-                            name={`fee[${index}].Remain`}
-                            control={control}
-                            render={({ field, fieldState }) => (
-                              <SelectPicker
-                                isClearable={false}
-                                placeholder="Số lượng"
-                                value={field.value}
-                                options={item?.Remains || []}
-                                label="Số lượng"
-                                onChange={(val) => {
-                                  field.onChange(val || null);
-                                  if (appPOS) {
-                                    appPOS
-                                      .setOs(
-                                        {
-                                          ...Os?.data,
-                                          AutoSalaryMethod:
-                                            AutoSalaryMethod?.value,
-                                        },
-                                        {
-                                          action: "TINH_LUONG",
-                                          data: {
-                                            feeList: fee
-                                              ? fee.map((x) => ({
-                                                  ...x,
-                                                  Assign: x?.Remain?.value || 0,
-                                                }))
-                                              : [],
-                                            Staffs: Staffs
-                                              ? Staffs.map((m) => ({
-                                                  UserID: m?.value,
-                                                  FullName: m?.label,
-                                                  Value: 0,
-                                                  feeList: fee
-                                                    ? fee
-                                                        .filter(
-                                                          (x) =>
-                                                            Number(
-                                                              x?.Remain?.value
-                                                            ) > 0
-                                                        )
-                                                        .map((x) => ({
-                                                          ...x,
-                                                          Assign:
-                                                            x?.Remain?.value ||
-                                                            0,
-                                                        }))
-                                                    : [],
-                                                }))
-                                              : [],
+              {Os?.data?.hasFees && (
+                <div className="mb-3.5 last:mb-0 border rounded">
+                  <div className="flex justify-between p-4 mb-px bg-gray-100">
+                    <div className="font-medium">Phụ phí</div>
+                    {isAddFreeShow() && (
+                      <Link
+                        noLinkClass
+                        className="flex font-medium text-primary"
+                        href={`/admin/pos/manage/${
+                          Os?.data?.MemberID
+                        }/add-prods?filters=${JSON.stringify({
+                          cateid: "890",
+                        })}&prevState=${JSON.stringify({
+                          invalidateQueries: ["OsDetailID"],
+                        })}`}
+                      >
+                        <PlusIcon className="w-4 mr-1" />
+                        Mua mới phụ phí
+                      </Link>
+                    )}
+                  </div>
+                  <div className="p-4">
+                    {fieldsFee &&
+                      fieldsFee?.map((item, index) => (
+                        <div className="mb-3.5 last:mb-0" key={item.id}>
+                          <div className="mb-px text-gray-500">
+                            {item.Title}
+                          </div>
+                          <div>
+                            <Controller
+                              name={`fee[${index}].Remain`}
+                              control={control}
+                              render={({ field, fieldState }) => (
+                                <SelectPicker
+                                  isClearable={false}
+                                  placeholder="Số lượng"
+                                  value={field.value}
+                                  options={item?.Remains || []}
+                                  label="Số lượng"
+                                  onChange={(val) => {
+                                    field.onChange(val || null);
+                                    if (appPOS) {
+                                      appPOS
+                                        .setOs(
+                                          {
+                                            ...Os?.data,
+                                            AutoSalaryMethod:
+                                              AutoSalaryMethod?.value,
                                           },
-                                        }
-                                      )
-                                      .then((os) => {
-                                        setValue(
-                                          "Staffs",
-                                          os?.Staffs?.map((x) => ({
-                                            ...x,
-                                            label: x.FullName,
-                                            value: x.UserID,
-                                            Value: x.Salary || x.Value,
-                                            raw: x.Salary || x.Value,
-                                            feeList: x.feeList
-                                              ? x.feeList.map((f) => ({
-                                                  ...f,
-                                                  raw: f.Value,
-                                                }))
-                                              : [],
-                                          }))
-                                        );
-                                      })
-                                      .catch((e) => console.log(e));
-                                  }
-                                }}
-                                errorMessage={fieldState?.error?.message}
-                                errorMessageForce={fieldState?.invalid}
-                              />
-                            )}
-                          />
+                                          {
+                                            action: "TINH_LUONG",
+                                            data: {
+                                              feeList: fee
+                                                ? fee.map((x) => ({
+                                                    ...x,
+                                                    Assign:
+                                                      x?.Remain?.value || 0,
+                                                  }))
+                                                : [],
+                                              Staffs: Staffs
+                                                ? Staffs.map((m) => ({
+                                                    UserID: m?.value,
+                                                    FullName: m?.label,
+                                                    Value: 0,
+                                                    feeList: fee
+                                                      ? fee
+                                                          .filter(
+                                                            (x) =>
+                                                              Number(
+                                                                x?.Remain?.value
+                                                              ) > 0
+                                                          )
+                                                          .map((x) => ({
+                                                            ...x,
+                                                            Assign:
+                                                              x?.Remain
+                                                                ?.value || 0,
+                                                          }))
+                                                      : [],
+                                                  }))
+                                                : [],
+                                            },
+                                          }
+                                        )
+                                        .then((os) => {
+                                          setValue(
+                                            "Staffs",
+                                            os?.Staffs?.map((x) => ({
+                                              ...x,
+                                              label: x.FullName,
+                                              value: x.UserID,
+                                              Value: x.Salary || x.Value,
+                                              raw: x.Salary || x.Value,
+                                              feeList: x.feeList
+                                                ? x.feeList.map((f) => ({
+                                                    ...f,
+                                                    raw: f.Value,
+                                                  }))
+                                                : [],
+                                            }))
+                                          );
+                                        })
+                                        .catch((e) => console.log(e));
+                                    }
+                                  }}
+                                  errorMessage={fieldState?.error?.message}
+                                  errorMessageForce={fieldState?.invalid}
+                                />
+                              )}
+                            />
+                          </div>
                         </div>
-                      </div>
-                    ))}
-                  {(!fieldsFee || fieldsFee.length === 0) && (
-                    <div className="font-light text-gray-600">Chưa có</div>
-                  )}
+                      ))}
+                    {(!fieldsFee || fieldsFee.length === 0) && (
+                      <div className="font-light text-gray-600">Chưa có</div>
+                    )}
+                  </div>
                 </div>
-              </div>
+              )}
+
               <div className="mb-3.5 last:mb-0">
                 <div className="border rounded">
                   <div className="flex justify-between p-4 mb-px bg-gray-100">
