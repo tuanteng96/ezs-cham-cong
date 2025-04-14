@@ -6,6 +6,16 @@ import { Controller, useForm } from "react-hook-form";
 import { Button, useStore } from "framework7-react";
 import { DatePicker, SelectPicker } from "@/partials/forms";
 
+let OptionsStatus = [
+  { label: "Đã hoàn thành", value: "1" },
+  { label: "Chưa hoàn thành", value: "0" },
+];
+
+let OptionsWorkingTime = [
+  { label: "Trong giờ", value: "1" },
+  { label: "Ngoài giờ", value: "0" },
+];
+
 function PickerFilter({ children, initialValues, onChange }) {
   const [visible, setVisible] = useState(false);
 
@@ -17,6 +27,8 @@ function PickerFilter({ children, initialValues, onChange }) {
       StockID: null,
       BeginFrom: new Date(),
       BeginTo: new Date(),
+      WorkingTime: null,
+      Status: null,
     },
   });
 
@@ -26,6 +38,8 @@ function PickerFilter({ children, initialValues, onChange }) {
         StockID: initialValues?.StockID,
         BeginFrom: initialValues?.BeginFrom,
         BeginTo: initialValues?.BeginTo,
+        WorkingTime: initialValues?.WorkingTime,
+        Status: initialValues?.Status,
       });
   }, [initialValues, visible]);
 
@@ -133,6 +147,48 @@ function PickerFilter({ children, initialValues, onChange }) {
                         )}
                       />
                     </div>
+                    <div className="mb-3.5 last:mb-0">
+                      <div className="mb-1">Trạng thái</div>
+                      <Controller
+                        name="Status"
+                        control={control}
+                        render={({ field, fieldState }) => (
+                          <SelectPicker
+                            isClearable={false}
+                            placeholder="Chọn trạng thái"
+                            value={field.value}
+                            options={OptionsStatus}
+                            label="Trạng thái"
+                            onChange={(val) => {
+                              field.onChange(val || null);
+                            }}
+                            errorMessage={fieldState?.error?.message}
+                            errorMessageForce={fieldState?.invalid}
+                          />
+                        )}
+                      />
+                    </div>
+                    <div className="mb-3.5 last:mb-0">
+                      <div className="mb-1">Loại giờ làm việc</div>
+                      <Controller
+                        name="WorkingTime"
+                        control={control}
+                        render={({ field, fieldState }) => (
+                          <SelectPicker
+                            isClearable={false}
+                            placeholder="Chọn loại"
+                            value={field.value}
+                            options={OptionsWorkingTime}
+                            label="Chọn loại"
+                            onChange={(val) => {
+                              field.onChange(val || null);
+                            }}
+                            errorMessage={fieldState?.error?.message}
+                            errorMessageForce={fieldState?.invalid}
+                          />
+                        )}
+                      />
+                    </div>
                   </div>
                   <div className="grid grid-cols-2 gap-3 p-4">
                     <Button
@@ -147,8 +203,8 @@ function PickerFilter({ children, initialValues, onChange }) {
                           BeginTo: new Date(),
                           StockID: {
                             label: CrStocks?.Title,
-                            value: CrStocks?.ID
-                          }
+                            value: CrStocks?.ID,
+                          },
                         })
                       }
                     >

@@ -186,11 +186,16 @@ function PrinterService({ f7route }) {
 
     let refCurrent = ServiceRef?.current;
 
+    let sizeCanvas = 530;
+    if (print.Path.indexOf("printOrderDHSize57") > -1) {
+      sizeCanvas = 380;
+    }
+
     while (imageBase64.length < minDataLength && i < maxAttempts) {
       imageBase64 = await htmlToImage.toPng(refCurrent, {
-        canvasWidth: 530,
+        canvasWidth: sizeCanvas,
         canvasHeight:
-          (530 * refCurrent?.clientHeight) / refCurrent?.clientWidth,
+          (sizeCanvas * refCurrent?.clientHeight) / refCurrent?.clientWidth,
         pixelRatio: 1,
         // skipAutoScale: true,
         cacheBust: true,

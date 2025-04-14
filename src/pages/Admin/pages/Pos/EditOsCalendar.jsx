@@ -154,6 +154,7 @@ function EditOsCalendar({ f7route, f7router }) {
       return rs ? { ...rs, Materials } : null;
     },
     onSuccess: (data) => {
+      console.log(data)
       let AutoSalaryMethod = data?.AutoSalaryMethod
         ? AutoSalaryMethodOptions.filter(
             (x) => Number(x.value) === data?.AutoSalaryMethod

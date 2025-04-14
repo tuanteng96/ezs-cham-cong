@@ -32,6 +32,8 @@ function OsClass(props) {
     DateEnd: null,
     BeginFrom: new Date(),
     BeginTo: new Date(),
+    Status: "",
+    WorkingTime: "",
     Pi: 1,
     Ps: 20,
   });
@@ -42,6 +44,8 @@ function OsClass(props) {
       let { data } = await ClassOsAPI.getListMembers({
         data: {
           ...filters,
+          Status: filters?.Status?.value || "",
+          WorkingTime: filters?.WorkingTime?.value || "",
           StockID: filters?.StockID?.value ? [filters?.StockID?.value] : [],
           BeginFrom: moment(filters.BeginFrom)
             .set({
@@ -89,14 +93,23 @@ function OsClass(props) {
           </Link>
         </NavLeft>
         <NavTitle>
-          {moment(filters.BeginFrom).format("DD-MM-YYYY") ===
-            moment().format("DD-MM-YYYY") &&
-          moment(filters.BeginTo).format("DD-MM-YYYY") ===
-            moment().format("DD-MM-YYYY")
-            ? "Quản lý lớp hôm nay"
-            : `Quản lý lớp (${moment(filters.BeginFrom).format(
-                "DD/MM"
-              )} - ${moment(filters.BeginTo).format("DD/MM")})`}
+          <div>
+            {moment(filters.BeginFrom).format("DD-MM-YYYY") ===
+              moment().format("DD-MM-YYYY") &&
+            moment(filters.BeginTo).format("DD-MM-YYYY") ===
+              moment().format("DD-MM-YYYY")
+              ? "Quản lý lớp hôm nay"
+              : `Quản lý lớp (${moment(filters.BeginFrom).format(
+                  "DD/MM"
+                )} - ${moment(filters.BeginTo).format("DD/MM")})`}
+          </div>
+          {!isLoading && (
+            <div className="font-lato text-[12px] tracking-[1px] opacity-90">
+              Tổng{" "}
+              {data?.pages && data?.pages.length > 0 && data?.pages[0].Total}{" "}
+              lớp
+            </div>
+          )}
         </NavTitle>
         <NavRight className="h-full">
           <PickerFilter
