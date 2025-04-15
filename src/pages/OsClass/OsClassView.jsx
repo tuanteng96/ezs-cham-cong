@@ -305,7 +305,7 @@ function OsClassView({ f7route }) {
                           {item?.Member?.FullName}
                         </div>
                         <div className="text-gray-500 font-lato">
-                          {Brand?.Global?.Admin?.hidePhoneMember ? (
+                          {Brand?.Global?.APP?.Staff?.hidePhoneMember ? (
                             <>
                               {item?.Member?.Phone
                                 ? `0${Array.from(
