@@ -1,8 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
   Link,
   NavLeft,
-  NavRight,
   NavTitle,
   Navbar,
   Page,
@@ -12,27 +11,19 @@ import {
 } from "framework7-react";
 import PromHelpers from "@/helpers/PromHelpers";
 import {
-  AdjustmentsVerticalIcon,
-  ArrowRightIcon,
-  CheckBadgeIcon,
   CheckIcon,
   ChevronLeftIcon,
-  ChevronRightIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
 import NoFound from "@/components/NoFound";
 import {
-  useInfiniteQuery,
   useMutation,
   useQuery,
   useQueryClient,
 } from "react-query";
 import clsx from "clsx";
-import AssetsHelpers from "@/helpers/AssetsHelpers";
 import moment from "moment";
 import ClassOsAPI from "@/api/ClassOs.api";
-import { PickerFilter } from "./components";
-import ArrayHelpers from "@/helpers/ArrayHelpers";
 import { toast } from "react-toastify";
 import { RolesHelpers } from "@/helpers/RolesHelpers";
 
@@ -44,6 +35,7 @@ function OsClassView({ f7route }) {
 
   let Auth = useStore("Auth");
   let CrStocks = useStore("CrStocks");
+  let Brand = useStore("CrStocks");
 
   const { adminTools_byStock } = RolesHelpers.useRoles({
     nameRoles: ["adminTools_byStock"],
@@ -204,9 +196,9 @@ function OsClassView({ f7route }) {
 
   const onUpdateOverTime = (ck) => {
     f7.dialog.confirm(
-      `Xác nhận ngoài giờ cho lớp ${prevState?.ClassTitle} (${moment(prevState?.TimeBegin).format(
-        "HH:mm"
-      )}-${moment(prevState?.TimeBegin)
+      `Xác nhận ngoài giờ cho lớp ${prevState?.ClassTitle} (${moment(
+        prevState?.TimeBegin
+      ).format("HH:mm")}-${moment(prevState?.TimeBegin)
         .add(prevState?.Minutes, "minute")
         .format("HH:mm")})`,
       () => {
@@ -317,7 +309,21 @@ function OsClassView({ f7route }) {
                           {item?.Member?.FullName}
                         </div>
                         <div className="text-gray-500 font-lato">
-                          {item?.Member?.Phone}
+                          {Brand?.Global?.Admin?.hidePhoneMember ? (
+                            <>
+                              {item?.Member?.Phone
+                                ? `${item?.Member?.Phone.slice(
+                                    0,
+                                    2
+                                  )}${Array.from(
+                                    { length: item?.Member?.Phone.length - 2 },
+                                    (v, i) => "*"
+                                  ).join("")}`
+                                : ""}
+                            </>
+                          ) : (
+                            item?.Member?.Phone
+                          )}
                         </div>
                         {item?.Status && (
                           <div
