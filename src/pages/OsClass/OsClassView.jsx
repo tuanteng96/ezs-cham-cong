@@ -16,11 +16,7 @@ import {
   XMarkIcon,
 } from "@heroicons/react/24/outline";
 import NoFound from "@/components/NoFound";
-import {
-  useMutation,
-  useQuery,
-  useQueryClient,
-} from "react-query";
+import { useMutation, useQuery, useQueryClient } from "react-query";
 import clsx from "clsx";
 import moment from "moment";
 import ClassOsAPI from "@/api/ClassOs.api";
@@ -312,13 +308,12 @@ function OsClassView({ f7route }) {
                           {Brand?.Global?.Admin?.hidePhoneMember ? (
                             <>
                               {item?.Member?.Phone
-                                ? `${item?.Member?.Phone.slice(
-                                    0,
-                                    2
-                                  )}${Array.from(
-                                    { length: item?.Member?.Phone.length - 2 },
+                                ? `0${Array.from(
+                                    { length: item?.Member?.Phone.length - 5 },
                                     (v, i) => "*"
-                                  ).join("")}`
+                                  ).join("")}${item?.Member?.Phone.substr(
+                                    item?.Member?.Phone.length - 4
+                                  )}`
                                 : ""}
                             </>
                           ) : (
