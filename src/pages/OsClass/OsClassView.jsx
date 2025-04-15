@@ -31,7 +31,7 @@ function OsClassView({ f7route }) {
 
   let Auth = useStore("Auth");
   let CrStocks = useStore("CrStocks");
-  let Brand = useStore("CrStocks");
+  let Brand = useStore("Brand");
 
   const { adminTools_byStock } = RolesHelpers.useRoles({
     nameRoles: ["adminTools_byStock"],
