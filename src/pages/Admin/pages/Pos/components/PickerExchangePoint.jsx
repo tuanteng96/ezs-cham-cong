@@ -104,7 +104,7 @@ function PickerExchangePoint({ children, MemberID, Points }) {
 
     let newValues = {
       ...values,
-      Point: maximum,
+      Point: maximum || values.Point,
     };
 
     changeMutation.mutate(

@@ -1,5 +1,6 @@
 import PromHelpers from "@/helpers/PromHelpers";
 import {
+  BanknotesIcon,
   ChevronLeftIcon,
   ChevronUpIcon,
   Cog6ToothIcon,
@@ -39,7 +40,11 @@ import clsx from "clsx";
 import AssetsHelpers from "@/helpers/AssetsHelpers";
 import { NumericFormat } from "react-number-format";
 import { RolesHelpers } from "@/helpers/RolesHelpers";
-import { PickerServiceChange, PickerServiceOsInfo } from "./components";
+import {
+  PickerSalaryOs,
+  PickerServiceChange,
+  PickerServiceOsInfo,
+} from "./components";
 import { UploadImages } from "@/partials/forms/files";
 
 const AutoSalaryMethodOptions = [
@@ -132,6 +137,7 @@ function EditOsCalendar({ f7route, f7router }) {
         mid: formState?.Os?.MemberID,
         osid: formState?.Os?.ID,
       });
+
       if (rs?.OrderID) {
         let { data: Order } = await AdminAPI.clientsViewOrderId({
           OrderID: rs?.OrderID,
@@ -151,10 +157,27 @@ function EditOsCalendar({ f7route, f7router }) {
         });
         Materials = rsMaterials?.data?.data;
       }
-      return rs ? { ...rs, Materials } : null;
+
+      let ContextJSONApi = null;
+      if (pos27) {
+        let svh = pos27.member(formState?.Os?.MemberID).service();
+        var root = svh.getProd(rs.ProdServiceID);
+
+        if (root.ContextJSON && JSON.parse(root.ContextJSON)?.IsNail) {
+          ContextJSONApi = {
+            ContextJSON: rs?.ContextJSON ? JSON.parse(rs?.ContextJSON) : null,
+          };
+
+          if (svh) {
+            let arr = await svh?.getContextSalaryItem(rs);
+            ContextJSONApi.SalaryItems = arr;
+          }
+        }
+      }
+
+      return rs ? { ...rs, Materials, ContextJSONApi } : null;
     },
     onSuccess: (data) => {
-      console.log(data)
       let AutoSalaryMethod = data?.AutoSalaryMethod
         ? AutoSalaryMethodOptions.filter(
             (x) => Number(x.value) === data?.AutoSalaryMethod
@@ -589,7 +612,7 @@ function EditOsCalendar({ f7route, f7router }) {
           onSuccess: (data) => {
             toast.success("Cập nhập thành công.");
             f7.dialog.close();
-            onToBack();
+            if (!values.IsSalary) onToBack();
           },
         }
       );
@@ -639,7 +662,7 @@ function EditOsCalendar({ f7route, f7router }) {
               });
             toast.success("Huỷ buổi thành công.");
             f7.dialog.close();
-            onToBack();
+            if (!values.IsSalary) onToBack();
           },
         }
       );
@@ -710,7 +733,7 @@ function EditOsCalendar({ f7route, f7router }) {
           onSuccess: (data) => {
             toast.success("Hoàn thành ca thành công.");
             f7.dialog.close();
-            onToBack();
+            if (!values.IsSalary) onToBack();
           },
         }
       );
@@ -1008,14 +1031,49 @@ function EditOsCalendar({ f7route, f7router }) {
                     >
                       <Cog6ToothIcon className="w-5 mr-1" /> Nhân viên thực hiện
                     </div>
-                    <Link
-                      noLinkClass
-                      className="flex font-medium text-primary"
-                      onClick={() => btnStaffRef?.current?.click()}
-                    >
-                      <PlusIcon className="w-4 mr-1" />
-                      Thêm nhân viên
-                    </Link>
+                    
+                    {Os?.data?.ContextJSONApi ? (
+                      <PickerSalaryOs
+                        data={Os?.data?.ContextJSONApi}
+                        Os={Os?.data}
+                        onUpdate={() =>
+                          handleSubmit((data) =>
+                            onSubmit({
+                              ...data,
+                              btn: "CHUYEN",
+                              IsSalary: true,
+                            })
+                          )()
+                        }
+                      >
+                        {({ open }) => (
+                          <Link
+                            noLinkClass
+                            className="flex font-medium text-primary"
+                            onClick={open}
+                          >
+                            {Os?.data?.ContextJSONApi?.ContextJSON
+                              ?.da_tinh_luong ? (
+                              "Xem chi tiết"
+                            ) : (
+                              <>
+                                <BanknotesIcon className="w-4 mr-1" />
+                                Tính lương
+                              </>
+                            )}
+                          </Link>
+                        )}
+                      </PickerSalaryOs>
+                    ) : (
+                      <Link
+                        noLinkClass
+                        className="flex font-medium text-primary"
+                        onClick={() => btnStaffRef?.current?.click()}
+                      >
+                        <PlusIcon className="w-4 mr-1" />
+                        Thêm nhân viên
+                      </Link>
+                    )}
                   </div>
                   <div className="p-4">
                     {fieldsStaffs && fieldsStaffs.length > 0 && (
@@ -1144,7 +1202,22 @@ function EditOsCalendar({ f7route, f7router }) {
                       </>
                     )}
                     {(!fieldsStaffs || fieldsStaffs.length === 0) && (
-                      <div className="font-light text-gray-600">Chưa có</div>
+                      <div>
+                        {!Os?.data?.ContextJSONApi ? (
+                          <div className="font-light text-gray-600">
+                            Chưa có
+                          </div>
+                        ) : (
+                          <Link
+                            noLinkClass
+                            className="flex font-medium text-primary"
+                            onClick={() => btnStaffRef?.current?.click()}
+                          >
+                            <PlusIcon className="w-4 mr-1" />
+                            Thêm nhân viên
+                          </Link>
+                        )}
+                      </div>
                     )}
                   </div>
                   <div className="hidden">

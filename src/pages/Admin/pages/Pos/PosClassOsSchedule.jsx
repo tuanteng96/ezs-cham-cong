@@ -629,8 +629,8 @@ function PosClassOsSchedule({ f7router, f7route }) {
                               <Link
                                 noLinkClass
                                 popoverOpen={
-                                  moment().isSameOrBefore(
-                                    moment(data?.TimeBegin)
+                                  moment(data?.TimeBegin).isSameOrBefore(
+                                    moment()
                                   )
                                     ? `.popover-class-os-${item.Member.ID}`
                                     : null
@@ -638,8 +638,8 @@ function PosClassOsSchedule({ f7router, f7route }) {
                                 disabled={data.Member?.Status}
                                 className={clsx(
                                   "flex items-center justify-center h-8 text-white rounded bg-success",
-                                  moment(data?.TimeBegin).isSameOrBefore(
-                                    moment()
+                                  moment().isSameOrBefore(
+                                    moment(data?.TimeBegin)
                                   ) && "opacity-50"
                                 )}
                               >
