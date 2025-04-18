@@ -61,6 +61,10 @@ import PosLocksCalendarPage from "@/pages/Admin/pages/Pos/PosLocksCalendar.jsx";
 import PosRoomsCalendarPage from "@/pages/Admin/pages/Pos/PosRoomsCalendar.jsx";
 import PosSettingsCalendarPage from "@/pages/Admin/pages/Pos/PosSettingsCalendar.jsx";
 import PosCareSchedulePage from "@/pages/Admin/pages/Pos/PosCareSchedule.jsx";
+import PosClassSchedulePage from "@/pages/Admin/pages/Pos/PosClassSchedule.jsx";
+import PosClassOsSchedulePage from "@/pages/Admin/pages/Pos/PosClassOsSchedule.jsx";
+import PosClassRequestSchedulePage from "@/pages/Admin/pages/Pos/PosClassRequestSchedule.jsx";
+import PosClassReportSchedulePage from "@/pages/Admin/pages/Pos/PosClassReportSchedule.jsx";
 import AddEditCalendarPage from "@/pages/Admin/pages/Pos/AddEditCalendar.jsx";
 import EditOsCalendarPage from "@/pages/Admin/pages/Pos/EditOsCalendar.jsx";
 import EditOsMaterialsPage from "@/pages/Admin/pages/Pos/EditOsMaterials.jsx";
@@ -307,6 +311,37 @@ var routes = [
             options: {
               transition: "f7-cover",
             },
+          },
+          {
+            path: "class-schedule",
+            component: PosClassSchedulePage,
+            options: {
+              transition: "f7-cover",
+            },
+            routes: [
+              
+              {
+                path: "report",
+                component: PosClassReportSchedulePage,
+                options: {
+                  transition: "f7-cover",
+                },
+              },
+              {
+                path: "request",
+                component: PosClassRequestSchedulePage,
+                options: {
+                  transition: "f7-cover",
+                },
+              },
+              {
+                path: ":ID",
+                component: PosClassOsSchedulePage,
+                options: {
+                  transition: "f7-cover",
+                },
+              },
+            ],
           },
           {
             path: "setting",

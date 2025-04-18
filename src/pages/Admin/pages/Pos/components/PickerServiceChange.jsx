@@ -12,7 +12,7 @@ import { toast } from "react-toastify";
 import { SelectServicesTransfer } from "@/partials/forms/select";
 
 const schema = yup.object().shape({
-  prodid: yup.object().required("Vui lòng chọn dịch vụ chuyển ddooir."),
+  prodid: yup.object().required("Vui lòng chọn dịch vụ chuyển đổi."),
 });
 
 function PickerServiceChange({ children, data }) {

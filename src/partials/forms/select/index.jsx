@@ -1,5 +1,6 @@
 import SelectBookingClients from "./SelectBookingClients";
 import SelectBookingPicker from "./SelectBookingPicker";
+import SelectClassOs from "./SelectClassOs";
 import SelectClients from "./SelectClients";
 import SelectDistricts from "./SelectDistricts";
 import SelectGender from "./SelectGender";
@@ -16,6 +17,7 @@ import SelectProvinces from "./SelectProvinces";
 import SelectServiceCardClients from "./SelectServiceCardClients";
 import SelectServiceProtocol from "./SelectServiceProtocol";
 import SelectServiceRoots from "./SelectServiceRoots";
+import SelectServicesOsClass from "./SelectServicesOsClass";
 import SelectServicesTransfer from "./SelectServicesTransfer";
 
 export {
@@ -37,5 +39,7 @@ export {
   SelectMoneyCardClients,
   SelectServicesTransfer,
   SelectServiceProtocol,
-  SelectMembers
+  SelectMembers,
+  SelectServicesOsClass,
+  SelectClassOs
 };

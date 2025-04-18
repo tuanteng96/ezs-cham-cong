@@ -6,6 +6,10 @@ import PickerAddMember from "./PickerAddMember";
 import PickerAddNoteDiary from "./PickerAddNoteDiary";
 import PickerAff from "./PickerAff";
 import PickerCareScheduleFilter from "./PickerCareScheduleFilter";
+import PickerClassOsMemberAddEdit from "./PickerClassOsMemberAddEdit";
+import PickerClassReportFilter from "./PickerClassReportFilter";
+import PickerClassRequestFilter from "./PickerClassRequestFilter";
+import PickerClassScheduleFilter from "./PickerClassScheduleFilter";
 import PickerDebt from "./PickerDebt";
 import PickerEditCard from "./PickerEditCard";
 import PickerEditDateCard from "./PickerEditDateCard";
@@ -67,5 +71,9 @@ export {
   PickerServiceRegimen,
   PickerCareScheduleFilter,
   PickerFilterClientBook,
-  PickerPriceProdAdd
+  PickerPriceProdAdd,
+  PickerClassScheduleFilter,
+  PickerClassOsMemberAddEdit,
+  PickerClassRequestFilter,
+  PickerClassReportFilter
 };

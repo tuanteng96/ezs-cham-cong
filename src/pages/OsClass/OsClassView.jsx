@@ -340,9 +340,18 @@ function OsClassView({ f7route }) {
                         {!item.Status && (
                           <>
                             <Link
-                              popoverOpen={`.popover-${item?.Member?.ID}`}
+                              popoverOpen={
+                                moment().isSameOrBefore(moment(data?.TimeBegin))
+                                  ? `.popover-${item?.Member?.ID}`
+                                  : null
+                              }
                               noLinkClass
-                              className="flex flex-col items-center justify-center"
+                              className={clsx(
+                                "flex flex-col items-center justify-center",
+                                moment(data?.TimeBegin).isSameOrBefore(
+                                  moment()
+                                ) && "opacity-50"
+                              )}
                             >
                               <div className="px-2 py-1 text-white rounded bg-primary">
                                 Điểm danh

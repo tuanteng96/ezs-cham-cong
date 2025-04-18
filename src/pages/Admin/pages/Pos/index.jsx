@@ -576,7 +576,18 @@ function PosAdmin({ f7router }) {
                   <span>Cài đặt phòng</span>
                 </Link>
               </div>
-              <div className="py-1.5">
+              <div className="flex flex-col">
+                {Brand?.Global?.Admin?.lop_hoc_pt && (
+                  <Link
+                    className="relative px-4 py-2"
+                    noLinkClass
+                    href="/admin/pos/calendar/class-schedule/"
+                    popoverClose
+                  >
+                    <span>Lịch lớp học</span>
+                  </Link>
+                )}
+
                 <Link
                   className="relative px-4 py-2"
                   noLinkClass

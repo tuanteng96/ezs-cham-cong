@@ -175,6 +175,12 @@ const AdminAPI = {
         },
       }
     ),
+  selectServicesOsClass: ({ data, Token }) =>
+    http.post(`/api/v3/OS25@Min`, JSON.stringify(data), {
+      headers: {
+        Authorization: `Bearer ${Token}`,
+      },
+    }),
   selectMembersCharge: ({ Key, Token }) =>
     http.get(
       `/api/gl/select2?cmd=user&rightSegs=pos_mng%7CReadApp%7Cpos_mng&_type=query&q=${Key}`,
@@ -881,6 +887,36 @@ const AdminAPI = {
     }),
   getCareSchedule: ({ data, Token }) =>
     http.post(`/api/v3/OSNR@afterservice`, JSON.stringify(data), {
+      headers: {
+        Authorization: `Bearer ${Token}`,
+      },
+    }),
+  getClassSchedule: ({ data, Token }) =>
+    http.post(`/api/v3/OSC@ClassList`, JSON.stringify(data), {
+      headers: {
+        Authorization: `Bearer ${Token}`,
+      },
+    }),
+  getClassListSchedule: ({ data, Token }) =>
+    http.post(`/api/v3/OSC@ClassMemberList`, JSON.stringify(data), {
+      headers: {
+        Authorization: `Bearer ${Token}`,
+      },
+    }),
+  addEditClassSchedule: ({ data, Token }) =>
+    http.post(`/api/v3/OSC@ClassMemberEDIT`, JSON.stringify(data), {
+      headers: {
+        Authorization: `Bearer ${Token}`,
+      },
+    }),
+  deleteClassSchedule: ({ data, Token }) =>
+    http.post(`/api/v3/OSC@ClassMemberDelete`, JSON.stringify(data), {
+      headers: {
+        Authorization: `Bearer ${Token}`,
+      },
+    }),
+  updateOsClassSchedule: ({ data, Token }) =>
+    http.post(`/api/v3/OS25@UpdateList`, JSON.stringify(data), {
       headers: {
         Authorization: `Bearer ${Token}`,
       },

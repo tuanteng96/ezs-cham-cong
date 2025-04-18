@@ -41,6 +41,7 @@ const PATH_NAVIGATION_PAGES = [
   "/technicians/",
   "/technicians/?Type=dl",
   "/statistical/day/",
+  "/admin/pos/calendar/class-schedule"
 ];
 
 const RouterHelpers = {
