@@ -246,45 +246,53 @@ function PosAdmin({ f7router }) {
         ...getQueryParams(filters),
       });
 
-      const dataBooks =
+      let dataBooks =
         data.books && Array.isArray(data.books)
           ? data.books
-              .map((item) => ({
-                ...item,
-                start: item.BookDate,
-                end: moment(item.BookDate)
-                  .add(item.RootMinutes ?? 60, "minutes")
-                  .toDate(),
-                title: item.RootTitles,
-                className: `fc-${getStatusClass(
-                  item.Status,
-                  item
-                )} shadow-lg rounded !mt-0 !ml-0 !mr-0 px-3 py-1.5 text-white`,
-                resourceIds:
-                  item.UserServices &&
-                  Array.isArray(item.UserServices) &&
-                  item.UserServices.length > 0
-                    ? item.UserServices.map((item) => item.ID)
-                    : [0],
-                MemberCurrent: {
-                  FullName:
-                    item?.IsAnonymous ||
-                    item.Member?.MobilePhone === "0000000000"
-                      ? item?.FullName
-                      : item?.Member?.FullName,
-                  MobilePhone:
-                    item?.IsAnonymous ||
-                    item.Member?.MobilePhone === "0000000000"
-                      ? item?.Phone
-                      : item?.Member?.MobilePhone,
-                },
-                Star: checkStar(item),
-                isBook: true,
-                MemberPhone: item?.MemberPhone || null,
-              }))
+              .map((item) => {
+                let TreatmentJson = item?.TreatmentJson
+                  ? JSON.parse(item?.TreatmentJson)
+                  : "";
+
+                return {
+                  ...item,
+                  start: item.BookDate,
+                  end: moment(item.BookDate)
+                    .add(item.RootMinutes ?? 60, "minutes")
+                    .toDate(),
+                  title: item.RootTitles,
+                  className: `fc-${getStatusClass(
+                    item.Status,
+                    item
+                  )} shadow-lg rounded !mt-0 !ml-0 !mr-0 px-3 py-1.5 text-white`,
+                  resourceIds:
+                    filters.view === "resourceTimelineDay"
+                      ? [TreatmentJson?.ID || 0]
+                      : item.UserServices &&
+                        Array.isArray(item.UserServices) &&
+                        item.UserServices.length > 0
+                      ? item.UserServices.map((item) => item.ID)
+                      : [0],
+                  MemberCurrent: {
+                    FullName:
+                      item?.IsAnonymous ||
+                      item.Member?.MobilePhone === "0000000000"
+                        ? item?.FullName
+                        : item?.Member?.FullName,
+                    MobilePhone:
+                      item?.IsAnonymous ||
+                      item.Member?.MobilePhone === "0000000000"
+                        ? item?.Phone
+                        : item?.Member?.MobilePhone,
+                  },
+                  Star: checkStar(item),
+                  isBook: true,
+                  MemberPhone: item?.MemberPhone || null,
+                };
+              })
               .filter((item) => item.Status !== "TU_CHOI")
           : [];
-      const dataBooksAuto =
+      let dataBooksAuto =
         data.osList && Array.isArray(data.osList)
           ? data.osList.map((item) => ({
               ...item,
@@ -306,14 +314,25 @@ function PosAdmin({ f7router }) {
                 item
               )} shadow-lg rounded !mt-0 !ml-0 !mr-0 p-3 py-1.5 text-white`,
               resourceIds:
-                item.staffs && Array.isArray(item.staffs)
+                filters.view === "resourceTimelineDay"
+                  ? [item?.os?.RoomID || 0]
+                  : item.staffs &&
+                    Array.isArray(item.staffs) &&
+                    item.staffs.length > 0
                   ? item.staffs.map((staf) => staf.ID)
-                  : [],
+                  : [0],
             }))
           : [];
+
       let dataOffline = [];
 
       if (filters.view === "resourceTimeGridDay") {
+        dataBooks = dataBooks.filter(
+          (x) =>
+            dataBooksAuto.findIndex((o) => o?.Member?.ID === x?.Member?.ID) ===
+            -1
+        );
+
         dataOffline =
           data?.dayOffs && data?.dayOffs.length > 0
             ? data?.dayOffs.map((item) => ({

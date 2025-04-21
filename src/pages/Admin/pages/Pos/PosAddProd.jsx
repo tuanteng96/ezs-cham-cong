@@ -267,6 +267,12 @@ function PosAddProd({ f7route, f7router }) {
         )
       );
 
+      if (prevState?.OrderServiceID) {
+        bodyFormData.append("after", "set_fee");
+        bodyFormData.append("orderserviceid", prevState?.OrderServiceID);
+        bodyFormData.append("MemberID", prevState?.MemberID);
+      }
+
       addMutation.mutate(
         {
           data: bodyFormData,
@@ -276,27 +282,27 @@ function PosAddProd({ f7route, f7router }) {
         {
           onSuccess: (data) => {
             toast.success("Thêm vào hoá đơn thành công.");
-
-            if (
-              selected.filter((x) => x.IsAddFee).length > 0 &&
-              f7router.previousRoute.path.includes("/admin/pos/calendar/os")
-            ) {
-              f7.view.main.router.back(
-                `${f7router.previousRoute.url}&prevFee=${JSON.stringify(
-                  selected
-                    .filter((x) => x.IsAddFee)
-                    .map((x) => ({
-                      Title: x.Title,
-                      Qty: x.Qty,
-                    }))
-                )}`,
-                {
-                  force: true,
-                }
-              );
-            } else {
-              f7router.back();
-            }
+            f7router.back();
+            // if (
+            //   selected.filter((x) => x.IsAddFee).length > 0 &&
+            //   f7router.previousRoute.path.includes("/admin/pos/calendar/os")
+            // ) {
+            //   f7.view.main.router.back(
+            //     `${f7router.previousRoute.url}&prevFee=${JSON.stringify(
+            //       selected
+            //         .filter((x) => x.IsAddFee)
+            //         .map((x) => ({
+            //           Title: x.Title,
+            //           Qty: x.Qty,
+            //         }))
+            //     )}`,
+            //     {
+            //       force: true,
+            //     }
+            //   );
+            // } else {
+            //   f7router.back();
+            // }
 
             if (data?.prePayedValue) {
               f7.dialog
@@ -340,26 +346,27 @@ function PosAddProd({ f7route, f7router }) {
         {
           onSuccess: (data) => {
             toast.success("Thêm vào hoá đơn thành công.");
-            if (
-              selected.filter((x) => x.IsAddFee).length > 0 &&
-              f7router.previousRoute.path.includes("/admin/pos/calendar/os")
-            ) {
-              f7.view.main.router(
-                `${f7router.previousRoute.url}&prevFee=${JSON.stringify(
-                  selected
-                    .filter((x) => x.IsAddFee)
-                    .map((x) => ({
-                      Title: x.Title,
-                      Qty: x.Qty,
-                    }))
-                )}`,
-                {
-                  force: true,
-                }
-              );
-            } else {
-              f7router.back();
-            }
+            f7router.back();
+            // if (
+            //   selected.filter((x) => x.IsAddFee).length > 0 &&
+            //   f7router.previousRoute.path.includes("/admin/pos/calendar/os")
+            // ) {
+            //   f7.view.main.router(
+            //     `${f7router.previousRoute.url}&prevFee=${JSON.stringify(
+            //       selected
+            //         .filter((x) => x.IsAddFee)
+            //         .map((x) => ({
+            //           Title: x.Title,
+            //           Qty: x.Qty,
+            //         }))
+            //     )}`,
+            //     {
+            //       force: true,
+            //     }
+            //   );
+            // } else {
+            //   f7router.back();
+            // }
 
             if (data?.prePayedValue) {
               f7.dialog

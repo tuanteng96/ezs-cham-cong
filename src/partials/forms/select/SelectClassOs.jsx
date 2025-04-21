@@ -55,7 +55,7 @@ function SelectClassOs({ StockIDs = [], ...props }) {
       setData(Classes?.data || []);
     }
   }, [key]);
-  console.log(data);
+  
   return (
     <SelectPicker
       options={data || []}

@@ -10,6 +10,7 @@ import PickerClassOsMemberAddEdit from "./PickerClassOsMemberAddEdit";
 import PickerClassReportFilter from "./PickerClassReportFilter";
 import PickerClassRequestFilter from "./PickerClassRequestFilter";
 import PickerClassScheduleFilter from "./PickerClassScheduleFilter";
+import PickerClassStudentFilter from "./PickerClassStudentFilter";
 import PickerDebt from "./PickerDebt";
 import PickerEditCard from "./PickerEditCard";
 import PickerEditDateCard from "./PickerEditDateCard";
@@ -77,5 +78,6 @@ export {
   PickerClassOsMemberAddEdit,
   PickerClassRequestFilter,
   PickerClassReportFilter,
-  PickerSalaryOs
+  PickerSalaryOs,
+  PickerClassStudentFilter
 };

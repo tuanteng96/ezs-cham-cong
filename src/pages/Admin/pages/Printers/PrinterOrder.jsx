@@ -10,7 +10,7 @@ import {
   Page,
   useStore,
 } from "framework7-react";
-import { ChevronLeftIcon } from "@heroicons/react/24/outline";
+import { ChevronLeftIcon, ShareIcon } from "@heroicons/react/24/outline";
 import { useQuery } from "react-query";
 import AdminAPI from "@/api/Admin.api";
 import ConfigsAPI from "@/api/Configs.api";
@@ -18,6 +18,8 @@ import moment from "moment";
 import StringHelpers from "@/helpers/StringHelpers";
 import clsx from "clsx";
 import * as htmlToImage from "html-to-image";
+import MoresAPI from "@/api/Mores.api";
+import AssetsHelpers from "@/helpers/AssetsHelpers";
 
 var pIndex = 0;
 
@@ -205,7 +207,7 @@ function PrinterOrder({ f7route }) {
     if (print.Path.indexOf("printOrderDHSize57") > -1) {
       sizeCanvas = 380;
     }
-    
+
     while (imageBase64.length < minDataLength && i < maxAttempts) {
       imageBase64 = await htmlToImage.toPng(refCurrent, {
         canvasWidth: sizeCanvas,
@@ -266,6 +268,56 @@ function PrinterOrder({ f7route }) {
             : null,
       });
     }
+  };
+
+  const onShare = async () => {
+    f7.dialog.preloader("Đang thực hiện ...");
+    let imageBase64 = "";
+    const minDataLength = 2000000;
+    let i = 0;
+    const maxAttempts = 10;
+
+    let refCurrent = OrderRef?.current;
+    refCurrent?.classList.add("p-4");
+    let sizeCanvas = 530;
+
+    while (imageBase64.length < minDataLength && i < maxAttempts) {
+      imageBase64 = await htmlToImage.toPng(refCurrent, {
+        canvasWidth: sizeCanvas,
+        canvasHeight:
+          (sizeCanvas * refCurrent?.clientHeight) / refCurrent?.clientWidth,
+        pixelRatio: 1,
+        // skipAutoScale: true,
+        cacheBust: true,
+        //skipFonts: true
+      });
+      i += 1;
+    }
+
+    var bodyFormData = new FormData();
+    bodyFormData.append(
+      "title",
+      `Hoa-don-ban-hang-${Order?.data?.OrderEnt?.ID}-${moment(
+        Order?.data?.OrderEnt?.CreateDate
+      ).format("HH:mm_DD-MM-YYYY")}`
+    );
+    bodyFormData.append("base64", imageBase64);
+
+    let rs = await MoresAPI.base64toImage({
+      data: bodyFormData,
+      Token: Auth?.token,
+    });
+
+    refCurrent?.classList.remove("p-4");
+    f7.dialog.close();
+    PromHelpers.SHARE_SOCIAL(
+      JSON.stringify({
+        Images: [AssetsHelpers.toAbsoluteUrl(rs?.data?.src)],
+        Content: `Hoá đơn bán hàng - ${Order?.data?.OrderEnt?.ID} (${moment(
+          Order?.data?.OrderEnt?.CreateDate
+        ).format("HH:mm DD/MM/YYYY")})`,
+      })
+    );
   };
 
   return (
@@ -589,6 +641,32 @@ function PrinterOrder({ f7route }) {
             In hoá đơn
           </Button>
         </div>
+        {/* <div className="flex gap-3 p-4 bg-white border-t">
+          <Button
+            type="button"
+            className="bg-white w-[50px] text-black border border-[#d3d3d3] button button-fill button-large button-preloader popover-open"
+            fill
+            large
+            preloader
+            onClick={onShare}
+            loading={isLoading || PrintersIP?.isLoading || Order.isLoading}
+            disabled={isLoading || PrintersIP?.isLoading || Order.isLoading}
+          >
+            <ShareIcon className="w-6" />
+          </Button>
+          <Button
+            type="button"
+            className="flex-1 bg-primary"
+            fill
+            large
+            preloader
+            loading={isLoading || PrintersIP?.isLoading || Order.isLoading}
+            disabled={isLoading || PrintersIP?.isLoading || Order.isLoading}
+            onClick={onPrinter}
+          >
+            In hoá đơn
+          </Button>
+        </div> */}
       </div>
     </Page>
   );

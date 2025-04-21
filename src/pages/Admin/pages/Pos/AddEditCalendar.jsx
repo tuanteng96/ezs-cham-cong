@@ -20,7 +20,7 @@ import {
   SelectMembersServices,
   SelectServiceRoots,
 } from "@/partials/forms/select";
-import { DatePicker, SelectPicker } from "@/partials/forms";
+import { DatePicker, SelectPicker, SelectPickersGroup } from "@/partials/forms";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import ConfigsAPI from "@/api/Configs.api";
 import KeyboardsHelper from "@/helpers/KeyboardsHelper";
@@ -73,6 +73,9 @@ const getQueryPost = (values) => {
         : "XAC_NHAN",
     Desc: newDesc,
     IsAnonymous: values?.MemberID?.label === "Khách vãng lai",
+    TreatmentJson: values?.TreatmentJson
+      ? JSON.stringify(values.TreatmentJson)
+      : "",
   };
 
   obj.Tags && delete obj.Tags;
@@ -83,6 +86,8 @@ const getQueryPost = (values) => {
 function AddEditCalendar({ f7route, f7router }) {
   const queryClient = useQueryClient();
 
+  let [RoomsList, setRoomsList] = useState([]);
+
   let isAddMode = !f7route?.query?.formState;
   let prevState = f7route?.query?.prevState
     ? JSON.parse(f7route?.query?.prevState)
@@ -90,6 +95,7 @@ function AddEditCalendar({ f7route, f7router }) {
 
   let Auth = useStore("Auth");
   let CrStocks = useStore("CrStocks");
+  let Stocks = useStore("Stocks");
   let Brand = useStore("Brand");
 
   const { pos_mng } = RolesHelpers.useRoles({
@@ -122,9 +128,12 @@ function AddEditCalendar({ f7route, f7router }) {
       FullName: "",
       Phone: "",
       Status: "",
+      TreatmentJson: "",
     },
     resolver: yupResolver(schemaAdd),
   });
+
+  let { MemberID, Status, Desc, StockID } = watch();
 
   useEffect(() => {
     if (f7route?.query?.BookDate) {
@@ -145,7 +154,7 @@ function AddEditCalendar({ f7route, f7router }) {
     }
     if (f7route?.query?.formState) {
       let initialValues = JSON.parse(f7route?.query?.formState);
-
+      console.log(initialValues);
       let newDesc = initialValues.Desc;
       let AmountPeople = {
         label: "1 khách",
@@ -214,6 +223,9 @@ function AddEditCalendar({ f7route, f7router }) {
         FullName: initialValues?.FullName || "",
         Phone: initialValues?.Phone || "",
         Status: initialValues?.Status || "",
+        TreatmentJson: initialValues?.TreatmentJson
+          ? JSON.parse(initialValues?.TreatmentJson)
+          : "",
       });
     }
   }, [f7route?.query]);
@@ -227,6 +239,61 @@ function AddEditCalendar({ f7route, f7router }) {
       memberRef?.current?.click();
     }
   }, [memberRef]);
+
+  const Rooms = useQuery({
+    queryKey: ["ConfigRoomsOs"],
+    queryFn: async () => {
+      let { data } = await ConfigsAPI.getValue("room");
+      let result = [];
+      if (data?.data && data.data.length > 0) {
+        let { Value } = data?.data[0];
+        if (Value) {
+          let newValue = JSON.parse(Value);
+          if (newValue && newValue.length > 0) {
+            for (let Stock of Stocks) {
+              let index = newValue.findIndex((x) => x.StockID === Stock?.ID);
+              if (index > -1) {
+                result.push(newValue[index]);
+              } else {
+                result.push({
+                  StockID: Stock?.ID,
+                  StockTitle: Stock?.Title,
+                  ListRooms: [],
+                });
+              }
+            }
+          }
+        } else {
+          result = Stocks.map((o) => ({
+            StockID: o.ID,
+            StockTitle: o?.Title,
+            ListRooms: [],
+          }));
+        }
+      }
+
+      return result;
+    },
+  });
+
+  useEffect(() => {
+    if (Rooms?.data && Rooms?.data.length > 0) {
+      let index = Rooms?.data.findIndex((x) => x.StockID === StockID?.value);
+      if (index > -1) {
+        setRoomsList(
+          Rooms?.data[index]?.ListRooms
+            ? Rooms?.data[index]?.ListRooms.map((room) => ({
+                ...room,
+                value: room.ID,
+                options: room.Children
+                  ? room.Children.map((x) => ({ ...x, value: x.ID }))
+                  : [],
+              }))
+            : []
+        );
+      }
+    }
+  }, [StockID, Rooms?.data]);
 
   const SettingCalendar = useQuery({
     queryKey: ["SettingCalendarBook", CrStocks],
@@ -438,8 +505,6 @@ function AddEditCalendar({ f7route, f7router }) {
       }
     );
   };
-
-  let { MemberID, Status, Desc, ID } = watch();
 
   const getStatusClass = (Status) => {
     const isAuto = Desc && Desc.toUpperCase().indexOf("TỰ ĐỘNG ĐẶT LỊCH");
@@ -797,6 +862,32 @@ function AddEditCalendar({ f7route, f7router }) {
               )}
             />
           </div>
+
+          {Brand?.Global?.Admin?.isRooms &&
+            RoomsList &&
+            RoomsList.length > 0 && (
+              <div className="mb-3.5 last:mb-0">
+                <div className="mb-px">Giường</div>
+                <Controller
+                  name="TreatmentJson"
+                  control={control}
+                  render={({ field, fieldState }) => (
+                    <SelectPickersGroup
+                      isRequired={true}
+                      placeholder="Chọn giường"
+                      value={field.value}
+                      options={RoomsList || []}
+                      label="Chọn giường"
+                      onChange={(val) => {
+                        field.onChange(val);
+                      }}
+                      errorMessage={fieldState?.error?.message}
+                      errorMessageForce={fieldState?.invalid}
+                    />
+                  )}
+                />
+              </div>
+            )}
           {Brand?.Global?.APP?.SL_khach && (
             <div className="mb-3.5 last:mb-0">
               <div className="mb-px">Số lượng khách</div>

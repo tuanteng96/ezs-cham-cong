@@ -29,6 +29,7 @@ import { toast } from "react-toastify";
 import { PickerClassOsMemberAddEdit } from "./components";
 import { SelectMembers } from "@/partials/forms/select";
 import PullToRefresh from "react-simple-pull-to-refresh";
+import ClassOsAPI from "@/api/ClassOs.api";
 
 let StatusOptions = [
   {
@@ -46,6 +47,7 @@ let StatusOptions = [
 function PosClassOsSchedule({ f7router, f7route }) {
   let Auth = useStore("Auth");
   let CrStocks = useStore("CrStocks");
+  let Brand = useStore("Brand");
 
   let StaffsRef = useRef(null);
 
@@ -99,7 +101,7 @@ function PosClassOsSchedule({ f7router, f7route }) {
   });
 
   const updateOsStatusMutation = useMutation({
-    mutationFn: async ({ data, update, Token }) => {
+    mutationFn: async ({ data, update, addPoint, deletePoint, Token }) => {
       let rs = await AdminAPI.addEditClassSchedule({
         data: data,
         Token,
@@ -108,6 +110,12 @@ function PosClassOsSchedule({ f7router, f7route }) {
         data: update,
         Token,
       });
+      if (addPoint)
+        await ClassOsAPI.addEditPointOsMember({ data: addPoint, Token });
+
+      if (deletePoint)
+        await ClassOsAPI.deletePointOsMember({ data: deletePoint, Token });
+
       await refetch();
       await queryClient.invalidateQueries({ queryKey: ["PosClassSchedule"] });
       return rs;
@@ -159,6 +167,30 @@ function PosClassOsSchedule({ f7router, f7route }) {
           newObj["UserID"] = 0;
         }
 
+        let addPoints = null;
+        let deletePoints = null;
+
+        if (Brand?.Global?.Admin?.lop_hoc_diem) {
+          if (Status.value === "DIEM_DANH_DEN") {
+            addPoints = {
+              MemberID: rowData?.Member?.ID,
+              Title: "Tích điểm khi đi tập",
+              Desc: `Đi tập lớp ${data?.Class?.Title} lúc ${moment(
+                data?.TimeBegin
+              ).format("HH:mm DD/MM/YYYY")}.`,
+              CreateDate: moment().format("YYYY-MM-DD HH:mm"),
+              Point: Brand?.Global?.Admin?.lop_hoc_diem,
+              StockID: data?.StockID,
+              OrderServiceID: rowData?.Os?.ID,
+            };
+          } else if (rowData?.Status === "DIEM_DANH_DEN") {
+            deletePoints = {
+              MemberID: rowData?.Member?.ID,
+              OrderServiceID: rowData?.Os?.ID,
+            };
+          }
+        }
+
         updateOsStatusMutation.mutate(
           {
             data: {
@@ -167,6 +199,12 @@ function PosClassOsSchedule({ f7router, f7route }) {
             update: {
               arr: [newObj],
             },
+            addPoint: addPoints
+              ? {
+                  edit: [addPoints],
+                }
+              : null,
+            deletePoint: deletePoints,
             Token: Auth?.token,
           },
           {

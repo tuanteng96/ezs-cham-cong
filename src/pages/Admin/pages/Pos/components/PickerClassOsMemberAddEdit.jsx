@@ -25,6 +25,8 @@ function PickerClassOsMemberAddEdit({
   const queryClient = useQueryClient();
   const [visible, setVisible] = useState(false);
 
+  let Auth = useStore("Auth");
+
   const { control, handleSubmit, reset, watch, setValue } = useForm({
     defaultValues: {
       Member: null,
@@ -58,7 +60,6 @@ function PickerClassOsMemberAddEdit({
         data: update,
         Token,
       });
-      await refetch();
 
       await queryClient.invalidateQueries({ queryKey: ["PosClassOsSchedule"] });
       await queryClient.invalidateQueries({ queryKey: ["PosClassSchedule"] });

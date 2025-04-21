@@ -65,6 +65,7 @@ import PosClassSchedulePage from "@/pages/Admin/pages/Pos/PosClassSchedule.jsx";
 import PosClassOsSchedulePage from "@/pages/Admin/pages/Pos/PosClassOsSchedule.jsx";
 import PosClassRequestSchedulePage from "@/pages/Admin/pages/Pos/PosClassRequestSchedule.jsx";
 import PosClassReportSchedulePage from "@/pages/Admin/pages/Pos/PosClassReportSchedule.jsx";
+import PosClassStudentSchedulePage from "@/pages/Admin/pages/Pos/PosClassStudentSchedule.jsx";
 import AddEditCalendarPage from "@/pages/Admin/pages/Pos/AddEditCalendar.jsx";
 import EditOsCalendarPage from "@/pages/Admin/pages/Pos/EditOsCalendar.jsx";
 import EditOsMaterialsPage from "@/pages/Admin/pages/Pos/EditOsMaterials.jsx";
@@ -319,7 +320,13 @@ var routes = [
               transition: "f7-cover",
             },
             routes: [
-              
+              {
+                path: "students",
+                component: PosClassStudentSchedulePage,
+                options: {
+                  transition: "f7-cover",
+                },
+              },
               {
                 path: "report",
                 component: PosClassReportSchedulePage,

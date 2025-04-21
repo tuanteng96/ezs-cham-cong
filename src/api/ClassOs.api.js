@@ -19,6 +19,18 @@ const ClassOsAPI = {
         Authorization: `Bearer ${Token}`,
       },
     }),
+  addEditPointOsMember: ({ data, Token }) =>
+    http.post(`/api/v3/MemberPoint27@Edit`, JSON.stringify(data), {
+      headers: {
+        Authorization: `Bearer ${Token}`,
+      },
+    }),
+  deletePointOsMember: ({ data, Token }) =>
+    http.post(`/api/v3/MemberPoint27@Deletes`, JSON.stringify(data), {
+      headers: {
+        Authorization: `Bearer ${Token}`,
+      },
+    }),
 };
 
 export default ClassOsAPI;

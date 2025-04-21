@@ -294,6 +294,12 @@ const CHOOSE_IMAGES = (args) => {
   }
 };
 
+const SHARE_SOCIAL = (args) => {
+  if (typeof APP21.prom !== "undefined") {
+    return APP21.prom("SHARE_SOCIAL", args);
+  }
+};
+
 const PromHelpers = {
   CHOOSE_FILE_SERVER,
   CALL_PHONE,
@@ -313,5 +319,6 @@ const PromHelpers = {
   PRINTER_CLEAR,
   CHOOSE_FILES,
   CHOOSE_IMAGES,
+  SHARE_SOCIAL
 };
 export default PromHelpers;

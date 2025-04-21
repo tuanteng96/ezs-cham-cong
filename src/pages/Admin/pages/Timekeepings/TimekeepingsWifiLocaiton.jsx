@@ -254,7 +254,7 @@ function TimekeepingsWifiLocaiton({ f7route }) {
                       control={control}
                       render={({ field, fieldState }) => (
                         <Input
-                          className="[&_input]:rounded [&_input]:lowercase [&_input]:placeholder:normal-case"
+                          className="[&_input]:rounded [&_input]:lowercase [&_input]:placeholder:normal-case font-lato font-medium"
                           type="text"
                           placeholder="Nhập ID truy cập Wifi"
                           value={field.value}

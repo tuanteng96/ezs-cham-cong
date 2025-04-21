@@ -18,7 +18,7 @@ function PickerSalaryOs({ children, data, Os, onUpdate }) {
     },
   });
 
-  const { fields } = useFieldArray({
+  const { fields, update } = useFieldArray({
     control, // control props comes from useForm (optional: if you are using FormProvider)
     name: "SalaryItems", // unique name for your Field Array
   });
@@ -163,20 +163,23 @@ function PickerSalaryOs({ children, data, Os, onUpdate }) {
                                                 UserFullName: val?.label || "",
                                               })
                                               .then((arr) => {
-                                                reset({
-                                                  SalaryItems: arr
-                                                    ? arr.map((x) => ({
-                                                        ...x,
-                                                        User: x?.UserID
+                                                update(
+                                                  index,
+                                                  arr && arr.length > 0
+                                                    ? {
+                                                        ...arr[0],
+                                                        User: arr[0].UserID
                                                           ? {
                                                               label:
-                                                                x.UserFullName,
-                                                              value: x.UserID,
+                                                                arr[0]
+                                                                  .UserFullName,
+                                                              value:
+                                                                arr[0].UserID,
                                                             }
                                                           : null,
-                                                      }))
-                                                    : [],
-                                                });
+                                                      }
+                                                    : null
+                                                );
                                                 f7.preloader.hide();
                                               })
                                               .catch(() => f7.preloader.hide());

@@ -71,9 +71,9 @@ function EditOsCalendar({ f7route, f7router }) {
     auth: Auth,
     CrStocks,
   });
-  let prevFee = f7route?.query?.prevFee
-    ? JSON.parse(f7route?.query?.prevFee)
-    : null;
+  // let prevFee = f7route?.query?.prevFee
+  //   ? JSON.parse(f7route?.query?.prevFee)
+  //   : null;
 
   let formState = f7route?.query?.formState
     ? JSON.parse(f7route?.query?.formState)
@@ -161,16 +161,18 @@ function EditOsCalendar({ f7route, f7router }) {
       let ContextJSONApi = null;
       if (pos27) {
         let svh = pos27.member(formState?.Os?.MemberID).service();
-        var root = svh.getProd(rs.ProdServiceID);
+        if (svh.getProd) {
+          var root = svh.getProd(rs.ProdServiceID);
 
-        if (root.ContextJSON && JSON.parse(root.ContextJSON)?.IsNail) {
-          ContextJSONApi = {
-            ContextJSON: rs?.ContextJSON ? JSON.parse(rs?.ContextJSON) : null,
-          };
+          if (root.ContextJSON && JSON.parse(root.ContextJSON)?.IsNail) {
+            ContextJSONApi = {
+              ContextJSON: rs?.ContextJSON ? JSON.parse(rs?.ContextJSON) : null,
+            };
 
-          if (svh) {
-            let arr = await svh?.getContextSalaryItem(rs);
-            ContextJSONApi.SalaryItems = arr;
+            if (svh) {
+              let arr = await svh?.getContextSalaryItem(rs);
+              ContextJSONApi.SalaryItems = arr;
+            }
           }
         }
       }
@@ -223,70 +225,70 @@ function EditOsCalendar({ f7route, f7router }) {
           }))
         : null;
 
-      if (prevFee && prevFee.length > 0) {
-        for (let fee of prevFee) {
-          let indexFee = newFee.findIndex(
-            (x) => x.Title.replace("(Gốc)", "") === fee.Title
-          );
-          if (indexFee > -1) {
-            newFee[indexFee].Remain = {
-              label: fee.Qty,
-              value: fee.Qty,
-            };
-          }
-        }
-        if (appPOS) {
-          appPOS
-            .setOs(
-              {
-                ...data,
-                AutoSalaryMethod: AutoSalaryMethod?.value,
-              },
-              {
-                action: "TINH_LUONG",
-                data: {
-                  feeList: newFee
-                    ? newFee.map((x) => ({
-                        ...x,
-                        Assign: x?.Remain?.value || 0,
-                      }))
-                    : [],
-                  Staffs: newStaffs
-                    ? newStaffs.map((m) => ({
-                        UserID: m?.value,
-                        FullName: m?.label,
-                        Value: 0,
-                        feeList: newFee
-                          ? newFee
-                              .filter((x) => Number(x?.Remain?.value) > 0)
-                              .map((x) => ({
-                                ...x,
-                                Assign: x?.Remain?.value || 0,
-                              }))
-                          : [],
-                      }))
-                    : [],
-                },
-              }
-            )
-            .then((os) => {
-              newStaffs = os?.Staffs?.map((x) => ({
-                ...x,
-                label: x.FullName,
-                value: x.UserID,
-                Value: x.Salary || x.Value,
-                raw: x.Salary || x.Value,
-                feeList: x.feeList
-                  ? x.feeList.map((f) => ({
-                      ...f,
-                      raw: f.Value,
-                    }))
-                  : [],
-              }));
-            })
-            .catch((e) => console.log(e));
-        }
-      }
+      // if (prevFee && prevFee.length > 0) {
+      //   for (let fee of prevFee) {
+      //     let indexFee = newFee.findIndex(
+      //       (x) => x.Title.replace("(Gốc)", "") === fee.Title
+      //     );
+      //     if (indexFee > -1) {
+      //       newFee[indexFee].Remain = {
+      //         label: fee.Qty,
+      //         value: fee.Qty,
+      //       };
+      //     }
+      //   }
+      //   if (appPOS) {
+      //     appPOS
+      //       .setOs(
+      //         {
+      //           ...data,
+      //           AutoSalaryMethod: AutoSalaryMethod?.value,
+      //         },
+      //         {
+      //           action: "TINH_LUONG",
+      //           data: {
+      //             feeList: newFee
+      //               ? newFee.map((x) => ({
+      //                   ...x,
+      //                   Assign: x?.Remain?.value || 0,
+      //                 }))
+      //               : [],
+      //             Staffs: newStaffs
+      //               ? newStaffs.map((m) => ({
+      //                   UserID: m?.value,
+      //                   FullName: m?.label,
+      //                   Value: 0,
+      //                   feeList: newFee
+      //                     ? newFee
+      //                         .filter((x) => Number(x?.Remain?.value) > 0)
+      //                         .map((x) => ({
+      //                           ...x,
+      //                           Assign: x?.Remain?.value || 0,
+      //                         }))
+      //                     : [],
+      //                 }))
+      //               : [],
+      //           },
+      //         }
+      //       )
+      //       .then((os) => {
+      //         newStaffs = os?.Staffs?.map((x) => ({
+      //           ...x,
+      //           label: x.FullName,
+      //           value: x.UserID,
+      //           Value: x.Salary || x.Value,
+      //           raw: x.Salary || x.Value,
+      //           feeList: x.feeList
+      //             ? x.feeList.map((f) => ({
+      //                 ...f,
+      //                 raw: f.Value,
+      //               }))
+      //             : [],
+      //         }));
+      //       })
+      //       .catch((e) => console.log(e));
+      //   }
+      // }
 
       let InfoJSON = data?.InfoJSON ? JSON.parse(data?.InfoJSON) : null;
       reset({
@@ -294,7 +296,7 @@ function EditOsCalendar({ f7route, f7router }) {
         Staffs: newStaffs,
         Hours: "",
         desc: data?.Desc,
-        IsMemberSet: data?.IsMemberSet,
+        IsMemberSet: data?.IsMemberSet ? true : false,
         date: data?.BookDate || new Date(),
         StockID: data?.Status
           ? index > -1
@@ -563,6 +565,7 @@ function EditOsCalendar({ f7route, f7router }) {
           StockID: values?.StockID?.value || "",
           RoomID: values.roomid?.value || "",
           AutoSalaryMethod: values.AutoSalaryMethod?.value || "0",
+          IsMemberSet: values?.IsMemberSet ? "1" : "0"
         },
         actions: {
           action: "GIAO_CA",
@@ -634,6 +637,7 @@ function EditOsCalendar({ f7route, f7router }) {
           StockID: values?.StockID?.value || "",
           RoomID: values.roomid?.value || "",
           AutoSalaryMethod: values.AutoSalaryMethod?.value || "0",
+          IsMemberSet: values?.IsMemberSet ? "1" : "0"
         },
         actions: {
           action: "HUY_BUOI",
@@ -684,6 +688,7 @@ function EditOsCalendar({ f7route, f7router }) {
           StockID: values?.StockID?.value || "",
           RoomID: values.roomid?.value || "",
           AutoSalaryMethod: values.AutoSalaryMethod?.value || "0",
+          IsMemberSet: values?.IsMemberSet ? "1" : "0"
         },
         actions: {
           action: "HOAN_THANH_CA",
@@ -906,6 +911,7 @@ function EditOsCalendar({ f7route, f7router }) {
                 <div className="mb-3.5 last:mb-0 border rounded">
                   <div className="flex justify-between p-4 mb-px bg-gray-100">
                     <div className="font-medium">Phụ phí</div>
+
                     {isAddFreeShow() && (
                       <Link
                         noLinkClass
@@ -916,6 +922,8 @@ function EditOsCalendar({ f7route, f7router }) {
                           cateid: "890",
                         })}&prevState=${JSON.stringify({
                           invalidateQueries: ["OsDetailID"],
+                          OrderServiceID: Os?.data?.ID,
+                          MemberID: Os?.data?.MemberID,
                         })}`}
                       >
                         <PlusIcon className="w-4 mr-1" />
@@ -1031,7 +1039,7 @@ function EditOsCalendar({ f7route, f7router }) {
                     >
                       <Cog6ToothIcon className="w-5 mr-1" /> Nhân viên thực hiện
                     </div>
-                    
+
                     {Os?.data?.ContextJSONApi ? (
                       <PickerSalaryOs
                         data={Os?.data?.ContextJSONApi}
@@ -1202,22 +1210,7 @@ function EditOsCalendar({ f7route, f7router }) {
                       </>
                     )}
                     {(!fieldsStaffs || fieldsStaffs.length === 0) && (
-                      <div>
-                        {!Os?.data?.ContextJSONApi ? (
-                          <div className="font-light text-gray-600">
-                            Chưa có
-                          </div>
-                        ) : (
-                          <Link
-                            noLinkClass
-                            className="flex font-medium text-primary"
-                            onClick={() => btnStaffRef?.current?.click()}
-                          >
-                            <PlusIcon className="w-4 mr-1" />
-                            Thêm nhân viên
-                          </Link>
-                        )}
-                      </div>
+                      <div className="font-light text-gray-600">Chưa có</div>
                     )}
                   </div>
                   <div className="hidden">

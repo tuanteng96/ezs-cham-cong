@@ -453,6 +453,14 @@ function PosClassSchedule({ f7router }) {
               </PickerClassScheduleFilter>
               <Link
                 className="relative px-4 py-2"
+                href="/admin/pos/calendar/class-schedule/students/"
+                noLinkClass
+                popoverClose
+              >
+                <span>Xem theo học viên</span>
+              </Link>
+              <Link
+                className="relative px-4 py-2"
                 href="/admin/pos/calendar/class-schedule/report/"
                 noLinkClass
                 popoverClose
