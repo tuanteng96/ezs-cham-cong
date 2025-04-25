@@ -382,8 +382,8 @@ function LayoutProvider({ children }) {
       Count: 0,
     },
   });
-  
-  window.refetchProcessings = refetchProcessings
+
+  window.refetchProcessings = refetchProcessings;
 
   useQuery({
     queryKey: ["InvoiceProcessings", { ID: Auth?.ID, StockID: CrStocks?.ID }],
@@ -490,7 +490,7 @@ function LayoutProvider({ children }) {
   }, [Auth, Brand]);
 
   useEffect(() => {
-    if (Brand && typeof appPOS === "undefined") {
+    if (Brand && typeof window.appPOS === "undefined") {
       CDNHelpers.addScript(
         Brand.Domain + `/adminz/user.user.top/appPOS.js?${new Date().getTime()}`
       )
@@ -499,22 +499,22 @@ function LayoutProvider({ children }) {
         })
         .catch((err) => console.log(err));
     } else if (!Brand && typeof appPOS !== "undefined") {
-      CDNHelpers.removeScript([
-        "https://msg.ezs.vn/lib/aspnet/signalr/dist/browser/signalr.js",
-        "/admincp/Js/datetimepicker/moment.min.js",
-        "/adminz/user.user.top/POS27.js",
-      ]);
+      // CDNHelpers.removeScript([
+      //   "https://msg.ezs.vn/lib/aspnet/signalr/dist/browser/signalr.js",
+      //   "/admincp/Js/datetimepicker/moment.min.js",
+      //   "/adminz/user.user.top/POS27.js",
+      // ]);
     }
 
-    if (Brand && typeof ClientZ === "undefined") {
+    if (Brand && typeof window.ClientZ === "undefined") {
       window.SERVER = Brand.Domain;
       CDNHelpers.addScript(
         Brand.Domain + `/app2021/service/http-common.js?${new Date().getTime()}`
       );
     } else if (!Brand && typeof ClientZ !== "undefined") {
-      CDNHelpers.removeScript(["/app2021/service/http-common.js"]);
+      //CDNHelpers.removeScript(["/app2021/service/http-common.js"]);
     }
-  }, [Brand]);
+  }, [Brand?.Domain]);
 
   useEffect(() => {
     document.addEventListener("bz.receive", handleBzReceive);

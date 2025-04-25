@@ -312,7 +312,7 @@ function PrinterOrder({ f7route }) {
     f7.dialog.close();
     PromHelpers.SHARE_SOCIAL(
       JSON.stringify({
-        Images: [AssetsHelpers.toAbsoluteUrl(rs?.data?.src)],
+        Images: [AssetsHelpers.toAbsoluteUrl(rs?.data?.src)], //AssetsHelpers.toAbsoluteUrl(rs?.data?.src)
         Content: `Hoá đơn bán hàng - ${Order?.data?.OrderEnt?.ID} (${moment(
           Order?.data?.OrderEnt?.CreateDate
         ).format("HH:mm DD/MM/YYYY")})`,
@@ -627,7 +627,7 @@ function PrinterOrder({ f7route }) {
         <div className="hidden" ref={buttonToPopoverWrapper}>
           <div className="button-to-print"></div>
         </div>
-        <div className="p-4 bg-white border-t">
+        {/* <div className="p-4 bg-white border-t">
           <Button
             type="button"
             className="flex-1 bg-primary"
@@ -640,9 +640,10 @@ function PrinterOrder({ f7route }) {
           >
             In hoá đơn
           </Button>
-        </div>
-        {/* <div className="flex gap-3 p-4 bg-white border-t">
+        </div> */}
+        <div className="flex gap-3 p-4 bg-white border-t">
           <Button
+            style={{ "--f7-preloader-color": "#000" }}
             type="button"
             className="bg-white w-[50px] text-black border border-[#d3d3d3] button button-fill button-large button-preloader popover-open"
             fill
@@ -666,7 +667,7 @@ function PrinterOrder({ f7route }) {
           >
             In hoá đơn
           </Button>
-        </div> */}
+        </div>
       </div>
     </Page>
   );

@@ -1,4 +1,4 @@
-import React, { Children, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   Button,
   Input,
@@ -38,7 +38,8 @@ import AdminAPI from "@/api/Admin.api";
 import { toast } from "react-toastify";
 import clsx from "clsx";
 import Dom7 from "dom7";
-import { PickerPriceProdAdd } from "./components";
+import { MenuSubNavbar, PickerPriceProdAdd } from "./components";
+import InfiniteScroll from "react-infinite-scroll-component";
 
 const getNameType = (type) => {
   switch (type) {
@@ -58,8 +59,6 @@ const getNameType = (type) => {
 };
 
 function PosAddProd({ f7route, f7router }) {
-  const allowInfinite = useRef(true);
-
   const queryClient = useQueryClient();
 
   let filtersState = f7route?.query?.filters
@@ -73,6 +72,8 @@ function PosAddProd({ f7route, f7router }) {
 
   let { id } = f7route.params;
 
+  let elRef = useRef();
+
   let CrStocks = useStore("CrStocks");
   let Auth = useStore("Auth");
 
@@ -80,11 +81,13 @@ function PosAddProd({ f7route, f7router }) {
     pi: 1,
     key: "",
     cateid: Number(filtersState?.cateid) || 0,
-    ps: 10,
+    ps: 8,
     stockid: CrStocks?.ID || "",
     getid: 1,
     includeCate: false,
   });
+
+  const [Active, setActive] = useState(null);
 
   const CheckIn = useQuery({
     queryKey: ["GetCheckIn", { ID: id }],
@@ -112,6 +115,7 @@ function PosAddProd({ f7route, f7router }) {
         },
         Token: Auth.token,
       });
+
       const { data: stocks } = await ProdsAPI.getProdsStocks({
         data: {
           DynamicIDs: data?.lst ? data?.lst.map((x) => x.DynamicID) : [],
@@ -143,6 +147,7 @@ function PosAddProd({ f7route, f7router }) {
     getNextPageParam: (lastPage, pages) =>
       lastPage.pi === lastPage.pcount ? undefined : lastPage.pi + 1,
     keepPreviousData: true,
+    onSettled: () => f7.dialog.close(),
   });
 
   const ProdsCateQuery = useQuery({
@@ -170,6 +175,49 @@ function PosAddProd({ f7route, f7router }) {
       return result || [];
     },
   });
+
+  useEffect(() => {
+    if (filtersState?.cateid) {
+      let index =
+        ProdsCateQuery.data &&
+        ProdsCateQuery.data.findIndex(
+          (x) =>
+            x.ID === Number(filters.cateid) ||
+            x.Active.includes(Number(filters.cateid))
+        );
+
+      if (index > -1) {
+        if (ProdsCateQuery.data[index].ID === 0) {
+          setActive({
+            ...ProdsCateQuery.data[index],
+            Children: ProdsCateQuery.data.filter((x) => x.ID !== 0),
+          });
+        } else {
+          if (
+            ProdsCateQuery.data[index].Children &&
+            ProdsCateQuery.data[index].Children.length > 0
+          ) {
+            setActive(ProdsCateQuery.data[index]);
+          }
+        }
+      }
+    } else {
+      let index =
+        ProdsCateQuery.data && ProdsCateQuery.data.findIndex((x) => x.ID === 0);
+      if (index > -1) {
+        setActive({
+          ...ProdsCateQuery.data[index],
+          Children: [
+            {
+              ID: 0,
+              Title: "Tất cả",
+            },
+            ...ProdsCateQuery.data.filter((x) => x.ID !== 0),
+          ],
+        });
+      }
+    }
+  }, [ProdsCateQuery?.data, filters.cateid]);
 
   const addMutation = useMutation({
     mutationFn: async (body) => {
@@ -235,15 +283,6 @@ function PosAddProd({ f7route, f7router }) {
   });
 
   const Lists = ArrayHelpers.useInfiniteQuery(ProdsQuery?.data?.pages, "lst");
-
-  const loadMore = () => {
-    if (!allowInfinite.current) return;
-    allowInfinite.current = false;
-
-    ProdsQuery.fetchNextPage().then(() => {
-      allowInfinite.current = true;
-    });
-  };
 
   const onChange = async () => {
     if (CheckIn?.data?.ID) {
@@ -429,12 +468,12 @@ function PosAddProd({ f7route, f7router }) {
       className="bg-white"
       name="Pos-add-prod"
       onPageBeforeIn={() => PromHelpers.STATUS_BAR_COLOR("light")}
-      ptr
-      onPtrRefresh={(done) => ProdsQuery.refetch().then(() => done())}
-      infinite
-      infiniteDistance={50}
-      infinitePreloader={ProdsQuery.isFetchingNextPage}
-      onInfinite={loadMore}
+      // ptr
+      // onPtrRefresh={(done) => ProdsQuery.refetch().then(() => done())}
+      // infinite
+      // infiniteDistance={50}
+      // infinitePreloader={ProdsQuery.isFetchingNextPage}
+      // onInfinite={loadMore}
       noToolbar={!selected || selected.length === 0}
     >
       <Navbar innerClass="!px-0 text-white" outline={false}>
@@ -458,10 +497,10 @@ function PosAddProd({ f7route, f7router }) {
           </Link>
         </NavRight>
         <div className="absolute h-[2px] w-full bottom-0 left-0 bg-[rgba(255,255,255,0.3)]"></div>
-        <Subnavbar className="[&>div]:px-0 shadow-lg">
-          <div className="relative w-full">
+        <Subnavbar className="[&>div]:px-0">
+          <div className="relative w-full h-full">
             <Input
-              className="[&_input]:border-0 [&_input]:placeholder:normal-case [&_input]:text-[15px] [&_input]:pl-14 [&_input]:shadow-none"
+              className="h-full [&_input]:border-0 [&_input]:placeholder:normal-case [&_input]:text-[15px] [&_input]:w-full [&_input]:pl-14 [&_input]:shadow-none"
               type="text"
               placeholder="Tìm kiếm theo tên mặt hàng ..."
               value={filters.key}
@@ -479,185 +518,270 @@ function PosAddProd({ f7route, f7router }) {
           </div>
         </Subnavbar>
       </Navbar>
-
-      {!ProdsQuery.isLoading && (
-        <>
-          {Lists && Lists.length > 0 && (
-            <div className="grid grid-cols-2 gap-4 p-4">
-              {Lists.map((item, index) => (
-                <PickerPriceProdAdd
-                  data={item}
-                  onChange={(price) => {
-                    let newSelected = [...selected];
-                    newSelected.push({
-                      ...item,
-                      Qty: 1,
-                      priceorder: Number(price),
-                    });
-                    setSelected(newSelected);
-                  }}
-                  key={index}
-                >
-                  {({ open }) => (
-                    <div className="overflow-hidden border rounded">
-                      <div
-                        className="relative aspect-square"
-                        onClick={() => {
-                          let newSelected = [...selected];
-                          let index = newSelected.findIndex(
-                            (x) => x.ID === item.ID
-                          );
-                          if (index > -1) {
-                            newSelected[index].Qty = newSelected[index].Qty + 1;
-                          } else {
-                            if (item.PriceProduct) {
-                              newSelected.push({ ...item, Qty: 1 });
-                            } else {
-                              open();
-                            }
-                          }
-                          setSelected(newSelected);
-                        }}
-                      >
-                        <img
-                          className="object-cover w-full h-full"
-                          src={AssetsHelpers.toAbsoluteUrl(item.Thumbnail)}
-                          alt={item.Title}
-                          onError={(e) => {
-                            e.currentTarget.src =
-                              AssetsHelpers.toAbsoluteUrlCore(
-                                "no-product.png",
-                                "/images/"
-                              );
-                          }}
-                        />
-                        {!item.IsMoney &&
-                          !item.IsService &&
-                          !item.IsNVL &&
-                          !item.IsAddFee &&
-                          !item.IsCourse && (
-                            <div className="absolute text-white bg-danger top-2 right-2 font-lato px-1.5 rounded">
-                              {item.stockCount}
-                            </div>
-                          )}
-                      </div>
-                      <div className="px-2 py-3 text-center">
-                        <div className="font-medium line-clamp-2 min-h-[42px]">
-                          {item.Title}
-                        </div>
-                        <div
-                          className={clsx(
-                            "mt-1 font-medium font-lato group",
-                            isCheckSales({
-                              SaleBegin: item.SaleBegin,
-                              SaleEnd: item.SaleEnd,
-                              PriceSale: item.PriceSale,
-                            }) && "is-sale"
-                          )}
-                        >
-                          <div className="hidden group-[.is-sale]:block">
-                            {StringHelpers.formatVND(item.PriceSale)}
-                          </div>
-                          <div className="group-[.is-sale]:line-through group-[.is-sale]:text-gray-400">
-                            {StringHelpers.formatVND(item.PriceProduct)}
-                          </div>
-                        </div>
-                        <div className="px-3 mt-2.5 flex">
-                          <button
-                            type="button"
-                            className="flex items-center justify-center h-8 text-white rounded-l w-9 bg-danger border-danger disabled:opacity-60"
-                            onClick={() => {
-                              let newSelected = [...selected];
-                              let index = newSelected.findIndex(
-                                (x) => x.ID === item.ID
-                              );
-                              if (index > -1) {
-                                if (newSelected[index].Qty <= 1) {
-                                  newSelected = newSelected.filter(
-                                    (x) => x.ID !== newSelected[index].ID
-                                  );
-                                } else {
-                                  newSelected[index].Qty =
-                                    newSelected[index].Qty - 1;
-                                }
-                              }
-                              setSelected(newSelected);
-                            }}
-                            disabled={isDisabled({ Item: item, Type: "Minus" })}
-                          >
-                            <MinusIcon className="w-4" />
-                          </button>
-                          <div className="flex items-center justify-center flex-1 w-12 border-y font-lato">
-                            {getValues(item)}
-                          </div>
-                          <button
-                            type="button"
-                            className="flex items-center justify-center h-8 text-white rounded-r w-9 bg-success border-danger"
-                            disabled={isDisabled({ Item: item, Type: "Plus" })}
-                            onClick={() => {
-                              let newSelected = [...selected];
-                              let index = newSelected.findIndex(
-                                (x) => x.ID === item.ID
-                              );
-                              if (index > -1) {
-                                newSelected[index].Qty =
-                                  newSelected[index].Qty + 1;
-                              } else {
-                                if (item.PriceProduct) {
-                                  newSelected.push({ ...item, Qty: 1 });
-                                } else {
-                                  open();
-                                }
-                              }
-                              setSelected(newSelected);
-                            }}
-                          >
-                            <PlusIcon className="w-4" />
-                          </button>
-                        </div>
+      <div className="flex flex-col h-full">
+        <div className="h-12 px-4 bg-white border-t shadow-lg">
+          {Active && (
+            <MenuSubNavbar
+              data={
+                Active?.Children?.map((x) => ({ ...x, visibleCount: true })) ||
+                []
+              }
+              selected={Number(filters.cateid)}
+              setSelected={(val) => {
+                setFilters((prevState) => ({
+                  ...prevState,
+                  cateid: val,
+                }));
+                f7.dialog.preloader("Đang tải ...");
+              }}
+            />
+          )}
+        </div>
+        <div id="scrollableDivProds" className="overflow-auto grow" ref={elRef}>
+          <InfiniteScroll
+            dataLength={Lists.length}
+            next={ProdsQuery.fetchNextPage}
+            hasMore={ProdsQuery.hasNextPage}
+            loader={
+              ProdsQuery.isLoading ? null : (
+                <>
+                  {Lists && Lists.length > 0 && (
+                    <div className="flex justify-center ezs-ptr">
+                      <div className="lds-ellipsis">
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                        <div></div>
                       </div>
                     </div>
                   )}
-                </PickerPriceProdAdd>
-              ))}
-            </div>
-          )}
-          {(!Lists || Lists.length) === 0 && (
-            <div className="h-full">
-              <NoFound
-                Title="Không có kết quả nào."
-                Desc="Rất tiếc ... Không tìm thấy dữ liệu nào"
-              />
-            </div>
-          )}
-        </>
-      )}
-
-      {ProdsQuery.isLoading && (
-        <div className="grid grid-cols-2 gap-4 p-4">
-          {Array(4)
-            .fill()
-            .map((_, index) => (
-              <div className="overflow-hidden border rounded" key={index}>
-                <div className="flex items-center justify-center w-full bg-gray-300 rounded aspect-square animate-pulse">
-                  <svg
-                    className="w-10 h-10 text-gray-200"
-                    aria-hidden="true"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="currentColor"
-                    viewBox="0 0 20 18"
-                  >
-                    <path d="M18 0H2a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2Zm-5.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3Zm4.376 10.481A1 1 0 0 1 16 15H4a1 1 0 0 1-.895-1.447l3.5-7A1 1 0 0 1 7.468 6a.965.965 0 0 1 .9.5l2.775 4.757 1.546-1.887a1 1 0 0 1 1.618.1l2.541 4a1 1 0 0 1 .028 1.011Z" />
-                  </svg>
-                </div>
-                <div className="flex flex-col items-center justify-center px-1 py-3">
-                  <div className="h-2.5 bg-gray-200 rounded-full w-11/12 mb-2"></div>
-                  <div className="h-2.5 bg-gray-200 rounded-full w-8/12"></div>
+                </>
+              )
+            }
+            scrollableTarget="scrollableDivProds"
+            refreshFunction={ProdsQuery.refetch}
+            pullDownToRefresh
+            pullDownToRefreshThreshold={50}
+            pullDownToRefreshContent={
+              <div className="flex justify-center ezs-ptr">
+                <div className="lds-ellipsis">
+                  <div></div>
+                  <div></div>
+                  <div></div>
+                  <div></div>
                 </div>
               </div>
-            ))}
+            }
+            releaseToRefreshContent={
+              <div className="flex justify-center ezs-ptr">
+                <div className="lds-ellipsis">
+                  <div></div>
+                  <div></div>
+                  <div></div>
+                  <div></div>
+                </div>
+              </div>
+            }
+          >
+            <div>
+              {!ProdsQuery.isLoading && (
+                <>
+                  {Lists && Lists.length > 0 && (
+                    <div className="grid grid-cols-2 gap-4 p-4">
+                      {Lists.map((item, index) => (
+                        <PickerPriceProdAdd
+                          data={item}
+                          onChange={(price) => {
+                            let newSelected = [...selected];
+                            newSelected.push({
+                              ...item,
+                              Qty: 1,
+                              priceorder: Number(price),
+                            });
+                            setSelected(newSelected);
+                          }}
+                          key={index}
+                        >
+                          {({ open }) => (
+                            <div className="overflow-hidden border rounded">
+                              <div
+                                className="relative aspect-square"
+                                onClick={() => {
+                                  let newSelected = [...selected];
+                                  let index = newSelected.findIndex(
+                                    (x) => x.ID === item.ID
+                                  );
+                                  if (index > -1) {
+                                    newSelected[index].Qty =
+                                      newSelected[index].Qty + 1;
+                                  } else {
+                                    if (item.PriceProduct) {
+                                      newSelected.push({ ...item, Qty: 1 });
+                                    } else {
+                                      open();
+                                    }
+                                  }
+                                  setSelected(newSelected);
+                                }}
+                              >
+                                <img
+                                  className="object-cover w-full h-full"
+                                  src={AssetsHelpers.toAbsoluteUrl(
+                                    item.Thumbnail
+                                  )}
+                                  alt={item.Title}
+                                  onError={(e) => {
+                                    e.currentTarget.src =
+                                      AssetsHelpers.toAbsoluteUrlCore(
+                                        "no-product.png",
+                                        "/images/"
+                                      );
+                                  }}
+                                />
+                                {!item.IsMoney &&
+                                  !item.IsService &&
+                                  !item.IsNVL &&
+                                  !item.IsAddFee &&
+                                  !item.IsCourse && (
+                                    <div className="absolute text-white bg-danger top-2 right-2 font-lato px-1.5 rounded">
+                                      {item.stockCount}
+                                    </div>
+                                  )}
+                              </div>
+                              <div className="px-2 py-3 text-center">
+                                <div className="font-medium line-clamp-2 min-h-[42px]">
+                                  {item.Title}
+                                </div>
+                                <div
+                                  className={clsx(
+                                    "mt-1 font-medium font-lato group",
+                                    isCheckSales({
+                                      SaleBegin: item.SaleBegin,
+                                      SaleEnd: item.SaleEnd,
+                                      PriceSale: item.PriceSale,
+                                    }) && "is-sale"
+                                  )}
+                                >
+                                  <div className="hidden group-[.is-sale]:block">
+                                    {StringHelpers.formatVND(item.PriceSale)}
+                                  </div>
+                                  <div className="group-[.is-sale]:line-through group-[.is-sale]:text-gray-400">
+                                    {StringHelpers.formatVND(item.PriceProduct)}
+                                  </div>
+                                </div>
+                                <div className="px-3 mt-2.5 flex">
+                                  <button
+                                    type="button"
+                                    className="flex items-center justify-center h-8 text-white rounded-l w-9 bg-danger border-danger disabled:opacity-60"
+                                    onClick={() => {
+                                      let newSelected = [...selected];
+                                      let index = newSelected.findIndex(
+                                        (x) => x.ID === item.ID
+                                      );
+                                      if (index > -1) {
+                                        if (newSelected[index].Qty <= 1) {
+                                          newSelected = newSelected.filter(
+                                            (x) =>
+                                              x.ID !== newSelected[index].ID
+                                          );
+                                        } else {
+                                          newSelected[index].Qty =
+                                            newSelected[index].Qty - 1;
+                                        }
+                                      }
+                                      setSelected(newSelected);
+                                    }}
+                                    disabled={isDisabled({
+                                      Item: item,
+                                      Type: "Minus",
+                                    })}
+                                  >
+                                    <MinusIcon className="w-4" />
+                                  </button>
+                                  <div className="flex items-center justify-center flex-1 w-12 border-y font-lato">
+                                    {getValues(item)}
+                                  </div>
+                                  <button
+                                    type="button"
+                                    className="flex items-center justify-center h-8 text-white rounded-r w-9 bg-success border-danger"
+                                    disabled={isDisabled({
+                                      Item: item,
+                                      Type: "Plus",
+                                    })}
+                                    onClick={() => {
+                                      let newSelected = [...selected];
+                                      let index = newSelected.findIndex(
+                                        (x) => x.ID === item.ID
+                                      );
+                                      if (index > -1) {
+                                        newSelected[index].Qty =
+                                          newSelected[index].Qty + 1;
+                                      } else {
+                                        if (item.PriceProduct) {
+                                          newSelected.push({
+                                            ...item,
+                                            Qty: 1,
+                                          });
+                                        } else {
+                                          open();
+                                        }
+                                      }
+                                      setSelected(newSelected);
+                                    }}
+                                  >
+                                    <PlusIcon className="w-4" />
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                        </PickerPriceProdAdd>
+                      ))}
+                    </div>
+                  )}
+                  {(!Lists || Lists.length) === 0 && (
+                    <div className="h-full">
+                      <NoFound
+                        Title="Không có kết quả nào."
+                        Desc="Rất tiếc ... Không tìm thấy dữ liệu nào"
+                      />
+                    </div>
+                  )}
+                </>
+              )}
+
+              {ProdsQuery.isLoading && (
+                <div className="grid grid-cols-2 gap-4 p-4">
+                  {Array(4)
+                    .fill()
+                    .map((_, index) => (
+                      <div
+                        className="overflow-hidden border rounded"
+                        key={index}
+                      >
+                        <div className="flex items-center justify-center w-full bg-gray-300 rounded aspect-square animate-pulse">
+                          <svg
+                            className="w-10 h-10 text-gray-200"
+                            aria-hidden="true"
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="currentColor"
+                            viewBox="0 0 20 18"
+                          >
+                            <path d="M18 0H2a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2Zm-5.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3Zm4.376 10.481A1 1 0 0 1 16 15H4a1 1 0 0 1-.895-1.447l3.5-7A1 1 0 0 1 7.468 6a.965.965 0 0 1 .9.5l2.775 4.757 1.546-1.887a1 1 0 0 1 1.618.1l2.541 4a1 1 0 0 1 .028 1.011Z" />
+                          </svg>
+                        </div>
+                        <div className="flex flex-col items-center justify-center px-1 py-3">
+                          <div className="h-2.5 bg-gray-200 rounded-full w-11/12 mb-2"></div>
+                          <div className="h-2.5 bg-gray-200 rounded-full w-8/12"></div>
+                        </div>
+                      </div>
+                    ))}
+                </div>
+              )}
+            </div>
+          </InfiniteScroll>
         </div>
-      )}
+      </div>
 
       <Panel
         left
@@ -724,6 +848,8 @@ function PosAddProd({ f7route, f7router }) {
                           noLinkClass
                           onClick={() => {
                             f7.panel.close(Dom7("#panel-cate-prod"));
+                            f7.dialog.preloader("Đang tải ...");
+                            elRef?.current?.scrollTo(0, 0);
                             setFilters((prevState) => ({
                               ...prevState,
                               cateid: item.ID,

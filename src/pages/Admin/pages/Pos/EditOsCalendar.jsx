@@ -565,7 +565,7 @@ function EditOsCalendar({ f7route, f7router }) {
           StockID: values?.StockID?.value || "",
           RoomID: values.roomid?.value || "",
           AutoSalaryMethod: values.AutoSalaryMethod?.value || "0",
-          IsMemberSet: values?.IsMemberSet ? "1" : "0"
+          IsMemberSet: values?.IsMemberSet ? "1" : "0",
         },
         actions: {
           action: "GIAO_CA",
@@ -637,7 +637,7 @@ function EditOsCalendar({ f7route, f7router }) {
           StockID: values?.StockID?.value || "",
           RoomID: values.roomid?.value || "",
           AutoSalaryMethod: values.AutoSalaryMethod?.value || "0",
-          IsMemberSet: values?.IsMemberSet ? "1" : "0"
+          IsMemberSet: values?.IsMemberSet ? "1" : "0",
         },
         actions: {
           action: "HUY_BUOI",
@@ -688,7 +688,7 @@ function EditOsCalendar({ f7route, f7router }) {
           StockID: values?.StockID?.value || "",
           RoomID: values.roomid?.value || "",
           AutoSalaryMethod: values.AutoSalaryMethod?.value || "0",
-          IsMemberSet: values?.IsMemberSet ? "1" : "0"
+          IsMemberSet: values?.IsMemberSet ? "1" : "0",
         },
         actions: {
           action: "HOAN_THANH_CA",
@@ -753,10 +753,27 @@ function EditOsCalendar({ f7route, f7router }) {
     }
     return true;
   };
-
+  
   const onToBack = () => {
     if (f7router.previousRoute.path.includes("add-prods")) {
-      f7.view.main.router.back(f7router.history[f7router.history.length - 4], {
+      // let index = f7router.history.findIndex((x) =>
+      //   x.includes(`/admin/pos/manage/${formState?.Os?.MemberID}/services`)
+      // );
+
+      // if (index > -1) {
+      //   f7.view.main.router.back(f7router.history[index], {
+      //     force: true,
+      //   });
+      // } else {
+      //   f7.view.main.router.back(
+      //     f7router.history[f7router.history.length - 4],
+      //     {
+      //       force: true,
+      //     }
+      //   );
+      // }
+
+      f7.view.main.router.back(f7router.history[f7router.history.length - 2], {
         force: true,
       });
     } else {

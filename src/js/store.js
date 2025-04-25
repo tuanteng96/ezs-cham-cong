@@ -5,7 +5,8 @@ import { f7 } from "framework7-react";
 import SubscribeHelpers from "../helpers/SubscribeHelpers";
 import axios from "axios";
 import { pick, keys } from "lodash-es";
-import { initializeApp } from "firebase/app";
+import { initializeApp, deleteApp } from "firebase/app";
+import CDNHelpers from "@/helpers/CDNHelpers";
 
 const store = createStore({
   state: {
@@ -54,7 +55,7 @@ const store = createStore({
       return state.ClientBirthDay;
     },
     FirebaseApp({ state }) {
-      return state.FirebaseApp ? initializeApp(state.FirebaseApp) : null;
+      return initializeApp(state.FirebaseApp, state?.Brand?.Domain);
     },
   },
   actions: {
@@ -77,9 +78,24 @@ const store = createStore({
         },
         success: () => {
           state.Brand = value;
-          state.FirebaseApp = value.FirebaseApp;
+          state.FirebaseApp = value?.FirebaseApp || null;
         },
       });
+      if (!value) {
+        //deleteApp(state.FirebaseApp)
+        if (window.appPOS) {
+          window.appPOS = undefined;
+          window.pos27 = undefined;
+          CDNHelpers.removeScript([
+            "/admincp/Js/datetimepicker/moment.min.js",
+            "/adminz/user.user.top/POS27.js",
+          ]);
+        }
+        if (window.ClientZ) {
+          window.ClientZ = undefined;
+          CDNHelpers.removeScript(["/app2021/service/http-common.js"]);
+        }
+      }
     },
     setAuth({ state }, value) {
       let model = {
@@ -178,13 +194,13 @@ const store = createStore({
             }
           }
           state.Auth = value;
-          state.Stocks = value?.Info?.Stocks ? value?.Info?.Stocks.filter(
-            (x) => x.ParentID !== 0
-          ).map((x) => ({
-            ...x,
-            value: x.ID,
-            label: x.Title,
-          })) : [];
+          state.Stocks = value?.Info?.Stocks
+            ? value?.Info?.Stocks.filter((x) => x.ParentID !== 0).map((x) => ({
+                ...x,
+                value: x.ID,
+                label: x.Title,
+              }))
+            : [];
           state.StocksAll = value?.Info?.Stocks || [];
           // state.Stocks =
           //   (value?.Info?.StockRights &&
@@ -253,8 +269,11 @@ const store = createStore({
                 });
               })
               .catch(() => {
-                f7.dialog.close();
-                f7.dialog.alert("Error : Provisional headers are shown ...");
+                //f7.dialog.alert("Error : Provisional headers are shown ...");
+                dispatch("setLogout").then(() => {
+                  f7.dialog.close();
+                  callback && callback();
+                });
               });
           } else {
             SubscribeHelpers.remove().then(() =>

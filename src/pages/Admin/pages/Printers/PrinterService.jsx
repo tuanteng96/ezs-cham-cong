@@ -488,6 +488,7 @@ function PrinterService({ f7route }) {
         </div>
         {/* <div className="flex gap-3 p-4 bg-white border-t">
           <Button
+            style={{ "--f7-preloader-color": "#000" }}
             type="button"
             className="bg-white w-[50px] text-black border border-[#d3d3d3] button button-fill button-large button-preloader popover-open"
             fill
