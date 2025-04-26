@@ -267,6 +267,21 @@ function PosClassRequestSchedule({ f7router, f7route }) {
             },
             Token: Auth?.token,
           });
+
+          window?.noti27?.LOP_HOC &&
+            window?.noti27?.LOP_HOC({
+              type: "Duyệt yêu cầu HLV",
+              Class: {
+                ...rowData?.Class,
+                TimeBegin: rowData?.TimeBegin,
+              },
+              RefUserIds: [{ ...rowData?.Members.UserRequest }],
+              MemberIds: rowData?.Member?.Lists
+                ? rowData?.Member?.Lists.map((x) => x.Member)
+                : [],
+              Stock: rowData?.Class?.Stock,
+            });
+
           f7.dialog.close();
         } else {
           f7.dialog.close();
@@ -307,6 +322,19 @@ function PosClassRequestSchedule({ f7router, f7route }) {
           {
             onSuccess: () => {
               f7.dialog.close();
+              window?.noti27?.LOP_HOC &&
+                window?.noti27?.LOP_HOC({
+                  type: "Hủy yêu cầu HLV",
+                  Class: {
+                    ...rowData?.Class,
+                    TimeBegin: rowData?.TimeBegin,
+                  },
+                  RefUserIds: [{ ...rowData?.Members.UserRequest }],
+                  MemberIds: rowData?.Member?.Lists
+                    ? rowData?.Member?.Lists.map((x) => x.Member)
+                    : [],
+                  Stock: rowData?.Class?.Stock,
+                });
               toast.success("Thực hiện thành công.");
             },
           }

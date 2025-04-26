@@ -197,7 +197,13 @@ function PosAddProd({ f7route, f7router }) {
             ProdsCateQuery.data[index].Children &&
             ProdsCateQuery.data[index].Children.length > 0
           ) {
-            setActive(ProdsCateQuery.data[index]);
+            setActive({
+              ...ProdsCateQuery.data[index],
+              Children: [
+                { ID: ProdsCateQuery.data[index].ID, Title: "Tất cả phụ phí" },
+                ...ProdsCateQuery.data[index].Children,
+              ],
+            });
           }
         }
       }

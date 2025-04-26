@@ -329,7 +329,7 @@ function PosClassOsSchedule({ f7router, f7route }) {
     } else {
       f7.dialog.confirm(
         `Bạn có chắc chắn muốn xoá lớp <span>${data?.Class.Title} (${
-          data?.TimeFrom
+          data?.TimeBegin
         }
                     <span class="px-px">-</span>
                     ${moment()
@@ -351,6 +351,28 @@ function PosClassOsSchedule({ f7router, f7route }) {
 
           f7.dialog.close();
           toast.success("Thực hiện thành công.");
+
+          window?.noti27?.LOP_HOC &&
+            window?.noti27?.LOP_HOC({
+              type: "Xóa lớp",
+              Class: {
+                ...data?.Class,
+                TimeBegin: data.TimeBegin,
+              },
+              RefUserIds: data?.Teacher
+                ? [
+                    {
+                      ID: data?.Teacher?.ID,
+                      FullName: data?.Teacher?.FullName,
+                    },
+                  ]
+                : [],
+              MemberIds: data?.Member?.Lists
+                ? data?.Member?.Lists.map((x) => x.Member)
+                : [],
+              Stock: data?.Class?.Stock,
+            });
+
           f7router.back();
         }
       );
@@ -401,10 +423,12 @@ function PosClassOsSchedule({ f7router, f7route }) {
       }
     );
   };
-
+  
   const onUpdateTeacher = (teacher) => {
     f7.dialog.confirm(
-      `Cập nhập huấn luyện viên <span>${teacher?.label} cho lớp ${data?.Class?.Title}</span>`,
+      teacher
+        ? `Cập nhập huấn luyện viên <span>${teacher?.label} cho lớp ${data?.Class?.Title}</span>`
+        : `Xoá huấn luyện viên <span>${data?.Teacher?.FullName} khỏi lớp ${data?.Class?.Title}</span>`,
       () => {
         f7.dialog.preloader("Đang thực hiện ...");
         let values = {
@@ -453,6 +477,56 @@ function PosClassOsSchedule({ f7router, f7route }) {
             onSuccess: () => {
               f7.dialog.close();
               toast.success("Thực hiện thành công.");
+
+              if (teacher) {
+                window?.noti27?.LOP_HOC &&
+                  window?.noti27?.LOP_HOC({
+                    type: "add HLV vào lớp",
+                    Class: {
+                      ...data?.Class,
+                      TimeBegin: data.TimeBegin,
+                    },
+                    RefUserIds: [
+                      {
+                        ID: teacher?.value,
+                        FullName: teacher?.label,
+                      },
+                    ],
+                    MemberIds: data?.Member?.Lists
+                      ? data?.Member?.Lists.map((x) => x.Member)
+                      : [],
+                    Stock: data?.Class?.Stock,
+                  });
+              } else {
+                window?.noti27?.LOP_HOC &&
+                  window?.noti27?.LOP_HOC({
+                    type: "Hủy HLV khỏi lớp",
+                    Class: {
+                      ...data?.Class,
+                      TimeBegin: data.TimeBegin,
+                    },
+                    RefUserIds: data?.Teacher
+                      ? [
+                          {
+                            ID: data?.Teacher?.ID,
+                            FullName: data?.Teacher?.FullName,
+                          },
+                        ]
+                      : [],
+                    MemberIds: data?.Member?.Lists
+                      ? data?.Member?.Lists.map((x) => x.Member)
+                      : [],
+                    Stock: data?.Class?.Stock,
+                  });
+              }
+
+              window?.top?.toastr?.success(
+                "Cập nhập huấn luyện viên thành công.",
+                "",
+                {
+                  timeOut: 200,
+                }
+              );
             },
           }
         );
@@ -750,12 +824,21 @@ function PosClassOsSchedule({ f7router, f7route }) {
               }}
             >
               {data?.Teacher?.FullName ? (
-                <>
+                <div className="flex items-end">
                   <span className="flex items-end">
+                    <PencilSquareIcon className="w-5 mr-1.5" />
                     {data?.Teacher?.FullName}
-                    <PencilSquareIcon className="w-5 ml-1.5" />
                   </span>
-                </>
+                  <span
+                    className="pl-2 font-normal text-danger"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onUpdateTeacher();
+                    }}
+                  >
+                    (Xoá)
+                  </span>
+                </div>
               ) : (
                 "Chọn huấn luyện viên?"
               )}
