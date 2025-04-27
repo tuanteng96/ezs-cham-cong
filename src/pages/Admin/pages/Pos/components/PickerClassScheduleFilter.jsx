@@ -26,6 +26,7 @@ function PickerClassScheduleFilter({ children, filters, onChange }) {
       StockID: [],
       TeachIDs: [],
       CrDate: new Date(),
+      isClassOpen: false
     },
   });
 
@@ -136,6 +137,24 @@ function PickerClassScheduleFilter({ children, filters, onChange }) {
                             isFilter
                             //isMulti
                           />
+                        )}
+                      />
+                    </div>
+                    <div className="flex items-end justify-between mb-3.5 last:mb-0">
+                      <div>Chỉ xem lớp đã mở</div>
+                      <Controller
+                        name="isClassOpen"
+                        control={control}
+                        render={({ field: { ref, ...field }, fieldState }) => (
+                          <label className="relative inline-flex items-center cursor-pointer">
+                            <input
+                              type="checkbox"
+                              className="sr-only peer"
+                              {...field}
+                              checked={field.value}
+                            />
+                            <div className="w-11 h-6 bg-gray-200 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600" />
+                          </label>
                         )}
                       />
                     </div>

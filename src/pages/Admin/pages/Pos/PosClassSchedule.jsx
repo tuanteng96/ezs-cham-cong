@@ -37,7 +37,10 @@ let RenderItems = ({ item, onOpenClass, filters }) => {
             Ngày {moment(filters.CrDate).format("DD-MM-YYYY")}
           </div>
         </div>
-        <div className="flex items-center justify-center w-12" onClick={() => setShow(!show)}>
+        <div
+          className="flex items-center justify-center w-12"
+          onClick={() => setShow(!show)}
+        >
           <ListBulletIcon className="text-gray-800 w-7" />
         </div>
       </div>
@@ -117,6 +120,7 @@ function PosClassSchedule({ f7router }) {
           value: CrStocks?.ID,
         }
       : null,
+    isClassOpen: false,
   });
 
   const { data, refetch, isLoading } = useQuery({
@@ -268,6 +272,13 @@ function PosClassSchedule({ f7router }) {
             Items: [event],
           });
         }
+      }
+
+      if (filters.isClassOpen) {
+        Result = Result.map((x) => ({
+          ...x,
+          Items: x.Items ? x.Items.filter((o) => o.ClassInfo) : [],
+        })).filter((x) => x.Items && x.Items.length > 0);
       }
       return Result;
     },

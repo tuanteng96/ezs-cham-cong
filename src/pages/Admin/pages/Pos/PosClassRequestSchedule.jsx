@@ -275,7 +275,7 @@ function PosClassRequestSchedule({ f7router, f7route }) {
                 ...rowData?.Class,
                 TimeBegin: rowData?.TimeBegin,
               },
-              RefUserIds: [{ ...rowData?.Members.UserRequest }],
+              RefUserIds: [{ ...rowData?.Member?.UserRequest }],
               MemberIds: rowData?.Member?.Lists
                 ? rowData?.Member?.Lists.map((x) => x.Member)
                 : [],
@@ -329,7 +329,7 @@ function PosClassRequestSchedule({ f7router, f7route }) {
                     ...rowData?.Class,
                     TimeBegin: rowData?.TimeBegin,
                   },
-                  RefUserIds: [{ ...rowData?.Members.UserRequest }],
+                  RefUserIds: [{ ...rowData?.Member.UserRequest }],
                   MemberIds: rowData?.Member?.Lists
                     ? rowData?.Member?.Lists.map((x) => x.Member)
                     : [],

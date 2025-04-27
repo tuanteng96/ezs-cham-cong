@@ -91,6 +91,33 @@ function PosClassOsSchedule({ f7router, f7route }) {
     },
   });
 
+  const recheckMutation = useMutation({
+    mutationFn: async (body) => {
+      const rsListClass = await AdminAPI.getClassListSchedule({
+        data: {
+          ClassIDs: [f7route?.params?.ID],
+          TeachIDs: [],
+          StockID: formState?.Class?.StockID ? [formState?.Class?.StockID] : [],
+          DateStart: null,
+          DateEnd: null,
+          BeginFrom: moment(formState.DateFrom, "HH:mm DD-MM-YYYY").format(
+            "YYYY-MM-DD HH:mm:ss"
+          ),
+          BeginTo: moment(formState.DateFrom, "HH:mm DD-MM-YYYY").format(
+            "YYYY-MM-DD HH:mm:ss"
+          ),
+          Pi: 1,
+          Ps: 1000,
+        },
+        Token: Auth?.token,
+      });
+
+      let Items = rsListClass?.data?.Items;
+
+      return Items && Items.length > 0 ? Items[0] : null;
+    },
+  });
+
   const updateMutation = useMutation({
     mutationFn: async (body) => {
       let rs = await AdminAPI.addEditClassSchedule(body);
@@ -130,90 +157,113 @@ function PosClassOsSchedule({ f7router, f7route }) {
     },
   });
 
-  const onAttendance = ({ rowIndex, Status, rowData }) => {
+  const onAttendance = ({ Status, rowData }) => {
     f7.dialog.confirm(
       `Bạn có chắc chắn muốn ${Status.label} cho học viên <span>${rowData.Member.FullName}</span>.`,
       async () => {
         f7.dialog.preloader("Đang thực hiện ...");
-        let values = {
-          ID: data?.ID,
-          CreateDate: moment(data.CreateDate, "YYYY-MM-DD HH:mm").format(
-            "YYYY-MM-DD HH:mm"
-          ),
-          StockID: data?.StockID,
-          TimeBegin: data?.TimeBegin
-            ? moment(data?.TimeBegin).format("YYYY-MM-DD HH:mm:ss")
-            : null,
-          OrderServiceClassID: data?.OrderServiceClassID,
-          TeacherID: data?.TeacherID,
-          Member: {
-            ...data?.Member,
-            IsOverTime: data?.Member?.IsOverTime || false,
-            Lists: data?.Member?.Lists || [],
-          },
-          MemberID: "",
-          Desc: "",
-        };
 
-        values.Member.Lists[rowIndex]["Status"] = Status.value;
-
-        let newObj = {
-          ID: rowData?.Os?.ID,
-          BookDate: Status.value ? moment().format("YYYY-MM-DD HH:mm") : null,
-          Status: !Status.value ? "" : "done",
-        };
-
-        if (!Status.value) {
-          newObj["UserID"] = 0;
-        }
-
-        let addPoints = null;
-        let deletePoints = null;
-
-        if (Brand?.Global?.Admin?.lop_hoc_diem) {
-          if (Status.value === "DIEM_DANH_DEN") {
-            addPoints = {
-              MemberID: rowData?.Member?.ID,
-              Title: "Tích điểm khi đi tập",
-              Desc: `Đi tập lớp ${data?.Class?.Title} lúc ${moment(
-                data?.TimeBegin
-              ).format("HH:mm DD/MM/YYYY")}.`,
-              CreateDate: moment().format("YYYY-MM-DD HH:mm"),
-              Point: Brand?.Global?.Admin?.lop_hoc_diem,
-              StockID: data?.StockID,
-              OrderServiceID: rowData?.Os?.ID,
-            };
-          } else if (rowData?.Status === "DIEM_DANH_DEN") {
-            deletePoints = {
-              MemberID: rowData?.Member?.ID,
-              OrderServiceID: rowData?.Os?.ID,
-            };
-          }
-        }
-
-        updateOsStatusMutation.mutate(
-          {
-            data: {
-              arr: [values],
-            },
-            update: {
-              arr: [newObj],
-            },
-            addPoint: addPoints
-              ? {
-                  edit: [addPoints],
-                }
+        let rs = await recheckMutation.mutateAsync();
+        if (!rs) {
+          await queryClient.invalidateQueries({
+            queryKey: ["PosClassSchedule"],
+          });
+          f7.dialog.close();
+          f7.dialog.alert("Lớp đã bị xoá.", () => {
+            f7router.back();
+          });
+        } else {
+          let values = {
+            ID: data?.ID,
+            CreateDate: moment(data.CreateDate, "YYYY-MM-DD HH:mm").format(
+              "YYYY-MM-DD HH:mm"
+            ),
+            StockID: data?.StockID,
+            TimeBegin: data?.TimeBegin
+              ? moment(data?.TimeBegin).format("YYYY-MM-DD HH:mm:ss")
               : null,
-            deletePoint: deletePoints,
-            Token: Auth?.token,
-          },
-          {
-            onSuccess: () => {
-              f7.dialog.close();
-              toast.success("Thực hiện thành công.");
+            OrderServiceClassID: data?.OrderServiceClassID,
+            TeacherID: rs?.TeacherID,
+            Member: {
+              ...rs?.Member,
+              IsOverTime: rs?.Member?.IsOverTime || false,
+              Lists: rs?.Member?.Lists || [],
             },
+            MemberID: "",
+            Desc: "",
+          };
+
+          let index = values.Member.Lists.findIndex(
+            (x) => x?.Member?.ID === rowData?.Member?.ID
+          );
+          if (index > -1) {
+            values.Member.Lists[index]["Status"] = Status.value;
+
+            let newObj = {
+              ID: rowData?.Os?.ID,
+              BookDate: Status.value
+                ? moment().format("YYYY-MM-DD HH:mm")
+                : null,
+              Status: !Status.value ? "" : "done",
+            };
+
+            if (!Status.value) {
+              newObj["UserID"] = 0;
+            }
+
+            let addPoints = null;
+            let deletePoints = null;
+
+            if (Brand?.Global?.Admin?.lop_hoc_diem) {
+              if (Status.value === "DIEM_DANH_DEN") {
+                addPoints = {
+                  MemberID: rowData?.Member?.ID,
+                  Title: "Tích điểm khi đi tập",
+                  Desc: `Đi tập lớp ${data?.Class?.Title} lúc ${moment(
+                    data?.TimeBegin
+                  ).format("HH:mm DD/MM/YYYY")}.`,
+                  CreateDate: moment().format("YYYY-MM-DD HH:mm"),
+                  Point: Brand?.Global?.Admin?.lop_hoc_diem,
+                  StockID: data?.StockID,
+                  OrderServiceID: rowData?.Os?.ID,
+                };
+              } else if (rowData?.Status === "DIEM_DANH_DEN") {
+                deletePoints = {
+                  MemberID: rowData?.Member?.ID,
+                  OrderServiceID: rowData?.Os?.ID,
+                };
+              }
+            }
+
+            updateOsStatusMutation.mutate(
+              {
+                data: {
+                  arr: [values],
+                },
+                update: {
+                  arr: [newObj],
+                },
+                addPoint: addPoints
+                  ? {
+                      edit: [addPoints],
+                    }
+                  : null,
+                deletePoint: deletePoints,
+                Token: Auth?.token,
+              },
+              {
+                onSuccess: () => {
+                  f7.dialog.close();
+                  toast.success("Thực hiện thành công.");
+                },
+              }
+            );
+          } else {
+            await refetch();
+            f7.dialog.close();
+            f7.dialog.alert("Học viên không tồn tại trong lớp.");
           }
-        );
+        }
       }
     );
   };
@@ -223,53 +273,64 @@ function PosClassOsSchedule({ f7router, f7route }) {
       `Bạn có chắc chắn muốn xoá học viên <span>${rowData.Member.FullName}</span>.`,
       async () => {
         f7.dialog.preloader("Đang thực hiện ...");
-        let values = {
-          ID: data?.ID,
-          CreateDate: moment(data.CreateDate, "YYYY-MM-DD HH:mm").format(
-            "YYYY-MM-DD HH:mm"
-          ),
-          StockID: data?.StockID,
-          TimeBegin: data?.TimeBegin
-            ? moment(data?.TimeBegin).format("YYYY-MM-DD HH:mm:ss")
-            : null,
-          OrderServiceClassID: data?.OrderServiceClassID,
-          TeacherID: data?.TeacherID,
-          Member: {
-            ...data?.Member,
-            IsOverTime: data?.Member?.IsOverTime || false,
-            Lists: data?.Member?.Lists || [],
-          },
-          MemberID: "",
-          Desc: "",
-        };
+        let rs = await recheckMutation.mutateAsync();
+        if (!rs) {
+          await queryClient.invalidateQueries({
+            queryKey: ["PosClassSchedule"],
+          });
+          f7.dialog.close();
+          f7.dialog.alert("Lớp đã bị xoá.", () => {
+            f7router.back();
+          });
+        } else {
+          let values = {
+            ID: data?.ID,
+            CreateDate: moment(data.CreateDate, "YYYY-MM-DD HH:mm").format(
+              "YYYY-MM-DD HH:mm"
+            ),
+            StockID: data?.StockID,
+            TimeBegin: data?.TimeBegin
+              ? moment(data?.TimeBegin).format("YYYY-MM-DD HH:mm:ss")
+              : null,
+            OrderServiceClassID: data?.OrderServiceClassID,
+            TeacherID: rs?.TeacherID,
+            Member: {
+              ...rs?.Member,
+              IsOverTime: rs?.Member?.IsOverTime || false,
+              Lists: rs?.Member?.Lists || [],
+            },
+            MemberID: "",
+            Desc: "",
+          };
 
-        values.Member.Lists = values.Member.Lists.filter(
-          (x) => x.Member.ID !== rowData?.Member?.ID
-        );
+          values.Member.Lists = values.Member.Lists.filter(
+            (x) => x.Member.ID !== rowData?.Member?.ID
+          );
 
-        updateOsStatusMutation.mutate(
-          {
-            data: {
-              arr: [values],
+          updateOsStatusMutation.mutate(
+            {
+              data: {
+                arr: [values],
+              },
+              update: {
+                arr: [
+                  {
+                    ID: rowData?.Os?.ID,
+                    Desc: "",
+                    UserID: 0,
+                  },
+                ],
+              },
+              Token: Auth?.token,
             },
-            update: {
-              arr: [
-                {
-                  ID: rowData?.Os?.ID,
-                  Desc: "",
-                  UserID: 0,
-                },
-              ],
-            },
-            Token: Auth?.token,
-          },
-          {
-            onSuccess: () => {
-              f7.dialog.close();
-              toast.success("Thực hiện thành công.");
-            },
-          }
-        );
+            {
+              onSuccess: () => {
+                f7.dialog.close();
+                toast.success("Thực hiện thành công.");
+              },
+            }
+          );
+        }
       }
     );
   };
@@ -279,42 +340,54 @@ function PosClassOsSchedule({ f7router, f7route }) {
       `Bạn có chắc chắn muốn chuyển trạng thái thành <span>${
         data.Member?.Status ? "huỷ hoàn thành ?" : "hoàn thành"
       }</span>`,
-      () => {
+      async () => {
         f7.dialog.preloader("Đang thực hiện ...");
-        let values = {
-          ID: data?.ID,
-          CreateDate: moment(data.CreateDate, "YYYY-MM-DD HH:mm").format(
-            "YYYY-MM-DD HH:mm"
-          ),
-          StockID: data?.StockID,
-          TimeBegin: data?.TimeBegin
-            ? moment(data?.TimeBegin).format("YYYY-MM-DD HH:mm:ss")
-            : null,
-          OrderServiceClassID: data?.OrderServiceClassID,
-          TeacherID: data?.TeacherID,
-          Member: {
-            ...data?.Member,
-            Lists: data?.Member?.Lists || [],
-            Status: data.Member?.Status ? "" : "1",
-          },
-          MemberID: "",
-          Desc: "",
-        };
 
-        updateMutation.mutate(
-          {
-            data: {
-              arr: [values],
+        let rs = await recheckMutation.mutateAsync();
+        if (!rs) {
+          await queryClient.invalidateQueries({
+            queryKey: ["PosClassSchedule"],
+          });
+          f7.dialog.close();
+          f7.dialog.alert("Lớp đã bị xoá.", () => {
+            f7router.back();
+          });
+        } else {
+          let values = {
+            ID: data?.ID,
+            CreateDate: moment(data.CreateDate, "YYYY-MM-DD HH:mm").format(
+              "YYYY-MM-DD HH:mm"
+            ),
+            StockID: data?.StockID,
+            TimeBegin: data?.TimeBegin
+              ? moment(data?.TimeBegin).format("YYYY-MM-DD HH:mm:ss")
+              : null,
+            OrderServiceClassID: data?.OrderServiceClassID,
+            TeacherID: rs?.TeacherID,
+            Member: {
+              ...rs?.Member,
+              Lists: rs?.Member?.Lists || [],
+              Status: rs.Member?.Status ? "" : "1",
             },
-            Token: Auth?.token,
-          },
-          {
-            onSuccess: () => {
-              f7.dialog.close();
-              toast.success("Thực hiện thành công.");
+            MemberID: "",
+            Desc: "",
+          };
+
+          updateMutation.mutate(
+            {
+              data: {
+                arr: [values],
+              },
+              Token: Auth?.token,
             },
-          }
-        );
+            {
+              onSuccess: () => {
+                f7.dialog.close();
+                toast.success("Thực hiện thành công.");
+              },
+            }
+          );
+        }
       }
     );
   };
@@ -328,16 +401,11 @@ function PosClassOsSchedule({ f7router, f7route }) {
       toast.error("Bạn không thể xoá lớp khi đã có học viên.");
     } else {
       f7.dialog.confirm(
-        `Bạn có chắc chắn muốn xoá lớp <span>${data?.Class.Title} (${
+        `Bạn có chắc chắn muốn xoá lớp <span>${data?.Class.Title} ngày ${moment(
           data?.TimeBegin
-        }
+        ).format("DD-MM-YYYY")} (${moment(data?.TimeBegin).format("HH:mm")}
                     <span class="px-px">-</span>
-                    ${moment()
-                      .set({
-                        hour: moment(data?.TimeFrom, "HH:mm").get("hour"),
-                        minute: moment(data?.TimeFrom, "HH:mm").get("minute"),
-                        second: moment(data?.TimeFrom, "HH:mm").get("second"),
-                      })
+                    ${moment(data?.TimeBegin)
                       .add(data?.Class?.Minutes, "minutes")
                       .format("HH:mm")})</span>.`,
         async () => {
@@ -384,152 +452,176 @@ function PosClassOsSchedule({ f7router, f7route }) {
       `Xác nhận ${
         !data?.Member?.IsOverTime ? "ngoài giờ" : "huỷ ngoài giờ"
       } cho lớp ?`,
-      () => {
+      async () => {
         f7.dialog.preloader("Đang thực hiện ...");
-        let values = {
-          ID: data?.ID,
-          CreateDate: moment(data.CreateDate, "YYYY-MM-DD HH:mm").format(
-            "YYYY-MM-DD HH:mm"
-          ),
-          StockID: data?.StockID,
-          TimeBegin: data?.TimeBegin
-            ? moment(data?.TimeBegin).format("YYYY-MM-DD HH:mm:ss")
-            : null,
-          OrderServiceClassID: data?.OrderServiceClassID,
-          TeacherID: data?.TeacherID,
-          Member: {
-            ...data?.Member,
-            Lists: data?.Member?.Lists || [],
-            IsOverTime: data.Member?.IsOverTime ? false : true,
-          },
-          MemberID: "",
-          Desc: "",
-        };
 
-        updateMutation.mutate(
-          {
-            data: {
-              arr: [values],
+        let rs = await recheckMutation.mutateAsync();
+        if (!rs) {
+          await queryClient.invalidateQueries({
+            queryKey: ["PosClassSchedule"],
+          });
+          f7.dialog.close();
+          f7.dialog.alert("Lớp đã bị xoá.", () => {
+            f7router.back();
+          });
+        } else {
+          let values = {
+            ID: data?.ID,
+            CreateDate: moment(data.CreateDate, "YYYY-MM-DD HH:mm").format(
+              "YYYY-MM-DD HH:mm"
+            ),
+            StockID: data?.StockID,
+            TimeBegin: data?.TimeBegin
+              ? moment(data?.TimeBegin).format("YYYY-MM-DD HH:mm:ss")
+              : null,
+            OrderServiceClassID: data?.OrderServiceClassID,
+            TeacherID: rs?.TeacherID,
+            Member: {
+              ...rs?.Member,
+              Lists: rs?.Member?.Lists || [],
+              IsOverTime: rs.Member?.IsOverTime ? false : true,
             },
-            Token: Auth?.token,
-          },
-          {
-            onSuccess: () => {
-              f7.dialog.close();
-              toast.success("Thực hiện thành công.");
+            MemberID: "",
+            Desc: "",
+          };
+
+          updateMutation.mutate(
+            {
+              data: {
+                arr: [values],
+              },
+              Token: Auth?.token,
             },
-          }
-        );
+            {
+              onSuccess: () => {
+                f7.dialog.close();
+                toast.success("Thực hiện thành công.");
+              },
+            }
+          );
+        }
       }
     );
   };
-  
+
   const onUpdateTeacher = (teacher) => {
     f7.dialog.confirm(
       teacher
         ? `Cập nhập huấn luyện viên <span>${teacher?.label} cho lớp ${data?.Class?.Title}</span>`
         : `Xoá huấn luyện viên <span>${data?.Teacher?.FullName} khỏi lớp ${data?.Class?.Title}</span>`,
-      () => {
+      async () => {
         f7.dialog.preloader("Đang thực hiện ...");
-        let values = {
-          ID: data?.ID,
-          CreateDate: moment(data.CreateDate, "YYYY-MM-DD HH:mm").format(
-            "YYYY-MM-DD HH:mm"
-          ),
-          StockID: data?.StockID,
-          TimeBegin: data?.TimeBegin
-            ? moment(data?.TimeBegin).format("YYYY-MM-DD HH:mm:ss")
-            : null,
-          OrderServiceClassID: data?.OrderServiceClassID,
-          TeacherID: teacher?.value || null,
-          Member: {
-            ...data?.Member,
-            HistoryCoachs: [
-              ...(data?.Member?.HistoryCoachs || []),
-              {
-                CreateDate: moment().format("YYYY-MM-DD HH:mm"),
-                Staff: {
-                  StaffID: Auth?.ID,
-                  ID: Auth?.ID,
-                  FullName: Auth?.FullName,
-                },
-                Coach: teacher
-                  ? {
-                      ID: teacher?.value,
-                      FullName: teacher?.label,
-                    }
-                  : null,
-              },
-            ],
-          },
-          MemberID: "",
-          Desc: "",
-        };
 
-        updateMutation.mutate(
-          {
-            data: {
-              arr: [values],
-            },
-            Token: Auth?.token,
-          },
-          {
-            onSuccess: () => {
-              f7.dialog.close();
-              toast.success("Thực hiện thành công.");
-
-              if (teacher) {
-                window?.noti27?.LOP_HOC &&
-                  window?.noti27?.LOP_HOC({
-                    type: "add HLV vào lớp",
-                    Class: {
-                      ...data?.Class,
-                      TimeBegin: data.TimeBegin,
-                    },
-                    RefUserIds: [
-                      {
+        let rs = await recheckMutation.mutateAsync();
+        if (!rs) {
+          await queryClient.invalidateQueries({
+            queryKey: ["PosClassSchedule"],
+          });
+          f7.dialog.close();
+          f7.dialog.alert("Lớp đã bị xoá.", () => {
+            f7router.back();
+          });
+        } else {
+          let values = {
+            ID: data?.ID,
+            CreateDate: moment(data.CreateDate, "YYYY-MM-DD HH:mm").format(
+              "YYYY-MM-DD HH:mm"
+            ),
+            StockID: data?.StockID,
+            TimeBegin: data?.TimeBegin
+              ? moment(data?.TimeBegin).format("YYYY-MM-DD HH:mm:ss")
+              : null,
+            OrderServiceClassID: data?.OrderServiceClassID,
+            TeacherID: teacher?.value || null,
+            Member: {
+              ...rs?.Member,
+              HistoryCoachs: [
+                ...(data?.Member?.HistoryCoachs || []),
+                {
+                  CreateDate: moment().format("YYYY-MM-DD HH:mm"),
+                  Staff: {
+                    StaffID: Auth?.ID,
+                    ID: Auth?.ID,
+                    FullName: Auth?.FullName,
+                  },
+                  Coach: teacher
+                    ? {
                         ID: teacher?.value,
                         FullName: teacher?.label,
-                      },
-                    ],
-                    MemberIds: data?.Member?.Lists
-                      ? data?.Member?.Lists.map((x) => x.Member)
-                      : [],
-                    Stock: data?.Class?.Stock,
-                  });
-              } else {
-                window?.noti27?.LOP_HOC &&
-                  window?.noti27?.LOP_HOC({
-                    type: "Hủy HLV khỏi lớp",
-                    Class: {
-                      ...data?.Class,
-                      TimeBegin: data.TimeBegin,
-                    },
-                    RefUserIds: data?.Teacher
-                      ? [
-                          {
-                            ID: data?.Teacher?.ID,
-                            FullName: data?.Teacher?.FullName,
-                          },
-                        ]
-                      : [],
-                    MemberIds: data?.Member?.Lists
-                      ? data?.Member?.Lists.map((x) => x.Member)
-                      : [],
-                    Stock: data?.Class?.Stock,
-                  });
-              }
-
-              window?.top?.toastr?.success(
-                "Cập nhập huấn luyện viên thành công.",
-                "",
-                {
-                  timeOut: 200,
-                }
-              );
+                      }
+                    : null,
+                },
+              ],
             },
-          }
-        );
+            MemberID: "",
+            Desc: "",
+          };
+
+          updateMutation.mutate(
+            {
+              data: {
+                arr: [values],
+              },
+              Token: Auth?.token,
+            },
+            {
+              onSuccess: () => {
+                f7.dialog.close();
+                toast.success("Thực hiện thành công.");
+
+                if (teacher) {
+                  window?.noti27?.LOP_HOC &&
+                    window?.noti27?.LOP_HOC({
+                      type: "add HLV vào lớp",
+                      Class: {
+                        ...data?.Class,
+                        TimeBegin: data.TimeBegin,
+                      },
+                      RefUserIds: [
+                        {
+                          ID: teacher?.value,
+                          FullName: teacher?.label,
+                        },
+                      ],
+                      MemberIds: rs?.Member?.Lists
+                        ? rs?.Member?.Lists.map((x) => x.Member)
+                        : [],
+                      Stock: data?.Class?.Stock,
+                    });
+                } else {
+                  window?.noti27?.LOP_HOC &&
+                    window?.noti27?.LOP_HOC({
+                      type: "Hủy HLV khỏi lớp",
+                      Class: {
+                        ...data?.Class,
+                        TimeBegin: data.TimeBegin,
+                      },
+                      RefUserIds: data?.Teacher
+                        ? [
+                            {
+                              ID: data?.Teacher?.ID,
+                              FullName: data?.Teacher?.FullName,
+                            },
+                          ]
+                        : [],
+                      MemberIds: rs?.Member?.Lists
+                        ? rs?.Member?.Lists.map((x) => x.Member)
+                        : [],
+                      Stock: data?.Class?.Stock,
+                    });
+                }
+
+                window?.top?.toastr?.success(
+                  "Cập nhập huấn luyện viên thành công.",
+                  "",
+                  {
+                    timeOut: 200,
+                  }
+                );
+              },
+            }
+          );
+        }
       }
     );
   };
@@ -701,7 +793,6 @@ function PosClassOsSchedule({ f7router, f7route }) {
                                     if (adminTools_byStock?.hasRight) {
                                       onAttendance({
                                         rowData: item,
-                                        rowIndex: index,
                                         Status: {
                                           label: "Huỷ điểm danh",
                                           value: "",
@@ -724,7 +815,6 @@ function PosClassOsSchedule({ f7router, f7route }) {
                                   onClick={() => {
                                     onAttendance({
                                       rowData: item,
-                                      rowIndex: index,
                                       Status: {
                                         label: "Đặt lại lịch",
                                         value: "",
@@ -774,7 +864,6 @@ function PosClassOsSchedule({ f7router, f7route }) {
                                         onClick={() => {
                                           onAttendance({
                                             rowData: item,
-                                            rowIndex: index,
                                             Status: otp,
                                           });
                                         }}

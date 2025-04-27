@@ -23,7 +23,7 @@ import ClassOsAPI from "@/api/ClassOs.api";
 import { toast } from "react-toastify";
 import { RolesHelpers } from "@/helpers/RolesHelpers";
 
-function OsClassView({ f7route }) {
+function OsClassView({ f7route, f7router }) {
   const queryClient = useQueryClient();
 
   let { params, query } = f7route;
@@ -92,6 +92,28 @@ function OsClassView({ f7route }) {
     },
   });
 
+  const recheckMutation = useMutation({
+    mutationFn: async (body) => {
+      let { data } = await ClassOsAPI.getListMembers({
+        data: {
+          ClassIDs: [prevState?.ClassID],
+          TeachIDs: [Auth?.ID],
+          DateStart: null,
+          DateEnd: null,
+          StockID: [prevState.StockID],
+          BeginFrom: moment(prevState?.TimeBegin).format("YYYY-MM-DD HH:mm:ss"),
+          BeginTo: moment(prevState?.TimeBegin)
+            .add(prevState?.Minutes, "minute")
+            .format("YYYY-MM-DD HH:mm:ss"),
+          Pi: 1,
+          Ps: 1,
+        },
+        Token: Auth?.token,
+      });
+      return data?.Items && data?.Items.length > 0 ? data?.Items[0] : null;
+    },
+  });
+
   const updateOsStatusMutation = useMutation({
     mutationFn: async ({ data, update, addPoint, deletePoint, Token }) => {
       let rs = await ClassOsAPI.addEditClassMember({ data: data, Token });
@@ -108,81 +130,104 @@ function OsClassView({ f7route }) {
     },
   });
 
-  const updateStatus = ({ Status, rowData, rowIndex }) => {
+  const updateStatus = ({ Status, rowData }) => {
     f7.dialog.confirm(
       `Xác nhận ${Status?.label} cho học viên ${rowData?.Member?.FullName}`,
-      () => {
+      async () => {
         f7.dialog.preloader("Đang thực hiện ...");
-        let newLists = [...initialValues.Member.Lists];
-        newLists[rowIndex]["Status"] = Status.value;
 
-        let newValues = {
-          arr: [
-            {
-              ...initialValues,
-              Member: {
-                ...initialValues.Member,
-                Lists: newLists,
+        let rs = await recheckMutation.mutateAsync();
+        if (!rs) {
+          await queryClient.invalidateQueries({ queryKey: ["OsMembers"] });
+          f7.dialog.close();
+          f7.dialog.alert("Lớp đã bị xoá.", () => {
+            f7router.back();
+          });
+        } else {
+          let newLists = [...rs.Member.Lists];
+
+          let index = newLists.findIndex(
+            (x) => x?.Member?.ID === rowData?.Member?.ID
+          );
+
+          if (index > -1) {
+            newLists[index]["Status"] = Status.value;
+
+            let newValues = {
+              arr: [
+                {
+                  ...initialValues,
+                  Member: {
+                    ...rs.Member,
+                    Lists: newLists,
+                  },
+                },
+              ],
+            };
+
+            let newObj = {
+              ID: rowData?.Os?.ID,
+              BookDate: Status.value
+                ? moment().format("YYYY-MM-DD HH:mm")
+                : null,
+              Status: !Status.value ? "" : "done",
+            };
+
+            if (!Status.value) {
+              newObj["UserID"] = 0;
+            }
+
+            let addPoints = null;
+            let deletePoints = null;
+
+            if (Brand?.Global?.Admin?.lop_hoc_diem) {
+              if (Status.value === "DIEM_DANH_DEN") {
+                addPoints = {
+                  MemberID: rowData?.Member?.ID,
+                  Title: "Tích điểm khi đi tập",
+                  Desc: `Đi tập lớp ${data?.Class?.Title} lúc ${moment(
+                    data?.TimeBegin
+                  ).format("HH:mm DD/MM/YYYY")}.`,
+                  CreateDate: moment().format("YYYY-MM-DD HH:mm"),
+                  Point: Brand?.Global?.Admin?.lop_hoc_diem,
+                  StockID: data?.StockID,
+                  OrderServiceID: rowData?.Os?.ID,
+                };
+              } else if (rowData?.Status === "DIEM_DANH_DEN") {
+                deletePoints = {
+                  MemberID: rowData?.Member?.ID,
+                  OrderServiceID: rowData?.Os?.ID,
+                };
+              }
+            }
+
+            updateOsStatusMutation.mutate(
+              {
+                data: newValues,
+                update: {
+                  arr: [newObj],
+                },
+                addPoint: addPoints
+                  ? {
+                      edit: [addPoints],
+                    }
+                  : null,
+                deletePoint: deletePoints,
+                Token: Auth?.token,
               },
-            },
-          ],
-        };
-
-        let newObj = {
-          ID: rowData?.Os?.ID,
-          BookDate: Status.value ? moment().format("YYYY-MM-DD HH:mm") : null,
-          Status: !Status.value ? "" : "done",
-        };
-
-        if (!Status.value) {
-          newObj["UserID"] = 0;
-        }
-
-        let addPoints = null;
-        let deletePoints = null;
-
-        if (Brand?.Global?.Admin?.lop_hoc_diem) {
-          if (Status.value === "DIEM_DANH_DEN") {
-            addPoints = {
-              MemberID: rowData?.Member?.ID,
-              Title: "Tích điểm khi đi tập",
-              Desc: `Đi tập lớp ${data?.Class?.Title} lúc ${moment(
-                data?.TimeBegin
-              ).format("HH:mm DD/MM/YYYY")}.`,
-              CreateDate: moment().format("YYYY-MM-DD HH:mm"),
-              Point: Brand?.Global?.Admin?.lop_hoc_diem,
-              StockID: data?.StockID,
-              OrderServiceID: rowData?.Os?.ID,
-            };
-          } else if (rowData?.Status === "DIEM_DANH_DEN") {
-            deletePoints = {
-              MemberID: rowData?.Member?.ID,
-              OrderServiceID: rowData?.Os?.ID,
-            };
+              {
+                onSuccess: () => {
+                  f7.dialog.close();
+                  toast.success("Cập nhật thành công.");
+                },
+              }
+            );
+          } else {
+            await refetch();
+            f7.dialog.close();
+            f7.dialog.alert("Học viên không tồn tại trong lớp.");
           }
         }
-
-        updateOsStatusMutation.mutate(
-          {
-            data: newValues,
-            update: {
-              arr: [newObj],
-            },
-            addPoint: addPoints
-              ? {
-                  edit: [addPoints],
-                }
-              : null,
-            deletePoint: deletePoints,
-            Token: Auth?.token,
-          },
-          {
-            onSuccess: () => {
-              f7.dialog.close();
-              toast.success("Cập nhật thành công.");
-            },
-          }
-        );
       }
     );
   };
@@ -196,32 +241,41 @@ function OsClassView({ f7route }) {
       )}-${moment(prevState?.TimeBegin)
         .add(prevState?.Minutes, "minute")
         .format("HH:mm")})`,
-      () => {
+      async () => {
         f7.dialog.preloader("Đang thực hiện ...");
-        let newValues = {
-          arr: [
-            {
-              ...initialValues,
-              Member: {
-                ...initialValues.Member,
-                Status: initialValues.Member?.Status ? "" : "1",
+        let rs = await recheckMutation.mutateAsync();
+        if (!rs) {
+          await queryClient.invalidateQueries({ queryKey: ["OsMembers"] });
+          f7.dialog.close();
+          f7.dialog.alert("Lớp đã bị xoá.", () => {
+            f7router.back();
+          });
+        } else {
+          let newValues = {
+            arr: [
+              {
+                ...initialValues,
+                Member: {
+                  ...rs.Member,
+                  Status: rs.Member?.Status ? "" : "1",
+                },
               },
-            },
-          ],
-        };
+            ],
+          };
 
-        addEditMutation.mutate(
-          {
-            data: newValues,
-            Token: Auth?.token,
-          },
-          {
-            onSuccess: () => {
-              f7.dialog.close();
-              toast.success("Cập nhật thành công.");
+          addEditMutation.mutate(
+            {
+              data: newValues,
+              Token: Auth?.token,
             },
-          }
-        );
+            {
+              onSuccess: () => {
+                f7.dialog.close();
+                toast.success("Cập nhật thành công.");
+              },
+            }
+          );
+        }
       }
     );
   };
@@ -233,32 +287,42 @@ function OsClassView({ f7route }) {
       ).format("HH:mm")}-${moment(prevState?.TimeBegin)
         .add(prevState?.Minutes, "minute")
         .format("HH:mm")})`,
-      () => {
+      async () => {
         f7.dialog.preloader("Đang thực hiện ...");
-        let newValues = {
-          arr: [
-            {
-              ...initialValues,
-              Member: {
-                ...initialValues.Member,
-                IsOverTime: ck,
-              },
-            },
-          ],
-        };
 
-        addEditMutation.mutate(
-          {
-            data: newValues,
-            Token: Auth?.token,
-          },
-          {
-            onSuccess: () => {
-              f7.dialog.close();
-              toast.success("Cập nhật thành công.");
+        let rs = await recheckMutation.mutateAsync();
+        if (!rs) {
+          await queryClient.invalidateQueries({ queryKey: ["OsMembers"] });
+          f7.dialog.close();
+          f7.dialog.alert("Lớp đã bị xoá.", () => {
+            f7router.back();
+          });
+        } else {
+          let newValues = {
+            arr: [
+              {
+                ...initialValues,
+                Member: {
+                  ...rs.Member,
+                  IsOverTime: ck,
+                },
+              },
+            ],
+          };
+
+          addEditMutation.mutate(
+            {
+              data: newValues,
+              Token: Auth?.token,
             },
-          }
-        );
+            {
+              onSuccess: () => {
+                f7.dialog.close();
+                toast.success("Cập nhật thành công.");
+              },
+            }
+          );
+        }
       }
     );
   };
@@ -421,7 +485,6 @@ function OsClassView({ f7route }) {
                                       updateStatus({
                                         Status: action,
                                         rowData: item,
-                                        rowIndex: index,
                                       })
                                     }
                                   >
@@ -449,7 +512,6 @@ function OsClassView({ f7route }) {
                                       value: "",
                                     },
                                     rowData: item,
-                                    rowIndex: index,
                                   });
                                 }
                               }}
