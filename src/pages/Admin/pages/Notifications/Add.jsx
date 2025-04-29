@@ -506,7 +506,7 @@ function NotificationAddAdmin({ f7router }) {
                     options={Members?.data || []}
                     label="Chọn khách hàng"
                     onChange={(val) => {
-                      field.onChange(val);
+                      field.onChange(val ? [val] : []);
                       trigger("ToUsers");
                     }}
                     errorMessage={fieldState?.error?.message}
@@ -528,7 +528,7 @@ function NotificationAddAdmin({ f7router }) {
                     options={Users?.data || []}
                     label="Chọn nhân viên"
                     onChange={(val) => {
-                      field.onChange(val);
+                      field.onChange(val ? [val] : []);
                       trigger("ToMembers");
                     }}
                     errorMessage={fieldState?.error?.message}
