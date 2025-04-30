@@ -73,12 +73,10 @@ function PickerTimekeeping({ children, user, filters }) {
     //resolver: yupResolver(schemaAddEdit),
   });
 
-  const { fields } = useFieldArray(
-    {
-      control, // control props comes from useForm (optional: if you are using FormProvider)
-      name: "Dates", // unique name for your Field Array
-    }
-  );
+  const { fields } = useFieldArray({
+    control, // control props comes from useForm (optional: if you are using FormProvider)
+    name: "Dates", // unique name for your Field Array
+  });
 
   useEffect(() => {
     if (visible) {
@@ -112,10 +110,22 @@ function PickerTimekeeping({ children, user, filters }) {
     };
 
     obj.CheckIn = WorkTrack.CheckIn
-      ? moment(WorkTrack.CheckIn).format("YYYY-MM-DD HH:mm:ss")
+      ? moment(Date)
+          .set({
+            hour: moment(WorkTrack.CheckIn, "HH:mm").get("hour"),
+            minute: moment(WorkTrack.CheckIn, "HH:mm").get("minute"),
+            second: 0,
+          })
+          .format("YYYY-MM-DD HH:mm:ss")
       : WorkTrack.CheckIn;
     obj.CheckOut = WorkTrack.CheckOut
-      ? moment(WorkTrack.CheckOut).format("YYYY-MM-DD HH:mm:ss")
+      ? moment(Date)
+          .set({
+            hour: moment(WorkTrack.CheckOut, "HH:mm").get("hour"),
+            minute: moment(WorkTrack.CheckOut, "HH:mm").get("minute"),
+            second: 0,
+          })
+          .format("YYYY-MM-DD HH:mm:ss")
       : WorkTrack.CheckOut;
     obj.Info.Desc = WorkTrack.Info.Desc || "";
     obj.Info.CheckOut.Desc = WorkTrack.Info.CheckOut.Desc || "";
@@ -197,7 +207,7 @@ function PickerTimekeeping({ children, user, filters }) {
       }
     );
   };
-  
+
   return (
     <AnimatePresence initial={false}>
       <>
@@ -311,14 +321,14 @@ function PickerTimekeeping({ children, user, filters }) {
                                         field.onChange(val.floatValue || "")
                                       }
                                     />
-                                    {field.value && (
+                                    {field.value ? (
                                       <div
                                         className="absolute top-0 right-0 flex items-center justify-center w-12 h-full"
                                         onClick={() => field.onChange("")}
                                       >
                                         <XMarkIcon className="w-5" />
                                       </div>
-                                    )}
+                                    ) : <></>}
                                   </div>
                                 </div>
                               )}
