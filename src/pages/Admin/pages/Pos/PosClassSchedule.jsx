@@ -91,7 +91,7 @@ let RenderItems = ({ item, onOpenClass, filters }) => {
                       <span>Vắng : </span>
                       <span className="pl-1 font-semibold font-lato">
                         {cls?.ClassInfo?.Member?.Lists?.filter(
-                          (x) => x.Status === "Vắng"
+                          (x) => x.Status === "DIEM_DANH_KHONG_DEN"
                         ).length || 0}
                       </span>
                     </div>
