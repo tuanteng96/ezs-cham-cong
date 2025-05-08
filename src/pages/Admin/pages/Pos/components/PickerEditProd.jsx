@@ -189,8 +189,8 @@ function PickerEditProd({ children, item, CheckInID, MemberID, Order }) {
 
   const isDisabled = () => {
     if (Brand?.Global?.Admin?.cam_chinh_gia) {
-      if (Auth?.ID === 1) return Auth?.ID === 1;
-      return adminTools_byStock?.hasRight;
+      if (Auth?.ID === 1) return Auth?.ID !== 1;
+      return !adminTools_byStock?.hasRight;
     }
     return false;
   };
@@ -317,7 +317,7 @@ function PickerEditProd({ children, item, CheckInID, MemberID, Order }) {
                                   })
                                 }
                               />
-                              {field.value && (
+                              {!isDisabled() && field.value && (
                                 <div
                                   className="absolute top-0 right-0 flex items-center justify-center w-12 h-full"
                                   onClick={() => field.onChange("")}

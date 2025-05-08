@@ -1,7 +1,7 @@
 import { f7, useStore } from "framework7-react";
 import React, { useEffect, useRef } from "react";
 import store from "../js/store";
-import { useQuery } from "react-query";
+import { useQuery, useQueryClient } from "react-query";
 import AuthAPI from "../api/Auth.api";
 import AdminAPI from "../api/Admin.api";
 import DeviceHelpers from "../helpers/DeviceHelpers";
@@ -17,6 +17,8 @@ function LayoutProvider({ children }) {
   let Auth = useStore("Auth");
   let Brand = useStore("Brand");
   let CrStocks = useStore("CrStocks");
+
+  const queryClient = useQueryClient();
 
   const notificationFull = useRef(null);
 
@@ -198,7 +200,7 @@ function LayoutProvider({ children }) {
     enabled: Boolean(Brand && Brand?.Domain),
   });
 
-  useQuery({
+  const { refetch: refetchWorkTimeSetting } = useQuery({
     queryKey: ["WorkTimeSetting", Auth?.WorkTimeSetting],
     queryFn: async () => {
       let { data, headers } = await ConfigsAPI.getValue(
@@ -276,6 +278,8 @@ function LayoutProvider({ children }) {
     },
     enabled: Boolean(Auth && Auth?.token),
   });
+
+  window.refetchWorkTimeSetting = refetchWorkTimeSetting;
 
   useQuery({
     queryKey: ["Notifications", { ID: Auth?.ID }],
@@ -437,6 +441,18 @@ function LayoutProvider({ children }) {
 
     refetchProcessings();
 
+    if (
+      (newData?.body?.MemberID && newData?.subject === "userCheckInOut") ||
+      newData?.subject === "member_group"
+    ) {
+      Promise.all([
+        queryClient.invalidateQueries(["ClientManageID"]),
+        queryClient.invalidateQueries(["OrderManageID"]),
+        queryClient.invalidateQueries(["ServiceUseManageID"]),
+        queryClient.invalidateQueries(["InvoiceProcessings"]),
+      ]);
+    }
+
     if (Brand?.Global?.PosApp) {
       // if (!notificationFull.current) {
       //   notificationFull.current = f7.notification.create({
@@ -520,6 +536,18 @@ function LayoutProvider({ children }) {
     document.addEventListener("bz.receive", handleBzReceive);
     return () => document.removeEventListener("bz.receive", handleBzReceive);
   });
+
+  let logOutAccount = () => {
+    store.dispatch("logout", () => {
+      f7.views.main.router.navigate("/login/");
+    });
+  };
+
+  window.logOutAccount = logOutAccount;
+
+  window.f7 = {
+    dialog: f7.dialog,
+  };
 
   return <>{children}</>;
 }

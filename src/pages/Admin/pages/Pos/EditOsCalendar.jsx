@@ -119,6 +119,8 @@ function EditOsCalendar({ f7route, f7router }) {
     name: "Staffs",
   });
 
+  let { roomid, StockID, fee, Staffs, AutoSalaryMethod, date } = watch();
+
   const OsImages = useQuery({
     queryKey: ["OsImagesDetailID", { ID: formState?.Os?.ID }],
     queryFn: async () => {
@@ -291,13 +293,14 @@ function EditOsCalendar({ f7route, f7router }) {
       // }
 
       let InfoJSON = data?.InfoJSON ? JSON.parse(data?.InfoJSON) : null;
+
       reset({
         ServiceID: data?.ID,
         Staffs: newStaffs,
         Hours: "",
         desc: data?.Desc,
         IsMemberSet: data?.IsMemberSet ? true : false,
-        date: data?.BookDate || new Date(),
+        date: date || data?.BookDate || new Date(),
         StockID: data?.Status
           ? index > -1
             ? Stocks[index]
@@ -373,8 +376,6 @@ function EditOsCalendar({ f7route, f7router }) {
     },
     enabled: Os?.data?.MemberID > 0,
   });
-
-  let { roomid, StockID, fee, Staffs, AutoSalaryMethod } = watch();
 
   useEffect(() => {
     if (Rooms?.data && Rooms?.data.length > 0) {
@@ -479,21 +480,19 @@ function EditOsCalendar({ f7route, f7router }) {
 
     f7.dialog.preloader("Đang Upload ...");
 
-    const promiseArray = images.map(async (arr) => {
-      await Promise.all(
-        images.map(async (image) => {
-          var bodyFormData = new FormData();
-          bodyFormData.append("src", image);
+    await Promise.all(
+      images.map(async (image) => {
+        var bodyFormData = new FormData();
+        bodyFormData.append("src", image);
 
-          await uploadImagesOsMutation.mutateAsync({
-            OsID: formState?.Os?.ID,
-            Token: Auth?.token,
-            data: bodyFormData,
-          });
-        })
-      );
-    });
-    await await Promise.all(promiseArray);
+        let rsImage = await uploadImagesOsMutation.mutateAsync({
+          OsID: formState?.Os?.ID,
+          Token: Auth?.token,
+          data: bodyFormData,
+        });
+        return rsImage;
+      })
+    );
     await OsImages.refetch();
     f7.dialog.close();
   };
@@ -753,7 +752,7 @@ function EditOsCalendar({ f7route, f7router }) {
     }
     return true;
   };
-  
+
   const onToBack = () => {
     if (f7router.previousRoute.path.includes("add-prods")) {
       // let index = f7router.history.findIndex((x) =>
@@ -1059,6 +1058,7 @@ function EditOsCalendar({ f7route, f7router }) {
 
                     {Os?.data?.ContextJSONApi ? (
                       <PickerSalaryOs
+                        BookDate={date}
                         data={Os?.data?.ContextJSONApi}
                         Os={Os?.data}
                         onUpdate={() =>

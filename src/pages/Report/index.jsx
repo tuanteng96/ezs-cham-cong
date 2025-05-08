@@ -16,7 +16,7 @@ function Report({ f7router }) {
   const Auth = useStore("Auth");
   const Brand = useStore("Brand");
   let CrStocks = useStore("CrStocks");
-
+    
   return (
     <Page
       name="report"
@@ -48,6 +48,7 @@ function Report({ f7router }) {
             CrStockID: CrStocks?.ID,
             Stocks: Auth?.Info?.StockRights,
             rightsSum: Auth?.Info?.rightsSum,
+            rightTree: Auth?.Info?.rightTree,
           },
           token: Auth?.token,
           isApp: true,

@@ -46,6 +46,9 @@ import ClientBirthDayPage from "@/pages/Admin/pages/Clients/ClientBirthDay.jsx";
 import ClientsAdminPage from "@/pages/Admin/pages/Clients/index.jsx";
 import AddEditClientsPage from "@/pages/Admin/pages/Clients/AddEditClients.jsx";
 
+import MembersAdminPage from "@/pages/Admin/pages/Members/index.jsx";
+import MembersAdminAddEditPage from "@/pages/Admin/pages/Members/AddEdit.jsx";
+
 import InvoiceProcessingsPage from "@/pages/Admin/pages/InvoiceProcessings/index.jsx";
 
 import OrderViewAdminPage from "@/pages/Admin/pages/Orders/OrderView.jsx";
@@ -632,6 +635,36 @@ var routes = [
             component: TimekeepingsUserPage,
             options: {
               transition: "f7-cover",
+            },
+          },
+        ],
+      },
+      {
+        path: "members",
+        component: MembersAdminPage,
+        options: {
+          transition: "f7-cover",
+        },
+        routes: [
+          {
+            path: "add",
+            component: MembersAdminAddEditPage,
+            options: {
+              transition: "f7-cover",
+            },
+          },
+          {
+            path: ":id",
+            component: MembersAdminAddEditPage,
+            options: {
+              transition: "f7-cover-v",
+            },
+          },
+          {
+            path: "edit/:id",
+            component: AddEditClientsPage,
+            options: {
+              transition: "f7-cover-v",
             },
           },
         ],

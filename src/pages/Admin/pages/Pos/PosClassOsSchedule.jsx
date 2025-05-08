@@ -202,7 +202,7 @@ function PosClassOsSchedule({ f7router, f7route }) {
             let newObj = {
               ID: rowData?.Os?.ID,
               BookDate: Status.value
-                ? moment().format("YYYY-MM-DD HH:mm")
+                ? moment(data?.TimeBegin).format("YYYY-MM-DD HH:mm")
                 : null,
               Status: !Status.value ? "" : "done",
             };

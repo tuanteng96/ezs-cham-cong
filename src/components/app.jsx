@@ -67,10 +67,12 @@ const MyApp = () => {
 
   const onAppForceIn = () => {
     window.refetchProcessings && window.refetchProcessings();
+    window.refetchWorkTimeSetting && window.refetchWorkTimeSetting();
   };
 
   const onAppForceOut = () => {
     window.refetchProcessings && window.refetchProcessings();
+    window.refetchWorkTimeSetting && window.refetchWorkTimeSetting();
     KeyboardsHelper.forceOutListener();
   };
 

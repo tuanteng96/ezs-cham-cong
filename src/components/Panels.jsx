@@ -12,6 +12,7 @@ import {
   CodeBracketIcon,
   RectangleStackIcon,
   Squares2X2Icon,
+  UserGroupIcon,
 } from "@heroicons/react/24/outline";
 import { Link, Panel, f7, f7ready, useStore } from "framework7-react";
 import React, { useEffect, useRef, useState } from "react";
@@ -69,7 +70,7 @@ function Panels(props) {
   const actionsToPopover = useRef(null);
   const buttonToPopoverWrapper = useRef(null);
 
-  const { notification, report, cong_ca, article, pos_mng, printConfig } =
+  const { notification, report, cong_ca, article, pos_mng, printConfig, usrmng } =
     RolesHelpers.useRoles({
       nameRoles: [
         "notification",
@@ -78,11 +79,12 @@ function Panels(props) {
         "article",
         "pos_mng",
         "printConfig",
+        "usrmng"
       ],
       auth: Auth,
       CrStocks,
     });
-
+    
   const [Menus, setMenus] = useState([]);
 
   useEffect(() => {
@@ -112,6 +114,15 @@ function Panels(props) {
         Id: f7.utils.id("xxxx-xxxx-xxxx-xxxx"),
         hasRight: cong_ca?.hasRight,
         Icon: <RectangleStackIcon className="w-5" />,
+      },
+      {
+        Title: "Quản lý nhân viên",
+        Link: "/admin/members/",
+        ActiveLink: ["/admin/members/"],
+        active: false,
+        Id: f7.utils.id("xxxx-xxxx-xxxx-xxxx"),
+        hasRight: usrmng?.hasRight,
+        Icon: <UserGroupIcon className="w-5" />,
       },
       {
         Title: "Quản lý lớp",

@@ -203,7 +203,7 @@ function PosClientCard({ f7router, f7route }) {
                           </div>
                         </div>
 
-                        <div class="px-4 py-3">
+                        <div className="px-4 py-3">
                           <div className="mb-px text-gray-600">
                             Chi tiêu dịch vụ
                           </div>

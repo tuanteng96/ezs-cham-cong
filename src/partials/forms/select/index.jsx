@@ -4,6 +4,7 @@ import SelectClassOs from "./SelectClassOs";
 import SelectClients from "./SelectClients";
 import SelectDistricts from "./SelectDistricts";
 import SelectGender from "./SelectGender";
+import SelectGroupRoles from "./SelectGroupRoles";
 import SelectMaterials from "./SelectMaterials";
 import SelectMaterialsFromCard from "./SelectMaterialsFromCard";
 import SelectMembers from "./SelectMembers";
@@ -13,12 +14,14 @@ import SelectMoneyCardClients from "./SelectMoneyCardClients";
 import SelectPicker from "./SelectPicker";
 import SelectPickersGroup from "./SelectPickersGroup";
 import SelectProductCardClients from "./SelectProductCardClients";
+import SelectUserShifts from "./SelectUserShifts";
 import SelectProvinces from "./SelectProvinces";
 import SelectServiceCardClients from "./SelectServiceCardClients";
 import SelectServiceProtocol from "./SelectServiceProtocol";
 import SelectServiceRoots from "./SelectServiceRoots";
 import SelectServicesOsClass from "./SelectServicesOsClass";
 import SelectServicesTransfer from "./SelectServicesTransfer";
+import SelectUserLevels from "./SelectUserLevels";
 
 export {
   SelectPicker,
@@ -41,5 +44,8 @@ export {
   SelectServiceProtocol,
   SelectMembers,
   SelectServicesOsClass,
-  SelectClassOs
+  SelectClassOs,
+  SelectGroupRoles,
+  SelectUserShifts,
+  SelectUserLevels
 };

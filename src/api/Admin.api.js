@@ -245,6 +245,30 @@ const AdminAPI = {
         Authorization: `Bearer ${Token}`,
       },
     }),
+  listMembers: ({ data, Token }) =>
+    http.post(`/api/v3/User24@Get`, JSON.stringify(data), {
+      headers: {
+        Authorization: `Bearer ${Token}`,
+      },
+    }),
+  addEditMembers: ({ data, Token }) =>
+    http.post(`/admin/smart.aspx?user_add=1`, data, {
+      headers: {
+        Authorization: `Bearer ${Token}`,
+      },
+    }),
+  updateMembers: ({ data, Token, StockID }) =>
+    http.post(`/api/v3/User24@Updates?stockid=${StockID}`, JSON.stringify(data), {
+      headers: {
+        Authorization: `Bearer ${Token}`,
+      },
+    }),
+  suggestMemberUsename: ({ data, Token, StockID }) =>
+    http.post(`/admin/smart.aspx?user_sugg=1&stockid=${StockID}`, data, {
+      headers: {
+        Authorization: `Bearer ${Token}`,
+      },
+    }),
   listClients: ({ Key = "", Token, pi = 1, ps = 15, StockID = "" }) =>
     http.get(
       `/services/preview.aspx?cmd=search_member&key=${encodeURIComponent(
@@ -917,6 +941,18 @@ const AdminAPI = {
     }),
   updateOsClassSchedule: ({ data, Token }) =>
     http.post(`/api/v3/OS25@UpdateList`, JSON.stringify(data), {
+      headers: {
+        Authorization: `Bearer ${Token}`,
+      },
+    }),
+  updateRatingMembers: ({ data, Token }) =>
+    http.post("/api/v3/userrate@save", JSON.stringify(data), {
+      headers: {
+        Authorization: `Bearer ${Token}`,
+      },
+    }),
+  getGroupRoles: ({ Token }) =>
+    http.get("/api/v3/User24@GetGroups", {
       headers: {
         Authorization: `Bearer ${Token}`,
       },

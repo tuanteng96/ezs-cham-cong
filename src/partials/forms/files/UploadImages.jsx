@@ -147,6 +147,17 @@ const UploadImages = ({
                 className="w-full"
                 src={AssetsHelpers.toAbsoluteUrl(value)}
                 alt="Avatar"
+                onError={e => {
+                  if (
+                    e.target.src !==
+                    AssetsHelpers.toAbsoluteUrl('/v2/assets/images/files/image-default.png', "")
+                  ) {
+                    e.target.onerror = null
+                    e.target.src = AssetsHelpers.toAbsoluteUrl(
+                      '/v2/assets/images/files/image-default.png', ""
+                    )
+                  }
+                }}
               />
             </a>
             <div

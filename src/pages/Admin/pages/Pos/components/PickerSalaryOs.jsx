@@ -8,8 +8,9 @@ import { useMutation } from "react-query";
 import { NumericFormat } from "react-number-format";
 import clsx from "clsx";
 import { SelectMembers } from "@/partials/forms/select";
+import moment from "moment";
 
-function PickerSalaryOs({ children, data, Os, onUpdate }) {
+function PickerSalaryOs({ children, data, Os, onUpdate, BookDate }) {
   const [visible, setVisible] = useState(false);
 
   const { control, handleSubmit, reset } = useForm({
@@ -59,8 +60,12 @@ function PickerSalaryOs({ children, data, Os, onUpdate }) {
     mutationFn: async (body) => {
       let svh = pos27 && pos27.member(Os?.MemberID).service();
       let rs = null;
+      
       if (svh) {
-        rs = await svh.saveContextSalaryItem(body.Os, body.SalaryItems);
+        rs = await svh.saveContextSalaryItem(
+          { ...body.Os, BookDate: moment(BookDate).format("YYYY-MM-DD HH:mm") },
+          body.SalaryItems
+        );
       }
       return rs;
     },

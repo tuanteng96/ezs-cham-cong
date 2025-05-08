@@ -48,6 +48,7 @@ function ReportPreview({ f7router }) {
             CrStockID: CrStocks?.ID,
             Stocks: Auth?.Info?.StockRights,
             rightsSum: Auth?.Info?.rightsSum,
+            rightTree: Auth?.Info?.rightTree,
             token: Auth?.token,
           },
           token: Auth?.token,

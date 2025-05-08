@@ -30,6 +30,7 @@ const BOTTOM_NAVIGATION_PAGES = [
   "/admin/pos/invoice-processings/",
   "/admin/printers/",
   "/admin/timekeepings/",
+  "/admin/members/",
   "/osclass/",
   "/debug/",
 ];

@@ -612,6 +612,14 @@ function PosClientManage({ f7route, f7router }) {
     (Order?.data?.Order?.CPayed || Order?.data?.Order?.MPayed) &&
     !adminTools_byStock?.hasRight;
 
+  const isDisabled = () => {
+    if (Brand?.Global?.Admin?.cam_chinh_gia) {
+      if (Auth?.ID === 1) return Auth?.ID !== 1;
+      return !adminTools_byStock?.hasRight;
+    }
+    return false;
+  };
+
   return (
     <Page
       noSwipeback
@@ -1408,32 +1416,34 @@ function PosClientManage({ f7route, f7router }) {
                               ></div>
                             </div>
                           </Link>
-                          <PickerDiscountEnterOrder
-                            CheckIn={Client?.data?.CheckIn}
-                            Order={Order?.data?.Order}
-                          >
-                            {({ open }) => (
-                              <Link
-                                onClick={open}
-                                popoverClose
-                                className="flex justify-between p-3 font-medium border-b last:border-0"
-                                noLinkClass
-                              >
-                                Giảm giá
-                                {Order?.data?.Order?.CustomeDiscount > 0 ? (
-                                  <div className="px-1.5 font-semibold text-xs text-white rounded bg-danger font-lato flex items-center">
-                                    {Order?.data?.Order?.CustomeDiscount > 100
-                                      ? StringHelpers.formatVND(
-                                          Order?.data?.Order?.CustomeDiscount
-                                        )
-                                      : `${Order?.data?.Order?.CustomeDiscount}%`}
-                                  </div>
-                                ) : (
-                                  <></>
-                                )}
-                              </Link>
-                            )}
-                          </PickerDiscountEnterOrder>
+                          {!isDisabled() && (
+                            <PickerDiscountEnterOrder
+                              CheckIn={Client?.data?.CheckIn}
+                              Order={Order?.data?.Order}
+                            >
+                              {({ open }) => (
+                                <Link
+                                  onClick={open}
+                                  popoverClose
+                                  className="flex justify-between p-3 font-medium border-b last:border-0"
+                                  noLinkClass
+                                >
+                                  Giảm giá
+                                  {Order?.data?.Order?.CustomeDiscount > 0 ? (
+                                    <div className="px-1.5 font-semibold text-xs text-white rounded bg-danger font-lato flex items-center">
+                                      {Order?.data?.Order?.CustomeDiscount > 100
+                                        ? StringHelpers.formatVND(
+                                            Order?.data?.Order?.CustomeDiscount
+                                          )
+                                        : `${Order?.data?.Order?.CustomeDiscount}%`}
+                                    </div>
+                                  ) : (
+                                    <></>
+                                  )}
+                                </Link>
+                              )}
+                            </PickerDiscountEnterOrder>
+                          )}
                         </>
                       )}
 
