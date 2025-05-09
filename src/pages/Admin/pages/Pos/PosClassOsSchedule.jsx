@@ -5,6 +5,7 @@ import { RolesHelpers } from "@/helpers/RolesHelpers";
 import {
   ChevronLeftIcon,
   EllipsisVerticalIcon,
+  InformationCircleIcon,
   PencilIcon,
   PencilSquareIcon,
   PlusIcon,
@@ -26,7 +27,7 @@ import moment from "moment";
 import React, { useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import { toast } from "react-toastify";
-import { PickerClassOsMemberAddEdit } from "./components";
+import { PickerClassOsMemberAddEdit, PickerHistoryCoachs } from "./components";
 import { SelectMembers } from "@/partials/forms/select";
 import PullToRefresh from "react-simple-pull-to-refresh";
 import ClassOsAPI from "@/api/ClassOs.api";
@@ -902,7 +903,20 @@ function PosClassOsSchedule({ f7router, f7route }) {
         </PullToRefresh>
         <div className="px-4 py-3.5 border-t">
           <div className="flex items-end justify-between mb-4">
-            <div className="font-medium leading-3">HLV</div>
+            <div className="flex items-center font-medium leading-3">
+              {data?.Member?.HistoryCoachs &&
+                data?.Member?.HistoryCoachs.length > 0 && (
+                  <PickerHistoryCoachs Coachs={data?.Member?.HistoryCoachs}>
+                    {({ open }) => (
+                      <InformationCircleIcon
+                        onClick={open}
+                        className="w-5 mr-1 text-warning"
+                      />
+                    )}
+                  </PickerHistoryCoachs>
+                )}
+              HLV
+            </div>
             <div
               className={clsx(
                 "font-medium leading-3",

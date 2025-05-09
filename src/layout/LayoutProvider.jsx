@@ -51,7 +51,7 @@ function LayoutProvider({ children }) {
     }
   }, []);
 
-  useQuery({
+  const { refetch: refetchAuth } = useQuery({
     queryKey: ["Auth", { Token: Auth?.token, WorkTrackStockID: CrStocks?.ID }],
     queryFn: async () => {
       let { data } = await AuthAPI.checkToken({
@@ -146,6 +146,8 @@ function LayoutProvider({ children }) {
     },
     enabled: Boolean(Auth && Auth?.token),
   });
+
+  window.refetchAuth = refetchAuth;
 
   useQuery({
     queryKey: ["Brand", Brand?.Domain],
@@ -537,8 +539,9 @@ function LayoutProvider({ children }) {
     return () => document.removeEventListener("bz.receive", handleBzReceive);
   });
 
-  let logOutAccount = () => {
-    store.dispatch("logout", () => {
+  let logOutAccount = (callback) => {
+    store.dispatch("logoutAuto", () => {
+      callback && callback();
       f7.views.main.router.navigate("/login/");
     });
   };

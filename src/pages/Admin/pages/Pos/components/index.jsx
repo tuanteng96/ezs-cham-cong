@@ -19,6 +19,7 @@ import PickerEditProd from "./PickerEditProd";
 import PickerExchangePoint from "./PickerExchangePoint";
 import PickerFilter from "./PickerFilter";
 import PickerFilterClientBook from "./PickerFilterClientBook";
+import PickerHistoryCoachs from "./PickerHistoryCoachs";
 import PickerPayments from "./PickerPayments";
 import PickerPreviewOldCard from "./PickerPreviewOldCard";
 import PickerPriceProdAdd from "./PickerPriceProdAdd";
@@ -79,5 +80,6 @@ export {
   PickerClassRequestFilter,
   PickerClassReportFilter,
   PickerSalaryOs,
-  PickerClassStudentFilter
+  PickerClassStudentFilter,
+  PickerHistoryCoachs
 };

@@ -286,6 +286,40 @@ const store = createStore({
         });
       });
     },
+    logoutAuto({ state, dispatch }, callback) {
+      f7.dialog.preloader("Đang thực hiện ...");
+      PromHelpers.SEND_TOKEN_FIREBASE().then(({ token, error }) => {
+        if (!error) {
+          var bodyFormData = new FormData();
+          bodyFormData.append("token", token);
+          axios
+            .get(
+              `${state.Brand.Domain}/api/v3/apptoken?cmd=call&accid=${state.Auth.ID}&acctype=${state.Auth.acc_type}&senderIndex=2&logout=1`,
+              bodyFormData
+            )
+            .then(() => {
+              dispatch("setLogout").then(() => {
+                f7.dialog.close();
+                callback && callback();
+              });
+            })
+            .catch(() => {
+              //f7.dialog.alert("Error : Provisional headers are shown ...");
+              dispatch("setLogout").then(() => {
+                f7.dialog.close();
+                callback && callback();
+              });
+            });
+        } else {
+          SubscribeHelpers.remove().then(() =>
+            dispatch("setLogout").then(() => {
+              f7.dialog.close();
+              callback && callback();
+            })
+          );
+        }
+      });
+    },
   },
 });
 export default store;
