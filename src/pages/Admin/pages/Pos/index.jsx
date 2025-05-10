@@ -131,14 +131,33 @@ function PosAdmin({ f7router }) {
   let Brand = useStore("Brand");
   let Stocks = useStore("Stocks");
 
+  const getViewCalendar = () => {
+    if (Brand?.Global?.Admin?.PosActiveCalendar) {
+      let index = Views.findIndex(
+        (x) => x.Key === Brand?.Global?.Admin?.PosActiveCalendar
+      );
+      if (index > -1) {
+        return Views[index].Key;
+      }
+    }
+    return "timeGridDay";
+  };
+
   const [filters, setFilters] = useState({
-    view: "timeGridDay",
+    view: getViewCalendar(),
     day: moment().toDate(),
     StockID: CrStocks?.ID || 0,
     MemberIDs: "",
     UserIDs: "",
-    status:
-      "XAC_NHAN,XAC_NHAN_TU_DONG,CHUA_XAC_NHAN,DANG_THUC_HIEN,THUC_HIEN_XONG",
+    status: [
+      "XAC_NHAN",
+      "XAC_NHAN_TU_DONG",
+      "CHUA_XAC_NHAN",
+      ...(!Brand?.Global?.Admin?.isAdminBooks ? ["DANG_THUC_HIEN"] : []),
+      ...(Brand?.Global?.Admin?.PosStatus
+        ? [...Brand?.Global?.Admin?.PosStatus]
+        : []),
+    ].toString(),
     StatusAtHome: "",
     StatusBook: "",
     StatusMember: "",
