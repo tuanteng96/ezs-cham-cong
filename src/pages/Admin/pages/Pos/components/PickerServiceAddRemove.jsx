@@ -328,57 +328,59 @@ function PickerServiceAddRemove({ children, data, MemberID }) {
                         )}
                       />
                     </div>
-                    <div className="mb-3.5 last:mb-0">
-                      <div className="mb-px">Số tiền hoàn ví</div>
-                      <Controller
-                        name="tomn"
-                        control={control}
-                        render={({ field, fieldState }) => (
-                          <div className="relative">
-                            <NumericFormat
-                              className={clsx(
-                                "w-full input-number-format border shadow-[0_4px_6px_0_rgba(16,25,40,.06)] rounded py-3 px-4 focus:border-primary",
-                                fieldState?.invalid
-                                  ? "border-danger"
-                                  : "border-[#d5d7da]"
+                    {type?.value !== "1" && (
+                      <div className="mb-3.5 last:mb-0">
+                        <div className="mb-px">Số tiền hoàn ví</div>
+                        <Controller
+                          name="tomn"
+                          control={control}
+                          render={({ field, fieldState }) => (
+                            <div className="relative">
+                              <NumericFormat
+                                className={clsx(
+                                  "w-full input-number-format border shadow-[0_4px_6px_0_rgba(16,25,40,.06)] rounded py-3 px-4 focus:border-primary",
+                                  fieldState?.invalid
+                                    ? "border-danger"
+                                    : "border-[#d5d7da]"
+                                )}
+                                type="text"
+                                autoComplete="off"
+                                thousandSeparator={true}
+                                placeholder="Số tiền"
+                                value={field.value}
+                                onValueChange={(val) =>
+                                  field.onChange(val.floatValue || "")
+                                }
+                                isAllowed={(values) => {
+                                  const { floatValue, formattedValue } = values;
+                                  if (type?.value !== "0") return true;
+                                  return (
+                                    formattedValue === "" ||
+                                    (floatValue > 0 && floatValue <= TotalPrice)
+                                  );
+                                }}
+                                onFocus={(e) =>
+                                  KeyboardsHelper.setAndroid({
+                                    Type: "modal-scrollbar",
+                                    Event: e,
+                                  })
+                                }
+                              />
+                              {field.value ? (
+                                <div
+                                  className="absolute top-0 right-0 flex items-center justify-center w-12 h-full"
+                                  onClick={() => field.onChange("")}
+                                >
+                                  <XMarkIcon className="w-5" />
+                                </div>
+                              ) : (
+                                <></>
                               )}
-                              type="text"
-                              autoComplete="off"
-                              thousandSeparator={true}
-                              placeholder="Số tiền"
-                              value={field.value}
-                              onValueChange={(val) =>
-                                field.onChange(val.floatValue || "")
-                              }
-                              isAllowed={(values) => {
-                                const { floatValue, formattedValue } = values;
-                                if (type?.value !== "0") return true;
-                                return (
-                                  formattedValue === "" ||
-                                  (floatValue > 0 && floatValue <= TotalPrice)
-                                );
-                              }}
-                              onFocus={(e) =>
-                                KeyboardsHelper.setAndroid({
-                                  Type: "modal-scrollbar",
-                                  Event: e,
-                                })
-                              }
-                            />
-                            {field.value ? (
-                              <div
-                                className="absolute top-0 right-0 flex items-center justify-center w-12 h-full"
-                                onClick={() => field.onChange("")}
-                              >
-                                <XMarkIcon className="w-5" />
-                              </div>
-                            ) : (
-                              <></>
-                            )}
-                          </div>
-                        )}
-                      />
-                    </div>
+                            </div>
+                          )}
+                        />
+                      </div>
+                    )}
                   </div>
                   <div className="p-4">
                     <Button
@@ -388,7 +390,10 @@ function PickerServiceAddRemove({ children, data, MemberID }) {
                       large
                       preloader
                       loading={changeMutation.isLoading}
-                      disabled={changeMutation.isLoading || Object.keys(errors).length > 0}
+                      disabled={
+                        changeMutation.isLoading ||
+                        Object.keys(errors).length > 0
+                      }
                     >
                       Thực hiện
                     </Button>
