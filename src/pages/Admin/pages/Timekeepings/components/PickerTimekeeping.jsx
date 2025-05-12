@@ -108,25 +108,25 @@ function PickerTimekeeping({ children, user, filters }) {
       },
       StockID: filters.StockID?.value,
     };
-
+    
     obj.CheckIn = WorkTrack.CheckIn
-      ? moment(Date)
+      ? moment(Date, "YYYY-MM-DD")
           .set({
-            hour: moment(WorkTrack.CheckIn, "HH:mm").get("hour"),
-            minute: moment(WorkTrack.CheckIn, "HH:mm").get("minute"),
+            hour: moment(WorkTrack.CheckIn, "YYYY-MM-DD HH:mm").get("hour"),
+            minute: moment(WorkTrack.CheckIn, "YYYY-MM-DD HH:mm").get("minute"),
             second: 0,
           })
           .format("YYYY-MM-DD HH:mm:ss")
-      : WorkTrack.CheckIn;
+      : "";
     obj.CheckOut = WorkTrack.CheckOut
-      ? moment(Date)
+      ? moment(Date, "YYYY-MM-DD")
           .set({
-            hour: moment(WorkTrack.CheckOut, "HH:mm").get("hour"),
-            minute: moment(WorkTrack.CheckOut, "HH:mm").get("minute"),
+            hour: moment(WorkTrack.CheckOut, "YYYY-MM-DD HH:mm").get("hour"),
+            minute: moment(WorkTrack.CheckOut, "YYYY-MM-DD HH:mm").get("minute"),
             second: 0,
           })
           .format("YYYY-MM-DD HH:mm:ss")
-      : WorkTrack.CheckOut;
+      : "";
     obj.Info.Desc = WorkTrack.Info.Desc || "";
     obj.Info.CheckOut.Desc = WorkTrack.Info.CheckOut.Desc || "";
     obj.Info.Note = WorkTrack.Info.Note || "";
@@ -192,6 +192,7 @@ function PickerTimekeeping({ children, user, filters }) {
         Value: WorkTrack.Info.CountWork,
       };
     }
+    
     updateMutation.mutate(
       {
         data: {
@@ -328,7 +329,9 @@ function PickerTimekeeping({ children, user, filters }) {
                                       >
                                         <XMarkIcon className="w-5" />
                                       </div>
-                                    ) : <></>}
+                                    ) : (
+                                      <></>
+                                    )}
                                   </div>
                                 </div>
                               )}
