@@ -739,6 +739,7 @@ function AddEditCalendar({ f7route, f7router }) {
                   onChange={field.onChange}
                   placeholder="Chọn thời gian"
                   showHeader
+                  minDate={new Date()}
                 />
               )}
             />
