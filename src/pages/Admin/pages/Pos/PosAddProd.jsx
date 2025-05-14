@@ -76,6 +76,7 @@ function PosAddProd({ f7route, f7router }) {
 
   let CrStocks = useStore("CrStocks");
   let Auth = useStore("Auth");
+  let Brand = useStore("Brand");
 
   const [filters, setFilters] = useState({
     pi: 1,
@@ -621,10 +622,17 @@ function PosAddProd({ f7route, f7router }) {
                                     newSelected[index].Qty =
                                       newSelected[index].Qty + 1;
                                   } else {
-                                    if (item.PriceProduct) {
-                                      newSelected.push({ ...item, Qty: 1 });
+                                    if (
+                                      Brand?.Global?.Admin
+                                        ?.chinh_gia_0_dong_mua_hang
+                                    ) {
+                                      if (item.PriceProduct) {
+                                        newSelected.push({ ...item, Qty: 1 });
+                                      } else {
+                                        open();
+                                      }
                                     } else {
-                                      open();
+                                      newSelected.push({ ...item, Qty: 1 });
                                     }
                                   }
                                   setSelected(newSelected);
@@ -723,13 +731,23 @@ function PosAddProd({ f7route, f7router }) {
                                         newSelected[index].Qty =
                                           newSelected[index].Qty + 1;
                                       } else {
-                                        if (item.PriceProduct) {
+                                        if (
+                                          Brand?.Global?.Admin
+                                            ?.chinh_gia_0_dong_mua_hang
+                                        ) {
+                                          if (item.PriceProduct) {
+                                            newSelected.push({
+                                              ...item,
+                                              Qty: 1,
+                                            });
+                                          } else {
+                                            open();
+                                          }
+                                        } else {
                                           newSelected.push({
                                             ...item,
                                             Qty: 1,
                                           });
-                                        } else {
-                                          open();
                                         }
                                       }
                                       setSelected(newSelected);

@@ -37,7 +37,7 @@ const schemaAdd = yup
     StockID: yup.object().nullable().required("Vui lòng chọn cơ sở."),
   })
   .required();
-const getQueryPost = (values) => {
+const getQueryPost = (values, Auth) => {
   let newDesc = "";
   if (values?.AmountPeople?.value) {
     newDesc =
@@ -77,6 +77,42 @@ const getQueryPost = (values) => {
       ? JSON.stringify(values.TreatmentJson)
       : "",
   };
+
+  let History = {
+    ...(values?.History || {}),
+    Edit: values?.History?.Edit
+      ? [
+          ...values?.History?.Edit,
+          {
+            CreateDate: moment().format("HH:mm DD-MM-YYYY"),
+            Staff: {
+              ID: Auth?.ID,
+              FullName: Auth?.FullName,
+            },
+            Booking: {
+              ...obj,
+              Members: values.MemberID,
+              UserServices: values.UserServiceIDs,
+            },
+          },
+        ]
+      : [
+          {
+            CreateDate: moment().format("HH:mm DD-MM-YYYY"),
+            Staff: {
+              ID: Auth?.ID,
+              FullName: Auth?.FullName,
+            },
+            Booking: {
+              ...obj,
+              Members: values.MemberID,
+              UserServices: values.UserServiceIDs,
+            },
+          },
+        ],
+  };
+
+  obj.History = History;
 
   obj.Tags && delete obj.Tags;
   obj.AmountPeople && delete obj.AmountPeople;
@@ -154,7 +190,7 @@ function AddEditCalendar({ f7route, f7router }) {
     }
     if (f7route?.query?.formState) {
       let initialValues = JSON.parse(f7route?.query?.formState);
-      console.log(initialValues);
+
       let newDesc = initialValues.Desc;
       let AmountPeople = {
         label: "1 khách",
@@ -225,6 +261,9 @@ function AddEditCalendar({ f7route, f7router }) {
         Status: initialValues?.Status || "",
         TreatmentJson: initialValues?.TreatmentJson
           ? JSON.parse(initialValues?.TreatmentJson)
+          : "",
+        History: initialValues?.HistoryJSON
+          ? JSON.parse(initialValues?.HistoryJSON)
           : "",
       });
     }
@@ -417,7 +456,8 @@ function AddEditCalendar({ f7route, f7router }) {
     });
 
   const onSubmit = async (values) => {
-    let obj = getQueryPost(values);
+    let obj = getQueryPost(values, Auth);
+
     if (values.ID) {
       await changeTagsTelesales(obj);
     }
@@ -445,8 +485,13 @@ function AddEditCalendar({ f7route, f7router }) {
 
   const onChangeStatus = async (Status) => {
     let values = watch();
-    let obj = getQueryPost(values);
-    obj.Status = Status;
+    let obj = getQueryPost(
+      {
+        ...values,
+        Status: Status,
+      },
+      Auth
+    );
 
     if (values.ID) {
       await changeTagsTelesales(obj);
@@ -473,8 +518,13 @@ function AddEditCalendar({ f7route, f7router }) {
 
   const onCheckIn = async () => {
     let values = watch();
-    let obj = getQueryPost(values);
-    obj.Status = "KHACH_DEN";
+    let obj = getQueryPost(
+      {
+        ...values,
+        Status: "KHACH_DEN",
+      },
+      Auth
+    );
 
     if (values.ID) {
       await changeTagsTelesales(obj);
