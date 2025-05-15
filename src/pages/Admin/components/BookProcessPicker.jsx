@@ -96,8 +96,8 @@ function BookProcessPicker({ children, data, type }) {
         onSuccess: () => {
           close();
           toast.success(type + " thành công.");
-          noti27?.TIN_NHAN &&
-            noti27.TIN_NHAN({
+          window?.noti27?.TIN_NHAN &&
+            nwindow?.oti27.TIN_NHAN({
               type:
                 type === "Xác nhận đặt lịch"
                   ? "CONFIRM_APPOINTMENT_WEB_APP"

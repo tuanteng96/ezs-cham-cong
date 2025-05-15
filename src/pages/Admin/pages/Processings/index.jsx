@@ -120,8 +120,8 @@ function ProcessingsAdmin({ f7router }) {
           onSuccess: () => {
             f7.dialog.close();
             toast.success("Xác nhận thành công.");
-            noti27?.TIN_NHAN &&
-              noti27.TIN_NHAN({
+            window?.noti27?.TIN_NHAN &&
+              window?.noti27.TIN_NHAN({
                 type: "CANCEL_BOOK_WEB_APP",
                 data: {
                   mbookID: item.ID,

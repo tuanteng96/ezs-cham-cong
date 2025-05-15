@@ -501,8 +501,8 @@ function PosClientManage({ f7route, f7router }) {
                 .open();
             }
 
-            noti27?.DH_LETAN_CHECKOUT &&
-              noti27?.DH_LETAN_CHECKOUT({
+            window?.noti27?.DH_LETAN_CHECKOUT &&
+              window?.noti27?.DH_LETAN_CHECKOUT({
                 Member: {
                   ...(Client?.data || {}),
                 },

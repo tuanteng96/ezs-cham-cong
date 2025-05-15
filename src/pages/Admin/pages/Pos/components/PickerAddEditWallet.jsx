@@ -150,8 +150,8 @@ function PickerAddEditWallet({ children, data, MemberID }) {
           );
           close();
 
-          noti27?.TIN_NHAN &&
-            noti27.TIN_NHAN({
+          window?.noti27?.TIN_NHAN &&
+            window?.noti27.TIN_NHAN({
               type: values?.ID ? "EDIT_WALLET_POS" : "ADD_WALLET_POS",
               data: values,
             });

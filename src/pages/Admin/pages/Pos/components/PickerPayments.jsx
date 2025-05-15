@@ -241,8 +241,8 @@ function PickerPayments({ children, Order, Client }) {
               }
             );
           }
-          noti27?.TIN_NHAN &&
-            noti27.TIN_NHAN({
+          window?.noti27?.TIN_NHAN &&
+            window?.noti27.TIN_NHAN({
               type: "PAYMENT_ALL_POS",
               data: {
                 MethodID: Type.MethodID,

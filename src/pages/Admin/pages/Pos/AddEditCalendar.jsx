@@ -37,6 +37,7 @@ const schemaAdd = yup
     StockID: yup.object().nullable().required("Vui lòng chọn cơ sở."),
   })
   .required();
+
 const getQueryPost = (values, Auth) => {
   let newDesc = "";
   if (values?.AmountPeople?.value) {
@@ -119,6 +120,25 @@ const getQueryPost = (values, Auth) => {
   return obj;
 };
 
+let OptionsStatus = [
+  {
+    value: "XAC_NHAN",
+    label: "Đã xác nhận",
+  },
+  {
+    value: "KHACH_KHONG_DEN",
+    label: "Khách không đến",
+  },
+  {
+    value: "TU_CHOI",
+    label: "Khách huỷ lịch",
+  },
+  {
+    value: "KHACH_DEN",
+    label: "Khách có đến",
+  },
+];
+
 function AddEditCalendar({ f7route, f7router }) {
   const queryClient = useQueryClient();
 
@@ -188,6 +208,7 @@ function AddEditCalendar({ f7route, f7router }) {
         suffix: newClient?.MobilePhone,
       });
     }
+
     if (f7route?.query?.formState) {
       let initialValues = JSON.parse(f7route?.query?.formState);
 
@@ -457,7 +478,7 @@ function AddEditCalendar({ f7route, f7router }) {
 
   const onSubmit = async (values) => {
     let obj = getQueryPost(values, Auth);
-
+    
     if (values.ID) {
       await changeTagsTelesales(obj);
     }
@@ -471,8 +492,8 @@ function AddEditCalendar({ f7route, f7router }) {
       },
       {
         onSuccess: (data) => {
-          noti27?.TIN_NHAN &&
-            noti27?.TIN_NHAN({
+          window?.noti27?.TIN_NHAN &&
+            window?.noti27?.TIN_NHAN({
               type: values.ID ? "UPDATE_BOOK_POS" : "ADD_BOOK_POS",
               data: obj,
             });
@@ -507,8 +528,8 @@ function AddEditCalendar({ f7route, f7router }) {
       },
       {
         onSuccess: (data) => {
-          noti27?.TIN_NHAN &&
-            noti27?.TIN_NHAN({ type: "UPDATE_BOOK_POS", data: obj });
+          window?.noti27?.TIN_NHAN &&
+            window?.noti27?.TIN_NHAN({ type: "UPDATE_BOOK_POS", data: obj });
           toast.success("Lịch đã được cập nhật thành công.");
           f7router.back();
         },
@@ -546,8 +567,8 @@ function AddEditCalendar({ f7route, f7router }) {
       },
       {
         onSuccess: (data) => {
-          noti27?.TIN_NHAN &&
-            noti27?.TIN_NHAN({ type: "UPDATE_BOOK_POS", data: obj });
+          window?.noti27?.TIN_NHAN &&
+            window?.noti27?.TIN_NHAN({ type: "UPDATE_BOOK_POS", data: obj });
           toast.success("Xác nhận khách đến thành công.");
           f7router.back();
           //f7.views.main.router.navigate("/admin/pos/calendar/");
@@ -801,27 +822,51 @@ function AddEditCalendar({ f7route, f7router }) {
                 name="Status"
                 control={control}
                 render={({ field: { ref, ...field }, fieldState }) => (
-                  <Input
-                    //clearButton
-                    className={clsx(
-                      "[&_input]:rounded [&_input]:capitalize [&_input]:placeholder:normal-case text-danger [&_input]:font-medium",
-                      "text-" + getStatusClass(field.value).Color
+                  <Controller
+                    name="Status"
+                    control={control}
+                    render={({ field, fieldState }) => (
+                      <SelectPicker
+                        isClearable={false}
+                        placeholder="Chọn trạng thái"
+                        value={
+                          field.value
+                            ? OptionsStatus.filter(
+                                (x) => x.value === field.value
+                              )[0]
+                            : null
+                        }
+                        options={OptionsStatus}
+                        label="Trạng thái"
+                        onChange={(val) => {
+                          field.onChange(val?.value || null);
+                        }}
+                        errorMessage={fieldState?.error?.message}
+                        errorMessageForce={fieldState?.invalid}
+                      />
                     )}
-                    type="input"
-                    placeholder="Nhập trạng thái"
-                    value={getStatusClass(field.value).Text}
-                    errorMessage={fieldState?.error?.message}
-                    errorMessageForce={fieldState?.invalid}
-                    onInput={field.onChange}
-                    onFocus={(e) =>
-                      KeyboardsHelper.setAndroid({
-                        Type: "body",
-                        Event: e,
-                      })
-                    }
-                    readonly
-                    disabled
                   />
+                  // <Input
+                  //   //clearButton
+                  //   className={clsx(
+                  //     "[&_input]:rounded [&_input]:capitalize [&_input]:placeholder:normal-case text-danger [&_input]:font-medium",
+                  //     "text-" + getStatusClass(field.value).Color
+                  //   )}
+                  //   type="input"
+                  //   placeholder="Nhập trạng thái"
+                  //   value={getStatusClass(field.value).Text}
+                  //   errorMessage={fieldState?.error?.message}
+                  //   errorMessageForce={fieldState?.invalid}
+                  //   onInput={field.onChange}
+                  //   onFocus={(e) =>
+                  //     KeyboardsHelper.setAndroid({
+                  //       Type: "body",
+                  //       Event: e,
+                  //     })
+                  //   }
+                  //   //readonly
+                  //   //disabled
+                  // />
                 )}
               />
             </div>
@@ -882,6 +927,7 @@ function AddEditCalendar({ f7route, f7router }) {
                       type="checkbox"
                       className="sr-only peer"
                       {...field}
+                      checked={field.value}
                     />
                     <div className="w-11 h-6 bg-gray-200 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600" />
                   </label>
