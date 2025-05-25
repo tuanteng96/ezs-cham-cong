@@ -22,7 +22,7 @@ export default async () => {
       //splitVendorChunkPlugin()
     ],
     root: SRC_DIR,
-    base: BASE,
+    base: "",
     publicDir: PUBLIC_DIR,
     experimental: {
       // renderBuiltUrl(filename, {

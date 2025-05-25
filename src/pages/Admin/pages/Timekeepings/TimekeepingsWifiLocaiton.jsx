@@ -13,9 +13,7 @@ import {
   Popover,
   useStore,
 } from "framework7-react";
-import {
-  ChevronLeftIcon,
-} from "@heroicons/react/24/outline";
+import { ChevronLeftIcon } from "@heroicons/react/24/outline";
 import { useMutation, useQueryClient } from "react-query";
 import ConfigsAPI from "@/api/Configs.api";
 import { toast } from "react-toastify";
@@ -26,6 +24,7 @@ function TimekeepingsWifiLocaiton({ f7route }) {
   const queryClient = useQueryClient();
 
   const StocksAll = useStore("StocksAll");
+  const Brand = useStore("Brand");
 
   const { control, handleSubmit, reset, setValue } = useForm({
     defaultValues: {
@@ -88,7 +87,11 @@ function TimekeepingsWifiLocaiton({ f7route }) {
             <ChevronLeftIcon className="w-6" />
           </Link>
         </NavLeft>
-        <NavTitle>Định vị - Wifi</NavTitle>
+        <NavTitle>
+          {Brand?.Global?.Admin?.an_cai_dai_dinh_vi
+            ? "Wifi chấm công"
+            : "Định vị - Wifi"}
+        </NavTitle>
         <div className="absolute h-[2px] w-full bottom-0 left-0 bg-[rgba(255,255,255,0.3)]"></div>
       </Navbar>
       <form
@@ -104,99 +107,112 @@ function TimekeepingsWifiLocaiton({ f7route }) {
                 key={item.id}
               >
                 <div className="flex items-center px-4 py-3.5 bg-gray-100 border-b text-[15px] font-medium">
-                  {item.Title}
+                  {item.Title === "Quản lý cơ sở"
+                    ? "Cơ sở tổng ( Công ty )"
+                    : item.Title}
                 </div>
                 <div className="p-4">
-                  <div className="mb-3.5 last:mb-0">
-                    <div className="mb-px font-light">Latitude</div>
-                    <Controller
-                      name={`Updated[${index}].Lat`}
-                      control={control}
-                      render={({ field, fieldState }) => (
-                        <Input
-                          className="[&_input]:rounded [&_input]:lowercase [&_input]:placeholder:normal-case"
-                          type="number"
-                          placeholder="Nhập Latitude"
-                          value={field.value}
-                          errorMessage={fieldState?.error?.message}
-                          errorMessageForce={fieldState?.invalid}
-                          onInput={field.onChange}
-                          onFocus={(e) =>
-                            KeyboardsHelper.setAndroid({
-                              Type: "body",
-                              Event: e,
-                            })
-                          }
-                          // clearButton={true}
+                  {!Brand?.Global?.Admin?.an_cai_dai_dinh_vi && (
+                    <>
+                      <div className="mb-3.5 last:mb-0">
+                        <div className="mb-px font-light">Latitude</div>
+                        <Controller
+                          name={`Updated[${index}].Lat`}
+                          control={control}
+                          render={({ field, fieldState }) => (
+                            <Input
+                              className="[&_input]:rounded [&_input]:lowercase [&_input]:placeholder:normal-case"
+                              type="number"
+                              placeholder="Nhập Latitude"
+                              value={field.value}
+                              errorMessage={fieldState?.error?.message}
+                              errorMessageForce={fieldState?.invalid}
+                              onInput={field.onChange}
+                              onFocus={(e) =>
+                                KeyboardsHelper.setAndroid({
+                                  Type: "body",
+                                  Event: e,
+                                })
+                              }
+                              // clearButton={true}
+                            />
+                          )}
                         />
-                      )}
-                    />
-                    <div className="mt-1.5 font-light text-[#999] text-[13px]">
-                      Latitude tại ví trị hiện tại vui lòng
-                      <span
-                        className="pl-1 font-normal underline text-primary"
-                        onClick={() => {
-                          PromHelpers.GET_LOCATION()
-                            .then(({ data }) => {
-                              setValue(`Updated[${index}].Lat`, data.latitude);
-                            })
-                            .catch((error) => {
-                              f7.dialog.alert(
-                                "Vui lòng bật vị trí của ứng dụng."
-                              );
-                            });
-                        }}
-                      >
-                        bấm vào đây
-                      </span>
-                      .
-                    </div>
-                  </div>
-                  <div className="mb-3.5 last:mb-0">
-                    <div className="mb-px font-light">Longitude</div>
-                    <Controller
-                      name={`Updated[${index}].Lng`}
-                      control={control}
-                      render={({ field, fieldState }) => (
-                        <Input
-                          className="[&_input]:rounded [&_input]:lowercase [&_input]:placeholder:normal-case"
-                          type="number"
-                          placeholder="Nhập Longitude"
-                          value={field.value}
-                          errorMessage={fieldState?.error?.message}
-                          errorMessageForce={fieldState?.invalid}
-                          onInput={field.onChange}
-                          onFocus={(e) =>
-                            KeyboardsHelper.setAndroid({
-                              Type: "body",
-                              Event: e,
-                            })
-                          }
-                          // clearButton={true}
+                        <div className="mt-1.5 font-light text-[#999] text-[13px]">
+                          Latitude tại ví trị hiện tại vui lòng
+                          <span
+                            className="pl-1 font-normal underline text-primary"
+                            onClick={() => {
+                              PromHelpers.GET_LOCATION()
+                                .then(({ data }) => {
+                                  setValue(
+                                    `Updated[${index}].Lat`,
+                                    data.latitude
+                                  );
+                                })
+                                .catch((error) => {
+                                  f7.dialog.alert(
+                                    "Vui lòng bật vị trí của ứng dụng."
+                                  );
+                                });
+                            }}
+                          >
+                            bấm vào đây
+                          </span>
+                          .
+                        </div>
+                      </div>
+                      <div className="mb-3.5 last:mb-0">
+                        <div className="mb-px font-light">Longitude</div>
+                        <Controller
+                          name={`Updated[${index}].Lng`}
+                          control={control}
+                          render={({ field, fieldState }) => (
+                            <Input
+                              className="[&_input]:rounded [&_input]:lowercase [&_input]:placeholder:normal-case"
+                              type="number"
+                              placeholder="Nhập Longitude"
+                              value={field.value}
+                              errorMessage={fieldState?.error?.message}
+                              errorMessageForce={fieldState?.invalid}
+                              onInput={field.onChange}
+                              onFocus={(e) =>
+                                KeyboardsHelper.setAndroid({
+                                  Type: "body",
+                                  Event: e,
+                                })
+                              }
+                              // clearButton={true}
+                            />
+                          )}
                         />
-                      )}
-                    />
-                    <div className="mt-1.5 font-light text-[#999] text-[13px]">
-                      Longitude tại ví trị hiện tại vui lòng
-                      <span
-                        className="pl-1 font-normal underline text-primary"
-                        onClick={() => {
-                          PromHelpers.GET_LOCATION()
-                            .then(({ data }) => {
-                              setValue(`Updated[${index}].Lng`, data.longitude);
-                            })
-                            .catch((error) => {
-                              f7.dialog.alert(
-                                "Vui lòng bật vị trí của ứng dụng."
-                              );
-                            });
-                        }}
-                      >
-                        bấm vào đây
-                      </span>
-                      .
-                    </div>
-                  </div>
+                        <div className="mt-1.5 font-light text-[#999] text-[13px]">
+                          Longitude tại ví trị hiện tại vui lòng
+                          <span
+                            className="pl-1 font-normal underline text-primary"
+                            onClick={() => {
+                              PromHelpers.GET_LOCATION()
+                                .then(({ data }) => {
+                                  setValue(
+                                    `Updated[${index}].Lng`,
+                                    data.longitude
+                                  );
+                                })
+                                .catch((error) => {
+                                  f7.dialog.alert(
+                                    "Vui lòng bật vị trí của ứng dụng."
+                                  );
+                                });
+                            }}
+                          >
+                            bấm vào đây
+                          </span>
+                          .
+                        </div>
+                      </div>
+                    </>
+                  )}
+
                   <div className="mb-3.5 last:mb-0">
                     <div className="mb-px font-light">Tên Wifi</div>
                     <Controller
@@ -278,10 +294,7 @@ function TimekeepingsWifiLocaiton({ f7route }) {
                         onClick={() => {
                           PromHelpers.GET_NETWORK_TYPE()
                             .then(({ data }) => {
-                              setValue(
-                                `Updated[${index}].WifiID`,
-                                data.BSSID
-                              );
+                              setValue(`Updated[${index}].WifiID`, data.BSSID);
                             })
                             .catch((error) => {
                               f7.dialog.alert(

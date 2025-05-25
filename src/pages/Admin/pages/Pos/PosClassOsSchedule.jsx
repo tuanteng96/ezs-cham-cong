@@ -589,6 +589,28 @@ function PosClassOsSchedule({ f7router, f7route }) {
                         : [],
                       Stock: data?.Class?.Stock,
                     });
+                  if (data.Teacher) {
+                    window?.noti27?.LOP_HOC &&
+                      window?.noti27?.LOP_HOC({
+                        type: "Hủy HLV khỏi lớp",
+                        Class: {
+                          ...data?.Class,
+                          TimeBegin: data.TimeBegin,
+                        },
+                        RefUserIds: data?.Teacher
+                          ? [
+                              {
+                                ID: data?.Teacher?.ID,
+                                FullName: data?.Teacher?.FullName,
+                              },
+                            ]
+                          : [],
+                        MemberIds: rs?.Member?.Lists
+                          ? rs?.Member?.Lists.map((x) => x.Member)
+                          : [],
+                        Stock: data?.Class?.Stock,
+                      });
+                  }
                 } else {
                   window?.noti27?.LOP_HOC &&
                     window?.noti27?.LOP_HOC({

@@ -1230,6 +1230,7 @@ function EditOsCalendar({ f7route, f7router }) {
                       <div className="font-light text-gray-600">Chưa có</div>
                     )}
                   </div>
+
                   <div className="hidden">
                     <Controller
                       name="Staffs"
@@ -1245,6 +1246,18 @@ function EditOsCalendar({ f7route, f7router }) {
                           value={field.value}
                           label="Chọn nhân viên"
                           onChange={(val) => {
+                            if (Brand?.Global?.Admin?.so_luong_nv_buoi_dv) {
+                              if (
+                                field.value &&
+                                field.value.length >=
+                                  Brand?.Global?.Admin?.so_luong_nv_buoi_dv
+                              ) {
+                                toast.error(
+                                  `Chỉ có thể chọn tối đa ${Brand?.Global?.Admin?.so_luong_nv_buoi_dv} nhân viên.`
+                                );
+                                return;
+                              }
+                            }
                             field.onChange(val);
 
                             if (appPOS) {

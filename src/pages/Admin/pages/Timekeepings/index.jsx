@@ -279,7 +279,9 @@ function Timekeepings({ f7route }) {
                 popoverClose
                 noLinkClass
               >
-                Định vị - Wifi
+                {Brand?.Global?.Admin?.an_cai_dai_dinh_vi
+                  ? "Wifi chấm công"
+                  : "Định vị - Wifi"}
               </Link>
             </div>
             <div className="flex flex-col py-2">
