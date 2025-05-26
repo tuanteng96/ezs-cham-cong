@@ -780,6 +780,14 @@ function EditOsCalendar({ f7route, f7router }) {
     }
   };
 
+  window.EditOsCalendarReload = () =>
+    new Promise(async (resolve, reject) => {
+      await OsImages.refetch();
+      await Os.refetch();
+      await Rooms.refetch();
+      resolve({ success: true });
+    });
+
   return (
     <Page
       className="bg-white"

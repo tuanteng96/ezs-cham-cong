@@ -425,6 +425,28 @@ function PosClientManage({ f7route, f7router }) {
     });
   };
 
+  window.AlertCheckOut = (Text) => {
+    f7.dialog.alert(Text, () => {
+      toast.success(Text);
+      Client.refetch();
+      Order.refetch();
+      ServicesUse.refetch();
+      queryClient.invalidateQueries(["InvoiceProcessings"]);
+      f7router.navigate("/admin/pos/clients/", {
+        clearPreviousHistory: true,
+      });
+    });
+  };
+
+  window.PosClientManageReload = () =>
+    new Promise(async (resolve, reject) => {
+      await Client.refetch();
+      await Order.refetch();
+      await ServicesUse.refetch();
+      await queryClient.invalidateQueries(["InvoiceProcessings"]);
+      resolve({ success: true });
+    });
+
   const onCheckOut = () => {
     f7.dialog.confirm("Xác nhận kết thúc cho khách hàng này ?", () => {
       f7.dialog.preloader("Đang thực hiện ...");
