@@ -88,7 +88,7 @@ function PosClientWallet({ f7router, f7route }) {
       case item.Source === "CHINH_SUA_SO_BUOI_DV":
         return "Hoàn tiền khi hoàn buổi dịch vụ";
       case item.Type === "MUA_HANG" &&
-        item?.Desc.indexOf("KHAU_TRU_TRA_HANG") === -1:
+        item?.Desc.indexOf("KHAU_TRU_TRA_HANG") === -1 || item?.Type === "MUA_HANG_DANHMUC" || item?.Type === "MUA_HANG_SANPHAM":
         return "Tích lũy mua hàng";
       case item.Type === "MUA_HANG" &&
         item?.Desc.indexOf("KHAU_TRU_TRA_HANG") > -1:
@@ -98,7 +98,7 @@ function PosClientWallet({ f7router, f7route }) {
       case item.SumType === "TRA_HANG_PHI_VI":
         return "Phí dịch vụ trả hàng";
       case item.Type === "GIOI_THIEU" &&
-        item?.Desc.indexOf("KHAU_TRU_TRA_HANG") === -1:
+        item?.Desc.indexOf("KHAU_TRU_TRA_HANG") === -1  || item?.Type === "GIOI_THIEU_DANHMUC" || item?.Type === "GIOI_THIEU_SANPHAM":
         return "Hoa hồng giới thiệu";
       case item.Type === "GIOI_THIEU" &&
         item?.Desc.indexOf("KHAU_TRU_TRA_HANG") > -1:
