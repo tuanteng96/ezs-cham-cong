@@ -64,6 +64,7 @@ function PickerEditStudent({ children, data, refetch, params }) {
         Places: data?.Places || "",
         TotalBefore: data?.TotalBefore,
         Tags: data?.Tags || "",
+        DayStatus: data.DayStatus || ''
       });
     }
   }, [data, visible]);
@@ -83,13 +84,15 @@ function PickerEditStudent({ children, data, refetch, params }) {
       return rs;
     },
   });
-
+  
   const onSubmit = (values) => {
     f7.dialog.preloader("Đang thực hiện ...");
     let newValues = {
       ...values,
       Status: values?.Status?.value || "",
+      DayStatus: !values?.ID ? moment().format('YYYY-MM-DD HH:mm') : values?.Status?.value !== data?.Status ? moment().format('YYYY-MM-DD HH:mm') : values.DayStatus
     };
+    
     editMutation.mutate(
       { edit: [newValues] },
       {

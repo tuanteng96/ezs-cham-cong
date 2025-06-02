@@ -51,7 +51,7 @@ function ClientsAdmin({ f7router }) {
       const { data } = await AdminAPI.listClients({
         ...filters,
         pi: pageParam,
-        ps: 20,
+        ps: 12,
         Token: Auth.token,
         StockID:
           !Brand?.Global?.Admin?.cho_phep_tim_khac_diem && !isAdmin

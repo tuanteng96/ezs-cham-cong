@@ -163,10 +163,12 @@ function PosClientManage({ f7route, f7router }) {
         data: bodyFormData,
         Token: Auth.token,
       });
+
       let Services = await appPOS.getOsList({ mid: f7route?.params?.id });
       Services = Services
         ? Services.filter((x) => x.Product?.IsAddFee !== 1)
         : [];
+
       let newRs = {
         ...data?.data,
       };
@@ -197,7 +199,7 @@ function PosClientManage({ f7route, f7router }) {
         return newObj;
       });
 
-      return newRs || null;
+      return newRs;
     },
     onSuccess: () => {
       setIsLoading(false);
@@ -208,12 +210,14 @@ function PosClientManage({ f7route, f7router }) {
   const ServicesUse = useQuery({
     queryKey: ["ServiceUseManageID", { id: f7route?.params?.id }],
     queryFn: async () => {
-      let data = await appPOS.getCurrentOs({
-        mid: f7route?.params?.id,
-        chk: Client?.data?.CheckIn || null,
-      });
+      let data =
+        (await appPOS) &&
+        appPOS.getCurrentOs({
+          mid: f7route?.params?.id,
+          chk: Client?.data?.CheckIn || null,
+        });
 
-      return data
+      return data && Array.isArray(data)
         ? data.map((x) => ({
             ...x,
             SalaryParseJSON:
@@ -277,7 +281,7 @@ function PosClientManage({ f7route, f7router }) {
         }
       }
       await Client.refetch();
-      await Order.refetch();
+      //await Order.refetch();
       await ServicesUse.refetch();
       await queryClient.invalidateQueries(["InvoiceProcessings"]);
       return data;

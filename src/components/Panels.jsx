@@ -6,11 +6,8 @@ import {
   PencilSquareIcon,
   PowerIcon,
   PresentationChartBarIcon,
-  BookOpenIcon,
   TvIcon,
   ChevronDownIcon,
-  CodeBracketIcon,
-  RectangleStackIcon,
   Squares2X2Icon,
   UserGroupIcon,
 } from "@heroicons/react/24/outline";
@@ -70,21 +67,28 @@ function Panels(props) {
   const actionsToPopover = useRef(null);
   const buttonToPopoverWrapper = useRef(null);
 
-  const { notification, report, cong_ca, article, pos_mng, printConfig, usrmng } =
-    RolesHelpers.useRoles({
-      nameRoles: [
-        "notification",
-        "report",
-        "cong_ca",
-        "article",
-        "pos_mng",
-        "printConfig",
-        "usrmng"
-      ],
-      auth: Auth,
-      CrStocks,
-    });
-    
+  const {
+    notification,
+    report,
+    cong_ca,
+    article,
+    pos_mng,
+    printConfig,
+    usrmng,
+  } = RolesHelpers.useRoles({
+    nameRoles: [
+      "notification",
+      "report",
+      "cong_ca",
+      "article",
+      "pos_mng",
+      "printConfig",
+      "usrmng",
+    ],
+    auth: Auth,
+    CrStocks,
+  });
+
   const [Menus, setMenus] = useState([]);
 
   useEffect(() => {
@@ -107,33 +111,6 @@ function Panels(props) {
         Icon: <HomeIcon className="w-5" />,
       },
       {
-        Title: "Quản lý chấm công",
-        Link: "/admin/timekeepings/",
-        ActiveLink: ["/admin/timekeepings/"],
-        active: false,
-        Id: f7.utils.id("xxxx-xxxx-xxxx-xxxx"),
-        hasRight: cong_ca?.hasRight,
-        Icon: <RectangleStackIcon className="w-5" />,
-      },
-      {
-        Title: "Quản lý nhân viên",
-        Link: "/admin/members/",
-        ActiveLink: ["/admin/members/"],
-        active: false,
-        Id: f7.utils.id("xxxx-xxxx-xxxx-xxxx"),
-        hasRight: usrmng?.hasRight,
-        Icon: <UserGroupIcon className="w-5" />,
-      },
-      {
-        Title: "Quản lý lớp",
-        Link: "/osclass/",
-        ActiveLink: ["/osclass/"],
-        active: false,
-        Id: f7.utils.id("xxxx-xxxx-xxxx-xxxx"),
-        hasRight: Brand?.Global?.Admin?.lop_hoc_pt,
-        Icon: <Squares2X2Icon className="w-5" />,
-      },
-      {
         Title: "Thu ngân",
         Link: "/admin/pos/clients/",
         ActiveLink: [
@@ -146,6 +123,72 @@ function Panels(props) {
         Id: f7.utils.id("xxxx-xxxx-xxxx-xxxx"),
         Icon: <TvIcon className="w-5" />,
         hasRight: pos_mng?.hasRight || false,
+      },
+      {
+        Title: "Quản lý nhân viên",
+        ActiveLink: ["/admin/members/", "/admin/timekeepings/"],
+        active: false,
+        Id: f7.utils.id("xxxx-xxxx-xxxx-xxxx"),
+        hasRight: usrmng?.hasRight || cong_ca?.hasRight || false,
+        Icon: <UserGroupIcon className="w-5" />,
+        SubMenu: [
+          {
+            Title: "Danh sách nhân viên",
+            Link: "/admin/members/",
+            active: false,
+            hasRight: usrmng?.hasRight,
+          },
+          {
+            Title: "Quản lý chấm công",
+            Link: "/admin/timekeepings/",
+            active: false,
+            hasRight: cong_ca?.hasRight,
+          },
+        ],
+      },
+      {
+        Title: "Quản lý lớp",
+        ActiveLink: ["/osclass/", "/courses/"],
+        active: false,
+        Id: f7.utils.id("xxxx-xxxx-xxxx-xxxx"),
+        hasRight: true,
+        Icon: <Squares2X2Icon className="w-5" />,
+        SubMenu: [
+          {
+            Title: "Quản lý lớp tập",
+            Link: "/osclass/",
+            active: false,
+            hasRight: Brand?.Global?.Admin?.lop_hoc_pt,
+          },
+          {
+            Title: "Quản lý đào tạo",
+            Link: "/courses/",
+            active: false,
+            hasRight: true,
+          },
+        ],
+      },
+      {
+        Title: "Báo cáo",
+        ActiveLink: ["/report/", "/report-preview/"],
+        active: false,
+        Id: f7.utils.id("xxxx-xxxx-xxxx-xxxx"),
+        hasRight: report?.hasRight || true,
+        Icon: <PresentationChartBarIcon className="w-5" />,
+        SubMenu: [
+          {
+            Title: "Tổng quan",
+            Link: "/report-preview/",
+            active: false,
+            hasRight: true,
+          },
+          {
+            Title: "Chi tiết",
+            Link: "/report/",
+            active: false,
+            hasRight: true,
+          },
+        ],
       },
       {
         Title: "Gửi tin nhắn APP",
@@ -188,6 +231,22 @@ function Panels(props) {
         active: false,
         Id: f7.utils.id("xxxx-xxxx-xxxx-xxxx"),
         hasRight: article?.hasRight || false,
+      },
+      {
+        Title: "Tiện ích",
+        Icon: <EllipsisHorizontalCircleIcon className="w-5" />,
+        ActiveLink: ["/admin/utility/", "/admin/utility/printerip-setting/"],
+        SubMenu: [
+          {
+            Title: "Cài đặt IP máy in",
+            Link: "/admin/utility/printerip-setting/",
+            active: false,
+            hasRight: printConfig?.hasRight || false,
+          },
+        ],
+        active: false,
+        Id: f7.utils.id("xxxx-xxxx-xxxx-xxxx"),
+        hasRight: cong_ca?.hasRight || printConfig?.hasRight || false,
       },
       // {
       //   Title: "Chấm công",
@@ -244,53 +303,6 @@ function Panels(props) {
       //   Id: f7.utils.id("xxxx-xxxx-xxxx-xxxx"),
       //   hasRight: true,
       // },
-      {
-        Title: "Báo cáo",
-        ActiveLink: ["/report/", "/report-preview/"],
-        active: false,
-        Id: f7.utils.id("xxxx-xxxx-xxxx-xxxx"),
-        hasRight: report?.hasRight || true,
-        Icon: <PresentationChartBarIcon className="w-5" />,
-        SubMenu: [
-          {
-            Title: "Tổng quan",
-            Link: "/report-preview/",
-            active: false,
-            hasRight: true,
-          },
-          {
-            Title: "Chi tiết",
-            Link: "/report/",
-            active: false,
-            hasRight: true,
-          },
-        ],
-      },
-      {
-        Title: "Đào tạo",
-        Link: "/courses/",
-        ActiveLink: ["/courses/"],
-        active: false,
-        Id: f7.utils.id("xxxx-xxxx-xxxx-xxxx"),
-        hasRight: true,
-        Icon: <BookOpenIcon className="w-5" />,
-      },
-      {
-        Title: "Tiện ích",
-        Icon: <EllipsisHorizontalCircleIcon className="w-5" />,
-        ActiveLink: ["/admin/utility/", "/admin/utility/printerip-setting/"],
-        SubMenu: [
-          {
-            Title: "Cài đặt IP máy in",
-            Link: "/admin/utility/printerip-setting/",
-            active: false,
-            hasRight: printConfig?.hasRight || false,
-          },
-        ],
-        active: false,
-        Id: f7.utils.id("xxxx-xxxx-xxxx-xxxx"),
-        hasRight: cong_ca?.hasRight || printConfig?.hasRight || false,
-      },
       // {
       //   Title: "Debug",
       //   Link: "/debug/",
@@ -399,6 +411,9 @@ function Panels(props) {
       containerEl="#panel-page"
       id="panel-app"
       onPanelOpen={onPanelOpen}
+      // onPanelClosed={() => {
+      //   f7.panel.destroy();
+      // }}
     >
       <div className="flex flex-col h-full">
         <div className="flex items-center p-4 bg-white border-b">

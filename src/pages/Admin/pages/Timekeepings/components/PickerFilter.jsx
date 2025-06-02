@@ -1,13 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "framer-motion";
-import { CheckIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import { XMarkIcon } from "@heroicons/react/24/outline";
 import { Controller, useForm } from "react-hook-form";
-import { Button, Input, useStore } from "framework7-react";
-import clsx from "clsx";
-import KeyboardsHelper from "@/helpers/KeyboardsHelper";
+import { Button, useStore } from "framework7-react";
 import { DatePicker, SelectPicker } from "@/partials/forms";
 import { RolesHelpers } from "@/helpers/RolesHelpers";
+import { SelectMembers } from "@/partials/forms/select";
 
 function PickerFilter({ children, initialValues, onChange }) {
   const [visible, setVisible] = useState(false);
@@ -21,11 +20,12 @@ function PickerFilter({ children, initialValues, onChange }) {
     CrStocks,
   });
 
-  const { control, handleSubmit, reset } = useForm({
+  const { control, handleSubmit, reset, watch } = useForm({
     defaultValues: {
       StockID: "",
       key: "",
       CrDate: "",
+      UserID: "",
     },
   });
 
@@ -81,47 +81,6 @@ function PickerFilter({ children, initialValues, onChange }) {
                   </div>
                   <div className="px-4 overflow-auto">
                     <div className="mb-3.5 last:mb-0">
-                      <div className="mb-1">Nhân viên</div>
-                      <Controller
-                        name="key"
-                        control={control}
-                        render={({ field }) => (
-                          <Input
-                            className="[&_input]:rounded [&_input]:placeholder:normal-case [&_input]:text-[15px]"
-                            type="text"
-                            placeholder="Nhập tên nhân viên"
-                            value={field.value}
-                            clearButton={true}
-                            onInput={field.onChange}
-                            onFocus={(e) =>
-                              KeyboardsHelper.setAndroid({
-                                Type: "body",
-                                Event: e,
-                              })
-                            }
-                          />
-                        )}
-                      />
-                    </div>
-                    <div className="mb-3.5 last:mb-0">
-                      <div className="mb-px font-light">Ngày</div>
-                      <Controller
-                        name="CrDate"
-                        control={control}
-                        render={({ field, fieldState }) => (
-                          <DatePicker
-                            format="DD-MM-YYYY"
-                            errorMessage={fieldState?.error?.message}
-                            errorMessageForce={fieldState?.invalid}
-                            value={field.value}
-                            onChange={field.onChange}
-                            placeholder="Chọn thời gian"
-                            showHeader
-                          />
-                        )}
-                      />
-                    </div>
-                    <div className="mb-3.5 last:mb-0">
                       <div className="mb-1">Cơ sở</div>
                       <Controller
                         name="StockID"
@@ -145,6 +104,43 @@ function PickerFilter({ children, initialValues, onChange }) {
                             }}
                             errorMessage={fieldState?.error?.message}
                             errorMessageForce={fieldState?.invalid}
+                          />
+                        )}
+                      />
+                    </div>
+                    <div className="mb-3.5 last:mb-0">
+                      <div className="mb-1">Nhân viên</div>
+                      <Controller
+                        name="UserID"
+                        control={control}
+                        render={({ field }) => (
+                          <SelectMembers
+                            StockID={watch().StockID?.value || ""}
+                            placeholderInput="Tên nhân viên"
+                            placeholder="Chọn nhân viên"
+                            value={field.value}
+                            label="Chọn nhân viên"
+                            onChange={(val) => {
+                              field.onChange(val);
+                            }}
+                          />
+                        )}
+                      />
+                    </div>
+                    <div className="mb-3.5 last:mb-0">
+                      <div className="mb-px font-light">Ngày</div>
+                      <Controller
+                        name="CrDate"
+                        control={control}
+                        render={({ field, fieldState }) => (
+                          <DatePicker
+                            format="DD-MM-YYYY"
+                            errorMessage={fieldState?.error?.message}
+                            errorMessageForce={fieldState?.invalid}
+                            value={field.value}
+                            onChange={field.onChange}
+                            placeholder="Chọn thời gian"
+                            showHeader
                           />
                         )}
                       />

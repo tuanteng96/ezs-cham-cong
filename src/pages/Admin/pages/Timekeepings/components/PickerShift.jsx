@@ -118,9 +118,9 @@ function PickerShift({ children, initialValues, data }) {
     if (!initialValues) {
       newValues.push(values);
     } else {
-      let index = newValues.findIndex(x => x.ID === initialValues.ID)
-      if(index > -1) {
-        newValues[index] = values
+      let index = newValues.findIndex((x) => x.ID === initialValues.ID);
+      if (index > -1) {
+        newValues[index] = values;
       }
     }
 
@@ -193,6 +193,13 @@ function PickerShift({ children, initialValues, data }) {
       <>
         {children({
           open: () => setVisible(true),
+          openSetup: () => {
+            reset({
+              ...initialValues,
+              Title: initialValues?.Name || "",
+            });
+            onCreate();
+          },
         })}
         {visible &&
           createPortal(
@@ -217,7 +224,9 @@ function PickerShift({ children, initialValues, data }) {
                   autoComplete="off"
                 >
                   <div className="relative flex justify-center px-4 py-5 text-xl font-semibold text-center">
-                    {initialValues ? "Chỉnh sửa ca làm việc" : "Tạo mới ca làm việc"}
+                    {initialValues
+                      ? "Chỉnh sửa ca làm việc"
+                      : "Tạo mới ca làm việc"}
                     <div
                       className="absolute top-0 right-0 flex items-center justify-center w-12 h-full"
                       onClick={close}
@@ -318,7 +327,7 @@ function PickerShift({ children, initialValues, data }) {
                       <XMarkIcon className="w-6" />
                     </div>
                   </div>
-                  <div className="px-4 overflow-auto">
+                  <div className="px-4 pb-4 overflow-auto">
                     {watch().flexible && (
                       <>
                         {fieldsOptions &&
@@ -327,36 +336,71 @@ function PickerShift({ children, initialValues, data }) {
                               className="border rounded shadow mb-3.5 last:mb-0 p-4"
                               key={item.id}
                             >
-                              <div className="mb-3.5 last:mb-0">
-                                <div className="mb-1">Tên ca</div>
-                                <Controller
-                                  name={`Options[${index}].Title`}
-                                  control={control}
-                                  render={({
-                                    field: { ref, ...field },
-                                    fieldState,
-                                  }) => (
-                                    <Input
-                                      errorMessage={fieldState?.error?.message}
-                                      errorMessageForce={fieldState?.invalid}
-                                      className="[&_input]:rounded [&_input]:placeholder:normal-case [&_input]:text-[15px]"
-                                      type="text"
-                                      placeholder="Nhập tên ca"
-                                      value={field.value}
-                                      clearButton={true}
-                                      onInput={field.onChange}
-                                      onFocus={(e) =>
-                                        KeyboardsHelper.setAndroid({
-                                          Type: "body",
-                                          Event: e,
-                                        })
-                                      }
+                              <div className="mb-3.5 last:mb-0 flex gap-3">
+                                <div className="flex-1">
+                                  <div className="mb-1">Tên ca</div>
+                                  <Controller
+                                    name={`Options[${index}].Title`}
+                                    control={control}
+                                    render={({
+                                      field: { ref, ...field },
+                                      fieldState,
+                                    }) => (
+                                      <Input
+                                        errorMessage={
+                                          fieldState?.error?.message
+                                        }
+                                        errorMessageForce={fieldState?.invalid}
+                                        className="[&_input]:rounded [&_input]:placeholder:normal-case [&_input]:text-[15px]"
+                                        type="text"
+                                        placeholder="Nhập tên ca"
+                                        value={field.value}
+                                        clearButton={true}
+                                        onInput={field.onChange}
+                                        onFocus={(e) =>
+                                          KeyboardsHelper.setAndroid({
+                                            Type: "body",
+                                            Event: e,
+                                          })
+                                        }
+                                      />
+                                    )}
+                                  />
+                                </div>
+                                <div className="w-[100px]">
+                                  <div className="mb-1">Số công</div>
+                                  <div>
+                                    <Controller
+                                      name={`Options[${index}].Value`}
+                                      control={control}
+                                      render={({
+                                        field: { ref, ...field },
+                                        fieldState,
+                                      }) => (
+                                        <NumericFormat
+                                          className={clsx(
+                                            "w-full input-number-format border shadow-[0_4px_6px_0_rgba(16,25,40,.06)] rounded py-3 px-4 focus:border-primary h-[48.5px]",
+                                            fieldState?.invalid
+                                              ? "border-danger"
+                                              : "border-[#d5d7da]"
+                                          )}
+                                          type="text"
+                                          autoComplete="off"
+                                          thousandSeparator={false}
+                                          placeholder="Nhập số lượng"
+                                          value={field.value}
+                                          onValueChange={(val) =>
+                                            field.onChange(val.floatValue || "")
+                                          }
+                                        />
+                                      )}
                                     />
-                                  )}
-                                />
+                                  </div>
+                                </div>
                               </div>
+
                               <div className="mb-3.5 last:mb-0">
-                                <div className="flex">
+                                <div className="flex items-end gap-3">
                                   <div className="flex-1">
                                     <div className="mb-px font-light">
                                       Bắt đầu lúc
@@ -403,9 +447,6 @@ function PickerShift({ children, initialValues, data }) {
                                         />
                                       )}
                                     />
-                                  </div>
-                                  <div className="flex items-center justify-center w-12 pt-5 text-gray-500">
-                                    <ArrowRightIcon className="w-5" />
                                   </div>
                                   <div className="flex-1">
                                     <div className="mb-px font-light">
@@ -454,66 +495,38 @@ function PickerShift({ children, initialValues, data }) {
                                       )}
                                     />
                                   </div>
+                                  <button
+                                    className="flex items-center justify-center h-12 text-white rounded w-11 bg-danger disabled:opacity-40"
+                                    type="button"
+                                    onClick={() => removeOptions(index)}
+                                    disabled={
+                                      !fieldsOptions ||
+                                      fieldsOptions.length === 1
+                                    }
+                                  >
+                                    <TrashIcon className="w-5" />
+                                  </button>
                                 </div>
-                              </div>
-                              <div className="mb-3.5 last:mb-0">
-                                <div className="mb-px">Số công</div>
-                                <div>
-                                  <Controller
-                                    name={`Options[${index}].Value`}
-                                    control={control}
-                                    render={({
-                                      field: { ref, ...field },
-                                      fieldState,
-                                    }) => (
-                                      <NumericFormat
-                                        className={clsx(
-                                          "w-full input-number-format border shadow-[0_4px_6px_0_rgba(16,25,40,.06)] rounded py-3 px-4 focus:border-primary",
-                                          fieldState?.invalid
-                                            ? "border-danger"
-                                            : "border-[#d5d7da]"
-                                        )}
-                                        type="text"
-                                        autoComplete="off"
-                                        thousandSeparator={false}
-                                        placeholder="Nhập số lượng"
-                                        value={field.value}
-                                        onValueChange={(val) =>
-                                          field.onChange(val.floatValue || "")
-                                        }
-                                      />
-                                    )}
-                                  />
-                                </div>
-                              </div>
-                              <div className="mb-3.5 last:mb-0 flex justify-center gap-2">
-                                <button
-                                  className="flex items-center justify-center text-white rounded w-9 h-9 bg-success"
-                                  type="button"
-                                  onClick={() => {
-                                    appendOptions({
-                                      Title: "",
-                                      TimeFrom: "06:00",
-                                      TimeTo: "18:00",
-                                      Value: 1,
-                                    });
-                                  }}
-                                >
-                                  <PlusIcon className="w-5" />
-                                </button>
-                                <button
-                                  className="flex items-center justify-center text-white rounded w-9 h-9 bg-danger disabled:opacity-40"
-                                  type="button"
-                                  onClick={() => removeOptions(index)}
-                                  disabled={
-                                    !fieldsOptions || fieldsOptions.length === 1
-                                  }
-                                >
-                                  <TrashIcon className="w-5" />
-                                </button>
                               </div>
                             </div>
                           ))}
+                        <div className="flex justify-center">
+                          <button
+                            className="flex items-center justify-center text-white rounded h-9 bg-success w-[200px]"
+                            type="button"
+                            onClick={() => {
+                              appendOptions({
+                                Title: "",
+                                TimeFrom: "06:00",
+                                TimeTo: "18:00",
+                                Value: 1,
+                              });
+                            }}
+                          >
+                            <PlusIcon className="w-5 mr-1" />
+                            Thêm khung giờ làm
+                          </button>
+                        </div>
                       </>
                     )}
                     {!watch().flexible && (

@@ -433,7 +433,7 @@ function PickerEditProd({ children, item, CheckInID, MemberID, Order }) {
                                     KeyboardsHelper.setAndroid({
                                       Type: "modal-scrollbar",
                                       Event: e,
-                                      success: field.onBlur
+                                      success: field.onBlur,
                                     })
                                   }
                                 />
@@ -489,7 +489,7 @@ function PickerEditProd({ children, item, CheckInID, MemberID, Order }) {
                                     KeyboardsHelper.setAndroid({
                                       Type: "modal-scrollbar",
                                       Event: e,
-                                      success: field.onBlur
+                                      success: field.onBlur,
                                     })
                                   }
                                 />
@@ -519,10 +519,12 @@ function PickerEditProd({ children, item, CheckInID, MemberID, Order }) {
                       disabled={
                         deleteMutation.isLoading ||
                         updateMutation.isLoading ||
-                        (!Brand?.Global?.Admin
-                          ?.Chinh_sua_don_hang_da_thanh_toan &&
-                          (Order?.CPayed || Order?.MPayed) &&
-                          !adminTools_byStock?.hasRight)
+                        (Brand?.Global?.Admin?.Khong_cho_xoa_sp_don_hang
+                          ? !adminTools_byStock?.hasRight
+                          : !Brand?.Global?.Admin
+                              ?.Chinh_sua_don_hang_da_thanh_toan &&
+                            (Order?.CPayed || Order?.MPayed) &&
+                            !adminTools_byStock?.hasRight)
                       }
                       onClick={onDelete}
                     >

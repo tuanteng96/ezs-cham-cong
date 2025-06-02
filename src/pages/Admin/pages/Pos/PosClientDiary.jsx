@@ -933,7 +933,7 @@ function PosClientDiary({ f7router, f7route }) {
                                           </div>
                                           <div className="mt-2">
                                             <div className="mb-1 font-medium text-primary">
-                                              {item.ProdTitle}
+                                              {item.ProdTitle} {item?.Root2Title ? <>( {item.Root2Title} )</> : <></>}
                                             </div>
                                             <div className="text-gray-500">
                                               {item.ProdService ||

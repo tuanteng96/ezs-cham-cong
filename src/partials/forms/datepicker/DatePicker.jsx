@@ -205,13 +205,29 @@ function DatePicker({
                       milliseconds,
                     }) => {
                       let isSet = true;
+                      let endOfMonth = moment()
+                        .set({
+                          years: years || moment(new Date()).format("YYYY"),
+                          months: months
+                            ? Number(months) - 1
+                            : moment(new Date()).format("M"),
+                          date: "01",
+                        })
+                        .endOf("month")
+                        .format("DD");
+
+                      let day = date || moment(new Date()).format("DD");
+                      if (endOfMonth && Number(day) > Number(endOfMonth)) {
+                        day = (Number(day) - 1).toString();
+                      }
+
                       if (minDate) {
                         let newValue = moment({
                           years: years || moment(new Date()).format("YYYY"),
                           months: months
                             ? Number(months) - 1
                             : moment(new Date()).format("M"),
-                          date: date || moment(new Date()).format("DD"),
+                          date: day,
                           hours: hours || moment(new Date()).format("H"),
                           minutes: minutes || moment(new Date()).format("mm"),
                           seconds: seconds || moment(new Date()).format("ss"),
@@ -228,7 +244,7 @@ function DatePicker({
                             months: months
                               ? Number(months) - 1
                               : moment(new Date()).format("M"),
-                            date: date || moment(new Date()).format("DD"),
+                            date: day,
                             hours: hours || moment(new Date()).format("H"),
                             minutes: minutes || moment(new Date()).format("mm"),
                             seconds: seconds || moment(new Date()).format("ss"),

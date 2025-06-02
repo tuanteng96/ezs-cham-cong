@@ -26,6 +26,7 @@ var pIndex = 0;
 function PrinterOrder({ f7route }) {
   const Auth = useStore("Auth");
   const Brand = useStore("Brand");
+  const StocksAll = useStore("StocksAll");
 
   const CrStocks = useStore("CrStocks");
 
@@ -90,6 +91,7 @@ function PrinterOrder({ f7route }) {
       let configs = await ConfigsAPI.getValue(
         "MA_QRCODE_NGAN_HANG,Bill.Title,Bill.Footer"
       );
+
       let obj = {
         BillTitle: "",
         BillFooter: "",
@@ -102,6 +104,20 @@ function PrinterOrder({ f7route }) {
         let Banks = JSON.parse(configs?.data?.data[2]?.Value);
         if (Banks && Banks?.ngan_hang && Banks?.ngan_hang.length > 0) {
           obj.ngan_hang = Banks?.ngan_hang[0];
+        }
+      }
+      if (Brand?.Global?.Admin?.PrintToStockID && data.data?.OrderEnt?.Stock) {
+        let index = StocksAll.findIndex(
+          (x) => x.ID === data.data?.OrderEnt?.Stock?.ID
+        );
+        if (index > -1) {
+          obj.BillTitle = StocksAll[index].Title;
+          if (StocksAll[index].LinkSEO) {
+            obj.BillPhone = StocksAll[index].LinkSEO;
+          }
+          if (StocksAll[index].Desc) {
+            obj.BillAddress = StocksAll[index].Desc;
+          }
         }
       }
       return data?.data
@@ -347,11 +363,20 @@ function PrinterOrder({ f7route }) {
               <div className="mb-px text-base font-bold uppercase">
                 {Order?.data?.BillTitle || Order?.data?.SysConfig?.BillTitle}
               </div>
-              <div
-                dangerouslySetInnerHTML={{
-                  __html: Order?.data?.BillAddress,
-                }}
-              ></div>
+              {Order?.data?.SysConfig?.BillPhone ||
+              Order?.data?.SysConfig?.BillAddress ? (
+                <div>
+                  <div>{Order?.data?.SysConfig?.BillAddress || 'Chưa có'}</div>
+                  <div>Hotline: {Order?.data?.SysConfig?.BillPhone || 'Chưa có'}</div>
+                </div>
+              ) : (
+                <div
+                  dangerouslySetInnerHTML={{
+                    __html: Order?.data?.BillAddress,
+                  }}
+                ></div>
+              )}
+
               <h1 className="mt-2 text-base font-bold uppercase">
                 Hóa đơn bán hàng
               </h1>

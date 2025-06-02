@@ -13,18 +13,26 @@ import {
   Page,
   useStore,
 } from "framework7-react";
-import React, { useState } from "react";
+import React from "react";
 import PromHelpers from "@/helpers/PromHelpers";
 import { useQuery } from "react-query";
-import AdminAPI from "@/api/Admin.api";
 import StringHelpers from "@/helpers/StringHelpers";
 import moment from "moment";
 import clsx from "clsx";
 import NoFound from "@/components/NoFound";
 import { PickerAddEditWallet } from "./components";
+import { RolesHelpers } from "@/helpers/RolesHelpers";
 
 function PosClientWallet({ f7router, f7route }) {
   let Auth = useStore("Auth");
+  let Brand = useStore("Brand");
+  let CrStocks = useStore("CrStocks");
+
+  const { adminTools_byStock } = RolesHelpers.useRoles({
+    nameRoles: ["adminTools_byStock"],
+    auth: Auth,
+    CrStocks,
+  });
 
   const { data, isLoading } = useQuery({
     queryKey: ["ClientWalletID", { ID: f7route?.params?.id }],
@@ -87,8 +95,10 @@ function PosClientWallet({ f7router, f7route }) {
         return "Trừ ví";
       case item.Source === "CHINH_SUA_SO_BUOI_DV":
         return "Hoàn tiền khi hoàn buổi dịch vụ";
-      case item.Type === "MUA_HANG" &&
-        item?.Desc.indexOf("KHAU_TRU_TRA_HANG") === -1 || item?.Type === "MUA_HANG_DANHMUC" || item?.Type === "MUA_HANG_SANPHAM":
+      case (item.Type === "MUA_HANG" &&
+        item?.Desc.indexOf("KHAU_TRU_TRA_HANG") === -1) ||
+        item?.Type === "MUA_HANG_DANHMUC" ||
+        item?.Type === "MUA_HANG_SANPHAM":
         return "Tích lũy mua hàng";
       case item.Type === "MUA_HANG" &&
         item?.Desc.indexOf("KHAU_TRU_TRA_HANG") > -1:
@@ -97,8 +107,10 @@ function PosClientWallet({ f7router, f7route }) {
         return "Hoàn tiền khi trả hàng";
       case item.SumType === "TRA_HANG_PHI_VI":
         return "Phí dịch vụ trả hàng";
-      case item.Type === "GIOI_THIEU" &&
-        item?.Desc.indexOf("KHAU_TRU_TRA_HANG") === -1  || item?.Type === "GIOI_THIEU_DANHMUC" || item?.Type === "GIOI_THIEU_SANPHAM":
+      case (item.Type === "GIOI_THIEU" &&
+        item?.Desc.indexOf("KHAU_TRU_TRA_HANG") === -1) ||
+        item?.Type === "GIOI_THIEU_DANHMUC" ||
+        item?.Type === "GIOI_THIEU_SANPHAM":
         return "Hoa hồng giới thiệu";
       case item.Type === "GIOI_THIEU" &&
         item?.Desc.indexOf("KHAU_TRU_TRA_HANG") > -1:
@@ -145,17 +157,25 @@ function PosClientWallet({ f7router, f7route }) {
         </NavLeft>
         <NavTitle>Ví điện tử</NavTitle>
         <NavRight className="h-full pr-4">
-          <PickerAddEditWallet MemberID={f7route?.params?.id}>
-            {({ open }) => (
-              <Link
-                onClick={open}
-                noLinkClass
-                className="!text-white flex item-center justify-center bg-success text-[14px] h-8 px-2 rounded items-center"
-              >
-                Nạp ví
-              </Link>
-            )}
-          </PickerAddEditWallet>
+          {(
+            Brand?.Global?.Admin?.an_nap_vi
+              ? adminTools_byStock?.hasRight
+              : !Brand?.Global?.Admin?.an_nap_vi
+          ) ? (
+            <PickerAddEditWallet MemberID={f7route?.params?.id}>
+              {({ open }) => (
+                <Link
+                  onClick={open}
+                  noLinkClass
+                  className="!text-white flex item-center justify-center bg-success text-[14px] h-8 px-2 rounded items-center"
+                >
+                  Nạp ví
+                </Link>
+              )}
+            </PickerAddEditWallet>
+          ) : (
+            <></>
+          )}
         </NavRight>
         <div className="absolute h-[2px] w-full bottom-0 left-0 bg-[rgba(255,255,255,0.3)]"></div>
       </Navbar>

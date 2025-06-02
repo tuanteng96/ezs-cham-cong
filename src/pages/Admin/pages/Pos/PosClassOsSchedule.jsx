@@ -760,22 +760,40 @@ function PosClassOsSchedule({ f7router, f7route }) {
                         className="mb-3.5 last:mb-0 border shadow rounded overflow-hidden"
                         key={index}
                       >
-                        <div className="px-4 py-2 bg-gray-50">
+                        <Link
+                          href={`/admin/pos/manage/${
+                            item?.Member?.ID
+                          }/?state=${JSON.stringify({
+                            MobilePhone: item?.Member?.Phone,
+                            FullName: item?.Member.FullName,
+                          })}`}
+                          noLinkClass
+                          className="flex flex-col px-4 py-2 bg-gray-50"
+                        >
                           <div className="font-semibold text-[15px] text-primary">
                             {item?.Member?.FullName}
                           </div>
                           <div className="font-medium leading-4 text-gray-700 font-lato">
                             {item?.Member?.Phone}
                           </div>
-                        </div>
+                        </Link>
                         <div className="border-t">
                           <div className="flex justify-between px-4 py-2.5 border-b border-dashed last:border-0">
                             <div className="text-gray-500 w-[90px]">
                               ID học viên
                             </div>
-                            <div className="font-lato font-medium text-[15px]">
+                            <Link
+                              href={`/admin/pos/manage/${
+                                item?.Member?.ID
+                              }/?state=${JSON.stringify({
+                                MobilePhone: item?.Member?.Phone,
+                                FullName: item?.Member.FullName,
+                              })}`}
+                              noLinkClass
+                              className="font-lato font-medium text-[15px]"
+                            >
                               {item?.Member?.ID}
-                            </div>
+                            </Link>
                           </div>
                           <div className="flex justify-between px-4 py-2.5 border-b border-dashed last:border-0">
                             <div className="text-gray-500 w-[90px]">

@@ -339,7 +339,7 @@ function PickerTimekeeping({ children, user, filters }) {
                           </div>
                           <div className="relative px-4 pt-5 pb-4 border rounded-lg">
                             <div className="absolute z-10 px-3 font-bold uppercase bg-white -top-3 text-success">
-                              Thông tin vào
+                              Giờ vào
                             </div>
                             <div className="mb-3.5 last:mb-0">
                               {/* <div className="mb-px font-light">Loại</div> */}
@@ -444,7 +444,7 @@ function PickerTimekeeping({ children, user, filters }) {
                           </div>
                           <div className="relative px-4 pt-5 pb-4 mt-6 border rounded-lg">
                             <div className="absolute z-10 px-3 font-bold uppercase bg-white -top-3 text-danger">
-                              Thông tin Ra
+                              Giờ ra
                             </div>
                             <div className="mb-3.5 last:mb-0">
                               {/* <div className="mb-px font-light">Loại</div> */}

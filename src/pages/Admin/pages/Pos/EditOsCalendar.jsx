@@ -62,6 +62,7 @@ function EditOsCalendar({ f7route, f7router }) {
   const queryClient = useQueryClient();
 
   const Stocks = useStore("Stocks");
+  const StocksAll = useStore("StocksAll");
   const CrStocks = useStore("CrStocks");
   const Auth = useStore("Auth");
   const Brand = useStore("Brand");
@@ -910,6 +911,15 @@ function EditOsCalendar({ f7route, f7router }) {
                         onChange={(val) => {
                           field.onChange(val || null);
                           setValue("roomid", null);
+                          pos27 &&
+                            pos27
+                              .member(Os?.data?.MemberID)
+                              .service()
+                              .eachOS((os) => { 
+                                if (os.ID === Os?.data?.ID) {
+                                  os.StockID = val?.value;
+                                }
+                              });
                         }}
                         errorMessage={fieldState?.error?.message}
                         errorMessageForce={fieldState?.invalid}

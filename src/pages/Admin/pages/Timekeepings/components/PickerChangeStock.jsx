@@ -44,7 +44,8 @@ function PickerChangeStock({ children, user, item }) {
     });
   }, [user, visible]);
 
-  const close = () => {
+  const close = (e) => {
+    e.stopPropagation()
     setVisible(false);
   };
 

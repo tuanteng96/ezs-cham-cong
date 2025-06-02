@@ -9,12 +9,19 @@ import {
   NavTitle,
   Page,
   Popover,
+  Toolbar,
   useStore,
 } from "framework7-react";
 import {
+  AdjustmentsVerticalIcon,
+  CalendarDaysIcon,
+  CalendarIcon,
   ChevronLeftIcon,
+  Cog6ToothIcon,
   EllipsisHorizontalIcon,
   EllipsisVerticalIcon,
+  ExclamationTriangleIcon,
+  ListBulletIcon,
 } from "@heroicons/react/24/outline";
 import {
   PickerChangeStock,
@@ -40,18 +47,21 @@ function Timekeepings({ f7route }) {
     StockID: CrStocks
       ? { ...CrStocks, label: CrStocks?.Title, value: CrStocks?.ID }
       : "",
-    key: "",
+    Key: "",
+    UserID: "",
     CrDate: new Date(),
   });
+  const [ActiveIndex, setActiveIndex] = useState(0);
 
   const { isLoading, isFetching, refetch, data } = useQuery({
     queryKey: ["TimekeepingsSheet", filters],
     queryFn: async () => {
       const newObj = {
-        ...filters,
         From: filters.CrDate ? moment(filters.CrDate).format("DD/MM/YYYY") : "",
         To: filters.CrDate ? moment(filters.CrDate).format("DD/MM/YYYY") : "",
-        StockID: filters.StockID ? filters.StockID.ID : "",
+        StockID: filters.StockID ? filters.StockID.value : "",
+        Key: filters.UserID ? filters.UserID?.value : "",
+        //UserID: filters.UserID ? filters.UserID?.value : ''
       };
 
       const { data } = await AdminAPI.getTimekeepingsSheet({
@@ -210,7 +220,7 @@ function Timekeepings({ f7route }) {
     <Page
       className="!bg-white"
       name="Timekeepings"
-      noToolbar
+      //noToolbar
       onPageBeforeIn={() => PromHelpers.STATUS_BAR_COLOR("light")}
       ptr
       onPtrRefresh={(done) => refetch().then(() => done())}
@@ -229,89 +239,22 @@ function Timekeepings({ f7route }) {
           Chấm công ngày {moment(filters.CrDate).format("DD/MM")}
         </NavTitle>
         <NavRight className="h-full">
-          <Link
-            noLinkClass
-            className="!text-white h-full flex item-center justify-center w-12"
-            popoverOpen=".popover-timekeepings"
+          <PickerFilter
+            initialValues={filters}
+            onChange={(values) => setFilters(values)}
           >
-            <EllipsisVerticalIcon className="w-6" />
-          </Link>
+            {({ open }) => (
+              <Link
+                onClick={open}
+                noLinkClass
+                className="!text-white h-full flex item-center justify-center w-12"
+              >
+                <AdjustmentsVerticalIcon className="w-6" />
+              </Link>
+            )}
+          </PickerFilter>
         </NavRight>
-        <Popover className="popover-timekeepings w-[230px]">
-          <div>
-            <div className="flex flex-col py-2 border-b">
-              <PickerFilter
-                initialValues={filters}
-                onChange={(values) => setFilters(values)}
-              >
-                {({ open }) => (
-                  <Link
-                    popoverClose
-                    className="py-2.5 px-3.5 font-medium"
-                    noLinkClass
-                    onClick={open}
-                  >
-                    Bộ lọc
-                  </Link>
-                )}
-              </PickerFilter>
-            </div>
-            <div className="flex flex-col py-2 border-b">
-              <Link
-                href="/admin/timekeepings/shift/"
-                popoverClose
-                className="py-2.5 px-3.5 font-medium"
-                noLinkClass
-              >
-                Ca làm việc
-              </Link>
-              <Link
-                href="/admin/timekeepings/punishment/"
-                className="py-2.5 px-3.5 font-medium"
-                popoverClose
-                noLinkClass
-              >
-                Thưởng phạt
-              </Link>
-              <Link
-                href="/admin/timekeepings/wifi-location/"
-                className="py-2.5 px-3.5 font-medium"
-                popoverClose
-                noLinkClass
-              >
-                {Brand?.Global?.Admin?.an_cai_dai_dinh_vi
-                  ? "Wifi chấm công"
-                  : "Định vị - Wifi"}
-              </Link>
-            </div>
-            <div className="flex flex-col py-2">
-              <Link
-                href="/admin/timekeepings/take-break/"
-                popoverClose
-                className="py-2.5 px-3.5 font-medium"
-                noLinkClass
-              >
-                Xem danh sách ngày nghỉ
-              </Link>
-              <Link
-                href="/admin/timekeepings/monthly/"
-                className="py-2.5 px-3.5 font-medium"
-                popoverClose
-                noLinkClass
-              >
-                Xem chấm công tháng
-              </Link>
-              <Link
-                href="/admin/timekeepings/work/"
-                className="py-2.5 px-3.5 font-medium"
-                popoverClose
-                noLinkClass
-              >
-                Xem lịch làm việc
-              </Link>
-            </div>
-          </div>
-        </Popover>
+
         <div className="absolute h-[2px] w-full bottom-0 left-0 bg-[rgba(255,255,255,0.3)]"></div>
       </Navbar>
       <div className="p-4">
@@ -349,9 +292,12 @@ function Timekeepings({ f7route }) {
                       className="flex-1 py-3.5 pl-4 flex-col items-start"
                     >
                       <div className="mb-px font-medium text-[15px] text-primary">
-                        {user?.FullName}
+                        {user?.FullName}{" "}
+                        <span className="pl-1 font-normal text-gray-500">
+                          ({user?.UserName})
+                        </span>
                       </div>
-                      <div className="text-gray-500">{user?.UserName}</div>
+                      {/* <div className="text-gray-500">{user?.UserName}</div> */}
                     </Link>
                     <Link
                       noLinkClass
@@ -362,7 +308,7 @@ function Timekeepings({ f7route }) {
                     </Link>
                     <Popover
                       className={clsx(
-                        "w-[150px]",
+                        "w-[220px]",
                         `popover-sheet-${user.UserID}`
                       )}
                     >
@@ -373,7 +319,15 @@ function Timekeepings({ f7route }) {
                           noLinkClass
                           onClick={opens}
                         >
-                          Chấm công
+                          Chấm công, chỉnh sửa
+                        </Link>
+                        <Link
+                          href={`/admin/timekeepings/${user?.UserID}/?FullName=${user?.FullName}&Month=${filters.CrDate}`}
+                          popoverClose
+                          className="flex justify-between px-3 py-2.5 font-medium"
+                          noLinkClass
+                        >
+                          Xem chấm công tháng
                         </Link>
                         <PickerJobType user={user}>
                           {({ open }) => (
@@ -383,7 +337,7 @@ function Timekeepings({ f7route }) {
                               noLinkClass
                               onClick={open}
                             >
-                              Loại công ca
+                              Loại công ca / lương giờ
                             </Link>
                           )}
                         </PickerJobType>
@@ -395,26 +349,106 @@ function Timekeepings({ f7route }) {
                               noLinkClass
                               onClick={open}
                             >
-                              Mã máy
+                              Đổi điện thoại chấm công
                             </Link>
                           )}
                         </PickerMachine>
 
                         <Link
                           popoverClose
-                          className="flex justify-between px-3 py-2.5 font-medium text-danger"
+                          className="flex justify-between px-3 py-2.5 font-medium"
                           noLinkClass
                           onClick={() => onResetPwd(user)}
                         >
-                          Reset mật khẩu
+                          Đổi mật khẩu
                         </Link>
                       </div>
                     </Popover>
                   </div>
                   {user.Dates &&
                     user.Dates.map((item, i) => (
-                      <div className="p-4" key={i}>
-                        <div className="flex justify-between" onClick={opens}>
+                      <div className="p-4" key={i} onClick={opens}>
+                        <div className="flex items-center justify-between">
+                          <div className="flex-1 pr-4">
+                            <div>
+                              {item.WorkTrack?.StockID && (
+                                <PickerChangeStock user={user} item={item}>
+                                  {({ open }) => (
+                                    <div
+                                      className="mb-px"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        open();
+                                      }}
+                                    >
+                                      {item.WorkTrack?.StockID !==
+                                      user.StockID ? (
+                                        <div className="flex items-center text-sm opacity-75 cursor-pointer">
+                                          <span className="pr-1">Tại</span>
+                                          {item.WorkTrack?.StockTitle ||
+                                            "Không xác định"}
+                                          <ExclamationTriangleIcon className="w-5 ml-1.5 text-danger" />
+                                        </div>
+                                      ) : (
+                                        <>
+                                          {item.WorkTrack?.CheckIn ? (
+                                            <div className="flex items-center text-sm opacity-75 cursor-pointer">
+                                              <span className="pr-1">Tại</span>
+                                              {item.WorkTrack?.StockTitle ||
+                                                "Không xác định"}
+                                            </div>
+                                          ) : (
+                                            <></>
+                                          )}
+                                        </>
+                                      )}
+                                    </div>
+                                  )}
+                                </PickerChangeStock>
+                              )}
+                              {item.WorkTrack?.Info?.WorkToday?.Title && (
+                                <div className="text-sm capitalize text-muted">
+                                  {item.WorkTrack?.Info?.WorkToday?.Title} (
+                                  {item.WorkTrack?.Info?.WorkToday?.TimeFrom ? (
+                                    <span className="font-lato">
+                                      {
+                                        item.WorkTrack?.Info?.WorkToday
+                                          ?.TimeFrom
+                                      }
+                                      <span className="px-1">-</span>
+                                      {item.WorkTrack?.Info?.WorkToday?.TimeTo}
+                                    </span>
+                                  ) : (
+                                    <>Theo giờ</>
+                                  )}
+                                  )
+                                </div>
+                              )}
+                              {!item.WorkTrack?.StockID ? (
+                                <div className="text-muted">Chưa chấm công</div>
+                              ) : (
+                                <></>
+                              )}
+                            </div>
+                          </div>
+                          <div className="w-12 text-center">
+                            <div className="text-base font-semibold text-success font-lato">
+                              {item?.WorkTrack?.CheckIn
+                                ? moment(item?.WorkTrack?.CheckIn).format(
+                                    "HH:mm"
+                                  )
+                                : "--:--"}
+                            </div>
+                            <div className="text-base font-semibold text-danger font-lato">
+                              {item?.WorkTrack?.CheckOut
+                                ? moment(item?.WorkTrack?.CheckOut).format(
+                                    "HH:mm"
+                                  )
+                                : "--:--"}
+                            </div>
+                          </div>
+                        </div>
+                        {/* <div className="flex justify-between" onClick={opens}>
                           <div>
                             <div className="text-muted">Vào làm</div>
                             <div className="text-base font-semibold text-success font-lato">
@@ -435,8 +469,8 @@ function Timekeepings({ f7route }) {
                                 : "--:--"}
                             </div>
                           </div>
-                        </div>
-                        {item.WorkTrack?.StockID && (
+                        </div> */}
+                        {/* {item.WorkTrack?.StockID && (
                           <PickerChangeStock user={user} item={item}>
                             {({ open }) => (
                               <div
@@ -478,7 +512,7 @@ function Timekeepings({ f7route }) {
                             )}
                             )
                           </div>
-                        )}
+                        )} */}
                       </div>
                     ))}
                 </div>
@@ -486,6 +520,115 @@ function Timekeepings({ f7route }) {
             </PickerTimekeeping>
           ))}
       </div>
+      <Popover
+        className="popover-timekeepings-settings w-[160px]"
+        onPopoverOpen={() => setActiveIndex(4)}
+        onPopoverClosed={() => setActiveIndex(0)}
+      >
+        <div className="flex flex-col py-2">
+          <Link
+            href="/admin/timekeepings/shift/"
+            popoverClose
+            className="py-2.5 px-3.5 font-medium"
+            noLinkClass
+          >
+            Ca làm việc
+          </Link>
+          <Link
+            href="/admin/timekeepings/punishment/"
+            className="py-2.5 px-3.5 font-medium"
+            popoverClose
+            noLinkClass
+          >
+            Thưởng phạt
+          </Link>
+          <Link
+            href="/admin/timekeepings/wifi-location/"
+            className="py-2.5 px-3.5 font-medium"
+            popoverClose
+            noLinkClass
+          >
+            {Brand?.Global?.Admin?.an_cai_dai_dinh_vi
+              ? "Wifi chấm công"
+              : "Định vị - Wifi"}
+          </Link>
+        </div>
+      </Popover>
+      <Toolbar
+        className="shadow-lg before:hidden"
+        inner={false}
+        bottom
+        style={{ "--f7-toolbar-bg-color": "#fff" }}
+      >
+        <div className="grid h-full grid-cols-5 overflow-auto no-scrollbar">
+          {[
+            {
+              Title: "Theo ngày",
+              Path: "",
+              Icon: <CalendarIcon className="w-6" />,
+            },
+            {
+              Title: "Theo Tháng",
+              Path: "/admin/timekeepings/monthly/",
+              Icon: <CalendarDaysIcon className="w-6" />,
+            },
+            {
+              Title: "Lịch nghỉ",
+              Path: "/admin/timekeepings/take-break/",
+              Icon: <ListBulletIcon className="w-6" />,
+            },
+            {
+              Title: "Lịch dự kiến",
+              Path: "/admin/timekeepings/work/",
+              Icon: (
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth="1.5"
+                  stroke="currentColor"
+                  className="w-6"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M6.75 2.994v2.25m10.5-2.25v2.25m-14.252 13.5V7.491a2.25 2.25 0 0 1 2.25-2.25h13.5a2.25 2.25 0 0 1 2.25 2.25v11.251m-18 0a2.25 2.25 0 0 0 2.25 2.25h13.5a2.25 2.25 0 0 0 2.25-2.25m-18 0v-7.5a2.25 2.25 0 0 1 2.25-2.25h13.5a2.25 2.25 0 0 1 2.25 2.25v7.5m-6.75-6h2.25m-9 2.25h4.5m.002-2.25h.005v.006H12v-.006Zm-.001 4.5h.006v.006h-.006v-.005Zm-2.25.001h.005v.006H9.75v-.006Zm-2.25 0h.005v.005h-.006v-.005Zm6.75-2.247h.005v.005h-.005v-.005Zm0 2.247h.006v.006h-.006v-.006Zm2.25-2.248h.006V15H16.5v-.005Z"
+                  />
+                </svg>
+              ),
+            },
+            {
+              Title: "Cài đặt",
+              Path: ".popover-timekeepings-settings",
+              Type: "popover",
+              Icon: <Cog6ToothIcon className="w-6" />,
+            },
+          ].map((item, index) => (
+            <Link
+              key={index}
+              className={clsx(
+                "cursor-pointer h-[48px]",
+                ActiveIndex === index ? "!text-app" : "!text-[#202244]"
+              )}
+              noLinkClass
+              href={!item.Type ? item.Path : "#"}
+              popoverOpen={item.Type ? item.Path : null}
+            >
+              <div
+                className={clsx(
+                  "flex flex-col items-center justify-center h-full pt-1",
+                  ActiveIndex === index ? "text-app" : "text-gray-700"
+                )}
+              >
+                {item.Icon}
+                <span className="text-[10px] mt-px leading-4">
+                  {item.Title}
+                </span>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </Toolbar>
     </Page>
   );
 }

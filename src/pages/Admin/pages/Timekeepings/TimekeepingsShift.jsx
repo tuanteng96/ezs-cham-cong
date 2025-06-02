@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import PromHelpers from "@/helpers/PromHelpers";
 import {
   f7,
@@ -13,6 +13,7 @@ import {
 import {
   ChevronLeftIcon,
   EllipsisHorizontalIcon,
+  PlusIcon,
 } from "@heroicons/react/24/outline";
 import { PickerShift } from "./components";
 import { useMutation, useQuery } from "react-query";
@@ -22,6 +23,8 @@ import clsx from "clsx";
 import { toast } from "react-toastify";
 
 function TimekeepingsShift({ f7route }) {
+  let isOpen = true;
+  let elRef = useRef();
   const { data, isLoading, refetch } = useQuery({
     queryKey: ["TimekeepingsShift"],
     queryFn: async () => {
@@ -45,6 +48,13 @@ function TimekeepingsShift({ f7route }) {
       return data;
     },
   });
+
+  useEffect(() => {
+    if (elRef?.current && isOpen && data && data.length === 1) {
+      elRef?.current?.click();
+      isOpen = false;
+    }
+  }, [elRef?.current, data]);
 
   const onDelete = (item) => {
     f7.dialog.confirm("Xác nhận xoá ca làm việc ?", () => {
@@ -82,19 +92,20 @@ function TimekeepingsShift({ f7route }) {
           </Link>
         </NavLeft>
         <NavTitle>Ca làm việc</NavTitle>
-        <NavRight className="h-full pr-4">
+        <NavRight className="h-full">
           <PickerShift data={data}>
             {({ open }) => (
               <Link
                 onClick={open}
                 noLinkClass
-                className="!text-white flex item-center justify-center bg-success text-[14px] h-8 px-2 rounded items-center"
+                className="!text-white flex item-center justify-center rounded items-center h-full w-12"
               >
-                Thêm mới
+                <PlusIcon className="w-6" />
               </Link>
             )}
           </PickerShift>
         </NavRight>
+
         <div className="absolute h-[2px] w-full bottom-0 left-0 bg-[rgba(255,255,255,0.3)]"></div>
       </Navbar>
       <div>
@@ -108,7 +119,7 @@ function TimekeepingsShift({ f7route }) {
                   key={i}
                 >
                   <div className="flex-1">
-                    <div className="mb-2.5 font-medium text-[15px] text-primary">
+                    <div className="mb-2.5 font-medium text-base text-primary">
                       <div className="w-2/4 h-3.5 bg-gray-200 rounded-full animate-pulse"></div>
                     </div>
                     <div className="text-gray-500">
@@ -132,35 +143,25 @@ function TimekeepingsShift({ f7route }) {
               <div className="p-4">
                 {data.map((item, index) => (
                   <PickerShift data={data} initialValues={item} key={index}>
-                    {({ open }) => (
-                      <div className="border mb-3.5 last:mb-0 p-4 rounded flex items-start">
-                        <div className="flex-1">
-                          <div className="mb-1 font-medium text-[15px] text-primary">
-                            {item.Name}
+                    {({ open, openSetup }) => (
+                      <div className="border mb-3.5 last:mb-0 p-4 rounded">
+                        {index === 0 && (
+                          <div ref={elRef} onClick={openSetup}></div>
+                        )}
+                        <div className="flex items-start">
+                          <div className="flex-1">
+                            <div className="text-base font-medium text-primary">
+                              {item.Name}
+                            </div>
                           </div>
-                          <div className="text-gray-500">
-                            {item.flexible
-                              ? item.Options.map(
-                                  (x) =>
-                                    x.Title.charAt(0).toUpperCase() +
-                                    x.Title.slice(1)
-                                ).join(", ")
-                              : item.Days.filter((x) => !x.isOff)
-                                  .map(
-                                    (x) =>
-                                      x.Title.charAt(0).toUpperCase() +
-                                      x.Title.slice(1)
-                                  )
-                                  .join(", ")}
-                          </div>
+                          <Link
+                            noLinkClass
+                            className="flex items-baseline justify-end w-12 h-10"
+                            popoverOpen={`.popover-shift-${item.ID}`}
+                          >
+                            <EllipsisHorizontalIcon className="w-6" />
+                          </Link>
                         </div>
-                        <Link
-                          noLinkClass
-                          className="flex items-baseline justify-end w-12 h-12"
-                          popoverOpen={`.popover-shift-${item.ID}`}
-                        >
-                          <EllipsisHorizontalIcon className="w-6" />
-                        </Link>
                         <Popover
                           className={clsx(
                             "w-[100px]",
@@ -186,6 +187,46 @@ function TimekeepingsShift({ f7route }) {
                             </Link>
                           </div>
                         </Popover>
+                        <div className="text-gray-500">
+                          {item.flexible ? (
+                            <>
+                              {item.Options &&
+                                item.Options.map((otp, i) => (
+                                  <div
+                                    className="flex justify-between mb-1 last:mb-0"
+                                    key={i}
+                                  >
+                                    <div className="">
+                                      {otp?.Title} ({otp?.TimeFrom}
+                                      <span className="px-1">-</span>
+                                      {otp?.TimeTo})
+                                    </div>
+                                    <div>Số công {otp?.Value}</div>
+                                  </div>
+                                ))}
+                            </>
+                          ) : (
+                            <>
+                              {item.Days &&
+                                item.Days.filter((x) => !x.isOff).map(
+                                  (otp, i) => (
+                                    <div
+                                      className="flex justify-between mb-1 last:mb-0"
+                                      key={i}
+                                    >
+                                      <div>
+                                        <span className="capitalize">{otp?.Title}</span> (
+                                        {otp?.TimeFrom}
+                                        <span className="px-1">-</span>
+                                        {otp?.TimeTo})
+                                      </div>
+                                      <div>Số công {otp?.Value}</div>
+                                    </div>
+                                  )
+                                )}
+                            </>
+                          )}
+                        </div>
                       </div>
                     )}
                   </PickerShift>

@@ -37,7 +37,7 @@ const ItemRender = ({ item }) => {
         onClick={() => setIsOpen(!isOpen)}
       >
         <div className="flex-1">
-          <div className="font-medium text-[15px] text-primary">
+          <div className="text-base font-medium text-primary">
             {item?.User?.FullName}
           </div>
           <div className="mt-px">
@@ -69,13 +69,13 @@ const ItemRender = ({ item }) => {
       {isOpen && (
         <div className="p-4 border-t">
           <div className="flex justify-between pb-3 mb-3 border-b border-dashed last:mb-0 last:pb-0 last:border-0">
-            <div className="text-gray-500">Số công</div>
+            <div className="text-[#222]">Số công</div>
             <div className="font-semibold font-lato w-[110px] text-right">
               {item?.TrackValue?.WorkQty}
             </div>
           </div>
           <div className="flex justify-between pb-3 mb-3 border-b border-dashed last:mb-0 last:pb-0 last:border-0">
-            <div className="flex-1 text-gray-500">Phụ câp ngày</div>
+            <div className="flex-1 text-[#222]">Phụ câp ngày</div>
             <div className="font-semibold font-lato w-[110px] text-right">
               {StringHelpers.formatVND(
                 (item?.TrackValue?.WorkQtyAllowance || 0) *
@@ -84,61 +84,78 @@ const ItemRender = ({ item }) => {
             </div>
           </div>
           <div className="flex justify-between pb-3 mb-3 border-b border-dashed last:mb-0 last:pb-0 last:border-0">
-            <div className="flex-1 text-gray-500">Tổng lương chấm công</div>
+            <div className="flex-1 text-[#222]">Tổng lương chấm công</div>
             <div className="font-semibold font-lato w-[110px] text-right">
               {StringHelpers.formatVND(
                 item?.TrackValue?.WorkQty * item?.NGAY_LUONG_CO_BAN
               )}
             </div>
           </div>
-          <div className="flex justify-between pb-3 mb-3 border-b border-dashed last:mb-0 last:pb-0 last:border-0">
-            <div className="flex-1 text-gray-500">Đi muộn việc cá nhân</div>
-            <div className="font-semibold font-lato w-[110px] text-right">
-              {item?.TrackValue.SO_LAN_DI_MUON_CN}
+          <div className="pb-3 mb-3 border-b border-dashed last:mb-0 last:pb-0 last:border-0">
+            <div className="flex justify-between mb-3">
+              <div className="flex-1 text-[#222]">
+                Tổng phạt (Đi muộn, về sớm)
+              </div>
+              <div className="font-semibold font-lato w-[110px] text-right">
+                {item?.TrackValue.DI_MUON + item?.TrackValue.VE_SOM > 0
+                  ? `-${StringHelpers.formatVND(
+                      item?.TrackValue.DI_MUON + item?.TrackValue.VE_SOM
+                    )}`
+                  : StringHelpers.formatVND(
+                      item?.TrackValue.DI_MUON + item?.TrackValue.VE_SOM
+                    )}
+              </div>
+            </div>
+            <div className="pl-5">
+              <div className="flex justify-between mb-3">
+                <div className="flex-1 text-gray-500">
+                  Số lần đi muộn việc cá nhân
+                </div>
+                <div className="font-semibold font-lato w-[50px] text-right">
+                  {item?.TrackValue.SO_LAN_DI_MUON_CN}
+                </div>
+              </div>
+              <div className="flex justify-between">
+                <div className="flex-1 text-gray-500">
+                  Số lần về sớm việc cá nhân
+                </div>
+                <div className="font-semibold font-lato w-[50px] text-right">
+                  {item?.TrackValue.SO_LAN_VE_SOM_CN}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="pb-3 mb-3 border-b border-dashed last:mb-0 last:pb-0 last:border-0">
+            <div className="flex justify-between mb-3">
+              <div className="flex-1 text-[#222]">Tổng Tăng ca, Thêm giờ</div>
+              <div className="font-semibold font-lato w-[110px] text-right">
+                {StringHelpers.formatVND(
+                  item?.TrackValue.DI_SOM + item?.TrackValue.VE_MUON
+                )}
+              </div>
+            </div>
+            <div className="pl-5">
+              <div className="flex justify-between mb-3">
+                <div className="flex-1 text-gray-500">
+                  Số lần đi sớm việc công ty
+                </div>
+                <div className="font-semibold font-lato w-[50px] text-right">
+                  {item?.TrackValue.SO_LAN_DI_SOM_CTY}
+                </div>
+              </div>
+              <div className="flex justify-between">
+                <div className="flex-1 text-gray-500">
+                  Số lần về muộn việc công ty
+                </div>
+                <div className="font-semibold font-lato w-[50px] text-right">
+                  {item?.TrackValue.SO_LAN_VE_MUON_CTY}
+                </div>
+              </div>
             </div>
           </div>
           <div className="flex justify-between pb-3 mb-3 border-b border-dashed last:mb-0 last:pb-0 last:border-0">
-            <div className="flex-1 text-gray-500">Đi sớm việc công ty</div>
-            <div className="font-semibold font-lato w-[110px] text-right">
-              {item?.TrackValue.SO_LAN_DI_SOM_CTY}
-            </div>
-          </div>
-          <div className="flex justify-between pb-3 mb-3 border-b border-dashed last:mb-0 last:pb-0 last:border-0">
-            <div className="flex-1 text-gray-500">Về muộn việc công ty</div>
-            <div className="font-semibold font-lato w-[110px] text-right">
-              {item?.TrackValue.SO_LAN_VE_MUON_CTY}
-            </div>
-          </div>
-          <div className="flex justify-between pb-3 mb-3 border-b border-dashed last:mb-0 last:pb-0 last:border-0">
-            <div className="flex-1 text-gray-500">Về sớm việc cá nhân</div>
-            <div className="font-semibold font-lato w-[110px] text-right">
-              {item?.TrackValue.SO_LAN_VE_SOM_CN}
-            </div>
-          </div>
-          <div className="flex justify-between pb-3 mb-3 border-b border-dashed last:mb-0 last:pb-0 last:border-0">
-            <div className="flex-1 text-gray-500">
-              Tổng phạt (Đi muộn, về sớm)
-            </div>
-            <div className="font-semibold font-lato w-[110px] text-right">
-              {item?.TrackValue.DI_MUON + item?.TrackValue.VE_SOM > 0
-                ? `-${StringHelpers.formatVND(
-                    item?.TrackValue.DI_MUON + item?.TrackValue.VE_SOM
-                  )}`
-                : StringHelpers.formatVND(
-                    item?.TrackValue.DI_MUON + item?.TrackValue.VE_SOM
-                  )}
-            </div>
-          </div>
-          <div className="flex justify-between pb-3 mb-3 border-b border-dashed last:mb-0 last:pb-0 last:border-0">
-            <div className="flex-1 text-gray-500">Tổng Tăng ca, Thêm giờ</div>
-            <div className="font-semibold font-lato w-[110px] text-right">
-              {StringHelpers.formatVND(
-                item?.TrackValue.DI_SOM + item?.TrackValue.VE_MUON
-              )}
-            </div>
-          </div>
-          <div className="flex justify-between pb-3 mb-3 border-b border-dashed last:mb-0 last:pb-0 last:border-0">
-            <div className="flex-1 text-gray-500">Tổng lương</div>
+            <div className="flex-1 text-[#222]">Tổng lương</div>
             <div className="text-base font-bold font-lato text-success w-[110px] text-right">
               {StringHelpers.formatVND(
                 item?.TrackValue?.WorkQty * item.NGAY_LUONG_CO_BAN -

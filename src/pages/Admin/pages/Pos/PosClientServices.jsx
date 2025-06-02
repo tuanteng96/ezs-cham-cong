@@ -70,6 +70,26 @@ function PosClientServices({ f7router, f7route }) {
   let CrStocks = useStore("CrStocks");
   let Brand = useStore("Brand");
 
+  let formatLists = (arr) => {
+    let newArr = arr.map((x) => {
+      let obj = {
+        ...x,
+        ServicesNew: x.Services.filter((x) => x.Status === "done").sort(
+          (a, b) => new Date(b.BookDate) - new Date(a.BookDate)
+        ),
+      };
+      return {
+        ...obj,
+        BookDate:
+          obj.ServicesNew && obj.ServicesNew.length > 0
+            ? obj.ServicesNew[0].BookDate
+            : null,
+      };
+    });
+    newArr = newArr.sort((a, b) => new Date(b.BookDate) - new Date(a.BookDate));
+    return newArr;
+  };
+
   const Services = useQuery({
     queryKey: ["ClientServicesID", { ID: f7route?.params?.id }],
     queryFn: async () => {
@@ -77,8 +97,12 @@ function PosClientServices({ f7router, f7route }) {
       let data = await appPOS.getOsList({ mid: f7route?.params?.id });
       let newData = data ? data.filter((x) => x.Product?.IsAddFee !== 1) : [];
       newInitialData[0].children = newData.filter((x) => x.TabIndex === 0);
-      newInitialData[1].children = newData.filter((x) => x.TabIndex === 1);
-      newInitialData[2].children = newData.filter((x) => x.TabIndex === 2);
+      newInitialData[1].children = formatLists(
+        newData.filter((x) => x.TabIndex === 1)
+      );
+      newInitialData[2].children = formatLists(
+        newData.filter((x) => x.TabIndex === 2)
+      );
 
       return newInitialData;
     },

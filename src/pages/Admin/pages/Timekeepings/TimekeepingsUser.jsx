@@ -545,7 +545,7 @@ function TimekeepingsUser({ f7route }) {
       </Navbar>
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="flex flex-col h-full pb-safe-b"
+        className="flex flex-col h-full"
       >
         <PullToRefresh
           className="overflow-auto grow ezs-ptr"
@@ -563,7 +563,7 @@ function TimekeepingsUser({ f7route }) {
                     >
                       <div className="flex-1">
                         <div className="mb-2.5 font-medium text-[15px] text-primary">
-                          <div className="w-2/4 h-3.5 bg-gray-200 rounded-full animate-pulse"></div>
+                          <div className="w-2/4 h-3.5 bg-gray-100 rounded-full animate-pulse"></div>
                         </div>
                         <div className="text-gray-500">
                           <div className="animate-pulse h-2.5 bg-gray-200 rounded-full w-full mb-1"></div>
@@ -584,9 +584,9 @@ function TimekeepingsUser({ f7route }) {
                       className="border rounded mb-3.5 last:mb-0"
                       key={index}
                     >
-                      <div className="px-4 py-3 border-b bg-gray-50">
+                      <div className="px-4 py-3 bg-gray-200 border-b">
                         <div className="flex justify-between">
-                          <div className="text-[15px] font-bold font-lato">
+                          <div className="text-base font-bold font-lato text-primary">
                             {moment(item.Date).format("DD/MM/YYYY")}
                           </div>
                           {item.WorkTrack?.Info?.WorkToday?.Title && (
@@ -767,7 +767,7 @@ function TimekeepingsUser({ f7route }) {
               ))}
           </div>
         </PullToRefresh>
-        <div className="shadow-2xl">
+        <div className="shadow-2xl pb-safe-b">
           <div className="grid grid-cols-1 gap-2 px-4 pt-4">
             <div className="flex justify-between">
               <div className="text-gray-600">Thưởng / Phạt</div>

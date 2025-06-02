@@ -13,6 +13,7 @@ import Dom7 from "dom7";
 import StringHelpers from "@/helpers/StringHelpers";
 import clsx from "clsx";
 import NoFound from "@/components/NoFound";
+import moment from "moment";
 
 const schemaAdd = yup
   .object({
@@ -209,6 +210,14 @@ function PickerDiscountCodeOrder({
     });
   };
 
+  const checkDateDiff = (dateEnd) => {
+    const oneDay = 24 * 60 * 60 * 1000; // hours*minutes*seconds*milliseconds
+    const firstDate = new Date();
+    const secondDate = new Date(dateEnd);
+    const diffDays = Math.round(Math.abs((firstDate - secondDate) / oneDay));
+    return diffDays;
+  };
+
   const handleSubmitWithoutPropagation = (e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -388,11 +397,15 @@ function PickerDiscountCodeOrder({
                                   <div>
                                     HSD:
                                     <span className="pl-1.5">
-                                      {item.ngay
-                                        ? moment(item.ngay).format(
-                                            "HH:mm DD-MM-YYYY"
-                                          )
-                                        : "Không giới hạn"}
+                                      {item.ngay === null ? (
+                                        "Không giới hạn"
+                                      ) : (
+                                        <>
+                                          {moment(item.ngay.To).format(
+                                            "HH:MM DD-MM-YYYY"
+                                          )}
+                                        </>
+                                      )}
                                     </span>
                                   </div>
                                 </div>

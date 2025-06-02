@@ -5,18 +5,18 @@ import { useQuery } from "react-query";
 import { SelectPickersGroup } from "..";
 import StringHelpers from "@/helpers/StringHelpers";
 
-function SelectMembers({ StockRoles, ...props }) {
+function SelectMembers({ StockRoles, StockID = "", ...props }) {
   let [data, setData] = useState([]);
   let Auth = useStore("Auth");
 
   let [key, setKey] = useState("");
 
   let Members = useQuery({
-    queryKey: ["SelectMembers"],
+    queryKey: ["SelectMembers", StockID],
     queryFn: async () => {
       const { data } = await AdminAPI.selectMembers({
         Key: key,
-        CurrentStockID: "",
+        CurrentStockID: StockID || "",
         Token: Auth?.token || "",
       });
 

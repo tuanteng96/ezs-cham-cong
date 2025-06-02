@@ -22,6 +22,8 @@ var pIndex = 0;
 
 function PrinterService({ f7route }) {
   const Auth = useStore("Auth");
+  const Brand = useStore("Brand");
+  const StocksAll = useStore("StocksAll");
 
   let Mode = f7route?.query?.mode || "";
 
@@ -89,6 +91,7 @@ function PrinterService({ f7route }) {
       let configs = await ConfigsAPI.getValue(
         "MA_QRCODE_NGAN_HANG,Bill.Title,Bill.Footer"
       );
+      
       let obj = {
         BillTitle: "",
         BillFooter: "",
@@ -98,6 +101,24 @@ function PrinterService({ f7route }) {
       if (configs?.data?.data && configs?.data?.data.length > 0) {
         obj.BillTitle = configs?.data?.data[0]?.Value || "";
         obj.BillFooter = configs?.data?.data[1]?.Value || "";
+      }
+      
+      if (Brand?.Global?.Admin?.PrintToStockID && data?.data?.os?.StockID) {
+        
+        let index = StocksAll.findIndex(
+          (x) => x.ID === data?.data?.os?.StockID
+        );
+        
+        if (index > -1) {
+          
+          obj.BillTitle = StocksAll[index].Title;
+          if (StocksAll[index].LinkSEO) {
+            obj.BillPhone = StocksAll[index].LinkSEO;
+          }
+          if (StocksAll[index].Desc) {
+            obj.BillAddress = StocksAll[index].Desc;
+          }
+        }
       }
       return data?.data
         ? {
@@ -281,7 +302,7 @@ function PrinterService({ f7route }) {
     var bodyFormData = new FormData();
     bodyFormData.append(
       "title",
-      `Hoa-don-ban-hang-${Service?.data?.os?.ID}-${moment(
+      `Hoa-don-dich-vu-${Service?.data?.os?.ID}-${moment(
         Service?.data?.os?.BookDate
       ).format("HH:mm_DD-MM-YYYY")}`
     );
@@ -297,7 +318,7 @@ function PrinterService({ f7route }) {
     PromHelpers.SHARE_SOCIAL(
       JSON.stringify({
         Images: [AssetsHelpers.toAbsoluteUrl(rs?.data?.src)],
-        Content: `Hoá đơn bán hàng - ${Service?.data?.os?.ID} (${moment(
+        Content: `Hoá đơn dịch vụ - ${Service?.data?.os?.ID} (${moment(
           Service?.data?.os?.BookDate
         ).format("HH:mm DD/MM/YYYY")})`,
       })
@@ -335,11 +356,23 @@ function PrinterService({ f7route }) {
                 {Service?.data?.BillTitle ||
                   Service?.data?.SysConfig?.BillTitle}
               </div>
-              <div
-                dangerouslySetInnerHTML={{
-                  __html: Service?.data?.BillAddress,
-                }}
-              ></div>
+              {Service?.data?.SysConfig?.BillPhone ||
+              Service?.data?.SysConfig?.BillAddress ? (
+                <div>
+                  <div>
+                    {Service?.data?.SysConfig?.BillAddress || "Chưa có"}
+                  </div>
+                  <div>
+                    Hotline: {Service?.data?.SysConfig?.BillPhone || "Chưa có"}
+                  </div>
+                </div>
+              ) : (
+                <div
+                  dangerouslySetInnerHTML={{
+                    __html: Service?.data?.BillAddress,
+                  }}
+                ></div>
+              )}
               <h1 className="mt-2 font-bold uppercase">Phiếu dịch vụ</h1>
               <div>
                 <p>
@@ -472,7 +505,34 @@ function PrinterService({ f7route }) {
         <div className="hidden" ref={buttonToPopoverWrapper}>
           <div className="button-to-print"></div>
         </div>
-        <div className="p-4 bg-white border-t">
+        {/* <div className="p-4 bg-white border-t">
+          <Button
+            type="button"
+            className="flex-1 bg-primary"
+            fill
+            large
+            preloader
+            loading={isLoading || PrintersIP?.isLoading || Service.isLoading}
+            disabled={isLoading || PrintersIP?.isLoading || Service.isLoading}
+            onClick={onPrinter}
+          >
+            In hoá đơn
+          </Button>
+        </div> */}
+        <div className="flex gap-3 p-4 bg-white border-t">
+          <Button
+            style={{ "--f7-preloader-color": "#000" }}
+            type="button"
+            className="bg-white w-[50px] text-black border border-[#d3d3d3] button button-fill button-large button-preloader popover-open"
+            fill
+            large
+            preloader
+            onClick={onShare}
+            loading={isLoading || PrintersIP?.isLoading || Service.isLoading}
+            disabled={isLoading || PrintersIP?.isLoading || Service.isLoading}
+          >
+            <ShareIcon className="w-6" />
+          </Button>
           <Button
             type="button"
             className="flex-1 bg-primary"
@@ -486,33 +546,6 @@ function PrinterService({ f7route }) {
             In hoá đơn
           </Button>
         </div>
-        {/* <div className="flex gap-3 p-4 bg-white border-t">
-          <Button
-            style={{ "--f7-preloader-color": "#000" }}
-            type="button"
-            className="bg-white w-[50px] text-black border border-[#d3d3d3] button button-fill button-large button-preloader popover-open"
-            fill
-            large
-            preloader
-            onClick={onShare}
-            loading={isLoading || PrintersIP?.isLoading || Order.isLoading}
-            disabled={isLoading || PrintersIP?.isLoading || Order.isLoading}
-          >
-            <ShareIcon className="w-6" />
-          </Button>
-          <Button
-            type="button"
-            className="flex-1 bg-primary"
-            fill
-            large
-            preloader
-            loading={isLoading || PrintersIP?.isLoading || Order.isLoading}
-            disabled={isLoading || PrintersIP?.isLoading || Order.isLoading}
-            onClick={onPrinter}
-          >
-            In hoá đơn
-          </Button>
-        </div> */}
       </div>
     </Page>
   );
