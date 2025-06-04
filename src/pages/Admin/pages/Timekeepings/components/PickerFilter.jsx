@@ -123,6 +123,7 @@ function PickerFilter({ children, initialValues, onChange }) {
                             onChange={(val) => {
                               field.onChange(val);
                             }}
+                            isFilter
                           />
                         )}
                       />

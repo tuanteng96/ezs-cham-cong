@@ -286,14 +286,14 @@ function Timekeepings({ f7route }) {
             <PickerTimekeeping user={user} filters={filters} key={index}>
               {({ open: opens }) => (
                 <div className="border rounded mb-3.5 last:mb-0">
-                  <div className="flex border-b bg-gray-50">
+                  <div className="flex bg-gray-200 border-b">
                     <Link
                       href={`/admin/timekeepings/${user?.UserID}/?FullName=${user?.FullName}&Month=${filters.CrDate}`}
                       className="flex-1 py-3.5 pl-4 flex-col items-start"
                     >
-                      <div className="mb-px font-medium text-[15px] text-primary">
+                      <div className="mb-px text-base font-medium text-primary">
                         {user?.FullName}{" "}
-                        <span className="pl-1 font-normal text-gray-500">
+                        <span className="pl-1 font-normal text-gray-500 text-[15px]">
                           ({user?.UserName})
                         </span>
                       </div>

@@ -1,12 +1,22 @@
+import { RolesHelpers } from "@/helpers/RolesHelpers";
 import StringHelpers from "@/helpers/StringHelpers";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import { AnimatePresence, motion } from "framer-motion";
-import moment from "moment";
+import { useStore } from "framework7-react";
 import React, { useState } from "react";
 import { createPortal } from "react-dom";
 
 function PickerServiceOsInfo({ children, data }) {
   const [visible, setVisible] = useState(false);
+
+  let Auth = useStore("Auth");
+  let CrStocks = useStore("CrStocks");
+
+  const { DelApp } = RolesHelpers.useRoles({
+    nameRoles: ["DelApp"],
+    auth: Auth,
+    CrStocks,
+  });
 
   let open = () => {
     setVisible(true);
@@ -38,7 +48,11 @@ function PickerServiceOsInfo({ children, data }) {
                 exit={{ opacity: 0, translateY: "100%" }}
               >
                 <div className="relative flex py-5 pl-4 text-xl font-semibold text-center pr-14">
-                  <div className="truncate">{data?.ProdService2 ? data?.ProdService2 : (data?.ProdService || data?.Title)}</div>
+                  <div className="truncate">
+                    {data?.ProdService2
+                      ? data?.ProdService2
+                      : data?.ProdService || data?.Title}
+                  </div>
                   <div
                     className="absolute top-0 right-0 flex items-center justify-center w-12 h-full"
                     onClick={close}
@@ -62,29 +76,30 @@ function PickerServiceOsInfo({ children, data }) {
                   <div className="flex items-center justify-between p-4 border-b border-dashed last:border-0">
                     <div className="text-gray-500">Dịch vụ</div>
                     <div className="w-2/4 font-medium text-right">
-                      {data?.ConvertTitle ? `${data?.ConvertTitle} (Chuyển đổi)` : data?.ProdService}
+                      {data?.ConvertTitle
+                        ? `${data?.ConvertTitle} (Chuyển đổi)`
+                        : data?.ProdService}
                     </div>
                   </div>
                   <div className="flex items-center justify-between p-4 border-b border-dashed last:border-0">
                     <div className="text-gray-500">Giá bán</div>
                     <div className="w-2/4 font-medium text-right">
-                      {
-                        data?.CostMerthod === 1 && StringHelpers.formatVND(data?.Cost1)
-                      }
-                      {
-                        data?.CostMerthod === 2 && StringHelpers.formatVND(data?.Cost2)
-                      }
-                      {
-                        data?.CostMerthod === 3 && StringHelpers.formatVND(data?.Cost3)
-                      }
+                      {data?.CostMerthod === 1 &&
+                        StringHelpers.formatVND(data?.Cost1)}
+                      {data?.CostMerthod === 2 &&
+                        StringHelpers.formatVND(data?.Cost2)}
+                      {data?.CostMerthod === 3 &&
+                        StringHelpers.formatVND(data?.Cost3)}
                     </div>
                   </div>
-                  <div className="flex items-center justify-between p-4 border-b border-dashed last:border-0">
-                    <div className="text-gray-500">Giá Cost</div>
-                    <div className="w-2/4 font-medium text-right">
-                      {StringHelpers.formatVND(data?.CostBase)}
+                  {!DelApp?.hasRight && (
+                    <div className="flex items-center justify-between p-4 border-b border-dashed last:border-0">
+                      <div className="text-gray-500">Giá Cost</div>
+                      <div className="w-2/4 font-medium text-right">
+                        {StringHelpers.formatVND(data?.CostBase)}
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </div>
               </motion.div>
             </div>,

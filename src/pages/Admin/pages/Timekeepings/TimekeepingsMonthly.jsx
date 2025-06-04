@@ -32,7 +32,7 @@ const ItemRender = ({ item }) => {
       <div
         className={clsx(
           "px-4 py-3.5 flex justify-between transition-all",
-          isOpen && "bg-gray-50"
+          isOpen && "bg-gray-200"
         )}
         onClick={() => setIsOpen(!isOpen)}
       >

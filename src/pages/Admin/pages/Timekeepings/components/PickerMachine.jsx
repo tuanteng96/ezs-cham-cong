@@ -104,7 +104,7 @@ function PickerMachine({ children, user }) {
                         render={({ field, fieldState }) => (
                           <Input
                             clearButton
-                            className="[&_input]:rounded [&_input]:placeholder:normal-case"
+                            className="[&_input]:rounded [&_input]:!pr-12 [&_input]:placeholder:normal-case"
                             type="input"
                             placeholder="Nhập mã máy"
                             value={field.value}
