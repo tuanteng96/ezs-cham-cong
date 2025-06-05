@@ -675,7 +675,17 @@ function PosClientManage({ f7route, f7router }) {
           </Link>
         </NavLeft>
         <NavTitle>
-          <Link className="!text-white" noLinkClass panelToggle="left">
+          <Link
+            className={clsx(
+              "!text-white",
+              !Client?.isLoading &&
+                Client?.data?.CheckIn &&
+                Client?.data?.CheckIn?.StockID !== CrStocks?.ID &&
+                "pointer-events-none"
+            )}
+            noLinkClass
+            panelToggle="left"
+          >
             <div className="truncate">{Client?.data?.FullName}</div>
             <div className="text-[11px] leading-4 font-medium opacity-75 font-lato">
               {Client?.data?.MobilePhone}
@@ -689,7 +699,13 @@ function PosClientManage({ f7route, f7router }) {
           !ServicesUse?.isLoading ? (
             <Link
               noLinkClass
-              className="!text-white h-full flex item-center justify-center w-12"
+              className={clsx(
+                "!text-white h-full flex item-center justify-center w-12",
+                !Client?.isLoading &&
+                  Client?.data?.CheckIn &&
+                  Client?.data?.CheckIn?.StockID !== CrStocks?.ID &&
+                  "pointer-events-none"
+              )}
               panelToggle="left"
             >
               <EllipsisHorizontalCircleIcon className="w-8" />
