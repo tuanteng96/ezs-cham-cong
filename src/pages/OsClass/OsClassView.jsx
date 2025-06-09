@@ -327,6 +327,21 @@ function OsClassView({ f7route, f7router }) {
     );
   };
 
+  let isDisabled = () => {
+    if (!data) return false;
+    if (adminTools_byStock?.hasRight) {
+      return !adminTools_byStock?.hasRight;
+    }
+    let TimeIn = moment(data.TimeBegin, "YYYY-MM-DD");
+    const diffInDays = moment().diff(TimeIn, "days");
+    if (diffInDays <= 0) {
+      return (
+        moment().diff(moment(data.TimeBegin, "YYYY-MM-DD HH:mm"), "minutes") < 0
+      );
+    }
+    return diffInDays > 0;
+  };
+
   return (
     <Page
       className="bg-white"
@@ -441,16 +456,14 @@ function OsClassView({ f7route, f7router }) {
                           <>
                             <Link
                               popoverOpen={
-                                moment(data?.TimeBegin).isSameOrBefore(moment())
+                                !isDisabled()
                                   ? `.popover-${item?.Member?.ID}`
                                   : null
                               }
                               noLinkClass
                               className={clsx(
                                 "flex flex-col items-center justify-center",
-                                moment().isSameOrBefore(
-                                  moment(data?.TimeBegin)
-                                ) && "opacity-50"
+                                isDisabled() && "opacity-50"
                               )}
                             >
                               <div className="px-2 py-1 text-white rounded bg-primary">
@@ -558,7 +571,7 @@ function OsClassView({ f7route, f7router }) {
               </div>
             </div>
             <button
-              disabled={isLoading}
+              disabled={isDisabled() || isLoading}
               className="h-12 px-5 font-medium text-white bg-success disabled:opacity-50 w-[200px]"
               type="button"
               onClick={() => {

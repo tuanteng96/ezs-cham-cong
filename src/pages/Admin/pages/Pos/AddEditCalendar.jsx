@@ -478,7 +478,7 @@ function AddEditCalendar({ f7route, f7router }) {
 
   const onSubmit = async (values) => {
     let obj = getQueryPost(values, Auth);
-    
+
     if (values.ID) {
       await changeTagsTelesales(obj);
     }
@@ -831,12 +831,34 @@ function AddEditCalendar({ f7route, f7router }) {
                         placeholder="Chọn trạng thái"
                         value={
                           field.value
-                            ? OptionsStatus.filter(
-                                (x) => x.value === field.value
-                              )[0]
+                            ? OptionsStatus.map((x) => {
+                                let obj = { ...x };
+                                if (
+                                  Desc &&
+                                  Desc.toUpperCase().indexOf(
+                                    "TỰ ĐỘNG ĐẶT LỊCH"
+                                  ) > -1
+                                ) {
+                                  if (obj.value === "XAC_NHAN") {
+                                    obj.label = "Đặt lịch dự kiến";
+                                  }
+                                }
+                                return obj;
+                              }).filter((x) => x.value === field.value)[0]
                             : null
                         }
-                        options={OptionsStatus}
+                        options={OptionsStatus.map((x) => {
+                          let obj = { ...x };
+                          if (
+                            Desc &&
+                            Desc.toUpperCase().indexOf("TỰ ĐỘNG ĐẶT LỊCH") > -1
+                          ) {
+                            if (obj.value === "XAC_NHAN") {
+                              obj.label = "Đặt lịch dự kiến";
+                            }
+                          }
+                          return obj;
+                        })}
                         label="Trạng thái"
                         onChange={(val) => {
                           field.onChange(val?.value || null);
@@ -1049,7 +1071,7 @@ function AddEditCalendar({ f7route, f7router }) {
               control={control}
               render={({ field, fieldState }) => (
                 <Input
-                  className="[&_textarea]:rounded [&_textarea]:lowercase [&_textarea]:placeholder:normal-case"
+                  className="[&_textarea]:rounded [&_textarea]:placeholder:normal-case"
                   type="textarea"
                   placeholder="Nhập ghi chú"
                   value={field.value}

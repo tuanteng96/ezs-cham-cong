@@ -7,6 +7,7 @@ module.exports = {
         app: "#F7B54F",
         primary: "#3E97FF",
         "primary-light": "#E1F0FF",
+        "primary-2": "#18c553",
         success: "#1BC5BD",
         "success-light": "#C9F7F5",
         warning: "#FFA800",

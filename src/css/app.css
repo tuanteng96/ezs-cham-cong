@@ -473,6 +473,10 @@ input:disabled {
     @apply before:hidden after:hidden
 }
 
+.fc-theme-standard .fc-list {
+    border: 0;
+}
+
 /* HTML: <div class="triangle"></div> */
 .triangle-left-top {
     aspect-ratio: 1;

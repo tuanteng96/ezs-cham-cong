@@ -104,9 +104,8 @@ function PickerTimeKeep({ children, item }) {
                 <div className="flex items-center justify-between p-4 mb-3 border rounded">
                   <div className="text-gray-500">Số công</div>
                   <div className="text-base font-semibold font-lato">
-                    {data?.CheckOut
-                      ? data?.Info?.CheckOut?.WorkToday?.Value
-                      : data?.Info?.WorkToday?.Value}
+                    {data?.Info?.CheckOut?.WorkToday?.Value ||
+                      data?.Info?.WorkToday?.Value}
                   </div>
                 </div>
               )}

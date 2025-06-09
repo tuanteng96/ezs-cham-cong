@@ -27,7 +27,7 @@ function PosClientBooks({ f7router, f7route }) {
     ? JSON.parse(f7route?.query?.client)
     : null;
   let Auth = useStore("Auth");
-  
+
   const [idRef, setIdRef] = useState(0);
   let [filters, setFilters] = useState({
     From: moment().subtract(15, "days").toDate(),
@@ -86,52 +86,53 @@ function PosClientBooks({ f7router, f7route }) {
     if (Status === "XAC_NHAN") {
       if (isAuto !== "" && isAuto > -1)
         return {
-          Color: "primary-2",
-          Text: "Xác nhận",
+          Color: "text-primary-2",
+          Text: "Đặt lịch dự kiến",
+          isOnly: true,
         };
       return {
-        Color: "primary",
+        Color: "text-primary",
         Text: "Xác nhận",
       };
     }
     if (Status === "CHUA_XAC_NHAN") {
       return {
-        Color: "warning",
+        Color: "text-warning",
         Text: "Chưa xác nhận",
       };
     }
     if (Status === "KHACH_KHONG_DEN") {
       return {
-        Color: "danger",
+        Color: "text-danger",
         Text: "Khách không đến",
       };
     }
     if (Status === "KHACH_DEN") {
       return {
-        Color: "info",
+        Color: "text-info",
         Text: "Khách đến",
       };
     }
     if (Status === "TU_CHOI") {
       return {
-        Color: "danger",
+        Color: "text-danger",
         Text: "Khách huỷ lịch",
       };
     }
     if (Status === "doing") {
       return {
-        Color: "success",
+        Color: "text-success",
         Text: "Đang thực hiện",
       };
     }
     if (Status === "done") {
       return {
-        Color: "secondary",
+        Color: "text-secondary",
         Text: "Hoàn thành",
       };
     }
     return {
-      Color: "warning",
+      Color: "text-warning",
       Text: "Chưa xác định",
     };
   };
@@ -267,7 +268,7 @@ function PosClientBooks({ f7router, f7route }) {
                       <span
                         className={clsx(
                           "pl-1 font-medium",
-                          "text-" + getStatusClass(item.Status, item).Color
+                          getStatusClass(item.Status, item).Color
                         )}
                       >
                         {getStatusClass(item.Status, item).Text}
