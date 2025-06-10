@@ -573,7 +573,7 @@ function NavigationBase({ pathname }) {
       TotalTime: values.Value,
       TimeFrom: null,
       TimeTo: null,
-      Value: 1,
+      Value: 0,
       hiddenTime: true,
       SalaryHours: WorkTimeToday?.SalaryHours || 0,
     };
