@@ -105,7 +105,7 @@ const AdminAPI = {
     ),
   listMembersBooking: ({ StockID = 0, Key = "", All = "", Token }) =>
     http.get(
-      `/api/gl/select2?cmd=user&roles=DV&crstockid=${StockID}&q=${Key}&All=${All}`,
+      `/api/gl/select2?cmd=user&roles=DV&crstockid=${StockID}&q=${Key}&All=${All}&includeSource=1`,
       {
         headers: {
           Authorization: `Bearer ${Token}`,

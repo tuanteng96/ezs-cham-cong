@@ -473,9 +473,10 @@ function PosAdmin({ f7router }) {
               ...item,
               id: item.id,
               title: item.text,
+              order: item?.source?.Order || 0
             }))
           : [];
-      return [{ id: 0, title: "Chưa chọn nhân viên" }, ...newData];
+      return [{ id: 0, title: "Chưa chọn nhân viên", order: 0 }, ...newData];
     },
     //enabled: filters.view === "resourceTimeGridDay",
   });
@@ -718,7 +719,7 @@ function PosAdmin({ f7router }) {
               : ResourcesBookings?.data || []
           }
           resourceGroupField="RoomTitle"
-          resourceOrder={filters?.view === "resourceTimelineDay" ? "title" : ""}
+          resourceOrder={filters?.view === "resourceTimelineDay" ? "title" : "order,id"}
           views={{
             timeGridDay: {
               allDaySlot: false,
