@@ -718,7 +718,7 @@ function OrderViewAdmin({ f7router, f7route }) {
                     )}
                   </Link>
                 )}
-                {data?.Order?.Status === "finish" && (
+                {data?.Order?.Status === "finish" && data?.Order?.AdminAction !== "TANG_DH_KET_THUC_NO" && (
                   <PickerGiftOrder
                     OrderID={f7route?.params?.id}
                     Order={data?.Order}
@@ -748,8 +748,8 @@ function OrderViewAdmin({ f7router, f7route }) {
                       Huỷ tặng
                     </Link>
                   )}
-
-                {data?.Order?.Status === "finish" && (
+      
+                {data?.Order?.Status === "finish" && data?.Order?.AdminAction !== "TANG_DH_KET_THUC_NO" && (
                   <PickerDebtLockOrder
                     OrderID={f7route?.params?.id}
                     Order={data?.Order}
