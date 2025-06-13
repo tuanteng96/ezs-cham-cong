@@ -718,23 +718,25 @@ function OrderViewAdmin({ f7router, f7route }) {
                     )}
                   </Link>
                 )}
-                {data?.Order?.Status === "finish" && data?.Order?.AdminAction !== "TANG_DH_KET_THUC_NO" && (
-                  <PickerGiftOrder
-                    OrderID={f7route?.params?.id}
-                    Order={data?.Order}
-                  >
-                    {({ open }) => (
-                      <Link
-                        popoverClose
-                        className="p-3 font-medium border-b last:border-0"
-                        noLinkClass
-                        onClick={open}
-                      >
-                        Tặng
-                      </Link>
-                    )}
-                  </PickerGiftOrder>
-                )}
+                {data?.Order?.Status === "finish" &&
+                  data?.Order?.AdminAction !== "TANG_DH_KET_THUC_NO" &&
+                  data?.Order?.AdminAction !== "KHOA_NO_KET_THUC_NO" && (
+                    <PickerGiftOrder
+                      OrderID={f7route?.params?.id}
+                      Order={data?.Order}
+                    >
+                      {({ open }) => (
+                        <Link
+                          popoverClose
+                          className="p-3 font-medium border-b last:border-0"
+                          noLinkClass
+                          onClick={open}
+                        >
+                          Tặng
+                        </Link>
+                      )}
+                    </PickerGiftOrder>
+                  )}
 
                 {data?.Order?.Status === "finish" &&
                   data?.Order?.AdminAction === "TANG_DH_KET_THUC_NO" &&
@@ -748,24 +750,26 @@ function OrderViewAdmin({ f7router, f7route }) {
                       Huỷ tặng
                     </Link>
                   )}
-      
-                {data?.Order?.Status === "finish" && data?.Order?.AdminAction !== "TANG_DH_KET_THUC_NO" && (
-                  <PickerDebtLockOrder
-                    OrderID={f7route?.params?.id}
-                    Order={data?.Order}
-                  >
-                    {({ open }) => (
-                      <Link
-                        popoverClose
-                        className="p-3 font-medium border-b last:border-0"
-                        noLinkClass
-                        onClick={open}
-                      >
-                        Khoá nợ
-                      </Link>
-                    )}
-                  </PickerDebtLockOrder>
-                )}
+
+                {data?.Order?.Status === "finish" &&
+                  data?.Order?.AdminAction !== "TANG_DH_KET_THUC_NO" &&
+                  data?.Order?.AdminAction !== "KHOA_NO_KET_THUC_NO" && (
+                    <PickerDebtLockOrder
+                      OrderID={f7route?.params?.id}
+                      Order={data?.Order}
+                    >
+                      {({ open }) => (
+                        <Link
+                          popoverClose
+                          className="p-3 font-medium border-b last:border-0"
+                          noLinkClass
+                          onClick={open}
+                        >
+                          Khoá nợ
+                        </Link>
+                      )}
+                    </PickerDebtLockOrder>
+                  )}
 
                 {data?.Order?.Status === "finish" &&
                   data?.Order?.AdminAction === "KHOA_NO_KET_THUC_NO" &&
