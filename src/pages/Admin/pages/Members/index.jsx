@@ -53,6 +53,7 @@ function MembersAdmin(props) {
           value: CrStocks?.ID,
         }
       : null,
+    Order: "[Order]",
   });
 
   const MembersQuery = useInfiniteQuery({
@@ -116,6 +117,7 @@ function MembersAdmin(props) {
               ],
             },
             Token: Auth?.token,
+            StockID: CrStocks?.ID,
           },
           {
             onSuccess: () => {

@@ -17,6 +17,7 @@ function PickerRating({ children, initialValues }) {
   const queryClient = useQueryClient();
 
   let Auth = useStore("Auth");
+  let CrStocks = useStore("CrStocks");
 
   const close = () => {
     setVisible(false);
@@ -27,6 +28,7 @@ function PickerRating({ children, initialValues }) {
       AverRate: "",
       ID: "",
       SoCaYeuCau: "",
+      Order: "",
     },
   });
 
@@ -36,6 +38,7 @@ function PickerRating({ children, initialValues }) {
         AverRate: initialValues?.AverRate || "",
         ID: initialValues?.ID || "",
         SoCaYeuCau: initialValues?.SoCaYeuCau || "",
+        Order: initialValues?.Order || "",
       });
     } else {
       reset();
@@ -44,10 +47,12 @@ function PickerRating({ children, initialValues }) {
   }, [visible]);
 
   const updateMutation = useMutation({
-    mutationFn: async (body) => {
-      let rs = await AdminAPI.updateRatingMembers(body);
+    mutationFn: async ({ Rating, Updates }) => {
+      let rs = await AdminAPI.updateRatingMembers(Rating);
+      await AdminAPI.updateMembers(Updates);
+      
       await queryClient.invalidateQueries({
-        queryKey: ["MembersList"],
+        queryKey: ["MembersLists"],
       });
       return rs;
     },
@@ -56,12 +61,26 @@ function PickerRating({ children, initialValues }) {
   const onSubmit = (values) => {
     f7.dialog.preloader("Đang thực hiện ...");
 
+    let newValues = { ...values };
+    delete newValues.Order;
+
     updateMutation.mutate(
       {
-        data: {
-          users: [values],
+        Rating: {
+          users: [newValues],
         },
-        Token: Auth?.token,
+        Updates: {
+          data: {
+            updates: [
+              {
+                UserID: initialValues.ID,
+                Order: values?.Order || 0,
+              },
+            ],
+          },
+          Token: Auth?.token,
+          StockID: CrStocks?.ID
+        },
       },
       {
         onSuccess: () => {
@@ -179,6 +198,40 @@ function PickerRating({ children, initialValues }) {
                       <div className="mt-1">
                         <Controller
                           name="SoCaYeuCau"
+                          control={control}
+                          render={({
+                            field: { ref, ...field },
+                            fieldState,
+                          }) => (
+                            <NumericFormat
+                              className={clsx(
+                                "w-full input-number-format border shadow-[0_4px_6px_0_rgba(16,25,40,.06)] rounded py-3 px-4 focus:border-primary",
+                                fieldState?.invalid
+                                  ? "border-danger"
+                                  : "border-[#d5d7da]"
+                              )}
+                              type="text"
+                              autoComplete="off"
+                              thousandSeparator={false}
+                              placeholder="Nhập số ca"
+                              value={field.value}
+                              onValueChange={(val) => {
+                                field.onChange(
+                                  typeof val.floatValue !== "undefined"
+                                    ? val.floatValue
+                                    : ""
+                                );
+                              }}
+                            />
+                          )}
+                        />
+                      </div>
+                    </div>
+                    <div className="mb-4 last:mb-0">
+                      <div className="font-semibold">Số thứ tự</div>
+                      <div className="mt-1">
+                        <Controller
+                          name="Order"
                           control={control}
                           render={({
                             field: { ref, ...field },
