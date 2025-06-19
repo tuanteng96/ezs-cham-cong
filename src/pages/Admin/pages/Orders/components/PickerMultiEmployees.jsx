@@ -20,6 +20,7 @@ function PickerMultiEmployees({ children, Order }) {
   const queryClient = useQueryClient();
   let Brand = useStore("Brand");
   let Auth = useStore("Auth");
+  let CrStocks = useStore("CrStocks")
 
   const [visible, setVisible] = useState(false);
   const [visibleValues, setVisibleValues] = useState(false);
@@ -229,6 +230,7 @@ function PickerMultiEmployees({ children, Order }) {
       {
         data: dataSubmit,
         Token: Auth?.token,
+        StockID: CrStocks?.ID
       },
       {
         onSuccess: (data) => {

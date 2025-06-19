@@ -1,6 +1,7 @@
 import MenuSubNavbar from "./MenuNavbar/MenuSubNavbar";
 import PanelPos from "./PanelPos";
 import PickerAccumulate from "./PickerAccumulate";
+import PickerAddEditTIP from "./PickerAddEditTIP";
 import PickerAddEditWallet from "./PickerAddEditWallet";
 import PickerAddMember from "./PickerAddMember";
 import PickerAddNoteDiary from "./PickerAddNoteDiary";
@@ -81,5 +82,6 @@ export {
   PickerClassReportFilter,
   PickerSalaryOs,
   PickerClassStudentFilter,
-  PickerHistoryCoachs
+  PickerHistoryCoachs,
+  PickerAddEditTIP
 };

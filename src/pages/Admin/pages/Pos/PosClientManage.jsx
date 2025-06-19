@@ -30,6 +30,7 @@ import { useMutation, useQuery, useQueryClient } from "react-query";
 import {
   PanelPos,
   PickerAccumulate,
+  PickerAddEditTIP,
   PickerAff,
   PickerEditProd,
   PickerPayments,
@@ -1512,21 +1513,64 @@ function PosClientManage({ f7route, f7router }) {
                       </PickerAff>
                       {Brand?.Global?.Admin?.Tips &&
                         Client?.data?.CheckIn?.CreateDate && (
-                          <Link
-                            popoverClose
-                            className="flex justify-between p-3 font-medium border-b last:border-0"
-                            noLinkClass
-                            onClick={onTIP}
+                          <PickerAddEditTIP
+                            Value={Client?.data?.CheckIn?.MemberTipAmount}
+                            Client={Client?.data}
                           >
-                            TIP
-                            {Client?.data?.CheckIn?.MemberTipAmount > 0 && (
-                              <div className="px-1.5 font-semibold text-xs text-white rounded bg-success font-lato flex items-center">
-                                {StringHelpers.formatVND(
-                                  Client?.data?.CheckIn?.MemberTipAmount
-                                )}
-                              </div>
+                            {({ open }) => (
+                              <>
+                                <Link
+                                  //popoverClose
+                                  className="flex justify-between p-3 font-medium border-b last:border-0"
+                                  noLinkClass
+                                  popoverOpen=".popover-tips-menu"
+                                >
+                                  TIP
+                                  {Client?.data?.CheckIn?.MemberTipAmount >
+                                    0 && (
+                                    <div className="px-1.5 font-semibold text-xs text-white rounded bg-success font-lato flex items-center">
+                                      {StringHelpers.formatVND(
+                                        Client?.data?.CheckIn?.MemberTipAmount
+                                      )}
+                                    </div>
+                                  )}
+                                </Link>
+                                <Popover
+                                  className="popover-tips-menu w-[130px]"
+                                  backdropEl="a"
+                                >
+                                  <div className="flex flex-col py-1">
+                                    <Link
+                                      popoverClose
+                                      className="flex justify-between p-3 font-medium border-b last:border-0"
+                                      noLinkClass
+                                      onClick={() => {
+                                        open();
+                                        Dom7(".popover").each(function (el) {
+                                          f7.popover.close(el);
+                                        });
+                                      }}
+                                    >
+                                      Nhập tiền TIP
+                                    </Link>
+                                    <Link
+                                      onClick={() => {
+                                        onTIP();
+                                        Dom7(".popover").each(function (el) {
+                                          f7.popover.close(el);
+                                        });
+                                      }}
+                                      popoverClose
+                                      className="flex justify-between p-3 font-medium border-b last:border-0"
+                                      noLinkClass
+                                    >
+                                      Hiển thị IPAD
+                                    </Link>
+                                  </div>
+                                </Popover>
+                              </>
                             )}
-                          </Link>
+                          </PickerAddEditTIP>
                         )}
                       <PickerAccumulate
                         data={Order?.data?.Order?.TAKE_MM}

@@ -214,6 +214,7 @@ function OrderBonusSalesCommissionAuto({ f7route }) {
       {
         data: dataSubmit,
         Token: Auth?.token,
+        StockID: CrStocks?.ID
       },
       {
         onSuccess: (data) => {
@@ -283,7 +284,7 @@ function OrderBonusSalesCommissionAuto({ f7route }) {
                       {fields &&
                       fields.some((x) => x.Product?.so_lan_thuong > 0) &&
                       item.Product?.so_lan_thuong === 0 ? (
-                        <div className="mt-1 text-danger font-light">
+                        <div className="mt-1 font-light text-danger">
                           (*) Chưa có dữ liệu thưởng lần đầu cho mặt hàng này.
                           Vui lòng tạo thưởng doanh số thủ công cho sản phẩm
                           này.

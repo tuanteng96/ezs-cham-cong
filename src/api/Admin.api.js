@@ -258,11 +258,15 @@ const AdminAPI = {
       },
     }),
   updateMembers: ({ data, Token, StockID }) =>
-    http.post(`/api/v3/User24@Updates?stockid=${StockID}`, JSON.stringify(data), {
-      headers: {
-        Authorization: `Bearer ${Token}`,
-      },
-    }),
+    http.post(
+      `/api/v3/User24@Updates?stockid=${StockID}`,
+      JSON.stringify(data),
+      {
+        headers: {
+          Authorization: `Bearer ${Token}`,
+        },
+      }
+    ),
   suggestMemberUsename: ({ data, Token, StockID }) =>
     http.post(`/admin/smart.aspx?user_sugg=1&stockid=${StockID}`, data, {
       headers: {
@@ -358,8 +362,8 @@ const AdminAPI = {
         Authorization: `Bearer ${Token}`,
       },
     }),
-  clientsViewOrderChangeBonusId: ({ data, Token }) =>
-    http.post(`/api/v3/orderbonus?cmd=calc`, JSON.stringify(data), {
+  clientsViewOrderChangeBonusId: ({ data, Token, StockID }) =>
+    http.post(`/api/v3/orderbonus?cmd=calc&stockid=${StockID}`, JSON.stringify(data), {
       headers: {
         Authorization: `Bearer ${Token}`,
       },
@@ -734,6 +738,12 @@ const AdminAPI = {
     ),
   clientChangeDateBonusOrderId: ({ data, Token, Type = "" }) =>
     http.post(`/api/v3/SysAdminTools@${Type}`, JSON.stringify(data), {
+      headers: {
+        Authorization: `Bearer ${Token}`,
+      },
+    }),
+  clientAddEditTIP: ({ data, Token }) =>
+    http.post(`/api/v3/MemberTip@Tip`, JSON.stringify(data), {
       headers: {
         Authorization: `Bearer ${Token}`,
       },

@@ -197,6 +197,7 @@ function OrderBonusSalesCommission({ f7route }) {
       {
         data: dataSubmit,
         Token: Auth?.token,
+        StockID: CrStocks?.ID
       },
       {
         onSuccess: (data) => {

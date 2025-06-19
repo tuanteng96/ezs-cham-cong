@@ -195,6 +195,7 @@ function PickerOneEmployees({ children, Order }) {
       {
         data: dataSubmit,
         Token: Auth?.token,
+        StockID: CrStocks?.ID
       },
       {
         onSuccess: (data) => {

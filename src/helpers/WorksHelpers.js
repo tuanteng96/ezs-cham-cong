@@ -195,14 +195,18 @@ const WorksHelpers = {
             if (Number(WorkShiftDuration[indexShift].Value) === -60) {
               initialValues[duration > 0 ? "DI_SOM" : "DI_MUON"] = {
                 ...WorkShiftDuration[indexShift],
+                ValueType: WorkShiftDuration[indexShift]?.Value,
+                Duration: duration,
                 Value: Math.round(
                   Math.abs(duration) * ((WorkTimeToday.SalaryHours || 0) / 60)
                 ),
               };
-            } else if (WorkShiftDuration[indexShift].Value >= -10) {
+            } else if (WorkShiftDuration[indexShift].Value > -10) {
               initialValues[duration > 0 ? "DI_SOM" : "DI_MUON"] = {
                 ...WorkShiftDuration[indexShift],
+                ValueType: WorkShiftDuration[indexShift]?.Value,
                 Value: 0,
+                Duration: duration,
                 WorkDays:
                   duration > 0
                     ? Number(
@@ -221,12 +225,16 @@ const WorksHelpers = {
             } else {
               initialValues[duration > 0 ? "DI_SOM" : "DI_MUON"] = {
                 ...WorkShiftDuration[indexShift],
-                Value: Math.abs(duration) * Math.abs(WorkShiftDuration[indexShift].Value),
+                ValueType: WorkShiftDuration[indexShift]?.Value,
+                Duration: duration,
+                Value: Math.abs(duration * WorkShiftDuration[indexShift].Value),
               };
             }
           } else {
             initialValues[duration > 0 ? "DI_SOM" : "DI_MUON"] = {
               ...WorkShiftDuration[indexShift],
+              ValueType: WorkShiftDuration[indexShift]?.Value,
+              Duration: duration,
               Value:
                 WorkShiftDuration[indexShift].Value > 100
                   ? WorkShiftDuration[indexShift].Value
@@ -259,6 +267,8 @@ const WorksHelpers = {
             ) {
               initialValues[duration > 0 ? "VE_SOM" : "VE_MUON"] = {
                 ...WorkShiftDuration[indexShift],
+                ValueType: WorkShiftDuration[indexShift]?.Value,
+                Duration: duration,
                 Value: Math.round(
                   Math.abs(duration) * ((WorkTimeToday.SalaryHours || 0) / 60)
                 ),
@@ -266,6 +276,8 @@ const WorksHelpers = {
             } else if (WorkShiftDuration[indexShift].Value > -10) {
               initialValues[duration > 0 ? "VE_SOM" : "VE_MUON"] = {
                 ...WorkShiftDuration[indexShift],
+                ValueType: WorkShiftDuration[indexShift]?.Value,
+                Duration: duration,
                 Value: 0,
                 WorkDays:
                   duration > 0
@@ -285,12 +297,16 @@ const WorksHelpers = {
             } else {
               initialValues[duration > 0 ? "VE_SOM" : "VE_MUON"] = {
                 ...WorkShiftDuration[indexShift],
-                Value: Math.abs(duration) * Math.abs(WorkShiftDuration[indexShift].Value),
+                Duration: duration,
+                ValueType: WorkShiftDuration[indexShift]?.Value,
+                Value: Math.abs(duration * WorkShiftDuration[indexShift].Value),
               };
             }
           } else {
             initialValues[duration > 0 ? "VE_SOM" : "VE_MUON"] = {
               ...WorkShiftDuration[indexShift],
+              Duration: duration,
+              ValueType: WorkShiftDuration[indexShift]?.Value,
               Value:
                 WorkShiftDuration[indexShift].Value > 100
                   ? WorkShiftDuration[indexShift].Value

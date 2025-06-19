@@ -286,6 +286,10 @@ input:disabled {
     z-index: 1350000;
 }
 
+.popover-backdrop ~ .popover-backdrop.popover-backdrop-unique {
+    z-index: 1350000;
+}
+
 /* FullCalendar */
 
 .fc {
