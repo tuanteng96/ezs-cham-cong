@@ -518,8 +518,8 @@ function PosClassSchedule({ f7router }) {
           </Popover>
         </NavRight>
         <Subnavbar className="[&>div]:px-0 shadow-lg">
-          <div className="w-full">
-            <div className="relative">
+          <div className="flex w-full">
+            <div className="relative flex-1">
               <Input
                 className="[&_input]:border-0 [&_input]:placeholder:normal-case [&_input]:text-[15px] [&_input]:pl-14 [&_input]:pr-4 [&_input]:shadow-none"
                 type="text"
@@ -537,6 +537,36 @@ function PosClassSchedule({ f7router }) {
                 <MagnifyingGlassIcon className="w-6 text-[#cccccc]" />
               </div>
             </div>
+            <Link
+              popoverOpen=".popover-filter-suggest"
+              noLinkClass
+              className="flex items-center justify-center !text-black w-14 relative"
+            >
+              <div className="absolute w-[1px] h-2/4 bg-[#cccccc] left-0"></div>
+              <ChevronDownIcon className="w-6 opacity-60" />
+            </Link>
+            <Popover className="popover-filter-suggest w-[120px]">
+              <div className="flex flex-col py-1">
+                {["1:1", "1:2", "1:3", "1:4"].map((item, index) => (
+                  <Link
+                    className={clsx(
+                      "relative px-4 py-3 font-medium border-b last:border-0"
+                    )}
+                    popoverClose
+                    noLinkClass
+                    key={index}
+                    onClick={() =>
+                      setFilters((prevState) => ({
+                        ...prevState,
+                        Key: item,
+                      }))
+                    }
+                  >
+                    {item}
+                  </Link>
+                ))}
+              </div>
+            </Popover>
           </div>
         </Subnavbar>
         <div className="absolute h-[2px] w-full bottom-0 left-0 bg-[rgba(255,255,255,0.3)]"></div>

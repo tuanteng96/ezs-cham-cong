@@ -435,6 +435,7 @@ function OsClassView({ f7route, f7router }) {
                             item?.Member?.Phone
                           )}
                         </div>
+                        <div className="mt-px font-light text-gray-500">{item?.Os?.Title}</div>
                         {item?.Status && (
                           <div
                             className={clsx(

@@ -472,6 +472,31 @@ function PosClassRequestSchedule({ f7router, f7route }) {
                         </div>
                       </div>
                       <div className="border-t">
+                        {item?.Member?.Lists &&
+                          item?.Member?.Lists.map((m, i) => (
+                            <div
+                              className="border-b border-dashed last:border-0"
+                              key={i}
+                            >
+                              <div className="flex justify-between px-4 py-2.5 border-b border-dashed last:border-0">
+                                <div className="text-gray-500 w-[90px]">
+                                  Khách hàng
+                                </div>
+                                <div className="flex-1 text-right">
+                                  {m?.Member?.FullName}
+                                </div>
+                              </div>
+                              <div className="flex justify-between px-4 py-2.5 border-b border-dashed last:border-0">
+                                <div className="text-gray-500 w-[90px]">
+                                  Số điện thoại
+                                </div>
+                                <div className="flex-1 text-right">
+                                  {m?.Member?.Phone}
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+
                         <div className="flex justify-between px-4 py-2.5 border-b border-dashed last:border-0">
                           <div className="text-gray-500 w-[90px]">Cơ sở</div>
                           <div className="flex-1 text-right">

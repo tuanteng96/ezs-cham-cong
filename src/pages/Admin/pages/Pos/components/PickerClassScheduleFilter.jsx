@@ -7,6 +7,7 @@ import { Button, useStore } from "framework7-react";
 import { SelectClients, SelectMembers } from "@/partials/forms/select";
 import { DatePicker, SelectPicker } from "@/partials/forms";
 import { RolesHelpers } from "@/helpers/RolesHelpers";
+import moment from "moment";
 
 function PickerClassScheduleFilter({ children, filters, onChange }) {
   const [visible, setVisible] = useState(false);
@@ -27,7 +28,7 @@ function PickerClassScheduleFilter({ children, filters, onChange }) {
       TeachIDs: [],
       CrDate: new Date(),
       Time: null,
-      isClassOpen: false
+      isClassOpen: false,
     },
   });
 
@@ -111,7 +112,19 @@ function PickerClassScheduleFilter({ children, filters, onChange }) {
                             errorMessage={fieldState?.error?.message}
                             errorMessageForce={fieldState?.invalid}
                             value={field.value}
-                            onChange={field.onChange}
+                            onChange={(e) => {
+                              if (!field.value) {
+                                field.onChange(
+                                  moment(e)
+                                    .set({
+                                      minute: "00",
+                                    })
+                                    .toDate()
+                                );
+                              } else {
+                                field.onChange(e);
+                              }
+                            }}
                             placeholder="Chọn giờ học"
                             showHeader
                             clear
