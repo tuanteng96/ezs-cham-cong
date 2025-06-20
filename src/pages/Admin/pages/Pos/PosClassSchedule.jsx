@@ -2,11 +2,16 @@ import AdminAPI from "@/api/Admin.api";
 import NoFound from "@/components/NoFound";
 import PromHelpers from "@/helpers/PromHelpers";
 import {
+  ChevronDownIcon,
   ChevronLeftIcon,
   EllipsisVerticalIcon,
   ListBulletIcon,
+  MagnifyingGlassIcon,
+  PhotoIcon,
+  ShoppingCartIcon,
 } from "@heroicons/react/24/outline";
 import {
+  Input,
   Link,
   NavLeft,
   NavRight,
@@ -14,6 +19,7 @@ import {
   Navbar,
   Page,
   Popover,
+  Subnavbar,
   f7,
   useStore,
 } from "framework7-react";
@@ -22,6 +28,8 @@ import React, { useState } from "react";
 import { useMutation, useQuery } from "react-query";
 import { PickerClassScheduleFilter } from "./components";
 import clsx from "clsx";
+import { DatePickerWrap } from "@/partials/forms";
+import StringHelpers from "@/helpers/StringHelpers";
 
 let RenderItems = ({ item, onOpenClass, filters }) => {
   let [show, setShow] = useState(false);
@@ -121,6 +129,8 @@ function PosClassSchedule({ f7router }) {
         }
       : null,
     isClassOpen: false,
+    Key: "",
+    Time: null,
   });
 
   const { data, refetch, isLoading } = useQuery({
@@ -280,6 +290,24 @@ function PosClassSchedule({ f7router }) {
           Items: x.Items ? x.Items.filter((o) => o.ClassInfo) : [],
         })).filter((x) => x.Items && x.Items.length > 0);
       }
+      if (filters.Key) {
+        Result = Result.filter((x) =>
+          StringHelpers.ConvertViToEn(x?.Class?.Title, true).includes(
+            StringHelpers.ConvertViToEn(filters.Key, true)
+          )
+        );
+      }
+      if (filters.Time) {
+        Result = Result.map((x) => ({
+          ...x,
+          Items: x.Items
+            ? x.Items.filter(
+                (o) => o.TimeFrom === moment(filters.Time).format("HH:mm")
+              )
+            : [],
+        })).filter((x) => x.Items && x.Items.length > 0);
+      }
+
       return Result;
     },
   });
@@ -489,6 +517,28 @@ function PosClassSchedule({ f7router }) {
             </div>
           </Popover>
         </NavRight>
+        <Subnavbar className="[&>div]:px-0 shadow-lg">
+          <div className="w-full">
+            <div className="relative">
+              <Input
+                className="[&_input]:border-0 [&_input]:placeholder:normal-case [&_input]:text-[15px] [&_input]:pl-14 [&_input]:pr-4 [&_input]:shadow-none"
+                type="text"
+                placeholder="Tên lớp học ..."
+                value={filters.Key}
+                clearButton={true}
+                onInput={(e) => {
+                  setFilters((prevState) => ({
+                    ...prevState,
+                    Key: e.target.value,
+                  }));
+                }}
+              />
+              <div className="absolute top-0 left-0 flex items-center justify-center h-full px-4 pointer-events-none">
+                <MagnifyingGlassIcon className="w-6 text-[#cccccc]" />
+              </div>
+            </div>
+          </div>
+        </Subnavbar>
         <div className="absolute h-[2px] w-full bottom-0 left-0 bg-[rgba(255,255,255,0.3)]"></div>
       </Navbar>
       {isLoading && (

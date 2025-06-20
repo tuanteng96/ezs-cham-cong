@@ -15,7 +15,7 @@ const years = [...Array(2112 - 1900).keys()].map((i) => (i + 1990).toString());
 const hoursList = Array(23)
   .fill()
   .map((_, i) => i.toString());
-const minuteList = Array(23)
+const minuteList = Array(59)
   .fill()
   .map((_, i) => (i < 10 ? "0" + i : i.toString()));
 
@@ -30,7 +30,7 @@ function DatePickerWrap({ children, value, format, onChange, label, showHeader =
     months: "",
     years: "",
   });
-
+  
   useEffect(() => {
     setPickerValue((prevState) => ({
       ...prevState,
@@ -160,7 +160,7 @@ function DatePickerWrap({ children, value, format, onChange, label, showHeader =
                         ))}
                       </Picker.Column>
                     )}
-
+                    
                     {format.includes("mm") && (
                       <Picker.Column key="minutes" name="minutes">
                         {minuteList.map((minute, i) => (

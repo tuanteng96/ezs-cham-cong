@@ -26,6 +26,7 @@ function PickerClassScheduleFilter({ children, filters, onChange }) {
       StockID: [],
       TeachIDs: [],
       CrDate: new Date(),
+      Time: null,
       isClassOpen: false
     },
   });
@@ -95,6 +96,25 @@ function PickerClassScheduleFilter({ children, filters, onChange }) {
                             onChange={field.onChange}
                             placeholder="Chọn ngày"
                             showHeader
+                          />
+                        )}
+                      />
+                    </div>
+                    <div className="mb-3.5 last:mb-0">
+                      <div className="mb-px font-light">Giờ học</div>
+                      <Controller
+                        name="Time"
+                        control={control}
+                        render={({ field, fieldState }) => (
+                          <DatePicker
+                            format="HH:mm"
+                            errorMessage={fieldState?.error?.message}
+                            errorMessageForce={fieldState?.invalid}
+                            value={field.value}
+                            onChange={field.onChange}
+                            placeholder="Chọn giờ học"
+                            showHeader
+                            clear
                           />
                         )}
                       />
