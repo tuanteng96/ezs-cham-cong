@@ -415,7 +415,11 @@ function PosClassSchedule({ f7router }) {
         }
       }
 
-      return filters.SortToTime ? SortTimeList : Result;
+      return filters.SortToTime
+        ? SortTimeList.sort((left, right) =>
+            moment.utc(left.DateFrom).diff(moment.utc(right.DateFrom))
+          )
+        : Result;
     },
   });
 
