@@ -28,7 +28,6 @@ import React, { useState } from "react";
 import { useMutation, useQuery } from "react-query";
 import { PickerClassScheduleFilter } from "./components";
 import clsx from "clsx";
-import { DatePickerWrap } from "@/partials/forms";
 import StringHelpers from "@/helpers/StringHelpers";
 
 let RenderItems = ({ item, onOpenClass, filters }) => {
@@ -114,6 +113,87 @@ let RenderItems = ({ item, onOpenClass, filters }) => {
   );
 };
 
+let RenderSortTimeItems = ({ item, onOpenClass, filters }) => {
+  let [show, setShow] = useState(false);
+
+  return (
+    <div className="mb-3.5 last:mb-0 border shadow rounded">
+      <div className="sticky top-0 pl-4 bg-gray-50 py-2.5 flex justify-between pr-1">
+        <div>
+          <div className="font-semibold text-[15px] text-primary">
+            {item.TimeFrom}
+            <span className="px-1">-</span>
+            {item.TimeEnd}
+          </div>
+          <div className="font-medium text-gray-700 font-lato">
+            Ngày {moment(filters.CrDate).format("DD-MM-YYYY")}
+          </div>
+        </div>
+        <div
+          className="flex items-center justify-center w-12"
+          onClick={() => setShow(!show)}
+        >
+          <ListBulletIcon className="text-gray-800 w-7" />
+        </div>
+      </div>
+      {show && (
+        <div className="p-4 border-t">
+          {item.Items && item.Items.length > 0 && (
+            <>
+              {item.Items.map((cls, idx) => (
+                <div
+                  className={clsx(
+                    !cls?.ClassInfo && "bg-[#a3a2a2]",
+                    cls?.ClassInfo && cls?.className,
+                    "text-white rounded mb-2 last:mb-0 p-2"
+                  )}
+                  key={idx}
+                  onClick={() => onOpenClass(cls)}
+                >
+                  <div className="font-lato font-semibold text-[15px] mb-1">
+                    {cls?.Class?.Title}
+                  </div>
+                  <div>
+                    Tổng số học viên :
+                    <span className="pl-1 font-medium font-lato">
+                      {cls?.ClassInfo?.Member?.Lists?.length || 0}
+                      <span className="px-px">/</span>
+                      {cls?.Class?.MemberTotal}
+                    </span>
+                  </div>
+                  <div>
+                    HLV :
+                    <span className="pl-1">
+                      {cls?.ClassInfo?.Teacher?.FullName || "Chưa có"}
+                    </span>
+                  </div>
+                  {cls?.ClassInfo && (
+                    <div>
+                      Điểm danh đến :
+                      <span className="pl-1 font-semibold font-lato">
+                        {cls?.ClassInfo?.Member?.Lists?.filter(
+                          (x) => x.Status === "DIEM_DANH_DEN"
+                        ).length || 0}
+                      </span>
+                      <span className="px-1">/</span>
+                      <span>Vắng : </span>
+                      <span className="pl-1 font-semibold font-lato">
+                        {cls?.ClassInfo?.Member?.Lists?.filter(
+                          (x) => x.Status === "DIEM_DANH_KHONG_DEN"
+                        ).length || 0}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </>
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
+
 function PosClassSchedule({ f7router }) {
   let Auth = useStore("Auth");
   let CrStocks = useStore("CrStocks");
@@ -131,6 +211,7 @@ function PosClassSchedule({ f7router }) {
     isClassOpen: false,
     Key: "",
     Time: null,
+    SortToTime: false,
   });
 
   const { data, refetch, isLoading } = useQuery({
@@ -308,7 +389,33 @@ function PosClassSchedule({ f7router }) {
         })).filter((x) => x.Items && x.Items.length > 0);
       }
 
-      return Result;
+      let SortTimeList = [];
+      for (let item of Result) {
+        for (let time of item.Items) {
+          let index = SortTimeList.findIndex(
+            (x) => x.TimeFrom === time.TimeFrom
+          );
+          if (index > -1) {
+            SortTimeList[index].Items = [
+              ...SortTimeList[index].Items,
+              {
+                ...time,
+              },
+            ];
+          } else {
+            SortTimeList.push({
+              TimeFrom: time.TimeFrom,
+              TimeEnd: moment(time.DateFrom)
+                .add(time.Class.Minutes, "minutes")
+                .format("HH:mm"),
+              DateFrom: time.DateFrom,
+              Items: [time],
+            });
+          }
+        }
+      }
+
+      return filters.SortToTime ? SortTimeList : Result;
     },
   });
 
@@ -468,8 +575,8 @@ function PosClassSchedule({ f7router }) {
           >
             <EllipsisVerticalIcon className="w-6" />
           </Link>
-          <Popover className={`popover-class-filter w-[170px]`}>
-            <div className="flex flex-col py-2">
+          <Popover className={`popover-class-filter w-[190px]`}>
+            <div className="flex flex-col py-2.5">
               <PickerClassScheduleFilter
                 filters={filters}
                 onChange={(val) => {
@@ -491,7 +598,7 @@ function PosClassSchedule({ f7router }) {
                 )}
               </PickerClassScheduleFilter>
               <Link
-                className="relative px-4 py-2"
+                className="relative px-4 py-2.5"
                 href="/admin/pos/calendar/class-schedule/students/"
                 noLinkClass
                 popoverClose
@@ -499,7 +606,7 @@ function PosClassSchedule({ f7router }) {
                 <span>Xem theo học viên</span>
               </Link>
               <Link
-                className="relative px-4 py-2"
+                className="relative px-4 py-2.5"
                 href="/admin/pos/calendar/class-schedule/report/"
                 noLinkClass
                 popoverClose
@@ -507,12 +614,35 @@ function PosClassSchedule({ f7router }) {
                 <span>Thống kê</span>
               </Link>
               <Link
-                className="relative px-4 py-2"
+                className="relative px-4 py-2.5"
                 href="/admin/pos/calendar/class-schedule/request/"
                 noLinkClass
                 popoverClose
               >
                 <span>Danh sách yêu cầu</span>
+              </Link>
+              <Link
+                popoverClose
+                className="relative flex justify-between px-4 py-2.5"
+                noLinkClass
+                onClick={() => {
+                  setFilters((prevState) => ({
+                    ...prevState,
+                    SortToTime: !filters.SortToTime,
+                  }));
+                }}
+              >
+                Xem theo giờ
+                <div className="w-9 h-5 bg-[#EBEDF3] rounded-[30px] relative items-center">
+                  <div
+                    className={clsx(
+                      "h-[15px] w-[15px] absolute shadow rounded-full top-2/4 -translate-y-2/4",
+                      filters.SortToTime
+                        ? "right-1 bg-primary"
+                        : "left-1 bg-white"
+                    )}
+                  ></div>
+                </div>
               </Link>
             </div>
           </Popover>
@@ -603,14 +733,32 @@ function PosClassSchedule({ f7router }) {
         <div className="pb-safe-b">
           {data && data.length > 0 && (
             <div className="p-4">
-              {data.map((item, index) => (
-                <RenderItems
-                  key={index}
-                  item={item}
-                  onOpenClass={onOpenClass}
-                  filters={filters}
-                />
-              ))}
+              <>
+                {filters.SortToTime && (
+                  <>
+                    {data.map((item, index) => (
+                      <RenderSortTimeItems
+                        key={index}
+                        item={item}
+                        onOpenClass={onOpenClass}
+                        filters={filters}
+                      />
+                    ))}
+                  </>
+                )}
+                {!filters.SortToTime && (
+                  <>
+                    {data.map((item, index) => (
+                      <RenderItems
+                        key={index}
+                        item={item}
+                        onOpenClass={onOpenClass}
+                        filters={filters}
+                      />
+                    ))}
+                  </>
+                )}
+              </>
             </div>
           )}
           {(!data || data.length === 0) && (
