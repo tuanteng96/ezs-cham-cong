@@ -31,6 +31,7 @@ function PickerClassOsMemberAddEdit({
     defaultValues: {
       Member: null,
       Service: null,
+      IsAllService: false,
     },
     resolver: yupResolver(schema),
   });
@@ -137,8 +138,8 @@ function PickerClassOsMemberAddEdit({
     handleSubmit(onSubmit)(e);
   };
 
-  let { Member } = watch();
-
+  let { Member, IsAllService } = watch();
+ 
   return (
     <AnimatePresence initial={false}>
       <>
@@ -199,12 +200,33 @@ function PickerClassOsMemberAddEdit({
                       />
                     </div>
                     <div className="mb-3.5 last:mb-0">
-                      <div className="mb-px">Thẻ liệu trình</div>
+                      <div className="flex justify-between mb-2">
+                        <div>Thẻ liệu trình</div>
+                        <Controller
+                          name="IsAllService"
+                          control={control}
+                          render={({
+                            field: { ref, ...field },
+                            fieldState,
+                          }) => (
+                            <label className="relative inline-flex items-center cursor-pointer">
+                              <input
+                                type="checkbox"
+                                className="sr-only peer"
+                                {...field}
+                                checked={field.value}
+                              />
+                              <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600" />
+                            </label>
+                          )}
+                        />
+                      </div>
                       <Controller
                         name="Service"
                         control={control}
                         render={({ field, fieldState }) => (
                           <SelectServicesOsClass
+                            IsAllService={IsAllService}
                             callback={(val) => setValue("Service", val)}
                             isDisabled={!Member}
                             Member={Member || null}

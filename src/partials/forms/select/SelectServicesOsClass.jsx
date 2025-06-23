@@ -8,18 +8,19 @@ function SelectServicesOsClass({
   ProdIDs,
   DateFrom,
   Member,
+  IsAllService = false,
   callback,
   ...props
 }) {
   let Auth = useStore("Auth");
 
   let { data } = useQuery({
-    queryKey: ["SelectServicesOsClass", { ProdIDs, DateFrom, Member }],
+    queryKey: ["SelectServicesOsClass", { Member, IsAllService }],
     queryFn: async () => {
       const { data } = await AdminAPI.selectServicesOsClass({
         data: {
           MemberIDs: Member?.value ? [Member?.value] : [],
-          ProdIDs: ProdIDs ? ProdIDs.split(",") : [],
+          ProdIDs: !IsAllService && ProdIDs ? ProdIDs.split(",") : [],
           Date: DateFrom ? moment(DateFrom).format("YYYY-MM-DD") : null,
         },
         Token: Auth?.token || "",
