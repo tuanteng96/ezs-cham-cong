@@ -147,7 +147,9 @@ function OsClassView({ f7route, f7router }) {
           let newLists = [...rs.Member.Lists];
 
           let index = newLists.findIndex(
-            (x) => x?.Member?.ID === rowData?.Member?.ID
+            (x) =>
+              x?.Member?.ID === rowData?.Member?.ID &&
+              x?.Os?.ID === rowData?.Os?.ID
           );
 
           if (index > -1) {
@@ -435,7 +437,9 @@ function OsClassView({ f7route, f7router }) {
                             item?.Member?.Phone
                           )}
                         </div>
-                        <div className="mt-px font-light text-gray-500">{item?.Os?.Title}</div>
+                        <div className="mt-px font-light text-gray-500">
+                          {item?.Os?.Title}
+                        </div>
                         {item?.Status && (
                           <div
                             className={clsx(

@@ -195,7 +195,7 @@ function PosClassOsSchedule({ f7router, f7route }) {
           };
 
           let index = values.Member.Lists.findIndex(
-            (x) => x?.Member?.ID === rowData?.Member?.ID
+            (x) => x?.Member?.ID === rowData?.Member?.ID && x?.Os?.ID === rowData?.Os?.ID
           );
           if (index > -1) {
             values.Member.Lists[index]["Status"] = Status.value;
@@ -305,7 +305,7 @@ function PosClassOsSchedule({ f7router, f7route }) {
           };
 
           values.Member.Lists = values.Member.Lists.filter(
-            (x) => x.Member.ID !== rowData?.Member?.ID
+            (x) => !(x.Member.ID === rowData?.Member?.ID && x?.Os?.ID === rowData?.Os?.ID)
           );
 
           updateOsStatusMutation.mutate(
