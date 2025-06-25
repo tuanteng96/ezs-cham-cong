@@ -1,6 +1,6 @@
 import AdminAPI from "@/api/Admin.api";
 import { RolesHelpers } from "@/helpers/RolesHelpers";
-import { SelectPicker } from "@/partials/forms";
+import { DatePicker, SelectPicker } from "@/partials/forms";
 import { TrashIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import clsx from "clsx";
 import { AnimatePresence, motion } from "framer-motion";
@@ -124,6 +124,13 @@ function PickerEditHisPayment({
                       stk: item?.BankNumber.split("|")[2],
                     }
                   : null,
+                AdminCreateDate: moment()
+                  .set({
+                    date: data?.D,
+                    month: data?.M - 1,
+                    year: data?.Y,
+                  })
+                  .toDate(),
               };
               let index = Order?.OrderItems?.findIndex(
                 (x) => x.ProdID === item?.ProdID
@@ -172,6 +179,13 @@ function PickerEditHisPayment({
             _MethodID: item?.MethodID,
             Value: Math.abs(item?.Value),
             Value0: Math.abs(item?.Value),
+            AdminCreateDate: moment()
+              .set({
+                date: data?.D,
+                month: data?.M - 1,
+                year: data?.Y,
+              })
+              .toDate(),
           };
           let index = Order?.OrderItems?.findIndex(
             (x) => x.ID === item?.ProdID
@@ -180,7 +194,7 @@ function PickerEditHisPayment({
           newPayments.push(obj);
         }
       }
-      setTypeMethodsNew(newTypeMethodsNew)
+      setTypeMethodsNew(newTypeMethodsNew);
       setValue("Payments", newPayments);
       setValue("Removes", []);
     }
@@ -216,46 +230,6 @@ function PickerEditHisPayment({
   });
 
   const onSubmit = (values) => {
-    // if (
-    //   values?.Payments &&
-    //   values?.Payments.some((x) =>
-    //     Brand?.Global?.Admin?.Pos_quan_ly?.thanh_toan_dh?.thanh_toan_vi_tt_am
-    //       ? typeof x?.MethodID?.Total !== "undefined" &&
-    //         x?.MethodID?.Total < x.Value &&
-    //         x?.MethodID?.Type === "THE_TIEN"
-    //       : typeof x?.MethodID?.Total !== "undefined" &&
-    //         x?.MethodID?.Total < x.Value
-    //   )
-    // ) {
-    //   for (let [i, pay] of values?.Payments.entries()) {
-    //     if (
-    //       pay?.MethodID?.Type === "VI" &&
-    //       !Brand?.Global?.Admin?.Pos_quan_ly?.thanh_toan_dh
-    //         ?.thanh_toan_vi_tt_am &&
-    //       typeof pay?.MethodID?.Total !== "undefined" &&
-    //       pay?.MethodID?.Total < pay.Value
-    //     ) {
-    //       setError(`Payments[${i}].Value`, {
-    //         type: "Client",
-    //         message: "Số dư trong ví không đủ.",
-    //         shouldFocus: true,
-    //       });
-    //     }
-    //     if (
-    //       pay?.MethodID?.Type === "THE_TIEN" &&
-    //       typeof pay?.MethodID?.Total !== "undefined" &&
-    //       pay?.MethodID?.Total < pay.Value
-    //     ) {
-    //       setError(`Payments[${i}].Value`, {
-    //         type: "Client",
-    //         message: "Số dư thẻ tiền không đủ.",
-    //         shouldFocus: true,
-    //       });
-    //     }
-    //   }
-    //   return;
-    // }
-
     let newPayment = values?.Payments
       ? values?.Payments.map((x) => {
           let obj = {
@@ -265,6 +239,7 @@ function PickerEditHisPayment({
               Number(x.MethodID?.value) === 2 && x.BankNumber
                 ? `${x.BankNumber?.ngan_hang}|${x.BankNumber?.ten}|${x.BankNumber?.stk}`
                 : "",
+            AdminCreateDate: moment(x.AdminCreateDate).format("YYYY-MM-DD"),
           };
           delete obj.id;
           return obj;
@@ -380,6 +355,33 @@ function PickerEditHisPayment({
                             </Link>
                           </div>
                           <div className="p-4">
+                            {adminTools_byStock?.hasRight && (
+                              <div className="mb-3.5 last:mb-0">
+                                <div className="mb-1 text-gray-500">
+                                  Ngày thanh toán
+                                </div>
+                                <Controller
+                                  name={`Payments[${index}].AdminCreateDate`}
+                                  control={control}
+                                  render={({ field, fieldState }) => (
+                                    <div className="relative">
+                                      <DatePicker
+                                        format="DD/MM/YYYY"
+                                        errorMessage={
+                                          fieldState?.error?.message
+                                        }
+                                        errorMessageForce={fieldState?.invalid}
+                                        value={field.value}
+                                        onChange={field.onChange}
+                                        placeholder="Chọn ngày"
+                                        showHeader
+                                      />
+                                    </div>
+                                  )}
+                                />
+                              </div>
+                            )}
+
                             <div className="mb-3.5 last:mb-0">
                               <div className="mb-1 text-gray-500">Giá trị</div>
                               <Controller
