@@ -19,7 +19,7 @@ function BonusSalesAuto({ name, adminTools_byStock }) {
   });
 
   let isHiddenPrice = false;
-  if (Brand?.Global?.Admin.hoa_hong_an_gia) {
+  if (Brand?.Global?.Admin?.hoa_hong_an_gia) {
     if (!adminTools_byStock?.hasRight) isHiddenPrice = true;
   }
 

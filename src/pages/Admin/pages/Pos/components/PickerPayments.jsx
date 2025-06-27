@@ -187,48 +187,61 @@ function PickerPayments({ children, Order, Client }) {
               gia_tri: DebtPay + (Client?.CheckIn?.MemberTipAmount || 0),
             };
             delete p.open;
-            BanksTransfer.open(p);
 
-            remove(
-              ref(
-                database,
-                "qrpay/" +
-                  Brand?.Domain?.replace(/^https?:\/\//, "")
-                    .replaceAll(".", "_")
-                    .toUpperCase() +
-                  "/" +
-                  CrStocks?.ID
-              )
-            )
-              .then(function () {
-                set(
-                  ref(
-                    database,
-                    "qrpay/" +
-                      Brand?.Domain?.replace(/^https?:\/\//, "")
-                        .replaceAll(".", "_")
-                        .toUpperCase() +
-                      "/" +
-                      CrStocks?.ID +
-                      "/" +
-                      p.don_hang
-                  ),
-                  {
-                    ...p,
-                    TokenDate: moment(new Date()).format("HH:mm DD/MM/YYYY"),
-                  }
+            if (BanksTransfer) {
+              BanksTransfer.open && BanksTransfer.open(p);
+
+              remove(
+                ref(
+                  database,
+                  "qrpay/" +
+                    Brand?.Domain?.replace(/^https?:\/\//, "")
+                      .replaceAll(".", "_")
+                      .toUpperCase() +
+                    "/" +
+                    CrStocks?.ID
                 )
-                  .then(() => {
-                    console.log("Đã bật");
-                    //
-                  })
-                  .catch((error) => {
-                    console.log(error);
-                  });
-              })
-              .catch(function (error) {
-                console.log("Remove failed: " + error.message);
-              });
+              )
+                .then(function () {
+                  set(
+                    ref(
+                      database,
+                      "qrpay/" +
+                        Brand?.Domain?.replace(/^https?:\/\//, "")
+                          .replaceAll(".", "_")
+                          .toUpperCase() +
+                        "/" +
+                        CrStocks?.ID +
+                        "/" +
+                        p.don_hang
+                    ),
+                    {
+                      ...p,
+                      TokenDate: moment(new Date()).format("HH:mm DD/MM/YYYY"),
+                    }
+                  )
+                    .then(() => {
+                      console.log("Đã bật");
+                      //
+                    })
+                    .catch((error) => {
+                      console.log(error);
+                    });
+                })
+                .catch(function (error) {
+                  console.log("Remove failed: " + error.message);
+                });
+            } else {
+              close();
+              f7.dialog.confirm(
+                "Bạn có muốn thực hiện thưởng hoa hồng & doanh số cho lần thanh toán này ?",
+                () => {
+                  f7.views.main.router.navigate(
+                    `/admin/pos/orders/view/${Order?.ID}/bonus-sales-commission/`
+                  );
+                }
+              );
+            }
           }
           if (Type.MethodID === 3) {
             close();
