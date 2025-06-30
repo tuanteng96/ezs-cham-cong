@@ -129,7 +129,14 @@ function PosClassOsSchedule({ f7router, f7route }) {
   });
 
   const updateOsStatusMutation = useMutation({
-    mutationFn: async ({ data, update, addPoint, deletePoint, Token }) => {
+    mutationFn: async ({
+      data,
+      update,
+      addPoint,
+      deletePoint,
+      Token,
+      OsReset,
+    }) => {
       let rs = await AdminAPI.addEditClassSchedule({
         data: data,
         Token,
@@ -138,11 +145,20 @@ function PosClassOsSchedule({ f7router, f7route }) {
         data: update,
         Token,
       });
-      if (addPoint)
+      if (addPoint) {
         await ClassOsAPI.addEditPointOsMember({ data: addPoint, Token });
+      }
 
-      if (deletePoint)
+      if (deletePoint) {
         await ClassOsAPI.deletePointOsMember({ data: deletePoint, Token });
+      }
+
+      if (Brand?.Global?.Admin?.lop_hoc_pt_reset_enddate) {
+        await ClassOsAPI.resetEndDateOs({
+          data: OsReset,
+          Token,
+        });
+      }
 
       await refetch();
       await queryClient.invalidateQueries({ queryKey: ["PosClassSchedule"] });
@@ -195,7 +211,9 @@ function PosClassOsSchedule({ f7router, f7route }) {
           };
 
           let index = values.Member.Lists.findIndex(
-            (x) => x?.Member?.ID === rowData?.Member?.ID && x?.Os?.ID === rowData?.Os?.ID
+            (x) =>
+              x?.Member?.ID === rowData?.Member?.ID &&
+              x?.Os?.ID === rowData?.Os?.ID
           );
           if (index > -1) {
             values.Member.Lists[index]["Status"] = Status.value;
@@ -250,6 +268,9 @@ function PosClassOsSchedule({ f7router, f7route }) {
                     }
                   : null,
                 deletePoint: deletePoints,
+                OsReset: {
+                  osID: rowData?.Os?.ID,
+                },
                 Token: Auth?.token,
               },
               {
@@ -305,7 +326,11 @@ function PosClassOsSchedule({ f7router, f7route }) {
           };
 
           values.Member.Lists = values.Member.Lists.filter(
-            (x) => !(x.Member.ID === rowData?.Member?.ID && x?.Os?.ID === rowData?.Os?.ID)
+            (x) =>
+              !(
+                x.Member.ID === rowData?.Member?.ID &&
+                x?.Os?.ID === rowData?.Os?.ID
+              )
           );
 
           updateOsStatusMutation.mutate(
@@ -822,6 +847,7 @@ function PosClassOsSchedule({ f7router, f7route }) {
                             </div>
                           </div>
                         </div>
+
                         <div className="grid grid-cols-2 gap-3 px-4 py-2.5 border-t">
                           {item.Status ? (
                             <>

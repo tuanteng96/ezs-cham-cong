@@ -244,6 +244,8 @@ function PosClientServices({ f7router, f7route }) {
       name="Pos-client-diary"
       noToolbar
       onPageBeforeIn={() => PromHelpers.STATUS_BAR_COLOR("light")}
+      ptr
+      onPtrRefresh={(done) => Services.refetch().then(() => done())}
     >
       <Navbar innerClass="!px-0 text-white" outline={false}>
         <NavLeft className="h-full">
@@ -255,7 +257,10 @@ function PosClientServices({ f7router, f7route }) {
             <ChevronLeftIcon className="w-6" />
           </Link>
         </NavLeft>
-        <NavTitle>Quản lý thẻ dịch vụ</NavTitle>
+        <NavTitle
+        >
+          Quản lý thẻ dịch vụ
+        </NavTitle>
         <div className="absolute h-[2px] w-full bottom-0 left-0 bg-[rgba(255,255,255,0.3)]"></div>
         <Subnavbar>
           <div className="w-full h-full px-2">
@@ -607,6 +612,26 @@ function PosClientServices({ f7router, f7route }) {
                               )}
                             </div>
                           )}
+                          {service?.BookPredictDate && (
+                            <div className="px-4 pb-4 font-medium text-gray-600">
+                              Dự kiến buổi tiếp :
+                              <span className="pl-1 font-semibold font-lato text-[15px]">
+                                {moment(service.BookPredictDate).format(
+                                  "HH:mm DD/MM/YYYY"
+                                )}
+                              </span>
+                            </div>
+                          )}
+                          {service.Services &&
+                            service.Services.some(
+                              (x) =>
+                                x.Desc &&
+                                x.Desc.toUpperCase().indexOf("BẢO LƯU") > -1
+                            ) && (
+                              <div className="px-4 pb-4 font-medium text-warning text-[15px]">
+                                Đang bảo lưu
+                              </div>
+                            )}
                         </div>
                       ))}
                     </div>

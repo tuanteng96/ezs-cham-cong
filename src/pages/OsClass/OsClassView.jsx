@@ -115,7 +115,14 @@ function OsClassView({ f7route, f7router }) {
   });
 
   const updateOsStatusMutation = useMutation({
-    mutationFn: async ({ data, update, addPoint, deletePoint, Token }) => {
+    mutationFn: async ({
+      data,
+      update,
+      addPoint,
+      deletePoint,
+      OsReset,
+      Token,
+    }) => {
       let rs = await ClassOsAPI.addEditClassMember({ data: data, Token });
       await ClassOsAPI.updateOsClassMember({ data: update, Token });
       if (addPoint)
@@ -123,7 +130,12 @@ function OsClassView({ f7route, f7router }) {
 
       if (deletePoint)
         await ClassOsAPI.deletePointOsMember({ data: deletePoint, Token });
-
+      if (Brand?.Global?.Admin?.lop_hoc_pt_reset_enddate) {
+        await ClassOsAPI.resetEndDateOs({
+          data: OsReset,
+          Token,
+        });
+      }
       await refetch();
       await queryClient.invalidateQueries({ queryKey: ["OsMembers"] });
       return rs;
@@ -215,6 +227,9 @@ function OsClassView({ f7route, f7router }) {
                     }
                   : null,
                 deletePoint: deletePoints,
+                OsReset: {
+                  osID: rowData?.Os?.ID,
+                },
                 Token: Auth?.token,
               },
               {

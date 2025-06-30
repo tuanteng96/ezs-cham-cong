@@ -31,6 +31,12 @@ const ClassOsAPI = {
         Authorization: `Bearer ${Token}`,
       },
     }),
+  resetEndDateOs: ({ data, Token }) =>
+    http.post(`/api/v3/osc@Reset1`, JSON.stringify(data), {
+      headers: {
+        Authorization: `Bearer ${Token}`,
+      },
+    }),
 };
 
 export default ClassOsAPI;

@@ -286,7 +286,7 @@ function PosAdmin({ f7router }) {
                   )} shadow-lg rounded !mt-0 !ml-0 !mr-0 px-3 py-1.5 text-white`,
                   resourceIds:
                     filters.view === "resourceTimelineDay"
-                      ? [TreatmentJson?.ID || 0]
+                      ? [TreatmentJson?.ID || TreatmentJson?.value || 0]
                       : item.UserServices &&
                         Array.isArray(item.UserServices) &&
                         item.UserServices.length > 0
