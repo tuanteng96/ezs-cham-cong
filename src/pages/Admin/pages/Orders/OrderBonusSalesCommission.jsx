@@ -121,6 +121,7 @@ function OrderBonusSalesCommission({ f7route }) {
                 };
               })
             : [];
+
         reset({ BounsSalesIn: newObj });
       }
     },
@@ -197,7 +198,7 @@ function OrderBonusSalesCommission({ f7route }) {
       {
         data: dataSubmit,
         Token: Auth?.token,
-        StockID: CrStocks?.ID
+        StockID: CrStocks?.ID,
       },
       {
         onSuccess: (data) => {
@@ -314,7 +315,7 @@ function OrderBonusSalesCommission({ f7route }) {
                           f7.dialog.confirm("Xác nhận loại bỏ ?", () => {
                             if (fields.length === 1) {
                               remove(index);
-                              handleSubmit(onSubmit)()
+                              handleSubmit(onSubmit)();
                             } else {
                               remove(index);
                             }

@@ -20,7 +20,7 @@ function PickerMultiEmployees({ children, Order }) {
   const queryClient = useQueryClient();
   let Brand = useStore("Brand");
   let Auth = useStore("Auth");
-  let CrStocks = useStore("CrStocks")
+  let CrStocks = useStore("CrStocks");
 
   const [visible, setVisible] = useState(false);
   const [visibleValues, setVisibleValues] = useState(false);
@@ -46,13 +46,23 @@ function PickerMultiEmployees({ children, Order }) {
   });
 
   useEffect(() => {
-    let newGroup = [{ value: "TU_VAN", label: Brand?.Global?.Admin?.hoa_hong_tu_van || "Hoa hồng tư vấn" }];
+    let newGroup = [
+      {
+        value: "TU_VAN",
+        label: Brand?.Global?.Admin?.hoa_hong_tu_van || "Hoa hồng tư vấn",
+      },
+    ];
     if (!Brand?.Global?.Admin?.hoa_hong_tu_van_ktv_an) {
       newGroup = [
-        { value: "TU_VAN", label: Brand?.Global?.Admin?.hoa_hong_tu_van || "Hoa hồng tư vấn" },
+        {
+          value: "TU_VAN",
+          label: Brand?.Global?.Admin?.hoa_hong_tu_van || "Hoa hồng tư vấn",
+        },
         {
           value: "KY_THUAT_VIEN",
-          label: Brand?.Global?.Admin?.hoa_hong_tu_van_khm || "Hoa hồng tư vấn ( KH mới )",
+          label:
+            Brand?.Global?.Admin?.hoa_hong_tu_van_khm ||
+            "Hoa hồng tư vấn ( KH mới )",
         },
       ];
     }
@@ -111,6 +121,25 @@ function PickerMultiEmployees({ children, Order }) {
   };
 
   const getValueHH = ({ item, user }) => {
+    if (item.gia_tri_thanh_toan === "NaN") {
+      if (
+        item?.prodBonus?.BonusSaleLevels &&
+        item?.prodBonus?.BonusSaleLevels.some((x) => x.Salary) &&
+        Type.value !== "KY_THUAT_VIEN"
+      ) {
+        let { BonusSaleLevels } = item?.prodBonus;
+        let index = BonusSaleLevels.findIndex((x) => x.Level === user.level);
+        let Salary = 0;
+        if (index > -1) {
+          Salary = BonusSaleLevels[index].Salary;
+        }
+        return Salary * item.Qty;
+      }
+      if (Type.value !== "KY_THUAT_VIEN") {
+        return item.prodBonus.BonusSale * item.Qty;
+      }
+      return item.prodBonus.BonusSale2 * item.Qty;
+    }
     if (
       item?.prodBonus?.BonusSaleLevels &&
       item?.prodBonus?.BonusSaleLevels.some((x) => x.Salary)
@@ -168,7 +197,7 @@ function PickerMultiEmployees({ children, Order }) {
             Value:
               item.Type.value === "KY_THUAT_VIEN"
                 ? getValueKTV({ item: item.Product, user: item.Staff })
-                : getValueHH({ item: item.Product, user: item.Staff }),
+                : getValueHH({ item: item.Product, user: item.Staff, Type: item.Type }),
           },
         ],
         Doanh_So: [
@@ -230,7 +259,7 @@ function PickerMultiEmployees({ children, Order }) {
       {
         data: dataSubmit,
         Token: Auth?.token,
-        StockID: CrStocks?.ID
+        StockID: CrStocks?.ID,
       },
       {
         onSuccess: (data) => {
@@ -275,7 +304,9 @@ function PickerMultiEmployees({ children, Order }) {
                   onSubmit={handleSubmitWithoutPropagation}
                 >
                   <div className="relative flex px-4 py-5 text-xl font-semibold">
-                    <div className="pr-8 truncate">Áp dụng mỗi nhân viên 1 sản phẩm</div>
+                    <div className="pr-8 truncate">
+                      Áp dụng mỗi nhân viên 1 sản phẩm
+                    </div>
                     <div
                       className="absolute top-0 right-0 flex items-center justify-center w-12 h-full"
                       onClick={close}

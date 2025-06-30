@@ -27,7 +27,7 @@ function PickerChangeDateBonus({ children, data, invalidateQueries, Type }) {
   const { control, handleSubmit, reset } = useForm({
     defaultValues: {
       date: "",
-      id: ""
+      id: "",
     },
     resolver: yupResolver(schemaAdd),
   });
@@ -36,7 +36,7 @@ function PickerChangeDateBonus({ children, data, invalidateQueries, Type }) {
     if (!visible) {
       reset({
         date: "",
-        id: ""
+        id: "",
       });
     } else {
       reset({ date: data?.CreateDate, id: data?.ID });
@@ -73,7 +73,7 @@ function PickerChangeDateBonus({ children, data, invalidateQueries, Type }) {
           date: moment(values.date).format("YYYY-MM-DD"),
         },
         Token: Auth?.token,
-        Type
+        Type,
       },
       {
         onSuccess: ({ data }) => {
@@ -125,8 +125,14 @@ function PickerChangeDateBonus({ children, data, invalidateQueries, Type }) {
                   onSubmit={handleSubmitWithoutPropagation}
                 >
                   <div className="px-4 overflow-auto grow">
+                    {data?.stock?.Title && (
+                      <div className="mb-2 font-medium last:mb-0">
+                        Cơ sở {data?.stock?.Title}
+                      </div>
+                    )}
+
                     <div className="mb-3.5 last:mb-0">
-                      <div className="mb-px font-light">Ngày thay đổi</div>
+                      <div className="mb-1 font-light">Ngày thay đổi</div>
                       <Controller
                         name="date"
                         control={control}
