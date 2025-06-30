@@ -270,6 +270,7 @@ function PosClassOsSchedule({ f7router, f7route }) {
                 deletePoint: deletePoints,
                 OsReset: {
                   osID: rowData?.Os?.ID,
+                  isRestore: Boolean(!Status?.value)
                 },
                 Token: Auth?.token,
               },

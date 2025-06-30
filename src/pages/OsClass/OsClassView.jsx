@@ -229,6 +229,7 @@ function OsClassView({ f7route, f7router }) {
                 deletePoint: deletePoints,
                 OsReset: {
                   osID: rowData?.Os?.ID,
+                  isRestore: Boolean(!Status?.value)
                 },
                 Token: Auth?.token,
               },
