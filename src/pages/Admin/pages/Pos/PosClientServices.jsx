@@ -26,6 +26,7 @@ import { useMutation, useQuery } from "react-query";
 import AssetsHelpers from "@/helpers/AssetsHelpers";
 import {
   MenuSubNavbar,
+  PickerReservedService,
   PickerServiceAddRemove,
   PickerServiceChangeStock,
   PickerServiceEnd,
@@ -62,6 +63,8 @@ let initialData = [
     children: [],
   },
 ];
+
+let HAS_RESERVED = "ĐANG BẢO LƯU";
 
 function PosClientServices({ f7router, f7route }) {
   const [active, setActive] = useState("Service");
@@ -238,6 +241,28 @@ function PosClientServices({ f7router, f7route }) {
     });
   };
 
+  const getDateReserved = (sv) => {
+    let date = "";
+    let index = sv.findIndex(
+      (x) => x.Desc && x.Desc.toUpperCase().indexOf(HAS_RESERVED) > -1
+    );
+    if (index > -1) {
+      let Desc = sv[index].Desc;
+      if (Desc && Desc.toUpperCase().indexOf("ĐANG BẢO LƯU") > -1) {
+        var found = [],
+          rxp = /{([^}]+)}/g,
+          curMatch;
+        while ((curMatch = rxp.exec(Desc))) {
+          found.push(curMatch[1]);
+        }
+        if (found && found.length > 1) {
+          date = found[0];
+        }
+      }
+    }
+    return date;
+  };
+
   return (
     <Page
       className="bg-white"
@@ -257,10 +282,7 @@ function PosClientServices({ f7router, f7route }) {
             <ChevronLeftIcon className="w-6" />
           </Link>
         </NavLeft>
-        <NavTitle
-        >
-          Quản lý thẻ dịch vụ
-        </NavTitle>
+        <NavTitle>Quản lý thẻ dịch vụ</NavTitle>
         <div className="absolute h-[2px] w-full bottom-0 left-0 bg-[rgba(255,255,255,0.3)]"></div>
         <Subnavbar>
           <div className="w-full h-full px-2">
@@ -456,6 +478,7 @@ function PosClientServices({ f7router, f7route }) {
                                         Kích hoạt bảo hành
                                       </Link>
                                     )}
+                                    
                                     {service.Product.PhacDo && (
                                       <PickerServiceRegimen
                                         data={service}
@@ -502,6 +525,66 @@ function PosClientServices({ f7router, f7route }) {
                                           Huỷ lịch cả liệu trình
                                         </Link>
                                       )}
+
+                                    {service.TabIndex === 0 && (
+                                      <PickerReservedService
+                                        Services={
+                                          service?.Services
+                                            ? service.Services.filter(
+                                                (x) => x.Status !== "doing"
+                                              )
+                                            : []
+                                        }
+                                        isCancel={
+                                          service.Services &&
+                                          service.Services.some(
+                                            (x) =>
+                                              x.Desc &&
+                                              x.Desc.toUpperCase().indexOf(
+                                                HAS_RESERVED
+                                              ) > -1
+                                          )
+                                        }
+                                      >
+                                        {({ open }) => (
+                                          <Link
+                                            popoverClose
+                                            className="flex justify-between p-3 font-medium border-b last:border-0"
+                                            noLinkClass
+                                            onClick={() => {
+                                              if (
+                                                service.Services &&
+                                                service.Services.some(
+                                                  (x) =>
+                                                    x.Status !== "done" &&
+                                                    x.Desc &&
+                                                    x.Desc.toUpperCase().indexOf(
+                                                      "ĐÃ XẾP LỚP"
+                                                    ) > -1
+                                                )
+                                              ) {
+                                                toast.error(
+                                                  "Có buổi đã sử dụng xếp lớp cho học viên. Vui lòng huỷ học viên ra khởi lớp."
+                                                );
+                                              } else {
+                                                open();
+                                              }
+                                            }}
+                                          >
+                                            {service.Services &&
+                                            service.Services.some(
+                                              (x) =>
+                                                x.Desc &&
+                                                x.Desc.toUpperCase().indexOf(
+                                                  HAS_RESERVED
+                                                ) > -1
+                                            )
+                                              ? "Huỷ bảo lưu"
+                                              : "Bảo lưu"}
+                                          </Link>
+                                        )}
+                                      </PickerReservedService>
+                                    )}
                                   </div>
                                 </Popover>
                               </>
@@ -626,10 +709,11 @@ function PosClientServices({ f7router, f7route }) {
                             service.Services.some(
                               (x) =>
                                 x.Desc &&
-                                x.Desc.toUpperCase().indexOf("BẢO LƯU") > -1
+                                x.Desc.toUpperCase().indexOf(HAS_RESERVED) > -1
                             ) && (
                               <div className="px-4 pb-4 font-medium text-warning text-[15px]">
-                                Đang bảo lưu
+                                Đang bảo lưu đến ngày{" "}
+                                {getDateReserved(service.Services)}
                               </div>
                             )}
                         </div>

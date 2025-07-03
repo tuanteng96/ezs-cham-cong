@@ -24,6 +24,7 @@ import PickerHistoryCoachs from "./PickerHistoryCoachs";
 import PickerPayments from "./PickerPayments";
 import PickerPreviewOldCard from "./PickerPreviewOldCard";
 import PickerPriceProdAdd from "./PickerPriceProdAdd";
+import PickerReservedService from "./PickerReservedService";
 import PickerSalaryOs from "./PickerSalaryOs";
 import PickerServiceAddRemove from "./PickerServiceAddRemove";
 import PickerServiceChange from "./PickerServiceChange";
@@ -83,5 +84,6 @@ export {
   PickerSalaryOs,
   PickerClassStudentFilter,
   PickerHistoryCoachs,
-  PickerAddEditTIP
+  PickerAddEditTIP,
+  PickerReservedService
 };
