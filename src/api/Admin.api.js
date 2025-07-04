@@ -251,6 +251,12 @@ const AdminAPI = {
         Authorization: `Bearer ${Token}`,
       },
     }),
+  userInfoId: ({ data, Token }) =>
+    http.post(`/api/v3/user24@info`, JSON.stringify(data), {
+      headers: {
+        Authorization: `Bearer ${Token}`,
+      },
+    }),
   addEditMembers: ({ data, Token }) =>
     http.post(`/admin/smart.aspx?user_add=1`, data, {
       headers: {
@@ -363,11 +369,15 @@ const AdminAPI = {
       },
     }),
   clientsViewOrderChangeBonusId: ({ data, Token, StockID }) =>
-    http.post(`/api/v3/orderbonus?cmd=calc&stockid=${StockID}`, JSON.stringify(data), {
-      headers: {
-        Authorization: `Bearer ${Token}`,
-      },
-    }),
+    http.post(
+      `/api/v3/orderbonus?cmd=calc&stockid=${StockID}`,
+      JSON.stringify(data),
+      {
+        headers: {
+          Authorization: `Bearer ${Token}`,
+        },
+      }
+    ),
   clientsViewCodOrderId: ({ data, Token }) =>
     http.post(`/api/v3/shipcode@getorder`, JSON.stringify(data), {
       headers: {

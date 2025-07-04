@@ -71,7 +71,7 @@ function MembersAdminAddEdit({ f7route, f7router }) {
     queryFn: async () => {
       const { data } = await AdminAPI.listMembers({
         data: {
-          Key: f7route?.query?.FullName,
+          Key: f7route?.query?.UserName,
           Pi: 1,
           Ps: 50,
           GroupIDs: [],
@@ -81,12 +81,20 @@ function MembersAdminAddEdit({ f7route, f7router }) {
         },
         Token: Auth.token,
       });
+
+      let { data: UserInfo } = await AdminAPI.userInfoId({
+        data: { UserID: id },
+        Token: Auth.token,
+      });
+
       let rs = null;
       if (data.Items && data.Items.length > 0) {
         let index = data.Items.findIndex((x) => x.ID === Number(id));
         if (index > -1) rs = data.Items[index];
       }
-      return rs;
+      return rs
+        ? { ...rs, salaryConfig: UserInfo?.salaryConfig, User: UserInfo?.User }
+        : null;
     },
     onSuccess: (rs) => {
       if (!rs) {
@@ -122,6 +130,53 @@ function MembersAdminAddEdit({ f7route, f7router }) {
               }))
             : null
         );
+
+        if (rs?.salaryConfig) {
+          for (let key of rs?.salaryConfig) {
+            if (key.Name === "LUONG") {
+              setValue("LUONG", key.Value);
+            }
+            if (key.Name === "PHU_CAP") {
+              setValue("PHU_CAP", key.Value);
+            }
+            if (key.Name === "GIU_LUONG") {
+              setValue("GIU_LUONG", key.Value);
+            }
+            if (key.Name === "SO_THANG_GIU_LUONG") {
+              setValue("SO_THANG_GIU_LUONG", key.Value);
+            }
+            if (key.Name === "TRO_CAP_NGAY") {
+              setValue("TRO_CAP_NGAY", key.Value);
+            }
+            if (key.Name === "NGAY_NGHI") {
+              setValue("LOAI_TINH_LUONG", key.Name);
+              setValue("SO_NGAY", key.Value);
+            }
+            if (key.Name === "NGAY_CONG") {
+              setValue("LOAI_TINH_LUONG", key.Name);
+              setValue("SO_NGAY", key.Value);
+            }
+          }
+        }
+
+        if (rs?.User) {
+          setValue("chluongLevels", rs?.User?.Level);
+
+          let WorkTimeSetting = rs?.User?.WorkTimeSetting
+            ? JSON.parse(rs?.User?.WorkTimeSetting)
+            : null;
+
+          setValue("chamcong.SalaryHours", WorkTimeSetting?.SalaryHours || "");
+          setValue(
+            `chamcong.ShiftID`,
+            WorkTimeSetting?.ShiftID
+              ? {
+                  label: WorkTimeSetting?.ShiftName,
+                  value: WorkTimeSetting?.ShiftID,
+                }
+              : null
+          );
+        }
       }
     },
     enabled: Boolean(id),
@@ -187,7 +242,7 @@ function MembersAdminAddEdit({ f7route, f7router }) {
               : null,
         },
         Token,
-        StockID: CrStocks?.ID
+        StockID: CrStocks?.ID,
       });
 
       await queryClient.invalidateQueries({
@@ -212,11 +267,11 @@ function MembersAdminAddEdit({ f7route, f7router }) {
       {
         data: bodyFormData,
         Token: Auth?.token,
-        StockID: CrStocks?.ID
+        StockID: CrStocks?.ID,
       },
       {
         onSuccess: (rs) => {
-            console.log(rs)
+          console.log(rs);
           setValue("usn", rs?.data?.data || "");
           setSuggestLoading(false);
         },
@@ -251,11 +306,10 @@ function MembersAdminAddEdit({ f7route, f7router }) {
       "chluongLevels",
       JSON.stringify(
         values?.chluongLevels
-          ? [{ id: values?.id || 0, Level: values?.chluongLevels?.value || "" }]
+          ? [{ id: values?.id || 0, Level: values?.chluongLevels || "" }]
           : []
       )
     );
-
     let newchluongData = [];
     if (values?.LUONG) {
       newchluongData.push({

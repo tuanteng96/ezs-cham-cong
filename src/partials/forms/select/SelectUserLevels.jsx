@@ -53,10 +53,10 @@ function SelectUserLevels({ onSuccess, name, label, wrapClassName, autoSet, ...p
               <SelectPicker
                 options={data || []}
                 {...props}
-                value={field.value}
+                value={data ? data.filter(x => x.value === field.value) : null}
                 label={label}
                 onChange={(val) => {
-                  field.onChange(val || null);
+                  field.onChange(val?.value || null);
                 }}
                 errorMessage={fieldState?.error?.message}
                 errorMessageForce={fieldState?.invalid}

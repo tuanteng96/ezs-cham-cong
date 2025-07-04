@@ -25,7 +25,7 @@ function SelectUserShifts(props) {
     },
     keepPreviousData: true,
   });
-
+  
   return (
     <SelectPicker
       options={data || []}

@@ -333,7 +333,7 @@ function MembersAdmin(props) {
                             </PickerShare>
 
                             <Link
-                              href={`/admin/members/${item.ID}?FullName=${item?.FullName}`}
+                              href={`/admin/members/${item.ID}?FullName=${item?.FullName}&UserName=${item?.UserName}`}
                               popoverClose
                               className="flex justify-between p-3 font-medium border-b last:border-0"
                               noLinkClass
