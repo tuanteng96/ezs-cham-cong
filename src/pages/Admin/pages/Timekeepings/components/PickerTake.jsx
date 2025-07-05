@@ -41,52 +41,115 @@ function PickerTake({ children, initialValues }) {
 
   useEffect(() => {
     if (visible) {
-      reset({
-        ID: initialValues?.ID || 0,
-        From:
-          initialValues?.From ||
-          moment()
+      if (initialValues?.ID) {
+        reset({
+          ID: initialValues?.ID || 0,
+          From:
+            initialValues?.From ||
+            moment()
+              .set({
+                hour: moment(
+                  Brand?.Global?.APP?.Working?.TimeOpen,
+                  "HH:mm:ss"
+                ).get("hour"),
+                minute: moment(
+                  Brand?.Global?.APP?.Working?.TimeOpen,
+                  "HH:mm:ss"
+                ).get("minute"),
+                second: moment(
+                  Brand?.Global?.APP?.Working?.TimeOpen,
+                  "HH:mm:ss"
+                ).get("second"),
+              })
+              .toDate(),
+          To:
+            initialValues?.To ||
+            moment()
+              .set({
+                hour: moment(
+                  Brand?.Global?.APP?.Working?.TimeClose,
+                  "HH:mm:ss"
+                ).get("hour"),
+                minute: moment(
+                  Brand?.Global?.APP?.Working?.TimeClose,
+                  "HH:mm:ss"
+                ).get("minute"),
+                second: moment(
+                  Brand?.Global?.APP?.Working?.TimeClose,
+                  "HH:mm:ss"
+                ).get("second"),
+              })
+              .toDate(),
+          UserID: initialValues?.UserID
+            ? {
+                value: initialValues?.User?.ID,
+                label: initialValues?.User?.FullName,
+              }
+            : null,
+          Desc: initialValues?.Desc || "",
+        });
+      } else {
+        let DateStart = null;
+        let DateEnd = null;
+
+        if (Brand?.Global?.Admin?.checkout_time) {
+          let { checkout_time } = Brand?.Global?.Admin;
+          DateStart = moment()
             .set({
-              hour: moment(
-                Brand?.Global?.APP?.Working?.TimeOpen,
-                "HH:mm:ss"
-              ).get("hour"),
-              minute: moment(
-                Brand?.Global?.APP?.Working?.TimeOpen,
-                "HH:mm:ss"
-              ).get("minute"),
-              second: moment(
-                Brand?.Global?.APP?.Working?.TimeOpen,
-                "HH:mm:ss"
-              ).get("second"),
+              hours: checkout_time.split(";")[1].split(":")[0],
+              minute: checkout_time.split(";")[1].split(":")[1],
             })
-            .toDate(),
-        To:
-          initialValues?.To ||
-          moment()
+            .toDate();
+          DateEnd = moment()
+            .add(1, "days")
             .set({
-              hour: moment(
-                Brand?.Global?.APP?.Working?.TimeClose,
-                "HH:mm:ss"
-              ).get("hour"),
-              minute: moment(
-                Brand?.Global?.APP?.Working?.TimeClose,
-                "HH:mm:ss"
-              ).get("minute"),
-              second: moment(
-                Brand?.Global?.APP?.Working?.TimeClose,
-                "HH:mm:ss"
-              ).get("second"),
+              hours: checkout_time.split(";")[1].split(":")[0],
+              minute: checkout_time.split(";")[1].split(":")[1],
             })
-            .toDate(),
-        UserID: initialValues?.UserID
-          ? {
-              value: initialValues?.User?.ID,
-              label: initialValues?.User?.FullName,
-            }
-          : null,
-        Desc: initialValues?.Desc || "",
-      });
+            .toDate();
+        }
+        reset({
+          ID: 0,
+          From:
+            DateStart ||
+            moment()
+              .set({
+                hour: moment(
+                  Brand?.Global?.APP?.Working?.TimeOpen,
+                  "HH:mm:ss"
+                ).get("hour"),
+                minute: moment(
+                  Brand?.Global?.APP?.Working?.TimeOpen,
+                  "HH:mm:ss"
+                ).get("minute"),
+                second: moment(
+                  Brand?.Global?.APP?.Working?.TimeOpen,
+                  "HH:mm:ss"
+                ).get("second"),
+              })
+              .toDate(),
+          To:
+            DateEnd ||
+            moment()
+              .set({
+                hour: moment(
+                  Brand?.Global?.APP?.Working?.TimeClose,
+                  "HH:mm:ss"
+                ).get("hour"),
+                minute: moment(
+                  Brand?.Global?.APP?.Working?.TimeClose,
+                  "HH:mm:ss"
+                ).get("minute"),
+                second: moment(
+                  Brand?.Global?.APP?.Working?.TimeClose,
+                  "HH:mm:ss"
+                ).get("second"),
+              })
+              .toDate(),
+          UserID: null,
+          Desc: "",
+        });
+      }
     }
   }, [initialValues, visible, Brand]);
 
@@ -253,9 +316,7 @@ function PickerTake({ children, initialValues }) {
                       loading={updateMutation.isLoading}
                       disabled={updateMutation.isLoading}
                     >
-                      {
-                        initialValues ? "Lưu thay đổi" : "Thêm mới"
-                      }
+                      {initialValues ? "Lưu thay đổi" : "Thêm mới"}
                     </Button>
                   </div>
                 </form>
