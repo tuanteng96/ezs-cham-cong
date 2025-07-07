@@ -303,6 +303,15 @@ function PosClientManage({ f7route, f7router }) {
     },
   });
 
+  const tipMutation = useMutation({
+    mutationFn: async (body) => {
+      let data = await AdminAPI.clientAddEditTIP(body);
+      await Client.refetch();
+      await Order.refetch()
+      return data;
+    },
+  });
+
   useEffect(() => {
     if (
       !isLoading &&
@@ -606,6 +615,27 @@ function PosClientManage({ f7route, f7router }) {
       f7.dialog.close();
       toast.error("Firebase chưa được kết nối.");
     }
+  };
+
+  const onTIPAction = ({ Arg }) => {
+    f7.dialog.preloader("Đang thực hiện ...");
+    let newValues = {
+      Amount: 0,
+      MemberCheckInID: Client?.data?.CheckIn?.ID,
+      Arg,
+    };
+    tipMutation.mutate(
+      {
+        data: newValues,
+        Token: Auth?.token,
+      },
+      {
+        onSuccess: ({ data }) => {
+          toast.success("Cập nhật thành công.");
+          f7.dialog.close();
+        },
+      }
+    );
   };
 
   const onSignature = () => {
@@ -1422,7 +1452,14 @@ function PosClientManage({ f7route, f7router }) {
                 <EllipsisVerticalIcon className="w-6" />
               </Button>
 
-              <Popover className="popover-order-paymented">
+              <Popover
+                className="popover-order-paymented"
+                onPopoverClosed={() => {
+                  Dom7(".popover").each(function (el) {
+                    f7.popover.close(el);
+                  });
+                }}
+              >
                 <div className="flex flex-col py-1">
                   {!Client?.data?.CheckIn && Client?.data?.RecentlyCheckIn && (
                     <Link
@@ -1527,18 +1564,19 @@ function PosClientManage({ f7route, f7router }) {
                                 >
                                   TIP
                                   {Client?.data?.CheckIn?.MemberTipAmount >
-                                    0 && (
+                                  0 ? (
                                     <div className="px-1.5 font-semibold text-xs text-white rounded bg-success font-lato flex items-center">
                                       {StringHelpers.formatVND(
                                         Client?.data?.CheckIn?.MemberTipAmount
                                       )}
                                     </div>
+                                  ) : (
+                                    <span className="pl-1">
+                                      ({Client?.data?.CheckIn?.MemberTipDesc})
+                                    </span>
                                   )}
                                 </Link>
-                                <Popover
-                                  className="popover-tips-menu w-[130px]"
-                                  backdropEl="a"
-                                >
+                                <Popover className="popover-tips-menu w-[150px] shadow-lg">
                                   <div className="flex flex-col py-1">
                                     <Link
                                       popoverClose
@@ -1565,6 +1603,32 @@ function PosClientManage({ f7route, f7router }) {
                                       noLinkClass
                                     >
                                       Hiển thị IPAD
+                                    </Link>
+                                    <Link
+                                      onClick={() => {
+                                        onTIPAction({ Arg: 0 });
+                                        Dom7(".popover").each(function (el) {
+                                          f7.popover.close(el);
+                                        });
+                                      }}
+                                      popoverClose
+                                      className="flex justify-between p-3 font-medium border-b last:border-0"
+                                      noLinkClass
+                                    >
+                                      Đã TIP ngoài
+                                    </Link>
+                                    <Link
+                                      onClick={() => {
+                                        onTIPAction({ Arg: "VAT" });
+                                        Dom7(".popover").each(function (el) {
+                                          f7.popover.close(el);
+                                        });
+                                      }}
+                                      popoverClose
+                                      className="flex justify-between p-3 font-medium border-b last:border-0"
+                                      noLinkClass
+                                    >
+                                      TIP kèm hoá đơn
                                     </Link>
                                   </div>
                                 </Popover>
