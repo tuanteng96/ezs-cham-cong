@@ -71,6 +71,14 @@ function TechniciansBookItem({ item }) {
     };
   };
 
+  const getRoom = (room) => {
+    if(room) {
+      let parseRooms = JSON.parse(room)
+      return <span className="pl-1">({parseRooms?.label})</span>
+    }
+    return <></>
+  }
+
   return (
     <div
       className="p-4 mb-4 bg-white rounded last:mb-0"
@@ -78,7 +86,7 @@ function TechniciansBookItem({ item }) {
     >
       <div className="relative pb-3 mb-3 border-b">
         <div className="font-semibold">
-          {item.RootTitles} {item.AtHome && " - Tại nhà"}
+          {item.RootTitles} {item.AtHome && " - Tại nhà"} {getRoom(item?.TreatmentJson)}
         </div>
         <div className="flex items-center mt-2 text-xs font-medium rounded">
           <div className={clsx("w-1.5 h-1.5 rounded-full mr-1.5", `bg-${getStatusClass(item.Status, item).Color}`)}></div>

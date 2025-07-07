@@ -20,10 +20,12 @@ import { DatePickerWrap } from "../../partials/forms";
 import { PickerActionFilter } from "../../components";
 import NoFound from "../../components/NoFound";
 import { TechniciansBookItem, TechniciansServiceItem } from "./components";
+import ConfigsAPI from "@/api/Configs.api";
 
 function Technicians({ f7router, f7route }) {
   const Auth = useStore("Auth");
   const CrStocks = useStore("CrStocks");
+  let Stocks = useStore("Stocks");
 
   const [Type, setType] = useState(f7route.query?.Type || "dv");
   const [filters, setFilters] = useState({
@@ -54,7 +56,48 @@ function Technicians({ f7router, f7route }) {
         Token: Auth?.token,
         StockID: CrStocks?.ID || "",
       });
-      return data;
+
+      let RsRooms = await ConfigsAPI.getValue("room");
+      let Rooms = [];
+      if (
+        RsRooms &&
+        RsRooms?.data?.data &&
+        RsRooms?.data?.data.length > 0 &&
+        RsRooms?.data?.data[0].Value
+      ) {
+        Rooms = JSON.parse(RsRooms?.data?.data[0].Value);
+      }
+
+      return {
+        ...data,
+        data: data?.data
+          ? data.data.map((item) => {
+              let obj = { ...item, RoomTitle: "" };
+              if (obj?.RoomID) {
+                for (let i = 0; i < Rooms.length; i++) {
+                  if (Rooms[i].ListRooms && Rooms[i].ListRooms.length > 0) {
+                    for (let k = 0; k < Rooms[i].ListRooms.length; k++) {
+                      if (
+                        Rooms[i].ListRooms[k].Children &&
+                        Rooms[i].ListRooms[k].Children.length > 0
+                      ) {
+                        let index = Rooms[i].ListRooms[k].Children.findIndex(
+                          (p) => p.ID === obj?.RoomID
+                        );
+                        if (index > -1) {
+                          obj.RoomTitle =
+                            Rooms[i].ListRooms[k].Children[index].label;
+                          break;
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+              return obj;
+            })
+          : [],
+      };
     },
     enabled: Boolean(Auth && Auth?.ID),
   });

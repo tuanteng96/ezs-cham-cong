@@ -38,7 +38,7 @@ function TechniciansServiceItem({ item }) {
         );
     }
   };
-
+  
   return (
     <div
       className="p-4 mb-4 bg-white rounded last:mb-0"
@@ -46,7 +46,8 @@ function TechniciansServiceItem({ item }) {
     >
       <div className="relative pb-3 mb-3 border-b">
         <div className="font-semibold">
-          {item.Title} ({item.RootMinutes}p/Ca)
+          {item.Title} ({item.RootMinutes}p/Ca){" "}
+          {item.RoomTitle && <span className="pl-1">({item.RoomTitle})</span>}
         </div>
         {checkStatus(item.Status)}
       </div>
@@ -69,7 +70,11 @@ function TechniciansServiceItem({ item }) {
             className="text-primary"
             onClick={() =>
               f7.views.main.router.navigate(
-                "/technicians/profile/" + item.member.ID + "/" + item.ID + "/?type=Os"
+                "/technicians/profile/" +
+                  item.member.ID +
+                  "/" +
+                  item.ID +
+                  "/?type=Os"
               )
             }
           >
