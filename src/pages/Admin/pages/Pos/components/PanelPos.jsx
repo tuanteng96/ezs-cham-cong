@@ -268,25 +268,30 @@ function PanelPos({ Client }) {
           <div className="bg-danger-light text-danger rounded px-1.5 text-[13px] py-px">
             #{Client?.ID}
           </div>
-          {Client?.Stock?.ID && Client?.Stock?.ID !== CrStocks?.ID && (
+          {Client?.Stock?.ID && Client?.Stock?.ID !== CrStocks?.ID ? (
             <div className="bg-danger-light text-danger rounded px-2 text-[13px] py-px">
               Khác điểm : {Client?.Stock?.Title}
             </div>
+          ) : (
+            <></>
           )}
-          {getDayFetus(Client?.Desc) && (
+          {getDayFetus(Client?.Desc) ? (
             <div className="bg-success-light text-success rounded px-2 text-[13px] py-px">
               {getDayFetus(Client?.Desc)}
             </div>
+          ) : (
+            <></>
           )}
 
-          {getExpectedBirth(Client?.Desc) && (
+          {getExpectedBirth(Client?.Desc) ? (
             <div className="bg-success-light text-success rounded px-2 text-[13px] py-px">
               {getExpectedBirth(Client?.Desc)}
             </div>
+          ) : (
+            <></>
           )}
 
-          {Client?.GroupJSON &&
-            Client?.GroupJSON.length > 0 &&
+          {Client?.GroupJSON && Client?.GroupJSON.length > 0 ? (
             Client?.GroupJSON.map((item, index) => (
               <div
                 className={clsx(
@@ -302,7 +307,10 @@ function PanelPos({ Client }) {
               >
                 {item?.Title}
               </div>
-            ))}
+            ))
+          ) : (
+            <></>
+          )}
 
           {Client?.Birth &&
             moment().format("DD-MM") ===

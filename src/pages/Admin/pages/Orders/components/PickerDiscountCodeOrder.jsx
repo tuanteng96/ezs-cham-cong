@@ -375,6 +375,7 @@ function PickerDiscountCodeOrder({
                                   <div className="font-semibold uppercase">
                                     Mã {item?.ma}
                                   </div>
+                                  {console.log(item)}
                                   <div className="border inline-block border-primary text-primary px-2 py-px rounded text-[13px] leading-4 mt-2 mb-1.5">
                                     {item?.Voucher?.ValueType === 2
                                       ? "Đồng giá"
