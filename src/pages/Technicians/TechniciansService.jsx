@@ -34,6 +34,7 @@ import { toast } from "react-toastify";
 import clsx from "clsx";
 import { useForm, Controller } from "react-hook-form";
 import { UploadImages } from "@/partials/forms/files";
+import ConfigsAPI from "@/api/Configs.api";
 
 const Photos = ({ PhotoList, Title }) => {
   const Brand = useStore("Brand");
@@ -320,11 +321,36 @@ function TechniciansService({ id, itemid }) {
   const Auth = useStore("Auth");
   const CrStocks = useStore("CrStocks");
   const Brand = useStore("Brand");
+  const Stocks = useStore("Stocks");
 
   const [active, setActive] = useState("#thong-tin");
   const [Note, setNote] = useState("");
 
-  let progress = 0;
+  const getRoomTitle = ({ RoomID, Rooms }) => {
+    let Title = "";
+    for (let i = 0; i < Rooms.length; i++) {
+      if (Rooms[i].ListRooms && Rooms[i].ListRooms.length > 0) {
+        for (let k = 0; k < Rooms[i].ListRooms.length; k++) {
+          if (
+            Rooms[i].ListRooms[k].Children &&
+            Rooms[i].ListRooms[k].Children.length > 0
+          ) {
+            let index = Rooms[i].ListRooms[k].Children.findIndex(
+              (p) => p.ID === RoomID
+            );
+            if (index > -1) {
+              Title =
+                Rooms[i].ListRooms[k].label +
+                " - " +
+                Rooms[i].ListRooms[k].Children[index].label;
+              break;
+            }
+          }
+        }
+      }
+    }
+    return Title;
+  };
 
   const { data, isLoading, refetch } = useQuery({
     queryKey: ["Technicians-Info"],
@@ -349,7 +375,24 @@ function TechniciansService({ id, itemid }) {
         Token: Auth?.token,
         StockID: CrStocks?.ID || "",
       });
-      return data?.data ? data?.data[0] : null;
+      let RsRooms = await ConfigsAPI.getValue("room");
+      let Rooms = [];
+      if (
+        RsRooms &&
+        RsRooms?.data?.data &&
+        RsRooms?.data?.data.length > 0 &&
+        RsRooms?.data?.data[0].Value
+      ) {
+        Rooms = JSON.parse(RsRooms?.data?.data[0].Value);
+      }
+      return data?.data && data?.data.length > 0
+        ? {
+            ...data?.data[0],
+            RoomTitle: data?.data[0].RoomID
+              ? getRoomTitle({ Rooms, RoomID: data?.data[0].RoomID })
+              : "",
+          }
+        : null;
     },
     enabled: Boolean(Auth && Auth?.ID),
     onSuccess: (data) => {
@@ -657,14 +700,17 @@ function TechniciansService({ id, itemid }) {
                     {data?.Minutes || 40}p/ Ca
                   </div>
                 </div>
+                {data?.RoomTitle && (
+                  <div className="px-4 py-2">
+                    <div className="text-muted">Phòng / Buồng</div>
+                    <div className="mt-px font-medium">{data?.RoomTitle}</div>
+                  </div>
+                )}
+
                 <div className="px-4 py-2">
                   <div className="text-muted">Điểm</div>
                   <div className="mt-px font-medium capitalize">
-                    {
-                      Auth.Info.StockRights.filter(
-                        (x) => x.ID === data?.StockID
-                      )[0]?.Title
-                    }
+                    {Stocks.filter((x) => x.ID === data?.StockID)[0]?.Title}
                   </div>
                 </div>
                 <div className="px-4 py-2">

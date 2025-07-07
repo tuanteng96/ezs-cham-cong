@@ -38,7 +38,7 @@ function TechniciansServiceItem({ item }) {
         );
     }
   };
-  
+
   return (
     <div
       className="p-4 mb-4 bg-white rounded last:mb-0"
@@ -46,8 +46,7 @@ function TechniciansServiceItem({ item }) {
     >
       <div className="relative pb-3 mb-3 border-b">
         <div className="font-semibold">
-          {item.Title} ({item.RootMinutes}p/Ca){" "}
-          {item.RoomTitle && <span className="pl-1">({item.RoomTitle})</span>}
+          {item.Title} ({item.RootMinutes}p/Ca)
         </div>
         {checkStatus(item.Status)}
       </div>
@@ -62,6 +61,12 @@ function TechniciansServiceItem({ item }) {
           <div className="mb-px font-light text-muted">Khách hàng</div>
           <div className="font-medium">{item.member.FullName}</div>
         </div>
+        {item.RoomTitle && (
+          <div className="col-span-2">
+            <div className="mb-px font-light text-muted">Buồng / Phòng</div>
+            <div className="font-medium">{item.RoomTitle}</div>
+          </div>
+        )}
       </div>
       <Actions opened={visible} onActionsClosed={close}>
         <ActionsGroup>

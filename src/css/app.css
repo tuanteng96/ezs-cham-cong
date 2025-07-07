@@ -2,6 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
+@theme {
+  --color-info: #8950FC; 
+}
+
 :root {
     --ezs-theme-color: #F7B54F;
     --f7-font-family: 'Be Vietnam Pro', sans-serif;

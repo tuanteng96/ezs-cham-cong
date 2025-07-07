@@ -25,7 +25,6 @@ import ConfigsAPI from "@/api/Configs.api";
 function Technicians({ f7router, f7route }) {
   const Auth = useStore("Auth");
   const CrStocks = useStore("CrStocks");
-  let Stocks = useStore("Stocks");
 
   const [Type, setType] = useState(f7route.query?.Type || "dv");
   const [filters, setFilters] = useState({
@@ -33,6 +32,32 @@ function Technicians({ f7router, f7route }) {
     From: new Date(),
     To: new Date(),
   });
+
+  const getRoomTitle = ({ RoomID, Rooms }) => {
+    let Title = "";
+    for (let i = 0; i < Rooms.length; i++) {
+      if (Rooms[i].ListRooms && Rooms[i].ListRooms.length > 0) {
+        for (let k = 0; k < Rooms[i].ListRooms.length; k++) {
+          if (
+            Rooms[i].ListRooms[k].Children &&
+            Rooms[i].ListRooms[k].Children.length > 0
+          ) {
+            let index = Rooms[i].ListRooms[k].Children.findIndex(
+              (p) => p.ID === RoomID
+            );
+            if (index > -1) {
+              Title =
+                Rooms[i].ListRooms[k].label +
+                " - " +
+                Rooms[i].ListRooms[k].Children[index].label;
+              break;
+            }
+          }
+        }
+      }
+    }
+    return Title;
+  };
 
   const { data, isLoading, refetch } = useQuery({
     queryKey: ["Technicians", filters],
@@ -70,29 +95,32 @@ function Technicians({ f7router, f7route }) {
 
       return {
         ...data,
+        mBook: data?.mBook
+          ? data?.mBook.map((item) => {
+              let obj = { ...item, RoomTitle: "" };
+              if (obj.TreatmentJson) {
+                let TreatmentJson = JSON.parse(obj.TreatmentJson);
+                if (
+                  TreatmentJson &&
+                  (TreatmentJson.ID || TreatmentJson?.value)
+                ) {
+                  obj.RoomTitle = getRoomTitle({
+                    RoomID: TreatmentJson.ID || TreatmentJson?.value,
+                    Rooms: Rooms || [],
+                  });
+                }
+              }
+              return obj;
+            })
+          : [],
         data: data?.data
           ? data.data.map((item) => {
               let obj = { ...item, RoomTitle: "" };
               if (obj?.RoomID) {
-                for (let i = 0; i < Rooms.length; i++) {
-                  if (Rooms[i].ListRooms && Rooms[i].ListRooms.length > 0) {
-                    for (let k = 0; k < Rooms[i].ListRooms.length; k++) {
-                      if (
-                        Rooms[i].ListRooms[k].Children &&
-                        Rooms[i].ListRooms[k].Children.length > 0
-                      ) {
-                        let index = Rooms[i].ListRooms[k].Children.findIndex(
-                          (p) => p.ID === obj?.RoomID
-                        );
-                        if (index > -1) {
-                          obj.RoomTitle =
-                            Rooms[i].ListRooms[k].Children[index].label;
-                          break;
-                        }
-                      }
-                    }
-                  }
-                }
+                obj.RoomTitle = getRoomTitle({
+                  RoomID: obj?.RoomID,
+                  Rooms: Rooms || [],
+                });
               }
               return obj;
             })
