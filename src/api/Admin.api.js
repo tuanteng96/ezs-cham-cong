@@ -223,8 +223,8 @@ const AdminAPI = {
         Authorization: `Bearer ${Token}`,
       },
     }),
-  createMemberBooking: ({ data, Token }) =>
-    http.post(`/api/v3/member23?cmd=add`, JSON.stringify(data), {
+  createMemberBooking: ({ data, Token, StockID }) =>
+    http.post(`/api/v3/member23?cmd=add&stockid=${StockID}`, JSON.stringify(data), {
       headers: {
         Authorization: `Bearer ${Token}`,
       },

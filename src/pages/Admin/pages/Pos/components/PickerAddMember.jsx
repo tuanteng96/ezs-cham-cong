@@ -29,6 +29,7 @@ function PickerAddMember({ children, onChange }) {
   const [visible, setVisible] = useState(false);
 
   let Auth = useStore("Auth");
+  let CrStocks = useStore("CrStocks");
 
   const { control, handleSubmit, reset, setError } = useForm({
     defaultValues: {
@@ -66,6 +67,7 @@ function PickerAddMember({ children, onChange }) {
       {
         data: obj,
         Token: Auth?.token,
+        StockID: CrStocks?.ID || ""
       },
       {
         onSuccess: ({ data }) => {
