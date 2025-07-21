@@ -977,6 +977,12 @@ const AdminAPI = {
         Authorization: `Bearer ${Token}`,
       },
     }),
+  getOrderItemInfo24: ({ data, Token }) =>
+    http.post(`/api/v3/OrderItem24@info`, JSON.stringify(data), {
+      headers: {
+        Authorization: `Bearer ${Token}`,
+      },
+    }),
 };
 
 export default AdminAPI;

@@ -254,18 +254,23 @@ function PickerEditProd({ children, item, CheckInID, MemberID, Order }) {
                                   Event: e,
                                 })
                               }
+                              disabled={item.HasFeeInUse}
                             />
                             <div className="flex">
-                              <div
-                                className="flex items-center justify-center w-12 h-full border border-[#d5d7da] shadow-[0_4px_6px_0_rgba(16,25,40,.06)] -ml-[1px] bg-gray-50"
+                              <button
+                                disabled={item.HasFeeInUse}
+                                type="button"
+                                className="disabled:opacity-40 flex items-center justify-center w-12 h-full border border-[#d5d7da] shadow-[0_4px_6px_0_rgba(16,25,40,.06)] -ml-[1px] bg-gray-50"
                                 onClick={() =>
                                   field.onChange(Number(field.value) + 1)
                                 }
                               >
                                 <PlusIcon className="w-5" />
-                              </div>
-                              <div
-                                className="flex items-center justify-center w-12 h-full border border-[#d5d7da] shadow-[0_4px_6px_0_rgba(16,25,40,.06)] -ml-[1px] bg-gray-50 rounded-r"
+                              </button>
+                              <button
+                                disabled={item.HasFeeInUse}
+                                type="button"
+                                className="disabled:opacity-40 flex items-center justify-center w-12 h-full border border-[#d5d7da] shadow-[0_4px_6px_0_rgba(16,25,40,.06)] -ml-[1px] bg-gray-50 rounded-r"
                                 onClick={() => {
                                   if (Number(field.value) > 1) {
                                     field.onChange(Number(field.value) - 1);
@@ -275,7 +280,7 @@ function PickerEditProd({ children, item, CheckInID, MemberID, Order }) {
                                 }}
                               >
                                 <MinusIcon className="w-5" />
-                              </div>
+                              </button>
                             </div>
                           </div>
                         )}
@@ -524,7 +529,8 @@ function PickerEditProd({ children, item, CheckInID, MemberID, Order }) {
                           : !Brand?.Global?.Admin
                               ?.Chinh_sua_don_hang_da_thanh_toan &&
                             (Order?.CPayed || Order?.MPayed) &&
-                            !adminTools_byStock?.hasRight)
+                            !adminTools_byStock?.hasRight) ||
+                        item.HasFeeInUse
                       }
                       onClick={onDelete}
                     >

@@ -200,6 +200,27 @@ function PosClientManage({ f7route, f7router }) {
         return newObj;
       });
 
+      if (Brand?.Global?.Admin?.Pos_quan_ly.kiem_tra_dk_xoa_phu_phi_don_hang) {
+        let ids = newRs.OrderItems.filter(
+          (x) => x?.ProdOrService === 2 && x?.HasFeeInUse === undefined
+        ).map((x) => x.ID);
+        if (ids && ids.length > 0) {
+          let {data: byUse} = await AdminAPI.getOrderItemInfo24({
+            data: {
+              ids,
+            },
+          });
+          if (byUse?.lst && byUse?.lst?.length > 0) {
+            for (let use of byUse?.lst) {
+              let index = newRs.OrderItems.findIndex(k => k.ID === use.ID)
+              if(index > -1) {
+                newRs.OrderItems[index]["HasFeeInUse"] = use.HasFeeInUse
+              }
+            }
+          }
+        }
+      }
+
       return newRs;
     },
     onSuccess: () => {
@@ -307,7 +328,7 @@ function PosClientManage({ f7route, f7router }) {
     mutationFn: async (body) => {
       let data = await AdminAPI.clientAddEditTIP(body);
       await Client.refetch();
-      await Order.refetch()
+      await Order.refetch();
       return data;
     },
   });
@@ -887,6 +908,11 @@ function PosClientManage({ f7route, f7router }) {
                                 <div className="flex-1">
                                   <div className="mb-px font-medium line-clamp-2">
                                     [{item?.ProdCode}] {item?.ProdTitle}
+                                    {
+                                      item.HasFeeInUse && (
+                                        <span className="pl-1 text-gray-500">( Đã dùng )</span>
+                                      )
+                                    }
                                   </div>
                                   <div className="flex justify-between">
                                     <div className="font-lato">
