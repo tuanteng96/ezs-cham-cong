@@ -13,8 +13,10 @@ const store = createStore({
     Brand: JSON.parse(localStorage.getItem("Brand")) || null,
     Auth: JSON.parse(localStorage.getItem("Auth")) || null,
     Stocks: JSON.parse(localStorage.getItem("Stocks")) || null,
+    StockRights: [],
     StocksAll: [],
     CrStocks: JSON.parse(localStorage.getItem("CrStocks")) || null,
+    RightTree: null,
     WorkTimeSettings:
       JSON.parse(localStorage.getItem("WorkTimeSettings")) || null,
     Notifications: [],
@@ -33,11 +35,17 @@ const store = createStore({
     Stocks({ state }) {
       return state.Stocks;
     },
+    StockRights({ state }) {
+      return state.StockRights;
+    },
     StocksAll({ state }) {
       return state.StocksAll;
     },
     CrStocks({ state }) {
       return state.CrStocks;
+    },
+    RightTree({ state }) {
+      return state.RightTree;
     },
     WorkTimeSettings({ state }) {
       return state.WorkTimeSettings;
@@ -82,7 +90,6 @@ const store = createStore({
         },
       });
       if (!value) {
-        //deleteApp(state.FirebaseApp)
         if (window.appPOS) {
           window.appPOS = undefined;
           window.pos27 = undefined;
@@ -127,9 +134,10 @@ const store = createStore({
             value.Info,
             keys({
               CrStockID: null,
-              StockRights: null,
-              rightTree: null,
-              Stocks: null,
+              //StockRights: null,
+              //rightTree: null,
+              //Stocks: null,
+              Groups: null,
             })
           ),
         },
@@ -201,20 +209,10 @@ const store = createStore({
                 label: x.Title,
               }))
             : [];
+
+          state.StockRights = value?.Info?.StockRights || [];
           state.StocksAll = value?.Info?.Stocks || [];
-          // state.Stocks =
-          //   (value?.Info?.StockRights &&
-          //     value?.Info?.StockRights.length > 0 &&
-          //     value?.Info?.StockRights.map((x) => ({
-          //       ...x,
-          //       value: x.ID,
-          //       label: x.Title,
-          //     }))) ||
-          //   value?.Info?.Stocks?.filter((x) => x.ParentID !== 0).map((x) => ({
-          //     ...x,
-          //     value: x.ID,
-          //     label: x.Title,
-          //   }));
+          state.RightTree = value?.Info?.rightTree || null;
         },
       });
     },
@@ -257,24 +255,31 @@ const store = createStore({
           if (!error) {
             var bodyFormData = new FormData();
             bodyFormData.append("token", token);
-            axios
-              .get(
-                `${state.Brand.Domain}/api/v3/apptoken?cmd=call&accid=${state.Auth.ID}&acctype=${state.Auth.acc_type}&senderIndex=2&logout=1`,
-                bodyFormData
-              )
-              .then(() => {
-                dispatch("setLogout").then(() => {
-                  f7.dialog.close();
-                  callback && callback();
+            if (state?.Auth?.ID) {
+              axios
+                .get(
+                  `${state.Brand.Domain}/api/v3/apptoken?cmd=call&accid=${state.Auth.ID}&acctype=${state.Auth.acc_type}&senderIndex=2&logout=1`,
+                  bodyFormData
+                )
+                .then(() => {
+                  dispatch("setLogout").then(() => {
+                    f7.dialog.close();
+                    callback && callback();
+                  });
+                })
+                .catch(() => {
+                  //f7.dialog.alert("Error : Provisional headers are shown ...");
+                  dispatch("setLogout").then(() => {
+                    f7.dialog.close();
+                    callback && callback();
+                  });
                 });
-              })
-              .catch(() => {
-                //f7.dialog.alert("Error : Provisional headers are shown ...");
-                dispatch("setLogout").then(() => {
-                  f7.dialog.close();
-                  callback && callback();
-                });
+            } else {
+              dispatch("setLogout").then(() => {
+                f7.dialog.close();
+                callback && callback();
               });
+            }
           } else {
             SubscribeHelpers.remove().then(() =>
               dispatch("setLogout").then(() => {

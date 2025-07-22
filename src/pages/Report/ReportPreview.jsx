@@ -14,9 +14,11 @@ import IframeComm from "react-iframe-comm";
 
 function ReportPreview({ f7router }) {
   const Auth = useStore("Auth");
+  const StockRights = useStore("StockRights");
+  const RightTree = useStore("RightTree");
   const Brand = useStore("Brand");
   let CrStocks = useStore("CrStocks");
-  
+
   return (
     <Page
       name="report-preview"
@@ -46,13 +48,13 @@ function ReportPreview({ f7router }) {
           Info: {
             ...Auth?.Info,
             CrStockID: CrStocks?.ID,
-            Stocks: Auth?.Info?.StockRights,
+            Stocks: StockRights || Auth?.Info?.StockRights,
             rightsSum: Auth?.Info?.rightsSum,
-            rightTree: Auth?.Info?.rightTree,
+            rightTree: RightTree || Auth?.Info?.rightTree,
             token: Auth?.token,
           },
           token: Auth?.token,
-          isApp: true
+          isApp: true,
         })}
         handleReady={() => {
           if (f7.views.main.router.url === "/report-preview/") {

@@ -528,8 +528,15 @@ function LayoutProvider({ children }) {
       window.SERVER = Brand.Domain;
       CDNHelpers.addScript(
         Brand.Domain + `/app2021/service/http-common.js?${new Date().getTime()}`
-      );
+      ).then(() => {
+        // StorageHelpers.remove({
+        //   keys: ["clientz"],
+        // });
+      });
     } else if (!Brand && typeof ClientZ !== "undefined") {
+      // StorageHelpers.remove({
+      //   keys: ["clientz"],
+      // });
       //CDNHelpers.removeScript(["/app2021/service/http-common.js"]);
     }
   }, [Brand?.Domain]);

@@ -14,9 +14,11 @@ import IframeComm from "react-iframe-comm";
 
 function Report({ f7router }) {
   const Auth = useStore("Auth");
+  const StockRights = useStore("StockRights");
+  const RightTree = useStore("RightTree");
   const Brand = useStore("Brand");
   let CrStocks = useStore("CrStocks");
-    
+  
   return (
     <Page
       name="report"
@@ -46,15 +48,15 @@ function Report({ f7router }) {
           Info: {
             ...Auth,
             CrStockID: CrStocks?.ID,
-            Stocks: Auth?.Info?.StockRights,
+            Stocks: StockRights || Auth?.Info?.StockRights,
             rightsSum: Auth?.Info?.rightsSum,
-            rightTree: Auth?.Info?.rightTree,
+            rightTree: RightTree || Auth?.Info?.rightTree,
           },
           token: Auth?.token,
           isApp: true,
           AppNavigation: (href) => {
-            console.log(href)
-          }
+            console.log(href);
+          },
         })}
         handleReady={() => {
           if (f7.views.main.router.url === "/report/") {
