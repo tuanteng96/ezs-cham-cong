@@ -374,12 +374,15 @@ function LayoutProvider({ children }) {
           }
         }
       }
+      
       return {
         ...rs,
+        ...data,
         items: rs?.items ? rs.items.sort((a, b) => a?.Index - b?.Index) : [],
       };
     },
     onSettled: (data) => {
+      console.log(data)
       store.dispatch("setProcessings", data);
     },
     enabled: Boolean(Auth && Auth?.token),
@@ -387,8 +390,9 @@ function LayoutProvider({ children }) {
       items: [],
       Count: 0,
     },
+    refetchInterval: data => (data?.pending || data?.data?.pending) ? 5000 : false
   });
-
+  
   window.refetchProcessings = refetchProcessings;
 
   useQuery({

@@ -138,7 +138,7 @@ function Statistical({ f7router }) {
             <ChevronLeftIcon className="w-6" />
           </Link>
         </NavLeft>
-        <NavTitle>Thống kê ({moment(filters.mon).format("MM-YYYY")})</NavTitle>
+        <NavTitle>Thống kê  ({moment(filters.mon).format("MM-YYYY")})</NavTitle>
         <NavRight className="!justify-center w-12 h-full">
           <DatePickerWrap
             value={filters.mon}
