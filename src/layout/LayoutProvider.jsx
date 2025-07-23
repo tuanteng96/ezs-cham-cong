@@ -374,7 +374,7 @@ function LayoutProvider({ children }) {
           }
         }
       }
-      
+
       return {
         ...rs,
         ...data,
@@ -382,17 +382,25 @@ function LayoutProvider({ children }) {
       };
     },
     onSettled: (data) => {
-      console.log(data)
-      store.dispatch("setProcessings", data);
+      if (
+        f7.popover.get(".popover-processings") &&
+        f7.popover.get(".popover-processings").opened
+      ) {
+        f7.popover.close(".popover-processings");
+      }
+      if (!data?.pending && !data?.data?.pending) {
+        store.dispatch("setProcessings", data);
+      }
     },
     enabled: Boolean(Auth && Auth?.token),
     initialData: {
       items: [],
       Count: 0,
     },
-    refetchInterval: data => (data?.pending || data?.data?.pending) ? 5000 : false
+    refetchInterval: (data) =>
+      data?.pending || data?.data?.pending ? 5000 : false,
   });
-  
+
   window.refetchProcessings = refetchProcessings;
 
   useQuery({

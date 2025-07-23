@@ -142,11 +142,6 @@ function NavigationPos({ pathname }) {
 
         <Popover
           className="popover-processings w-[210px]"
-          onPopoverClose={(e) => {
-            // if (Dom7(e.el).hasClass("modal-out")) {
-            //   Dom7(e.el).remove();
-            // }
-          }}
           onPopoverOpen={() => {
             queryClient.invalidateQueries(["InvoiceProcessings"]);
           }}
