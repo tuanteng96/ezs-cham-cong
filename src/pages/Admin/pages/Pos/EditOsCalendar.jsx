@@ -62,7 +62,7 @@ function EditOsCalendar({ f7route, f7router }) {
   const queryClient = useQueryClient();
 
   const Stocks = useStore("Stocks");
-  const StocksAll = useStore("StocksAll");
+
   const CrStocks = useStore("CrStocks");
   const Auth = useStore("Auth");
   const Brand = useStore("Brand");
@@ -915,7 +915,7 @@ function EditOsCalendar({ f7route, f7router }) {
                             pos27
                               .member(Os?.data?.MemberID)
                               .service()
-                              .eachOS((os) => { 
+                              .eachOS((os) => {
                                 if (os.ID === Os?.data?.ID) {
                                   os.StockID = val?.value;
                                 }
@@ -1152,6 +1152,13 @@ function EditOsCalendar({ f7route, f7router }) {
                                     </div>
                                     <div className="relative flex-1">
                                       <NumericFormat
+                                        disabled={
+                                          Brand?.Global?.Admin
+                                            ?.cam_sua_luong_tour
+                                            ? !adminTools_byStock?.hasRight
+                                            : Brand?.Global?.Admin
+                                                ?.cam_sua_luong_tour
+                                        }
                                         className={clsx(
                                           "w-full input-number-format border shadow-[0_4px_6px_0_rgba(16,25,40,.06)] rounded-s-none rounded-e py-3 px-4 focus:border-primary",
                                           fieldState?.invalid
@@ -1176,7 +1183,18 @@ function EditOsCalendar({ f7route, f7router }) {
                                       {field.value ? (
                                         <div
                                           className="absolute top-0 right-0 flex items-center justify-center w-12 h-full"
-                                          onClick={() => field.onChange("")}
+                                          onClick={() => {
+                                            if (
+                                              Brand?.Global?.Admin
+                                                ?.cam_sua_luong_tour
+                                                ? !adminTools_byStock?.hasRight
+                                                : Brand?.Global?.Admin
+                                                    ?.cam_sua_luong_tour
+                                            ) {
+                                              return;
+                                            }
+                                            field.onChange("");
+                                          }}
                                         >
                                           <XMarkIcon className="w-5" />
                                         </div>
@@ -1201,6 +1219,13 @@ function EditOsCalendar({ f7route, f7router }) {
                                         </div>
                                         <div className="relative flex-1">
                                           <NumericFormat
+                                            disabled={
+                                              Brand?.Global?.Admin
+                                                ?.cam_sua_luong_tour
+                                                ? !adminTools_byStock?.hasRight
+                                                : Brand?.Global?.Admin
+                                                    ?.cam_sua_luong_tour
+                                            }
                                             className={clsx(
                                               "w-full input-number-format border shadow-[0_4px_6px_0_rgba(16,25,40,.06)] rounded-s-none rounded-e py-3 px-4 focus:border-primary",
                                               fieldState?.invalid
@@ -1227,7 +1252,18 @@ function EditOsCalendar({ f7route, f7router }) {
                                           {field.value ? (
                                             <div
                                               className="absolute top-0 right-0 flex items-center justify-center w-12 h-full"
-                                              onClick={() => field.onChange("")}
+                                              onClick={() => {
+                                                if (
+                                                  Brand?.Global?.Admin
+                                                    ?.cam_sua_luong_tour
+                                                    ? !adminTools_byStock?.hasRight
+                                                    : Brand?.Global?.Admin
+                                                        ?.cam_sua_luong_tour
+                                                ) {
+                                                  return;
+                                                }
+                                                field.onChange("");
+                                              }}
                                             >
                                               <XMarkIcon className="w-5" />
                                             </div>
