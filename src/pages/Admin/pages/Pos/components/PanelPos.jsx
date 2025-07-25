@@ -156,6 +156,15 @@ function PanelPos({ Client }) {
     }
   };
 
+  const getValueOrder = (rs) => {
+    
+    let Value = 0
+    if(rs?.cashSum && rs.cashSum.length > 0) {
+      return rs.cashSum[0].Payed - Math.abs(rs.cashSum[0].Return)
+    }
+    return Value
+  }
+
   const isOldCard = () => {
     if (Brand?.Global?.Admin?.nv_le_tan_an_tao_the_cu) {
       return adminTools_byStock?.hasRight;
@@ -469,6 +478,14 @@ function PanelPos({ Client }) {
                 panelClose
               >
                 Đơn hàng
+                {getValueOrder(Client?.Present) > 0 && (
+                  <span className="pl-2">
+                    -
+                    <span className="pl-2 font-bold font-lato text-danger">
+                      {StringHelpers.formatVND(getValueOrder(Client?.Present))}
+                    </span>
+                  </span>
+                )}
               </Link>
             </div>
             <div className="border-b border-dashed last:border-b-0">
