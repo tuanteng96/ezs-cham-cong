@@ -421,7 +421,24 @@ input:disabled {
 
 .fc .fc-listWeek-view .fc-event {
     --fc-border-color : #ebedf4;
-    @apply !bg-white !shadow-none !border-none !text-gray-900
+    @apply !bg-white !shadow-none !border-none !text-gray-900;
+}
+
+
+.fc .fc-listWeek-view .fc-event {
+    @apply flex !p-0
+}
+
+.fc .fc-listWeek-view .fc-event  .fc-list-event-time {
+    @apply min-w-[110px] w-[110px]
+}
+
+.fc .fc-listWeek-view .fc-event .fc-list-event-graphic {
+    @apply min-w-[50px] w-[50px]
+}
+
+.fc .fc-listWeek-view .fc-event .fc-list-event-title {
+    @apply max-w-[calc(100%-240px)];
 }
 
 .fc .fc-listWeek-view .fc-event .fc-list-event-time {
@@ -429,7 +446,7 @@ input:disabled {
 }
 
 .fc .fc-listWeek-view .fc-event .fc-list-event-title {
-    @apply py-3.5 font-medium
+    @apply py-3.5 font-medium;
 }
 
 .fc .fc-listWeek-view .fc-event .fc-list-event-graphic {

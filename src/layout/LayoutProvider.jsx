@@ -397,9 +397,101 @@ function LayoutProvider({ children }) {
       items: [],
       Count: 0,
     },
-    refetchInterval: (data) =>
-      data?.pending || data?.data?.pending ? 5000 : false,
+    // refetchInterval: (data) =>
+    //   data?.pending || data?.data?.pending ? 5000 : false,
   });
+
+  var ProcessingsUpdate = (data) => {
+    if (
+      f7.popover.get(".popover-processings") &&
+      f7.popover.get(".popover-processings").opened
+    ) {
+      f7.popover.close(".popover-processings");
+    }
+
+    let rs = null;
+    if (data) {
+      rs = {
+        items: [
+          {
+            Title: "Đặt lịch",
+            Index: 1,
+            children: [],
+            ID: "memberBooks",
+          },
+          {
+            Title: "Huỷ lịch",
+            Index: 2,
+            children: [],
+            ID: "memberBooksCancel",
+          },
+          {
+            Title: "Đơn hàng Online",
+            Index: 3,
+            children: [],
+            ID: "orderWebApp",
+          },
+          {
+            Title: "Duyệt thanh toán",
+            Index: 4,
+            children: [],
+            ID: "smsPayed",
+          },
+          {
+            Title: "Lịch nhắc",
+            Index: 5,
+            children: [],
+            ID: "noti",
+          },
+          {
+            Title: "Liên hệ",
+            Index: 6,
+            children: [],
+            ID: "contact",
+          },
+          {
+            Title: "Thanh toán",
+            Index: 7,
+            children: [],
+            ID: "qrCallback",
+          },
+        ],
+        Count: 0,
+      };
+
+      for (const property in data) {
+        if (
+          [
+            "memberBooks",
+            "memberBooksCancel",
+            "orderWebApp",
+            "smsPayed",
+            "noti",
+            "contact",
+            "qrCallback",
+          ].includes(property)
+        ) {
+          if (Array.isArray(data[property])) {
+            rs.Count += data[property].length;
+          }
+          let index = rs.items.findIndex((x) => x.ID === property);
+          if (index > -1) {
+            rs.items[index].children = data[property];
+          }
+        }
+      }
+    }
+
+    let result = {
+      ...rs,
+      ...data,
+      items: rs?.items ? rs.items.sort((a, b) => a?.Index - b?.Index) : [],
+    };
+
+    store.dispatch("setProcessings", result);
+  };
+
+  window.ProcessingsUpdate = ProcessingsUpdate;
 
   window.refetchProcessings = refetchProcessings;
 
