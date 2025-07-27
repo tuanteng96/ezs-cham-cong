@@ -833,7 +833,7 @@ function PosAdmin({ f7router }) {
             const { extendedProps } = event._def;
             let italicEl = document.createElement("div");
             italicEl.classList.add("fc-content");
-
+            
             if (
               typeof extendedProps !== "object" ||
               Object.keys(extendedProps).length > 0
@@ -900,7 +900,7 @@ function PosAdmin({ f7router }) {
                   "Chưa xác định số"
                 }</span> 
               <div class="flex">
-                <div class="truncate capitalize">${
+                <div class="${filters.view !== "listWeek" ? 'truncate ' : ''}capitalize">${
                   extendedProps.RootTitles || "Chưa chọn dịch vụ"
                 }</div>
               <span class="${!extendedProps?.isBook && "d-none"} pl-1">- ${
