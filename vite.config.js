@@ -43,18 +43,18 @@ export default async () => {
       minify: true,
       outDir: BUILD_DIR,
       assetsInlineLimit: 0,
-      chunkSizeWarningLimit: 2000,
+      chunkSizeWarningLimit: 5000,
       emptyOutDir: true,
       rollupOptions: {
         treeshake: false,
         output: {
-          manualChunks: (id) => {
+          manualChunks: (id) => {        
+            // if (id.includes("node_modules") && !(/\.css$/.test(id))) return "vendor";
             const url = new URL(id, import.meta.url);
             const chunkName = url.searchParams.get("chunkName");
             if (chunkName) {
               return chunkName;
             }
-            // return void will invoke the built-in `viteManualChunks`
           },
           assetFileNames: (assetInfo) => {
             if (/\.css$/.test(assetInfo.name)) {

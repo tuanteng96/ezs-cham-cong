@@ -2,11 +2,9 @@ import React from "react";
 import { useMutation } from "react-query";
 import MoresAPI from "../../../api/Mores.api";
 import { useStore } from "framework7-react";
-import { toast } from "react-toastify";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import AssetsHelpers from "../../../helpers/AssetsHelpers";
 import clsx from "clsx";
-import Resizer from "react-image-file-resizer";
 
 function UploadFiles({
   value,
@@ -20,48 +18,48 @@ function UploadFiles({
     mutationFn: (body) => MoresAPI.upload(body),
   });
 
-  const handleFile = async (event) => {
-    const [file] = event.target.files;
-    if (file) {
-      let val = await new Promise((resolve) => {
-        Resizer.imageFileResizer(
-          file,
-          600,
-          600,
-          "JPEG",
-          100,
-          0,
-          (uri) => {
-            resolve(uri);
-          },
-          "file",
-          300,
-          300
-        );
-      });
-      var bodyFormData = new FormData();
-      bodyFormData.append("file", val);
+  // const handleFile = async (event) => {
+  //   const [file] = event.target.files;
+  //   if (file) {
+  //     let val = await new Promise((resolve) => {
+  //       Resizer.imageFileResizer(
+  //         file,
+  //         600,
+  //         600,
+  //         "JPEG",
+  //         100,
+  //         0,
+  //         (uri) => {
+  //           resolve(uri);
+  //         },
+  //         "file",
+  //         300,
+  //         300
+  //       );
+  //     });
+  //     var bodyFormData = new FormData();
+  //     bodyFormData.append("file", val);
 
-      uploadMutation.mutate(
-        {
-          Token: Auth?.token,
-          File: bodyFormData,
-        },
-        {
-          onSuccess: ({ data }) => {
-            if (data?.error) {
-              toast.error(data.error);
-            } else {
-              onChange(data.data);
-            }
-          },
-          onError: (error) => {
-            console.log(error);
-          },
-        }
-      );
-    }
-  };
+  //     uploadMutation.mutate(
+  //       {
+  //         Token: Auth?.token,
+  //         File: bodyFormData,
+  //       },
+  //       {
+  //         onSuccess: ({ data }) => {
+  //           if (data?.error) {
+  //             toast.error(data.error);
+  //           } else {
+  //             onChange(data.data);
+  //           }
+  //         },
+  //         onError: (error) => {
+  //           console.log(error);
+  //         },
+  //       }
+  //     );
+  //   }
+  // };
 
   return (
     <div className={clsx(wrapClass)}>
@@ -103,14 +101,14 @@ function UploadFiles({
               <div className="text-[11px] text-muted mt-1">Upload</div>
             </div>
           )}
-          <input
+          {/* <input
             id="dropzone-file"
             type="file"
             className="hidden"
             accept="image/*"
             onChange={handleFile}
             value=""
-          />
+          /> */}
         </label>
         {value && (
           <div

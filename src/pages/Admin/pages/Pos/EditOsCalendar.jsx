@@ -25,8 +25,8 @@ import {
   useStore,
 } from "framework7-react";
 import React, { useEffect, useRef, useState } from "react";
-import { yupResolver } from "@hookform/resolvers/yup";
-import * as yup from "yup";
+// import { yupResolver } from "@hookform/resolvers/yup";
+// import * as yup from "yup";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
 import { SelectMembersServices } from "@/partials/forms/select";
 import { DatePicker, SelectPicker, SelectPickersGroup } from "@/partials/forms";
@@ -46,6 +46,7 @@ import {
   PickerServiceOsInfo,
 } from "./components";
 import { UploadImages } from "@/partials/forms/files";
+import { Fancybox } from "@fancyapps/ui";
 
 const AutoSalaryMethodOptions = [
   {
@@ -1639,7 +1640,52 @@ function EditOsCalendar({ f7route, f7router }) {
                       <div
                         className="relative flex items-center border aspect-square"
                         key={index}
-                        onClick={() => standalone.current.open(index)}
+                        onClick={() => {
+                          Fancybox.show(
+                            OsImages?.data && OsImages?.data.length > 0
+                              ? OsImages?.data.map((x) => ({
+                                  src: AssetsHelpers.toAbsoluteUrl(x.Src),
+                                  thumbSrc: AssetsHelpers.toAbsoluteUrl(
+                                    x.Src
+                                  ),
+                                }))
+                              : [],
+                            {
+                              Carousel: {
+                                Toolbar: {
+                                  items: {
+                                    downloadImage: {
+                                      tpl: '<button class="f-button"><svg tabindex="-1" width="24" height="24" viewBox="0 0 24 24"><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2M7 11l5 5 5-5M12 4v12"></path></svg></button>',
+                                      click: () => {
+                                        PromHelpers.OPEN_LINK(
+                                          AssetsHelpers.toAbsoluteUrl(item.Src)
+                                        );
+                                      },
+                                    },
+                                  },
+                                  display: {
+                                    left: ["counter"],
+                                    middle: [
+                                      "zoomIn",
+                                      "zoomOut",
+                                      // "toggle1to1",
+                                      "rotateCCW",
+                                      "rotateCW",
+                                      // "flipX",
+                                      // "flipY",
+                                    ],
+                                    right: [
+                                      "downloadImage",
+                                      //"thumbs",
+                                      "close",
+                                    ],
+                                  },
+                                },
+                              },
+                              startIndex: index,
+                            }
+                          );
+                        }}
                       >
                         <img
                           className="object-contain w-full h-full rounded"
@@ -1666,7 +1712,7 @@ function EditOsCalendar({ f7route, f7router }) {
                     isMultiple={true}
                   />
                 </div>
-                <PhotoBrowser
+                {/* <PhotoBrowser
                   photos={
                     OsImages?.data
                       ? OsImages?.data.map((x) => ({
@@ -1685,7 +1731,7 @@ function EditOsCalendar({ f7route, f7router }) {
                   ref={standalone}
                   navbarShowCount={true}
                   toolbar={false}
-                />
+                /> */}
               </div>
             </div>
           </>

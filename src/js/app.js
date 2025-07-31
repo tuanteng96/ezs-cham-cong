@@ -1,41 +1,42 @@
 // Import React and ReactDOM
-import React from 'react';
-import {
-    createRoot
-} from 'react-dom/client';
-import {
-    install
-} from 'resize-observer';
+import React from "react";
+import { createRoot } from "react-dom/client";
+import { ResizeObserver } from "@juggle/resize-observer";
 
 // Import Framework7
-import Framework7 from './framework7-custom.js';
+import Framework7 from "./framework7-custom.js";
 
 // Import Framework7-React Plugin
-import Framework7React from 'framework7-react';
+import Framework7React from "framework7-react";
 
 // Import Framework7 Styles
-import '../css/framework7-custom.less';
+import "../css/framework7-custom.less";
 
 import "../css/ReactToastify.css";
 
 // Import Icons and App Custom Styles
-import '../css/icons.css';
-import '../css/app.css';
+import "../css/icons.css";
+import "../css/app.css";
 
 //
-import "./bz.js"
+import "@fancyapps/ui/dist/fancybox/fancybox.css";
+
+//
+import "./bz.js";
 import "./prom.js";
 import "./event-notification.js";
 
 // Import App Component
-import App from '../components/app.jsx';
+import App from "../components/app.jsx";
 
 // Init F7 React Plugin
-Framework7.use(Framework7React)
+Framework7.use(Framework7React);
 
-if (typeof window !== "undefined") install();
+if (typeof window !== "undefined" && !window.ResizeObserver) {
+  window.ResizeObserver = ResizeObserver;
+}
 
 // Mount React App
-const root = createRoot(document.getElementById('app'));
+const root = createRoot(document.getElementById("app"));
 
 root.render(React.createElement(App));

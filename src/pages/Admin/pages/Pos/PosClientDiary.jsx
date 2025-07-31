@@ -1,5 +1,6 @@
 import {
   AdjustmentsVerticalIcon,
+  ArrowDownTrayIcon,
   CheckIcon,
   ChevronLeftIcon,
   EllipsisHorizontalIcon,
@@ -12,7 +13,7 @@ import {
   NavTitle,
   Navbar,
   Page,
-  PhotoBrowser,
+  //PhotoBrowser,
   Popover,
   Subnavbar,
   Tab,
@@ -34,6 +35,8 @@ import AssetsHelpers from "@/helpers/AssetsHelpers";
 import { toast } from "react-toastify";
 import StringHelpers from "@/helpers/StringHelpers";
 import PullToRefresh from "react-simple-pull-to-refresh";
+import { RolesHelpers } from "@/helpers/RolesHelpers";
+import { Fancybox } from "@fancyapps/ui";
 
 let Menu = [
   {
@@ -46,6 +49,14 @@ let Menu = [
   },
   {
     Index: 2,
+    ID: "CareHistory",
+    Title: "Lịch sử chăm sóc",
+    children: [],
+    items: [],
+    Key: "CareHistory",
+  },
+  {
+    Index: 3,
     ID: "Attachments",
     Title: "Hình ảnh",
     children: [],
@@ -54,7 +65,7 @@ let Menu = [
     visibleCount: true,
   },
   {
-    Index: 3,
+    Index: 4,
     ID: "NotiDates",
     Title: "Lịch nhắc",
     children: [],
@@ -62,7 +73,7 @@ let Menu = [
     Key: "NotiDates",
   },
   {
-    Index: 4,
+    Index: 5,
     ID: "ServicesHistory",
     Title: "Lịch sử dịch vụ",
     children: [],
@@ -70,7 +81,7 @@ let Menu = [
     Key: "ServicesHistory",
   },
   {
-    Index: 5,
+    Index: 6,
     ID: "SalesHistory",
     Title: "Lịch sử mua hàng",
     children: [],
@@ -78,7 +89,7 @@ let Menu = [
     Key: "SalesHistory",
   },
   {
-    Index: 6,
+    Index: 7,
     ID: "MemberAff",
     Title: "Người giới thiệu",
     children: [],
@@ -97,12 +108,17 @@ function PosClientDiary({ f7router, f7route }) {
   });
   const [photos, setPhotos] = useState([]);
 
-  const standalone = useRef(null);
-
   const listInnerRef = useRef();
 
   let Auth = useStore("Auth");
   let CrStocks = useStore("CrStocks");
+  let Brand = useStore("Brand");
+
+  const { adminTools_byStock } = RolesHelpers.useRoles({
+    nameRoles: ["adminTools_byStock"],
+    auth: Auth,
+    CrStocks,
+  });
 
   const { isLoading, refetch } = useQuery({
     queryKey: ["ClientDiaryID", { ID: f7route?.params?.id }],
@@ -158,6 +174,40 @@ function PosClientDiary({ f7router, f7route }) {
               newMenu[index].items = data?.data[property];
             }
           }
+        }
+      }
+
+      return newMenu || null;
+    },
+    onSuccess: (data) => {
+      setMenus(data);
+    },
+    enabled: Number(f7route?.params?.id) > 0,
+  });
+
+  useQuery({
+    queryKey: ["ClientCareHisDiaryID", { ID: f7route?.params?.id }],
+    queryFn: async () => {
+      let { data } = await AdminAPI.clientCareHistoryDiaryId({
+        data: {
+          pi: 1,
+          ps: 1000,
+          filter: {
+            MemberID: f7route?.params?.id,
+          },
+        },
+        Token: Auth?.token,
+      });
+      let newMenu = [...Menus];
+
+      if (data?.data) {
+        let index = Menu.findIndex((x) => x.Key === "CareHistory");
+        if (index > -1) {
+          newMenu[index].children = data?.data;
+          newMenu[index].items = ArrayHelpers.groupbyDDHHMM(
+            data?.data,
+            "CreateDate"
+          );
         }
       }
 
@@ -291,7 +341,6 @@ function PosClientDiary({ f7router, f7route }) {
 
   const onScroll = () => {
     if (listInnerRef.current) {
-      
       const { scrollTop, scrollHeight, clientHeight } = listInnerRef.current;
       const isNearBottom = scrollTop + clientHeight >= scrollHeight;
 
@@ -324,7 +373,7 @@ function PosClientDiary({ f7router, f7route }) {
     if (index > -1) {
       newMenu[index].children = Lists;
       newMenu[index].items = Lists;
-      newMenu[index].Total = MemberAff?.data?.pages[0]?.Total
+      newMenu[index].Total = MemberAff?.data?.pages[0]?.Total;
     }
   }, [Lists]);
 
@@ -414,6 +463,25 @@ function PosClientDiary({ f7router, f7route }) {
         }
       );
     });
+  };
+
+  const isHasControl = (item) => {
+    let has = false;
+
+    if (adminTools_byStock?.hasRight) {
+      has = true;
+    }
+
+    if (!has) {
+      if (
+        moment(item.CreateDate).format("DD-MM-YYYY") ===
+        moment().format("DD-MM-YYYY")
+      ) {
+        has = Auth.ID === item.User.ID;
+      }
+    }
+
+    return Auth?.ID === 1 || has;
   };
 
   return (
@@ -553,9 +621,27 @@ function PosClientDiary({ f7router, f7route }) {
             </>
           )}
         </NavRight>
+
         <Subnavbar>
           <MenuSubNavbar
-            data={Menus || []}
+            data={
+              Menus
+                ? Menus.filter((x) => {
+                    let has = true;
+                    if (x.ID === "CareHistory") {
+                      has = Brand?.Global?.Admin?.lich_su_cham_soc_pos;
+                    }
+                    if (x.ID === "MemberAff") {
+                      if (Brand?.Global?.Admin?.maff) {
+                        has = Brand?.Global?.Admin?.maff;
+                      } else {
+                        has = Auth.ID === 1;
+                      }
+                    }
+                    return has;
+                  })
+                : []
+            }
             selected={active}
             setSelected={(val) => {
               setActive(val);
@@ -565,10 +651,24 @@ function PosClientDiary({ f7router, f7route }) {
         </Subnavbar>
         <div className="absolute h-[2px] w-full bottom-0 left-0 bg-[rgba(255,255,255,0.3)]"></div>
       </Navbar>
+
       <div className="h-full bg-[#f5f8fa]">
         <Tabs animated>
           {Menus &&
-            Menus.map((item, index) => (
+            Menus.filter((x) => {
+              let has = true;
+              if (x.ID === "CareHistory") {
+                has = Brand?.Global?.Admin?.lich_su_cham_soc_pos;
+              }
+              if (x.ID === "MemberAff") {
+                if (Brand?.Global?.Admin?.maff) {
+                  has = Brand?.Global?.Admin?.maff;
+                } else {
+                  has = Auth.ID === 1;
+                }
+              }
+              return has;
+            }).map((item, index) => (
               <Tab
                 className="h-full pt-0"
                 id={item.ID}
@@ -639,12 +739,14 @@ function PosClientDiary({ f7router, f7route }) {
                                               <div className="px-1">-</div>
                                               <div>{item?.User?.FullName}</div>
                                             </div>
+                                            {isHasControl(item) && (
+                                              <Link
+                                                popoverOpen={`.popover-note-${item?.ID}`}
+                                              >
+                                                <EllipsisHorizontalIcon className="w-6" />
+                                              </Link>
+                                            )}
 
-                                            <Link
-                                              popoverOpen={`.popover-note-${item?.ID}`}
-                                            >
-                                              <EllipsisHorizontalIcon className="w-6" />
-                                            </Link>
                                             <Popover
                                               className={`popover-note-${item?.ID} w-[120px]`}
                                             >
@@ -703,6 +805,54 @@ function PosClientDiary({ f7router, f7route }) {
                                 ))}
                               </>
                             )}
+                            {item.ID === "CareHistory" && (
+                              <>
+                                {item.items.map((care, index) => (
+                                  <div className="mb-3.5 last:mb-0" key={index}>
+                                    <div className="flex items-center">
+                                      <div className="w-1.5 h-1.5 mr-2 rounded-full bg-primary"></div>
+                                      <div className="px-2.5 py-1 font-medium rounded bg-primary-light text-primary">
+                                        {moment(care.dayFull).format(
+                                          "[Ngày] DD [Th]MM YYYY"
+                                        )}
+                                      </div>
+                                    </div>
+                                    <div>
+                                      {care?.items.map((item, idx) => (
+                                        <div
+                                          className="p-4 mt-3 bg-white rounded"
+                                          key={idx}
+                                        >
+                                          <div className="flex justify-between">
+                                            <div className="flex text-gray-500">
+                                              <div>
+                                                {moment(care.dayFull).format(
+                                                  "HH:mm"
+                                                )}
+                                              </div>
+                                              <div className="px-1">-</div>
+                                              <div>{item?.TeleName}</div>
+                                            </div>
+                                          </div>
+                                          <div className="mt-2">
+                                            {item.Result}
+                                          </div>
+                                          <div
+                                            className={clsx("mt-2")}
+                                            dangerouslySetInnerHTML={{
+                                              __html:
+                                                StringHelpers.fixedContentDomain(
+                                                  item.Content
+                                                ),
+                                            }}
+                                          ></div>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
+                                ))}
+                              </>
+                            )}
                             {item.ID === "Attachments" && (
                               <>
                                 {SortedByTime &&
@@ -728,17 +878,62 @@ function PosClientDiary({ f7router, f7route }) {
                                             <div className="flex items-center justify-center aspect-square">
                                               {isPhoto(item.Src) ? (
                                                 <img
-                                                  className="h-full rounded-t"
+                                                  className="object-cover h-full rounded-t"
                                                   src={AssetsHelpers.toAbsoluteUrl(
                                                     item.Src
                                                   )}
                                                   onClick={() => {
                                                     let index =
                                                       photos.findIndex(
-                                                        (x) => x.ID === item.ID
+                                                        (x) =>
+                                                          x.Src === item.Src
                                                       );
-                                                    standalone?.current?.open(
-                                                      index
+                                                    Fancybox.show(
+                                                      photos.map((x) => ({
+                                                        src: AssetsHelpers.toAbsoluteUrl(
+                                                          x.Src
+                                                        ),
+                                                        thumbSrc:
+                                                          AssetsHelpers.toAbsoluteUrl(
+                                                            x.Src
+                                                          ),
+                                                      })),
+                                                      {
+                                                        Carousel: {
+                                                          Toolbar: {
+                                                            items: {
+                                                              downloadImage: {
+                                                                tpl: '<button class="f-button"><svg tabindex="-1" width="24" height="24" viewBox="0 0 24 24"><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2M7 11l5 5 5-5M12 4v12"></path></svg></button>',
+                                                                click: () => {
+                                                                  PromHelpers.OPEN_LINK(
+                                                                    AssetsHelpers.toAbsoluteUrl(
+                                                                      item.Src
+                                                                    )
+                                                                  );
+                                                                },
+                                                              },
+                                                            },
+                                                            display: {
+                                                              left: ["counter"],
+                                                              middle: [
+                                                                "zoomIn",
+                                                                "zoomOut",
+                                                                // "toggle1to1",
+                                                                "rotateCCW",
+                                                                "rotateCW",
+                                                                // "flipX",
+                                                                // "flipY",
+                                                              ],
+                                                              right: [
+                                                                "downloadImage",
+                                                                //"thumbs",
+                                                                "close",
+                                                              ],
+                                                            },
+                                                          },
+                                                        },
+                                                        startIndex: index,
+                                                      }
                                                     );
                                                   }}
                                                 />
@@ -792,10 +987,55 @@ function PosClientDiary({ f7router, f7route }) {
                                                   onClick={() => {
                                                     let index =
                                                       photos.findIndex(
-                                                        (x) => x.ID === item.ID
+                                                        (x) =>
+                                                          x.Src === item.Src
                                                       );
-                                                    standalone?.current?.open(
-                                                      index
+                                                    Fancybox.show(
+                                                      photos.map((x) => ({
+                                                        src: AssetsHelpers.toAbsoluteUrl(
+                                                          x.Src
+                                                        ),
+                                                        thumbSrc:
+                                                          AssetsHelpers.toAbsoluteUrl(
+                                                            x.Src
+                                                          ),
+                                                      })),
+                                                      {
+                                                        Carousel: {
+                                                          Toolbar: {
+                                                            items: {
+                                                              downloadImage: {
+                                                                tpl: '<button class="f-button"><svg tabindex="-1" width="24" height="24" viewBox="0 0 24 24"><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2M7 11l5 5 5-5M12 4v12"></path></svg></button>',
+                                                                click: () => {
+                                                                  PromHelpers.OPEN_LINK(
+                                                                    AssetsHelpers.toAbsoluteUrl(
+                                                                      item.Src
+                                                                    )
+                                                                  );
+                                                                },
+                                                              },
+                                                            },
+                                                            display: {
+                                                              left: ["counter"],
+                                                              middle: [
+                                                                "zoomIn",
+                                                                "zoomOut",
+                                                                // "toggle1to1",
+                                                                "rotateCCW",
+                                                                "rotateCW",
+                                                                // "flipX",
+                                                                // "flipY",
+                                                              ],
+                                                              right: [
+                                                                "downloadImage",
+                                                                //"thumbs",
+                                                                "close",
+                                                              ],
+                                                            },
+                                                          },
+                                                        },
+                                                        startIndex: index,
+                                                      }
                                                     );
                                                   }}
                                                 />
@@ -824,13 +1064,13 @@ function PosClientDiary({ f7router, f7route }) {
                                     </div>
                                   ))}
 
-                                <PhotoBrowser
+                                {/* <PhotoBrowser
                                   photos={photos}
                                   thumbs={photos.map((x) => x.url)}
                                   ref={standalone}
                                   navbarShowCount={true}
                                   toolbar={false}
-                                />
+                                /> */}
                               </>
                             )}
                             {item.ID === "NotiDates" && (
@@ -933,7 +1173,12 @@ function PosClientDiary({ f7router, f7route }) {
                                           </div>
                                           <div className="mt-2">
                                             <div className="mb-1 font-medium text-primary">
-                                              {item.ProdTitle} {item?.Root2Title ? <>( {item.Root2Title} )</> : <></>}
+                                              {item.ProdTitle}{" "}
+                                              {item?.Root2Title ? (
+                                                <>( {item.Root2Title} )</>
+                                              ) : (
+                                                <></>
+                                              )}
                                             </div>
                                             <div className="text-gray-500">
                                               {item.ProdService ||

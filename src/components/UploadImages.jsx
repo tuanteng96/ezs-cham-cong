@@ -2,12 +2,10 @@
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import clsx from "clsx";
 import React, { useState } from "react";
-import { toast } from "react-toastify";
 import MoresAPI from "../api/Mores.api";
-import { f7, Link, useStore } from "framework7-react";
+import { Link, useStore } from "framework7-react";
 import AssetsHelpers from "../helpers/AssetsHelpers";
 import { useMutation } from "react-query";
-import Resizer from "react-image-file-resizer";
 
 const UploadImages = ({
   className,
@@ -31,51 +29,6 @@ const UploadImages = ({
         setCompleted(progress);
       }),
   });
-
-  const handleFileChange = async (event) => {
-    const [file] = event.target.files;
-
-    if (file) {
-      let val = await new Promise((resolve) => {
-        Resizer.imageFileResizer(
-          file,
-          600,
-          600,
-          "JPEG",
-          100,
-          0,
-          (uri) => {
-            resolve(uri);
-          },
-          "file",
-          300,
-          300
-        );
-      });
-
-      var bodyFormData = new FormData();
-      bodyFormData.append("file", val);
-
-      uploadMutation.mutate(
-        {
-          Token: Auth?.token,
-          File: bodyFormData,
-        },
-        {
-          onSuccess: ({ data }) => {
-            if (data?.error) {
-              toast.error(data.error);
-            } else {
-              onChange(data.data);
-            }
-          },
-          onError: (error) => {
-            console.log(error);
-          },
-        }
-      );
-    }
-  };
 
   return (
     <>

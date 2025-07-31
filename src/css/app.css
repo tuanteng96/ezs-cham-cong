@@ -69,7 +69,7 @@
     --fc-today-bg-color: #fff;
     --fc-small-font-size: 13px;
 
-    --f7-panel-left-width: 300px
+    --f7-panel-left-width: 300px;
 }
 
 /* Page */    
@@ -519,4 +519,13 @@ input:disabled {
 
 .actions-ctv .color-red > .actions-button-text {
     @apply text-danger font-medium
+}
+
+.fancybox__dialog [data-carousel-go-prev],
+.fancybox__dialog [data-carousel-go-next] {
+    @apply hidden
+}
+
+.fancybox__dialog .fancybox__container {
+    @apply !pb-safe-b !pt-safe-t
 }

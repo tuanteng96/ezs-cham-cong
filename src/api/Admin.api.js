@@ -7,7 +7,7 @@ const AdminAPI = {
     http.post(`/api/v3/cate25@UpdateLatLng`, JSON.stringify(body)),
   listProcessings: ({ StockID, Token }) =>
     http.get(
-      `/api/v3/usertask?cmd=list&stockid=${StockID}&loadId=2&from=&to=&token=${Token}`
+      `/api/v3/usertask?cmd=list&stockid=${StockID}&loadId=2&from=&to=&token=${Token}&force=1`
     ),
   invoiceProcessings: ({
     MemberCheckInID,
@@ -224,11 +224,15 @@ const AdminAPI = {
       },
     }),
   createMemberBooking: ({ data, Token, StockID }) =>
-    http.post(`/api/v3/member23?cmd=add&stockid=${StockID}`, JSON.stringify(data), {
-      headers: {
-        Authorization: `Bearer ${Token}`,
-      },
-    }),
+    http.post(
+      `/api/v3/member23?cmd=add&stockid=${StockID}`,
+      JSON.stringify(data),
+      {
+        headers: {
+          Authorization: `Bearer ${Token}`,
+        },
+      }
+    ),
   addBookings: ({ data, Token, CrStockID }) =>
     http.post(
       `/api/v3/mbookadmin?cmd=AdminBooking&CurrentStockID=${CrStockID}`,
@@ -523,6 +527,12 @@ const AdminAPI = {
     }),
   clientCareDiaryId: ({ MemberID, Token }) =>
     http.get(`/api/v3/membercare?cmd=get&mid=${MemberID}`, {
+      headers: {
+        Authorization: `Bearer ${Token}`,
+      },
+    }),
+  clientCareHistoryDiaryId: ({ data, Token }) =>
+    http.post(`/api/v3/tele23@list_tele`, JSON.stringify(data), {
       headers: {
         Authorization: `Bearer ${Token}`,
       },

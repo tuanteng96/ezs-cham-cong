@@ -299,10 +299,7 @@ function PosClientServices({ f7router, f7route }) {
         </Subnavbar>
       </Navbar>
       <div className="bg-[#f5f8fa] h-full">
-        <PullToRefresh
-          className="h-full ezs-ptr"
-          onRefresh={Services.refetch}
-        >
+        <PullToRefresh className="h-full ezs-ptr" onRefresh={Services.refetch}>
           <Tabs animated>
             {(Services?.data || initialData)?.map((item, index) => (
               <Tab

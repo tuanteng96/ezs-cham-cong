@@ -899,13 +899,18 @@ function PosAdmin({ f7router }) {
                   extendedProps?.MemberCurrent?.MobilePhone ||
                   "Chưa xác định số"
                 }</span> 
-              <div class="flex">
+              <div class="flex${filters.view === "listWeek" ? " flex-col" : ""}">
                 <div class="${filters.view !== "listWeek" ? 'truncate ' : ''}capitalize">${
                   extendedProps.RootTitles || "Chưa chọn dịch vụ"
                 }</div>
-              <span class="${!extendedProps?.isBook && "d-none"} pl-1">- ${
+                ${
+                  filters.view === "listWeek" ? `<span class="${!extendedProps?.isBook && "d-none"} pl-1">(${
                   extendedProps?.BookCount?.Done || 0
-                }/${extendedProps?.BookCount?.Total || 0}</span>
+                }/${extendedProps?.BookCount?.Total || 0})</span>` : `<span class="${!extendedProps?.isBook && "d-none"} pl-1">- ${
+                  extendedProps?.BookCount?.Done || 0
+                }/${extendedProps?.BookCount?.Total || 0}</span>`
+                }
+              
               </div>
             </div>
             </div>`;

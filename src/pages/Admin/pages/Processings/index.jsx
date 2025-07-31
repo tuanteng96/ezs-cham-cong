@@ -34,7 +34,7 @@ function ProcessingsAdmin({ f7router }) {
     f7ready((f7) => {
       queryClient.invalidateQueries(["Processings"]);
     });
-  });
+  }, []);
 
   const [active, setActive] = useState(
     Processings?.items && Processings?.items.length > 0

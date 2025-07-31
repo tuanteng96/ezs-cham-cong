@@ -297,7 +297,7 @@ function LayoutProvider({ children }) {
 
   const { refetch: refetchProcessings } = useQuery({
     queryKey: ["Processings", { ID: Auth?.ID, StockID: CrStocks?.ID }],
-    queryFn: async () => {
+    queryFn: async (a) => {
       let { data } = await AdminAPI.listProcessings({
         StockID: CrStocks?.ID,
         Token: Auth?.token,
@@ -397,8 +397,8 @@ function LayoutProvider({ children }) {
       items: [],
       Count: 0,
     },
-    // refetchInterval: (data) =>
-    //   data?.pending || data?.data?.pending ? 5000 : false,
+    refetchInterval: (data) =>
+      data?.pending || data?.data?.pending ? 5000 : false,
   });
 
   var ProcessingsUpdate = (data) => {
