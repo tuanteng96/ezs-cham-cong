@@ -72,7 +72,7 @@ function PickerMultiEmployees({ children, Order }) {
   useEffect(() => {
     if (Order) {
       const { oiItems } = Order;
-      const newObt =
+      let newObt =
         oiItems && oiItems.length > 0
           ? oiItems.map((item) => ({
               Product: item,
@@ -80,6 +80,22 @@ function PickerMultiEmployees({ children, Order }) {
               Type: GroupUsers[0],
             }))
           : [];
+
+      if (
+        Brand?.Global?.Admin?.cai_dat_phi?.visible &&
+        Brand?.Global?.Admin?.cai_dat_phi?.an_tinh_hs_ds
+      ) {
+        newObt = newObt.filter(
+          (x) =>
+            x.Product.ProdTitle !==
+              Brand?.Global?.Admin?.cai_dat_phi?.TIP?.ProdTitle &&
+            x.Product.ProdTitle !==
+              Brand?.Global?.Admin?.cai_dat_phi?.PHIDICHVU?.ProdTitle &&
+            x.Product.ProdTitle !==
+              Brand?.Global?.Admin?.cai_dat_phi?.PHIQUETTHE?.ProdTitle
+        );
+      }
+
       setValue("Divided", newObt);
     }
   }, [Order]);
@@ -197,7 +213,11 @@ function PickerMultiEmployees({ children, Order }) {
             Value:
               item.Type.value === "KY_THUAT_VIEN"
                 ? getValueKTV({ item: item.Product, user: item.Staff })
-                : getValueHH({ item: item.Product, user: item.Staff, Type: item.Type }),
+                : getValueHH({
+                    item: item.Product,
+                    user: item.Staff,
+                    Type: item.Type,
+                  }),
           },
         ],
         Doanh_So: [

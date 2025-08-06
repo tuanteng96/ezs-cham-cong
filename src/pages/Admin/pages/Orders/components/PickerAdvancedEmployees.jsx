@@ -18,7 +18,6 @@ function PickerAdvancedEmployees({ children, Order }) {
   let Brand = useStore("Brand");
   let Auth = useStore("Auth");
   let CrStocks = useStore("CrStocks");
-  
 
   const [visible, setVisible] = useState(false);
 
@@ -112,7 +111,7 @@ function PickerAdvancedEmployees({ children, Order }) {
       {
         data: dataSubmit,
         Token: Auth?.token,
-        StockID: CrStocks?.ID
+        StockID: CrStocks?.ID,
       },
       {
         onSuccess: (data) => {
@@ -125,6 +124,21 @@ function PickerAdvancedEmployees({ children, Order }) {
   };
 
   let { Advanced } = watch();
+
+  let oiItems = Order?.oiItems || [];
+
+  if (
+    Brand?.Global?.Admin?.cai_dat_phi?.visible &&
+    Brand?.Global?.Admin?.cai_dat_phi?.an_tinh_hs_ds
+  ) {
+    oiItems = oiItems.filter(
+      (x) =>
+        x.ProdTitle !== Brand?.Global?.Admin?.cai_dat_phi?.TIP?.ProdTitle &&
+        x.ProdTitle !==
+          Brand?.Global?.Admin?.cai_dat_phi?.PHIDICHVU?.ProdTitle &&
+        x.ProdTitle !== Brand?.Global?.Admin?.cai_dat_phi?.PHIQUETTHE?.ProdTitle
+    );
+  }
 
   return (
     <AnimatePresence initial={false}>
@@ -178,7 +192,7 @@ function PickerAdvancedEmployees({ children, Order }) {
                                     isClearable={false}
                                     placeholder="Chọn sản phẩm"
                                     value={field.value}
-                                    options={Order?.oiItems}
+                                    options={oiItems}
                                     label="Chọn sản phẩm"
                                     onChange={(val) => {
                                       field.onChange(val);

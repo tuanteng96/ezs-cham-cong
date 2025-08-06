@@ -192,6 +192,12 @@ const ArrayHelpers = {
             100
         );
   },
+  arrayContains: (x, y) => {
+    return !x.reduce(
+      (y, e, t) => ((t = y.indexOf(e)), t >= 0 && y.splice(t, 1), y),
+      [...y]
+    ).length;
+  },
 };
 
 export default ArrayHelpers;

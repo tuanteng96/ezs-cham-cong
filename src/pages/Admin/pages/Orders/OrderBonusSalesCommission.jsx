@@ -101,7 +101,7 @@ function OrderBonusSalesCommission({ f7route }) {
     onSuccess: (data) => {
       if (data) {
         const { doanh_so, hoa_hong, oiItems } = data;
-        const newObj =
+        let newObj =
           oiItems && oiItems.length > 0
             ? oiItems.map((product) => {
                 const Hoa_hong_arr = hoa_hong.filter(
@@ -121,6 +121,21 @@ function OrderBonusSalesCommission({ f7route }) {
                 };
               })
             : [];
+
+        if (
+          Brand?.Global?.Admin?.cai_dat_phi?.visible &&
+          Brand?.Global?.Admin?.cai_dat_phi?.an_tinh_hs_ds
+        ) {
+          newObj = newObj.filter(
+            (x) =>
+              x.Product.ProdTitle !==
+                Brand?.Global?.Admin?.cai_dat_phi?.TIP?.ProdTitle &&
+              x.Product.ProdTitle !==
+                Brand?.Global?.Admin?.cai_dat_phi?.PHIDICHVU?.ProdTitle &&
+              x.Product.ProdTitle !==
+                Brand?.Global?.Admin?.cai_dat_phi?.PHIQUETTHE?.ProdTitle
+          );
+        }
 
         reset({ BounsSalesIn: newObj });
       }

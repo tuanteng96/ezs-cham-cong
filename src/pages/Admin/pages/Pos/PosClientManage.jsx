@@ -30,6 +30,7 @@ import { useMutation, useQuery, useQueryClient } from "react-query";
 import {
   PanelPos,
   PickerAccumulate,
+  PickerAddEditFee,
   PickerAddEditTIP,
   PickerAff,
   PickerEditProd,
@@ -47,6 +48,7 @@ import {
 import { toast } from "react-toastify";
 import { RolesHelpers } from "@/helpers/RolesHelpers";
 import { getDatabase, ref, remove, set } from "firebase/database";
+import ArrayHelpers from "@/helpers/ArrayHelpers";
 
 function PosClientManage({ f7route, f7router }) {
   let Auth = useStore("Auth");
@@ -166,6 +168,7 @@ function PosClientManage({ f7route, f7router }) {
       });
 
       let Services = await appPOS.getOsList({ mid: f7route?.params?.id });
+
       Services = Services
         ? Services.filter((x) => x.Product?.IsAddFee !== 1)
         : [];
@@ -205,21 +208,28 @@ function PosClientManage({ f7route, f7router }) {
           (x) => x?.ProdOrService === 2 && x?.HasFeeInUse === undefined
         ).map((x) => x.ID);
         if (ids && ids.length > 0) {
-          let {data: byUse} = await AdminAPI.getOrderItemInfo24({
+          let { data: byUse } = await AdminAPI.getOrderItemInfo24({
             data: {
               ids,
             },
           });
           if (byUse?.lst && byUse?.lst?.length > 0) {
             for (let use of byUse?.lst) {
-              let index = newRs.OrderItems.findIndex(k => k.ID === use.ID)
-              if(index > -1) {
-                newRs.OrderItems[index]["HasFeeInUse"] = use.HasFeeInUse
+              let index = newRs.OrderItems.findIndex((k) => k.ID === use.ID);
+              if (index > -1) {
+                newRs.OrderItems[index]["HasFeeInUse"] = use.HasFeeInUse;
               }
             }
           }
         }
       }
+
+      let ServiceAll = await AdminAPI.clientsServiceUseId({
+        ID: f7route?.params?.id,
+        Token: Auth?.token,
+      });
+
+      newRs.ServiceAll = ServiceAll?.data?.Model?.OrderService || [];
 
       return newRs;
     },
@@ -232,13 +242,13 @@ function PosClientManage({ f7route, f7router }) {
   const ServicesUse = useQuery({
     queryKey: ["ServiceUseManageID", { id: f7route?.params?.id }],
     queryFn: async () => {
-      let data =
-        (await appPOS) &&
-        appPOS.getCurrentOs({
+      let data = null;
+      if (appPOS) {
+        data = await appPOS.getCurrentOs({
           mid: f7route?.params?.id,
           chk: Client?.data?.CheckIn || null,
         });
-
+      }
       return data && Array.isArray(data)
         ? data.map((x) => ({
             ...x,
@@ -698,6 +708,19 @@ function PosClientManage({ f7route, f7router }) {
     return false;
   };
 
+  const checkAddEditFee = () => {
+    if (!Order?.data?.OrderItems || Order?.data?.OrderItems.length === 0)
+      return false;
+    return !ArrayHelpers.arrayContains(
+      Order?.data?.OrderItems && Order?.data?.OrderItems.map((x) => x.ProdID),
+      [
+        Number(Brand?.Global?.Admin?.cai_dat_phi?.TIP?.ProdID),
+        Number(Brand?.Global?.Admin?.cai_dat_phi?.PHIDICHVU.ProdID),
+        Number(Brand?.Global?.Admin?.cai_dat_phi?.PHIQUETTHE.ProdID),
+      ]
+    );
+  };
+
   return (
     <Page
       noSwipeback
@@ -908,11 +931,11 @@ function PosClientManage({ f7route, f7router }) {
                                 <div className="flex-1">
                                   <div className="mb-px font-medium line-clamp-2">
                                     [{item?.ProdCode}] {item?.ProdTitle}
-                                    {
-                                      item.HasFeeInUse && (
-                                        <span className="pl-1 text-gray-500">( Đã dùng )</span>
-                                      )
-                                    }
+                                    {item.HasFeeInUse && (
+                                      <span className="pl-1 text-gray-500">
+                                        ( Đã dùng )
+                                      </span>
+                                    )}
                                   </div>
                                   <div className="flex justify-between">
                                     <div className="font-lato">
@@ -1574,7 +1597,8 @@ function PosClientManage({ f7route, f7router }) {
                           </Link>
                         )}
                       </PickerAff>
-                      {Brand?.Global?.Admin?.Tips &&
+                      {!Brand?.Global?.Admin?.cai_dat_phi?.visible &&
+                        Brand?.Global?.Admin?.Tips &&
                         Client?.data?.CheckIn?.CreateDate && (
                           <PickerAddEditTIP
                             Value={Client?.data?.CheckIn?.MemberTipAmount}
@@ -1583,7 +1607,6 @@ function PosClientManage({ f7route, f7router }) {
                             {({ open }) => (
                               <>
                                 <Link
-                                  //popoverClose
                                   className="flex justify-between p-3 font-medium border-b last:border-0"
                                   noLinkClass
                                   popoverOpen=".popover-tips-menu"
@@ -1662,6 +1685,29 @@ function PosClientManage({ f7route, f7router }) {
                             )}
                           </PickerAddEditTIP>
                         )}
+
+                      {Brand?.Global?.Admin?.cai_dat_phi?.visible &&
+                        checkAddEditFee() && (
+                          <PickerAddEditFee
+                            Order={Order?.data}
+                            Client={Client?.data}
+                            ServicesUse={ServicesUse?.data}
+                          >
+                            {({ open }) => (
+                              <>
+                                <Link
+                                  onClick={open}
+                                  popoverClose
+                                  className="flex justify-between p-3 font-medium border-b last:border-0"
+                                  noLinkClass
+                                >
+                                  Phí
+                                </Link>
+                              </>
+                            )}
+                          </PickerAddEditFee>
+                        )}
+
                       <PickerAccumulate
                         data={Order?.data?.Order?.TAKE_MM}
                         Order={Order?.data?.Order}

@@ -122,7 +122,7 @@ function PickerOneEmployees({ children, Order }) {
   const onSubmit = (values) => {
     const { Equally, Type } = values;
     if (Equally.length > 0) {
-      const newArr =
+      let newArr =
         Order && Order.oiItems && Order.oiItems.length > 0
           ? Order.oiItems.map((item) => ({
               Product: item,
@@ -144,6 +144,22 @@ function PickerOneEmployees({ children, Order }) {
               })),
             }))
           : [];
+
+      if (
+        Brand?.Global?.Admin?.cai_dat_phi?.visible &&
+        Brand?.Global?.Admin?.cai_dat_phi?.an_tinh_hs_ds
+      ) {
+        newArr = newArr.filter(
+          (x) =>
+            x.Product.ProdTitle !==
+              Brand?.Global?.Admin?.cai_dat_phi?.TIP?.ProdTitle &&
+            x.Product.ProdTitle !==
+              Brand?.Global?.Admin?.cai_dat_phi?.PHIDICHVU?.ProdTitle &&
+            x.Product.ProdTitle !==
+              Brand?.Global?.Admin?.cai_dat_phi?.PHIQUETTHE?.ProdTitle
+        );
+      }
+
       setValue("EquallyValues", newArr);
       openValues();
     }
@@ -195,7 +211,7 @@ function PickerOneEmployees({ children, Order }) {
       {
         data: dataSubmit,
         Token: Auth?.token,
-        StockID: CrStocks?.ID
+        StockID: CrStocks?.ID,
       },
       {
         onSuccess: (data) => {
