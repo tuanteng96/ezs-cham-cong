@@ -710,7 +710,7 @@ function PosClientManage({ f7route, f7router }) {
 
   const checkAddEditFee = () => {
     if (!Order?.data?.OrderItems || Order?.data?.OrderItems.length === 0)
-      return false;
+      return true;
     return !ArrayHelpers.arrayContains(
       Order?.data?.OrderItems && Order?.data?.OrderItems.map((x) => x.ProdID),
       [
