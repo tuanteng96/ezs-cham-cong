@@ -143,14 +143,14 @@ const PHI_QUET_THE = ({ Client, Order, SettingFee, Auth, CrStocks, close }) => {
                       setValue("FeeTotal", newFeeTotal);
                     }}
                   />
-                  {field.value && (
+                  {field.value ? (
                     <div
                       className="absolute top-0 right-0 flex items-center justify-center w-12 h-full"
                       onClick={() => field.onChange("")}
                     >
                       <XMarkIcon className="w-5" />
                     </div>
-                  )}
+                  ) : <></>}
                 </div>
               </div>
             )}

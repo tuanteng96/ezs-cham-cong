@@ -1485,17 +1485,21 @@ function PosClientManage({ f7route, f7router }) {
                 disabled={
                   Order?.isLoading ||
                   Client.isLoading ||
-                  (!Client?.data?.CheckIn && !Client?.data?.RecentlyCheckIn) ||
-                  !Client?.data?.CheckIn ||
-                  !Order?.data?.Order?.ID ||
-                  Order?.data?.OrderItems?.length === 0
+                  (!Client?.data?.CheckIn && !Order?.data?.Order?.ID) ||
+                  !(
+                    (!Client?.data?.CheckIn && Client?.data?.RecentlyCheckIn) ||
+                    (Brand?.Global?.Admin?.cai_dat_phi?.visible &&
+                      checkAddEditFee()) ||
+                    Order?.data?.OrderItems?.length > 0
+                  )
                 }
                 // disabled={
                 //   Order?.isLoading ||
+                //   Client.isLoading ||
+                //   (!Client?.data?.CheckIn && !Client?.data?.RecentlyCheckIn) ||
                 //   !Client?.data?.CheckIn ||
                 //   !Order?.data?.Order?.ID ||
-                //   Order?.data?.OrderItems?.length === 0 ||
-                //   !Client?.data?.CheckIn
+                //   Order?.data?.OrderItems?.length === 0
                 // }
               >
                 <EllipsisVerticalIcon className="w-6" />
@@ -1520,6 +1524,28 @@ function PosClientManage({ f7route, f7router }) {
                       Ký lại
                     </Link>
                   )}
+
+                  {Brand?.Global?.Admin?.cai_dat_phi?.visible &&
+                    checkAddEditFee() && (
+                      <PickerAddEditFee
+                        Order={Order?.data}
+                        Client={Client?.data}
+                        ServicesUse={ServicesUse?.data}
+                      >
+                        {({ open }) => (
+                          <>
+                            <Link
+                              onClick={open}
+                              popoverClose
+                              className="flex justify-between p-3 font-medium border-b last:border-0"
+                              noLinkClass
+                            >
+                              Phí
+                            </Link>
+                          </>
+                        )}
+                      </PickerAddEditFee>
+                    )}
 
                   {Client?.data?.CheckIn &&
                   Order?.data?.Order?.ID &&
@@ -1684,28 +1710,6 @@ function PosClientManage({ f7route, f7router }) {
                               </>
                             )}
                           </PickerAddEditTIP>
-                        )}
-
-                      {Brand?.Global?.Admin?.cai_dat_phi?.visible &&
-                        checkAddEditFee() && (
-                          <PickerAddEditFee
-                            Order={Order?.data}
-                            Client={Client?.data}
-                            ServicesUse={ServicesUse?.data}
-                          >
-                            {({ open }) => (
-                              <>
-                                <Link
-                                  onClick={open}
-                                  popoverClose
-                                  className="flex justify-between p-3 font-medium border-b last:border-0"
-                                  noLinkClass
-                                >
-                                  Phí
-                                </Link>
-                              </>
-                            )}
-                          </PickerAddEditFee>
                         )}
 
                       <PickerAccumulate
