@@ -305,9 +305,7 @@ function MembersAdminAddEdit({ f7route, f7router }) {
     bodyFormData.append(
       "chluongLevels",
       JSON.stringify(
-        values?.chluongLevels
-          ? [{ id: values?.id || 0, Level: values?.chluongLevels || "" }]
-          : []
+        [{ id: values?.id || 0, Level: values?.chluongLevels || "" }]
       )
     );
     let newchluongData = [];
