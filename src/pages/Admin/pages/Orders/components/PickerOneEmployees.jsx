@@ -278,6 +278,18 @@ function PickerOneEmployees({ children, Order }) {
                             options={Order?.nhan_vien || []}
                             label="Chọn nhân viên"
                             onChange={(option) => {
+                              if (Brand?.Global?.Admin?.so_luong_nv_buoi_dv) {
+                                if (
+                                  field.value &&
+                                  field.value.length >=
+                                    Brand?.Global?.Admin?.so_luong_nv_buoi_dv
+                                ) {
+                                  toast.error(
+                                    `Chỉ có thể chọn tối đa ${Brand?.Global?.Admin?.so_luong_nv_buoi_dv} nhân viên.`
+                                  );
+                                  return;
+                                }
+                              }
                               let newOption = [];
                               if (option.length <= 10) {
                                 let arrCount = ArrayHelpers.employeeRatio(
