@@ -91,12 +91,19 @@ function PickerFilter({ children, initialValues, onChange }) {
                             placeholder="Chọn cơ sở"
                             value={field.value}
                             options={
-                              cong_ca?.StockRolesAll
-                                ? cong_ca?.StockRolesAll.map((x) => ({
-                                    ...x,
-                                    value: x.value || 778,
-                                  }))
-                                : []
+                              cong_ca?.IsStocks
+                                ? [
+                                    {
+                                      label: "Tất cả cơ sở",
+                                      value: "",
+                                    },
+                                  ].concat(
+                                    cong_ca?.StockRolesAll.map((x) => ({
+                                      ...x,
+                                      value: x.value || 778,
+                                    }))
+                                  )
+                                : cong_ca?.StockRoles || []
                             }
                             label="Cơ sở"
                             onChange={(val) => {
