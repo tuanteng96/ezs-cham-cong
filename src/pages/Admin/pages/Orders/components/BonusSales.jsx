@@ -12,6 +12,7 @@ import { NumericFormat } from "react-number-format";
 import { SelectPicker } from "@/partials/forms";
 import clsx from "clsx";
 import { PickerChangeDateBonus } from ".";
+import ConditionsHelpers from "@/helpers/ConditionsHelpers";
 
 function BonusSales({ name, adminTools_byStock }) {
   let Auth = useStore("Auth");
@@ -53,15 +54,19 @@ function BonusSales({ name, adminTools_byStock }) {
                     {({ open }) => (
                       <span
                         onClick={() =>
-                          (Brand?.Global?.Admin?.thuong_ds_nang_cao
-                            ? Auth?.ID === 1
-                            : adminTools_byStock?.hasRight) && open()
+                          !ConditionsHelpers.isDisabledSalesSommission(
+                            item,
+                            Brand?.Global?.Admin?.thuong_ds_nang_cao,
+                            adminTools_byStock.hasRight
+                          ) && open()
                         }
                       >
                         {moment(item.CreateDate).format("DD.MM.YYYY")}
-                        {(Brand?.Global?.Admin?.thuong_ds_nang_cao
-                          ? Auth?.ID === 1
-                          : adminTools_byStock?.hasRight) && (
+                        {!ConditionsHelpers.isDisabledSalesSommission(
+                          item,
+                          Brand?.Global?.Admin?.thuong_ds_nang_cao,
+                          adminTools_byStock.hasRight
+                        ) && (
                           <PencilSquareIcon className="inline-block w-4 ml-1 align-sub" />
                         )}
                       </span>
@@ -73,11 +78,11 @@ function BonusSales({ name, adminTools_byStock }) {
               )}
             </div>
             {item.ID &&
-              (Brand?.Global?.Admin?.thuong_ds_nang_cao
-                ? Auth?.ID === 1
-                : adminTools_byStock?.hasRight ||
-                  moment(item.CreateDate).format("DD-MM-YYYY") ===
-                    moment().format("DD-MM-YYYY")) && (
+              !ConditionsHelpers.isDisabledSalesSommission(
+                item,
+                Brand?.Global?.Admin?.thuong_ds_nang_cao,
+                adminTools_byStock.hasRight
+              ) && (
                 <div
                   className="text-danger"
                   onClick={() =>
@@ -112,21 +117,19 @@ function BonusSales({ name, adminTools_byStock }) {
                           field.onChange(val.floatValue || "")
                         }
                         disabled={
-                          (Brand?.Global?.Admin?.thuong_ds_nang_cao
-                            ? Auth?.ID !== 1
-                            : !(
-                                adminTools_byStock?.hasRight ||
-                                moment(item.CreateDate).format("DD-MM-YYYY") ===
-                                  moment().format("DD-MM-YYYY")
-                              )) || isHiddenPrice
+                          ConditionsHelpers.isDisabledSalesSommission(
+                            item,
+                            Brand?.Global?.Admin?.thuong_ds_nang_cao,
+                            adminTools_byStock.hasRight
+                          ) || isHiddenPrice
                         }
                       />
                       {field.value &&
-                      (Brand?.Global?.Admin?.thuong_ds_nang_cao
-                        ? Auth?.ID === 1
-                        : adminTools_byStock?.hasRight ||
-                          moment(item.CreateDate).format("DD-MM-YYYY") ===
-                            moment().format("DD-MM-YYYY")) &&
+                      !ConditionsHelpers.isDisabledSalesSommission(
+                        item,
+                        Brand?.Global?.Admin?.thuong_ds_nang_cao,
+                        adminTools_byStock.hasRight
+                      ) &&
                       !isHiddenPrice ? (
                         <div
                           className="absolute top-0 right-0 flex items-center justify-center w-12 h-full"
@@ -149,15 +152,11 @@ function BonusSales({ name, adminTools_byStock }) {
                   control={control}
                   render={({ field, fieldState }) => (
                     <SelectPicker
-                      isDisabled={
-                        Brand?.Global?.Admin?.thuong_ds_nang_cao
-                          ? Auth?.ID !== 1
-                          : !(
-                              adminTools_byStock?.hasRight ||
-                              moment(item.CreateDate).format("DD-MM-YYYY") ===
-                                moment().format("DD-MM-YYYY")
-                            )
-                      }
+                      isDisabled={ConditionsHelpers.isDisabledSalesSommission(
+                        item,
+                        Brand?.Global?.Admin?.thuong_ds_nang_cao,
+                        adminTools_byStock.hasRight
+                      )}
                       isClearable={true}
                       placeholder="Chọn loại"
                       value={field.value}

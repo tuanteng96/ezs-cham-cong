@@ -32,6 +32,7 @@ import {
   PickerOneEmployees,
 } from "./components";
 import NoFound from "@/components/NoFound";
+import ConditionsHelpers from "@/helpers/ConditionsHelpers";
 
 function OrderBonusSalesCommission({ f7route }) {
   const queryClient = useQueryClient();
@@ -276,22 +277,23 @@ function OrderBonusSalesCommission({ f7route }) {
                   </Link>
                 )}
               </PickerMultiEmployees>
-              {Brand?.Global?.Admin?.thuong_ds_nang_cao
-                ? Auth?.ID === 1
-                : !Brand?.Global?.Admin?.thuong_ds_nang_cao && (
-                    <PickerAdvancedEmployees Order={data}>
-                      {({ open }) => (
-                        <Link
-                          onClick={open}
-                          popoverClose
-                          className="relative px-4 py-3 font-medium border-b last:border-0"
-                          noLinkClass
-                        >
-                          Nâng cao
-                        </Link>
-                      )}
-                    </PickerAdvancedEmployees>
+
+              {(Brand?.Global?.Admin?.thuong_ds_nang_cao
+                ? adminTools_byStock?.hasRight
+                : !Brand?.Global?.Admin?.thuong_ds_nang_cao) && (
+                <PickerAdvancedEmployees Order={data}>
+                  {({ open }) => (
+                    <Link
+                      onClick={open}
+                      popoverClose
+                      className="relative px-4 py-3 font-medium border-b last:border-0"
+                      noLinkClass
+                    >
+                      Nâng cao
+                    </Link>
                   )}
+                </PickerAdvancedEmployees>
+              )}
             </div>
           </Popover>
         </NavRight>
@@ -324,21 +326,27 @@ function OrderBonusSalesCommission({ f7route }) {
                           {StringHelpers.formatVND(item.Product.ToPay)}
                         </div>
                       </div>
-                      <div
-                        className="flex items-center justify-end w-10 h-8 pt-2.5 text-danger"
-                        onClick={() =>
-                          f7.dialog.confirm("Xác nhận loại bỏ ?", () => {
-                            if (fields.length === 1) {
-                              remove(index);
-                              handleSubmit(onSubmit)();
-                            } else {
-                              remove(index);
-                            }
-                          })
-                        }
-                      >
-                        <TrashIcon className="w-6" />
-                      </div>
+                      {ConditionsHelpers.isDeleteProductSalesSommission(
+                        item,
+                        Brand?.Global?.Admin?.thuong_ds_nang_cao,
+                        adminTools_byStock.hasRight
+                      ) && (
+                        <div
+                          className="flex items-center justify-end w-10 h-8 pt-2.5 text-danger"
+                          onClick={() =>
+                            f7.dialog.confirm("Xác nhận loại bỏ ?", () => {
+                              if (fields.length === 1) {
+                                remove(index);
+                                handleSubmit(onSubmit)();
+                              } else {
+                                remove(index);
+                              }
+                            })
+                          }
+                        >
+                          <TrashIcon className="w-6" />
+                        </div>
+                      )}
                     </div>
                     <div>
                       <div className="border-b">

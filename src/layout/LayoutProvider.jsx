@@ -382,12 +382,6 @@ function LayoutProvider({ children }) {
       };
     },
     onSettled: (data) => {
-      if (
-        f7.popover.get(".popover-processings") &&
-        f7.popover.get(".popover-processings").opened
-      ) {
-        f7.popover.close(".popover-processings");
-      }
       if (!data?.pending && !data?.data?.pending) {
         store.dispatch("setProcessings", data);
       }
@@ -402,13 +396,6 @@ function LayoutProvider({ children }) {
   });
 
   var ProcessingsUpdate = (data) => {
-    if (
-      f7.popover.get(".popover-processings") &&
-      f7.popover.get(".popover-processings").opened
-    ) {
-      f7.popover.close(".popover-processings");
-    }
-
     let rs = null;
     if (data) {
       rs = {
@@ -525,17 +512,25 @@ function LayoutProvider({ children }) {
   });
 
   useQuery({
-    queryKey: ["ClientBirthDay", { ID: Auth?.ID, StockID: CrStocks?.ID }],
+    queryKey: ["ClientBirthDayCount", { ID: Auth?.ID, StockID: CrStocks?.ID }],
     queryFn: async () => {
-      let { data } = await AdminAPI.ClientBirthDay({
+      let { data } = await AdminAPI.ClientBirthDayCount({
         Token: Auth?.token,
-        pi: 1,
-        ps: 100,
       });
-      return data?.data || null;
+      let obj = {
+        day: 0,
+        mon: 0,
+      };
+      if (data?.stocks && data?.stocks.length > 0) {
+        let index = data?.stocks.findIndex((x) => x.StockID === CrStocks?.ID);
+        if (index > -1) {
+          obj = data?.stocks[index];
+        }
+      }
+      return obj;
     },
     onSettled: (data) => {
-      store.dispatch("setClientBirthDay", data);
+      store.dispatch("setClientBirthDayCount", data);
     },
     enabled: Boolean(Auth && Auth?.token),
   });

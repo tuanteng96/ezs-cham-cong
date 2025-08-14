@@ -12,6 +12,7 @@ import { NumericFormat } from "react-number-format";
 import clsx from "clsx";
 import { RolesHelpers } from "@/helpers/RolesHelpers";
 import { SelectMembersBouns } from ".";
+import ConditionsHelpers from "@/helpers/ConditionsHelpers";
 
 function PickerAdvancedEmployees({ children, Order }) {
   const queryClient = useQueryClient();
@@ -273,17 +274,12 @@ function PickerAdvancedEmployees({ children, Order }) {
                                       onValueChange={(val) =>
                                         field.onChange(val.floatValue || "")
                                       }
-                                      disabled={
-                                        Brand?.Global?.Admin?.thuong_ds_nang_cao
-                                          ? Auth?.ID !== 1
-                                          : !(
-                                              adminTools_byStock?.hasRight ||
-                                              moment(item.CreateDate).format(
-                                                "DD-MM-YYYY"
-                                              ) ===
-                                                moment().format("DD-MM-YYYY")
-                                            )
-                                      }
+                                      disabled={ConditionsHelpers.isDisabledSalesSommission(
+                                        item,
+                                        Brand?.Global?.Admin
+                                          ?.thuong_ds_nang_cao,
+                                        adminTools_byStock.hasRight
+                                      )}
                                     />
                                     {field.value ? (
                                       <div

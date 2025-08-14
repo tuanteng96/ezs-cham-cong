@@ -1,4 +1,4 @@
-import { Link, Popover, Toolbar, useStore } from "framework7-react";
+import { f7, Link, Popover, Toolbar, useStore } from "framework7-react";
 import React, { useEffect, useMemo, useState } from "react";
 import clsx from "clsx";
 import {
@@ -10,18 +10,16 @@ import {
 } from "@heroicons/react/24/outline";
 import RouterHelpers from "../../helpers/RouterHelpers";
 import { useIsFetching, useQueryClient } from "react-query";
-import moment from "moment";
-import Dom7 from "dom7";
 
 function NavigationPos({ pathname }) {
-
   const queryClient = useQueryClient();
 
   let InvoiceProcessings = useStore("InvoiceProcessings");
   let Processings = useStore("Processings");
-  let ClientBirthDay = useStore("ClientBirthDay");
+  let ClientBirthDayCount = useStore("ClientBirthDayCount");
 
   let [CountProcessings, setCountProcessings] = useState(0);
+  let [isPopoverOpened, setIsPopoverOpened] = useState(false);
 
   let isLoadingProcessings = useIsFetching({ queryKey: ["Processings"] }) > 0;
   let isLoadingInvoice =
@@ -30,6 +28,15 @@ function NavigationPos({ pathname }) {
   useEffect(() => {
     setCountProcessings(Processings?.Count);
   }, [Processings]);
+
+  useEffect(() => {
+    if (isPopoverOpened) {
+      Promise.all([
+        queryClient.invalidateQueries(["ClientBirthDayCount"]),
+        queryClient.invalidateQueries(["InvoiceProcessings"]),
+      ]);
+    }
+  }, [isPopoverOpened]);
 
   const noBottomNav = useMemo(() => {
     return (
@@ -109,7 +116,11 @@ function NavigationPos({ pathname }) {
             </div>
           </div>
         </Link>
-        <Link className="relative" popoverOpen=".popover-processings">
+        <Link
+          onClick={setIsPopoverOpened}
+          className="relative btn-popover-processings"
+          //popoverOpen=".popover-processings"
+        >
           <div
             className={clsx(
               "flex flex-col items-center justify-center pt-1",
@@ -141,20 +152,21 @@ function NavigationPos({ pathname }) {
         </Link>
 
         <Popover
+          targetEl={".btn-popover-processings"}
+          opened={isPopoverOpened}
           className="popover-processings w-[210px]"
-          onPopoverOpen={() => {
-            queryClient.invalidateQueries(["InvoiceProcessings"]);
-          }}
         >
           <div className="flex flex-col py-1">
             <Link
-              href="/admin/processings/"
-              popoverClose
               className={clsx(
                 "relative px-4 py-3 font-medium border-b last:border-0",
                 pathname === "/admin/processings/" && "text-app"
               )}
               noLinkClass
+              onClick={() => {
+                setIsPopoverOpened(false);
+                f7.views.main.router.navigate("/admin/processings/");
+              }}
             >
               Cần xử lý
               {isLoadingProcessings ? (
@@ -172,13 +184,17 @@ function NavigationPos({ pathname }) {
               )}
             </Link>
             <Link
-              href="/admin/pos/invoice-processings/"
               className={clsx(
                 "relative px-4 py-3 font-medium border-b last:border-0",
                 pathname === "/admin/pos/invoice-processings/" && "text-app"
               )}
-              popoverClose
               noLinkClass
+              onClick={() => {
+                setIsPopoverOpened(false);
+                f7.views.main.router.navigate(
+                  "/admin/pos/invoice-processings/"
+                );
+              }}
             >
               Hoá đơn đang xử lý
               {isLoadingInvoice ? (
@@ -199,30 +215,22 @@ function NavigationPos({ pathname }) {
               )}
             </Link>
             <Link
-              href="/admin/pos/clients/birthday/"
-              popoverClose
               className={clsx(
                 "relative px-4 py-3 font-medium border-b last:border-0",
                 pathname === "/admin/pos/clients/birthday/" && "text-app"
               )}
               noLinkClass
+              onClick={() => {
+                setIsPopoverOpened(false);
+                f7.views.main.router.navigate("/admin/pos/clients/birthday/");
+              }}
             >
               Khách sinh nhật
-              {ClientBirthDay &&
-                ClientBirthDay.filter(
-                  (x) =>
-                    moment(x.Birth).format("DD-MM") === moment().format("DD-MM")
-                ).length > 0 && (
-                  <span className="absolute text-white bg-danger text-[11px] px-1.5 min-w-[15px] h-[17px] leading-none rounded-full flex items-center justify-center top-2/4 right-4 -translate-y-2/4 font-lato">
-                    {
-                      ClientBirthDay.filter(
-                        (x) =>
-                          moment(x.Birth).format("DD-MM") ===
-                          moment().format("DD-MM")
-                      ).length
-                    }
-                  </span>
-                )}
+              {ClientBirthDayCount?.day > 0 && (
+                <span className="absolute text-white bg-danger text-[11px] px-1.5 min-w-[15px] h-[17px] leading-none rounded-full flex items-center justify-center top-2/4 right-4 -translate-y-2/4 font-lato">
+                  {ClientBirthDayCount?.day}
+                </span>
+              )}
             </Link>
           </div>
         </Popover>

@@ -6,6 +6,7 @@ import { NumericFormat } from "react-number-format";
 import { SelectPicker } from "@/partials/forms";
 import clsx from "clsx";
 import moment from "moment";
+import ConditionsHelpers from "@/helpers/ConditionsHelpers";
 
 function BonusSalesAuto({ name, adminTools_byStock }) {
   let Auth = useStore("Auth");
@@ -43,11 +44,11 @@ function BonusSalesAuto({ name, adminTools_byStock }) {
               </div>
             </div>
             {item?.OrderItemID &&
-              (Brand?.Global?.Admin?.thuong_ds_nang_cao
-                ? Auth?.ID === 1
-                : adminTools_byStock?.hasRight ||
-                  moment(item.CreateDate).format("DD-MM-YYYY") ===
-                    moment().format("DD-MM-YYYY")) && (
+              !ConditionsHelpers.isDisabledSalesSommission(
+                { ...item, ID: item.OrderItemID },
+                Brand?.Global?.Admin?.thuong_ds_nang_cao,
+                adminTools_byStock.hasRight
+              ) && (
                 <div
                   className="text-danger"
                   onClick={() =>
@@ -82,21 +83,20 @@ function BonusSalesAuto({ name, adminTools_byStock }) {
                           field.onChange(val.floatValue || "")
                         }
                         disabled={
-                          (Brand?.Global?.Admin?.thuong_ds_nang_cao
-                            ? Auth?.ID !== 1
-                            : !(
-                                adminTools_byStock?.hasRight ||
-                                moment(item.CreateDate).format("DD-MM-YYYY") ===
-                                  moment().format("DD-MM-YYYY")
-                              )) || isHiddenPrice
+                          ConditionsHelpers.isDisabledSalesSommission(
+                            { ...item, ID: item.OrderItemID },
+                            Brand?.Global?.Admin?.thuong_ds_nang_cao,
+                            adminTools_byStock.hasRight
+                          ) || isHiddenPrice
                         }
                       />
                       {field.value &&
-                      (Brand?.Global?.Admin?.thuong_ds_nang_cao
-                        ? Auth?.ID === 1
-                        : adminTools_byStock?.hasRight ||
-                          moment(item.CreateDate).format("DD-MM-YYYY") ===
-                            moment().format("DD-MM-YYYY")) && !isHiddenPrice ? (
+                      !ConditionsHelpers.isDisabledSalesSommission(
+                        { ...item, ID: item.OrderItemID },
+                        Brand?.Global?.Admin?.thuong_ds_nang_cao,
+                        adminTools_byStock.hasRight
+                      ) &&
+                      !isHiddenPrice ? (
                         <div
                           className="absolute top-0 right-0 flex items-center justify-center w-12 h-full"
                           onClick={() => field.onChange("")}
@@ -118,15 +118,11 @@ function BonusSalesAuto({ name, adminTools_byStock }) {
                   control={control}
                   render={({ field, fieldState }) => (
                     <SelectPicker
-                      isDisabled={
-                        Brand?.Global?.Admin?.thuong_ds_nang_cao
-                          ? Auth?.ID !== 1
-                          : !(
-                              adminTools_byStock?.hasRight ||
-                              moment(item.CreateDate).format("DD-MM-YYYY") ===
-                                moment().format("DD-MM-YYYY")
-                            )
-                      }
+                      isDisabled={ConditionsHelpers.isDisabledSalesSommission(
+                        { ...item, ID: item.OrderItemID },
+                        Brand?.Global?.Admin?.thuong_ds_nang_cao,
+                        adminTools_byStock.hasRight
+                      )}
                       isClearable={true}
                       placeholder="Chọn loại"
                       value={field.value}

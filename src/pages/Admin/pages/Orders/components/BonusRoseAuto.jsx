@@ -5,6 +5,7 @@ import { MinusCircleIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { NumericFormat } from "react-number-format";
 import clsx from "clsx";
 import moment from "moment";
+import ConditionsHelpers from "@/helpers/ConditionsHelpers";
 
 function BonusRoseAuto({ name, adminTools_byStock }) {
   let Auth = useStore("Auth");
@@ -16,7 +17,7 @@ function BonusRoseAuto({ name, adminTools_byStock }) {
     control,
     name: name,
   });
-  
+
   let isHiddenPrice = false;
   if (Brand?.Global?.Admin?.hoa_hong_an_gia) {
     if (!adminTools_byStock?.hasRight) isHiddenPrice = true;
@@ -28,6 +29,7 @@ function BonusRoseAuto({ name, adminTools_byStock }) {
         Chưa có thưởng hoa hồng.
       </div>
     );
+
   return (
     <div className="p-4">
       {fields.map((item, index) => (
@@ -42,11 +44,11 @@ function BonusRoseAuto({ name, adminTools_byStock }) {
               </div>
             </div>
             {item.SubSourceID &&
-              (Brand?.Global?.Admin?.thuong_ds_nang_cao
-                ? Auth?.ID === 1
-                : adminTools_byStock?.hasRight ||
-                  moment(item.CreateDate).format("DD-MM-YYYY") ===
-                    moment().format("DD-MM-YYYY")) && (
+              !ConditionsHelpers.isDisabledSalesSommission(
+                { ...item, ID: item.SubSourceID },
+                Brand?.Global?.Admin?.thuong_ds_nang_cao,
+                adminTools_byStock.hasRight
+              ) && (
                 <div
                   className="text-danger"
                   onClick={() =>
@@ -80,21 +82,20 @@ function BonusRoseAuto({ name, adminTools_byStock }) {
                         field.onChange(val.floatValue || "")
                       }
                       disabled={
-                        (Brand?.Global?.Admin?.thuong_ds_nang_cao
-                          ? Auth?.ID !== 1
-                          : !(
-                              adminTools_byStock?.hasRight ||
-                              moment(item.CreateDate).format("DD-MM-YYYY") ===
-                                moment().format("DD-MM-YYYY")
-                            )) || isHiddenPrice
+                        ConditionsHelpers.isDisabledSalesSommission(
+                          { ...item, ID: item.SubSourceID || null },
+                          Brand?.Global?.Admin?.thuong_ds_nang_cao,
+                          adminTools_byStock.hasRight
+                        ) || isHiddenPrice
                       }
                     />
                     {field.value &&
-                    (Brand?.Global?.Admin?.thuong_ds_nang_cao
-                      ? Auth?.ID === 1
-                      : adminTools_byStock?.hasRight ||
-                        moment(item.CreateDate).format("DD-MM-YYYY") ===
-                          moment().format("DD-MM-YYYY")) && !isHiddenPrice ? (
+                    !ConditionsHelpers.isDisabledSalesSommission(
+                      { ...item, ID: item.SubSourceID },
+                      Brand?.Global?.Admin?.thuong_ds_nang_cao,
+                      adminTools_byStock.hasRight
+                    ) &&
+                    !isHiddenPrice ? (
                       <div
                         className="absolute top-0 right-0 flex items-center justify-center w-12 h-full"
                         onClick={() => field.onChange("")}

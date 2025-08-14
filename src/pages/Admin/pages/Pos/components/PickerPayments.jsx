@@ -459,7 +459,7 @@ function PickerPayments({ children, Order, Client }) {
                     </div>
                   </div>
                   <div className="p-4 border-t">
-                    {Brand?.Global?.Admin?.Tips &&
+                    {/* {Brand?.Global?.Admin?.Tips &&
                     Client?.CheckIn?.MemberTipAmount ? (
                       <div className="flex items-end justify-between mb-2.5">
                         <div className="font-medium leading-3">Khách TIP</div>
@@ -472,7 +472,7 @@ function PickerPayments({ children, Order, Client }) {
                       </div>
                     ) : (
                       <></>
-                    )}
+                    )} */}
 
                     <div className="flex items-end justify-between mb-2.5">
                       {DebtPay === 0 && Order?.ToPay > 0 && Order?.ID ? (

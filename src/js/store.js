@@ -22,7 +22,7 @@ const store = createStore({
     Notifications: [],
     Processings: null,
     InvoiceProcessings: null,
-    ClientBirthDay: null,
+    ClientBirthDayCount: null,
     FirebaseApp: null,
   },
   getters: {
@@ -59,8 +59,8 @@ const store = createStore({
     InvoiceProcessings({ state }) {
       return state.InvoiceProcessings;
     },
-    ClientBirthDay({ state }) {
-      return state.ClientBirthDay;
+    ClientBirthDayCount({ state }) {
+      return state.ClientBirthDayCount;
     },
     FirebaseApp({ state }) {
       return initializeApp(state.FirebaseApp, state?.Brand?.Domain);
@@ -70,8 +70,8 @@ const store = createStore({
     setNotifications({ state }, value) {
       state.Notifications = value;
     },
-    setClientBirthDay({ state }, value) {
-      state.ClientBirthDay = value;
+    setClientBirthDayCount({ state }, value) {
+      state.ClientBirthDayCount = value;
     },
     setProcessings({ state }, value) {
       state.Processings = value;

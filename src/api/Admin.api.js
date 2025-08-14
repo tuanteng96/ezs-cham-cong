@@ -24,15 +24,18 @@ const AdminAPI = {
         },
       }
     ),
-  ClientBirthDay: ({ Token, pi = 1, ps = 15, StockID = "" }) =>
-    http.get(
-      `/services/preview.aspx?cmd=search_member&key=&typeSearch=sell&ps=${ps}&pi=${pi}&searchId=4&__MemberCheckin=&__MemberMoney=0&__MyNoti=0&__AllNoti=0&__Birth=0&__MBirth=1&__Cate=false&__HasOrderService=0&__MemberGroups=false&__StaffID=0&__StockID=${StockID}&__Source=&__Tags=`,
-      {
-        headers: {
-          Authorization: `Bearer ${Token}`,
-        },
-      }
-    ),
+  ClientBirthDay: ({ StockID = "", Token = "", force = false }) =>
+    http.get(`/api/v3/MBirth@get?stockid=${StockID}${force ? "&force=1" : ""}`, {
+      headers: {
+        Authorization: `Bearer ${Token}`,
+      },
+    }),
+  ClientBirthDayCount: ({ Token }) =>
+    http.get(`/api/v3/MBirth@sum`, {
+      headers: {
+        Authorization: `Bearer ${Token}`,
+      },
+    }),
   doPayedProcess: ({ bodyFormData, Token, StockID }) =>
     http.post(
       `/api/v3/usertask?cmd=doSmsPayed&stockid=${StockID}`,
