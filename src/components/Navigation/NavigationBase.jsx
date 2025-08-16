@@ -129,8 +129,13 @@ function NavigationBase({ pathname }) {
             cssClass: "actions-ctv",
             on: {
               open: () => {
-                Dom7(".actions-ctv").find(".actions-button").removeClass("actions-button").addClass("bg-white h-[50px] border-b border-[#dddddd] flex items-center justify-center")
-              }
+                Dom7(".actions-ctv")
+                  .find(".actions-button")
+                  .removeClass("actions-button")
+                  .addClass(
+                    "bg-white h-[50px] border-b border-[#dddddd] flex items-center justify-center"
+                  );
+              },
             },
           });
 

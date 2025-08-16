@@ -729,7 +729,7 @@ function PosClientManage({ f7route, f7router }) {
       name="Pos-member"
       onPageBeforeIn={() => {
         PromHelpers.STATUS_BAR_COLOR("light");
-        f7.panel.close(Dom7("#panel-pos"));
+        f7.panel.close("#panel-pos");
       }}
       noToolbar
     >
@@ -1340,7 +1340,15 @@ function PosClientManage({ f7route, f7router }) {
                                 ).join(", ")}
                               </div>
                             )}
-                          <div></div>
+                          {item.Fees && item.Fees.length > 0 && (
+                            <div className="text-xs text-gray-600">
+                              <span className="pr-2">PP:</span>
+                              {item.Fees.map(
+                                (x) =>
+                                  `${x.Title} (${x.Qty})`
+                              ).join(", ")}
+                            </div>
+                          )}
                         </div>
                       </div>
                       <div className="flex items-center justify-end w-10">

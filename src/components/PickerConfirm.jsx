@@ -47,6 +47,14 @@ function PickerConfirm({ children }) {
 
   const confirmMutation = useMutation({
     mutationFn: async (body) => {
+      // let newBody = {
+      //   list: [],
+      // };
+      // if (body?.list && body?.list.length > 0) {
+      //   for (let item of body?.list) {
+      //     let newItem = {...item}
+      //   }
+      // }
       let data = await WorkTrackAPI.CheckInOut(body);
       await Promise.all([
         queryClient.invalidateQueries(["Auth"]),
@@ -58,10 +66,9 @@ function PickerConfirm({ children }) {
   });
 
   const onSubmit = (values) => {
-    
     f7.dialog.preloader("Đang chấm công...");
     let newValues = { ...values };
-    
+
     delete newValues.Info.Title;
     if (
       newValues.Info["DI_MUON"] &&
@@ -105,7 +112,7 @@ function PickerConfirm({ children }) {
       newValues?.Info?.Type?.value === "CA_NHAN" &&
       typeof newValues.Info["DI_MUON"].WorkDays !== "undefined"
     ) {
-      newValues.Info.WorkToday.Value = newValues.Info["DI_MUON"].WorkDays
+      newValues.Info.WorkToday.Value = newValues.Info["DI_MUON"].WorkDays;
     }
 
     if (
@@ -113,7 +120,7 @@ function PickerConfirm({ children }) {
       newValues?.Info?.Type?.value === "CA_NHAN" &&
       typeof newValues.Info["VE_SOM"].WorkDays !== "undefined"
     ) {
-      newValues.Info.WorkToday.Value = newValues.Info["VE_SOM"].WorkDays
+      newValues.Info.WorkToday.Value = newValues.Info["VE_SOM"].WorkDays;
     }
 
     if (
@@ -121,7 +128,7 @@ function PickerConfirm({ children }) {
       newValues?.Info?.Type?.value === "CONG_TY" &&
       typeof newValues.Info["DI_SOM"].WorkDays !== "undefined"
     ) {
-      newValues.Info.WorkToday.Value = newValues.Info["DI_SOM"].WorkDays
+      newValues.Info.WorkToday.Value = newValues.Info["DI_SOM"].WorkDays;
     }
 
     if (
@@ -129,7 +136,7 @@ function PickerConfirm({ children }) {
       newValues?.Info?.Type?.value === "CONG_TY" &&
       typeof newValues.Info["VE_MUON"].WorkDays !== "undefined"
     ) {
-      newValues.Info.WorkToday.Value = newValues.Info["VE_MUON"].WorkDays
+      newValues.Info.WorkToday.Value = newValues.Info["VE_MUON"].WorkDays;
     }
 
     let dataConfirm = {
@@ -143,7 +150,7 @@ function PickerConfirm({ children }) {
         },
       ],
     };
-    
+
     confirmMutation.mutate(dataConfirm, {
       onSettled: () => {
         f7.dialog.close();

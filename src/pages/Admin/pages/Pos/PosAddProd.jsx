@@ -871,7 +871,7 @@ function PosAddProd({ f7route, f7router }) {
                           )}
                           noLinkClass
                           onClick={() => {
-                            f7.panel.close(Dom7("#panel-cate-prod"));
+                            f7.panel.close("#panel-cate-prod");
                             f7.dialog.preloader("Đang tải ...");
                             elRef?.current?.scrollTo(0, 0);
                             setFilters((prevState) => ({
@@ -906,7 +906,7 @@ function PosAddProd({ f7route, f7router }) {
                                 )}
                                 noLinkClass
                                 onClick={() => {
-                                  f7.panel.close(Dom7("#panel-cate-prod"));
+                                  f7.panel.close("#panel-cate-prod");
                                   setFilters((prevState) => ({
                                     ...prevState,
                                     cateid: sub.ID,

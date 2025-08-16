@@ -151,7 +151,7 @@ function LoginPage({ f7router }) {
       noToolbar
       noSwipeback
       className="bg-white"
-      onPageInit={() => f7.panel.close(Dom7("#panel-app"))}
+      onPageInit={() => f7.panel.close("#panel-app")}
       onPageBeforeIn={() => PromHelpers.STATUS_BAR_COLOR()}
     >
       <PickerOTP>

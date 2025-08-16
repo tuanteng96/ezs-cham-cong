@@ -400,10 +400,10 @@ function Panels(props) {
       }
     }
     setTimeout(() => {
-      f7.panel.close(Dom7("#panel-app"));
+      f7.panel.close("#panel-app");
     }, 10);
   };
-
+  window.f7panel = f7.panel
   return (
     <Panel
       floating
@@ -418,7 +418,7 @@ function Panels(props) {
       <div className="flex flex-col h-full">
         <div className="flex items-center p-4 bg-white border-b">
           <Link
-            onClick={() => f7.panel.close(Dom7("#panel-app"))}
+            onClick={() => f7.panel.close("#panel-app")}
             href="/account/"
             noLinkClass
             className="w-11 h-11"
@@ -515,7 +515,7 @@ function Panels(props) {
                           className="font-normal border-t"
                           component={<Link href={sub.Link} />}
                           key={i}
-                          onClick={() => f7.panel.close(Dom7("#panel-app"))}
+                          onClick={() => f7.panel.close("#panel-app")}
                           active={sub.active}
                         >
                           {sub.Title}
@@ -524,7 +524,7 @@ function Panels(props) {
                     </CSubMenu>
                   ) : (
                     <MenuItem
-                      onClick={() => f7.panel.close(Dom7("#panel-app"))}
+                      onClick={() => f7.panel.close("#panel-app")}
                       component={<Link href={menu.Link} />}
                       className="font-medium border-b"
                       active={menu.active}
