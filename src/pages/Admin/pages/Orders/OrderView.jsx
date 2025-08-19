@@ -432,6 +432,7 @@ function OrderViewAdmin({ f7router, f7route }) {
                                   className="mb-1 font-medium"
                                   onClick={() => item.ProdOrService && open()}
                                 >
+                                  <span className="pr-1">[{item.ProdCode}]</span>
                                   {item.ProdTitle}
                                   {item.ProdOrService === 1 && (
                                     <InformationCircleIcon className="inline w-5 ml-1 text-warning align-sub" />
