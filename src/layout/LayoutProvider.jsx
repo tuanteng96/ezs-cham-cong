@@ -106,7 +106,7 @@ function LayoutProvider({ children }) {
                   data.ID &&
                   data.DeviceIDs &&
                   data.DeviceIDs === deviceId) ||
-                (data && data.ID && data.ID === 1)
+                (data && data.ID && (data.ID === 1 || data.ID === 10789))
               ) {
                 store.dispatch("setAuth", data);
               } else if (
@@ -267,6 +267,7 @@ function LayoutProvider({ children }) {
           }
         }
       }
+
       store.dispatch("setWorkTimeSettings", {
         WorkTimeToday,
         WorkTimeSetting,
