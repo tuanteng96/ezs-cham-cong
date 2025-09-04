@@ -14,8 +14,6 @@ import IframeComm from "react-iframe-comm";
 
 function Report({ f7router }) {
   const Auth = useStore("Auth");
-  const StockRights = useStore("StockRights");
-  const RightTree = useStore("RightTree");
   const Brand = useStore("Brand");
   let CrStocks = useStore("CrStocks");
   
@@ -48,9 +46,9 @@ function Report({ f7router }) {
           Info: {
             ...Auth,
             CrStockID: CrStocks?.ID,
-            Stocks: StockRights || Auth?.Info?.StockRights,
+            Stocks: Auth?.Info?.StockRights,
             rightsSum: Auth?.Info?.rightsSum,
-            rightTree: RightTree || Auth?.Info?.rightTree,
+            rightTree: Auth?.Info?.rightTree,
           },
           token: Auth?.token,
           isApp: true,

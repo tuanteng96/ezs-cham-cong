@@ -23,7 +23,6 @@ var pIndex = 0;
 function PrinterService({ f7route }) {
   const Auth = useStore("Auth");
   const Brand = useStore("Brand");
-  const StocksAll = useStore("StocksAll");
 
   let Mode = f7route?.query?.mode || "";
 
@@ -91,7 +90,7 @@ function PrinterService({ f7route }) {
       let configs = await ConfigsAPI.getValue(
         "MA_QRCODE_NGAN_HANG,Bill.Title,Bill.Footer"
       );
-      
+
       let obj = {
         BillTitle: "",
         BillFooter: "",
@@ -102,21 +101,19 @@ function PrinterService({ f7route }) {
         obj.BillTitle = configs?.data?.data[0]?.Value || "";
         obj.BillFooter = configs?.data?.data[1]?.Value || "";
       }
-      
+
       if (Brand?.Global?.Admin?.PrintToStockID && data?.data?.os?.StockID) {
-        
-        let index = StocksAll.findIndex(
+        let index = Auth?.Info?.StocksAll.findIndex(
           (x) => x.ID === data?.data?.os?.StockID
         );
-        
+
         if (index > -1) {
-          
-          obj.BillTitle = StocksAll[index].Title;
-          if (StocksAll[index].LinkSEO) {
-            obj.BillPhone = StocksAll[index].LinkSEO;
+          obj.BillTitle = Auth?.Info?.StocksAll[index].Title;
+          if (Auth?.Info?.StocksAll[index].LinkSEO) {
+            obj.BillPhone = Auth?.Info?.StocksAll[index].LinkSEO;
           }
-          if (StocksAll[index].Desc) {
-            obj.BillAddress = StocksAll[index].Desc;
+          if (Auth?.Info?.StocksAll[index].Desc) {
+            obj.BillAddress = Auth?.Info?.StocksAll[index].Desc;
           }
         }
       }

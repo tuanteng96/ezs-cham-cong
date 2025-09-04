@@ -123,7 +123,7 @@ const ClientFieldEmail = ({ isAddMode }) => {
             <LayoutGroup key={isOpen}>
               <Dialog open={isOpen} onClose={onHide}>
                 <m.div
-                  className="fixed inset-0 bg-black/[.2] dark:bg-black/[.4] z-[1010]"
+                  className="fixed inset-0 bg-black/[.5] z-[1010]"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}

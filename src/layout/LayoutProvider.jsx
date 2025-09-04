@@ -1,7 +1,7 @@
 import { f7, useStore } from "framework7-react";
 import React, { useEffect, useRef } from "react";
 import store from "../js/store";
-import { useQuery, useQueryClient } from "react-query";
+import { useMutation, useQuery, useQueryClient } from "react-query";
 import AuthAPI from "../api/Auth.api";
 import AdminAPI from "../api/Admin.api";
 import DeviceHelpers from "../helpers/DeviceHelpers";
@@ -10,6 +10,7 @@ import ConfigsAPI from "../api/Configs.api";
 import moment from "moment";
 import PromHelpers from "../helpers/PromHelpers";
 import CDNHelpers from "@/helpers/CDNHelpers";
+import WorkTrackAPI from "@/api/WorkTrack.api";
 
 window.axios = axios;
 
@@ -17,6 +18,7 @@ function LayoutProvider({ children }) {
   let Auth = useStore("Auth");
   let Brand = useStore("Brand");
   let CrStocks = useStore("CrStocks");
+  let CrsInOut = useStore("CrsInOut");
 
   const queryClient = useQueryClient();
 
@@ -54,12 +56,21 @@ function LayoutProvider({ children }) {
   const { refetch: refetchAuth } = useQuery({
     queryKey: ["Auth", { Token: Auth?.token, WorkTrackStockID: CrStocks?.ID }],
     queryFn: async () => {
-      let { data } = await AuthAPI.checkToken({
+      let { data, headers } = await AuthAPI.checkToken({
         Token: Auth?.token,
         WorkTrackStockID: CrStocks?.ID,
       });
 
-      return { data };
+      return {
+        data: data
+          ? {
+              ...data,
+              ServerTime: headers?.Date
+                ? moment(headers?.Date, "MM/DD/YYYY HH:mm").toDate()
+                : moment().toDate(),
+            }
+          : null,
+      };
     },
     onSettled: ({ data }) => {
       if (data?.error) {
@@ -106,7 +117,7 @@ function LayoutProvider({ children }) {
                   data.ID &&
                   data.DeviceIDs &&
                   data.DeviceIDs === deviceId) ||
-                (data && data.ID && (data.ID === 1 || data.ID === 10789))
+                (data && data.ID && data.ID === 1)
               ) {
                 store.dispatch("setAuth", data);
               } else if (
@@ -497,7 +508,7 @@ function LayoutProvider({ children }) {
         ? data?.data
             .map((item) => ({
               ...item,
-              TimeCheckOut: item.CheckIn.CreateDate,
+              TimeCheckOut: item?.CheckIn?.CreateDate || null,
             }))
             .sort(function (left, right) {
               return moment
@@ -579,7 +590,7 @@ function LayoutProvider({ children }) {
   useEffect(() => {
     if (Auth?.token) {
       if (!window.bzClient) {
-        var gr = Brand?.Domain.replaceAll("https://", "");
+        var gr = String(Brand?.Domain).replace(/https:\/\//g, "");
 
         var bzClient = new BZ({
           group: gr,

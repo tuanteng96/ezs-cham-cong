@@ -7,7 +7,9 @@ const set = async ({ data, success, fail }) => {
     });
     success && success();
   } catch (err) {
-    fail && fail(err);
+    success && success();
+    console.log(err)
+    //fail && fail(err);
   }
 };
 

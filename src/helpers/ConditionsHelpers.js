@@ -4,7 +4,7 @@ const ConditionsHelpers = {
   isDisabledSalesSommission: (item, has, rights) => {
     // has là Brand?.Global?.Admin?.thuong_ds_nang_cao
     // rights là adminTools_byStock?.hasRight
-
+    
     if (has) {
       return !rights;
     }
@@ -15,7 +15,7 @@ const ConditionsHelpers = {
           moment().format("DD-MM-YYYY")
       );
     }
-    return !has;
+    return has;
   },
   isDeleteProductSalesSommission: (item, has, rights) => {
     let newDoanh_So = item.Doanh_So

@@ -26,7 +26,6 @@ var pIndex = 0;
 function PrinterOrder({ f7route }) {
   const Auth = useStore("Auth");
   const Brand = useStore("Brand");
-  const StocksAll = useStore("StocksAll");
 
   const CrStocks = useStore("CrStocks");
 
@@ -107,16 +106,16 @@ function PrinterOrder({ f7route }) {
         }
       }
       if (Brand?.Global?.Admin?.PrintToStockID && data.data?.OrderEnt?.Stock) {
-        let index = StocksAll.findIndex(
+        let index = Auth?.Info?.StocksAll?.findIndex(
           (x) => x.ID === data.data?.OrderEnt?.Stock?.ID
         );
         if (index > -1) {
-          obj.BillTitle = StocksAll[index].Title;
-          if (StocksAll[index].LinkSEO) {
-            obj.BillPhone = StocksAll[index].LinkSEO;
+          obj.BillTitle = Auth?.Info?.StocksAll[index].Title;
+          if (Auth?.Info?.StocksAll[index].LinkSEO) {
+            obj.BillPhone = Auth?.Info?.StocksAll[index].LinkSEO;
           }
-          if (StocksAll[index].Desc) {
-            obj.BillAddress = StocksAll[index].Desc;
+          if (Auth?.Info?.StocksAll[index].Desc) {
+            obj.BillAddress = Auth?.Info?.StocksAll[index].Desc;
           }
         }
       }

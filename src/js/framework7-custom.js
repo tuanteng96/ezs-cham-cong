@@ -27,7 +27,7 @@ import Radio from 'framework7/components/radio';
 import Toggle from 'framework7/components/toggle';
 // import Range from 'framework7/components/range';
 import Stepper from 'framework7/components/stepper';
-import SmartSelect from 'framework7/components/smart-select';
+//import SmartSelect from 'framework7/components/smart-select';
 import Grid from 'framework7/components/grid';
 import Calendar from 'framework7/components/calendar';
 import Picker from 'framework7/components/picker';
@@ -78,7 +78,7 @@ Framework7.use([
   Toggle,
   //Range,
   Stepper,
-  SmartSelect,
+  //SmartSelect,
   Grid,
   Calendar,
   Picker,

@@ -74,11 +74,6 @@ function PosClientManage({ f7route, f7router }) {
   const Client = useQuery({
     queryKey: ["ClientManageID", { Key: f7route?.params?.id }],
     queryFn: async () => {
-      // await AdminAPI.clientsPresentAppId({
-      //   MemberID: f7route?.params?.id,
-      //   Token: Auth.token,
-      // });
-
       let { data } = await AdminAPI.clientsId({
         pi: 1,
         ps: 1,
@@ -544,28 +539,9 @@ function PosClientManage({ f7route, f7router }) {
                 })
                 .open();
             } else {
-              f7.dialog
-                .create({
-                  title: "Thông báo",
-                  content:
-                    "Thao tác tiếp tục với khách hàng này hay Quay về trang danh sách khách hàng ?",
-                  buttons: [
-                    {
-                      text: "Tiếp tục",
-                      close: true,
-                    },
-                    {
-                      text: "DS. Khách hàng",
-                      close: true,
-                      onClick: () => {
-                        f7router.navigate("/admin/pos/clients/", {
-                          clearPreviousHistory: true,
-                        });
-                      },
-                    },
-                  ],
-                })
-                .open();
+              f7router.navigate("/admin/pos/clients/", {
+                clearPreviousHistory: true,
+              });
             }
 
             window?.noti27?.DH_LETAN_CHECKOUT &&
@@ -1112,14 +1088,6 @@ function PosClientManage({ f7route, f7router }) {
                           </PickerEditProd>
                         ))}
                       </div>
-                      {/* <div className="flex items-end justify-between p-4 border-b">
-                        <div className="font-medium">Tổng đơn hàng</div>
-                        <div className="text-base font-bold font-lato">
-                          {StringHelpers.formatVND(
-                            Order?.data?.Order?.TotalValue
-                          )}
-                        </div>
-                      </div> */}
                     </>
                   )}
                 {(!Order?.data?.OrderItems ||
@@ -1344,8 +1312,7 @@ function PosClientManage({ f7route, f7router }) {
                             <div className="text-xs text-gray-600">
                               <span className="pr-2">PP:</span>
                               {item.Fees.map(
-                                (x) =>
-                                  `${x.Title} (${x.Qty})`
+                                (x) => `${x.Title} (${x.Qty})`
                               ).join(", ")}
                             </div>
                           )}
@@ -1746,6 +1713,7 @@ function PosClientManage({ f7route, f7router }) {
                         className="flex justify-between p-3 font-medium border-b last:border-0"
                         noLinkClass
                         href={`/admin/pos/orders/view/${Order?.data?.Order?.ID}/bonus-sales-commission/`}
+                        //href={`/admin/pos/orders/view/${Order?.data?.Order?.ID}/bonus-sales-commission-sharing/`}
                       >
                         Hoa hồng & Doanh số
                         {Order?.data?.Order?.Counter?.doanh_so +

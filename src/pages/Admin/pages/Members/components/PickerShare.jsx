@@ -26,7 +26,7 @@ function PickerShare({ children, initialValues, callback }) {
             <div className="fixed z-[13501] inset-0 flex justify-end flex-col">
               <motion.div
                 key={visible}
-                className="absolute inset-0 bg-black/[.2] dark:bg-black/[.4] z-10"
+                className="absolute inset-0 bg-black/[.5] z-10"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
@@ -112,7 +112,7 @@ function PickerShare({ children, initialValues, callback }) {
                           <div className="italic font-medium mb-1.5">
                             B2. Đăng nhập APP với thông tin tên miền là
                             <span className="px-1 font-semibold text-primary">
-                              {Brand.Domain}
+                              {Brand?.Domain}
                             </span>
                             . Tài khoản & Mật khẩu như trên
                           </div>

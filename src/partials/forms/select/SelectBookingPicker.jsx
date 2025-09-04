@@ -30,6 +30,7 @@ const SelectBookingPicker = forwardRef(
       isClearable = true,
       isFilter = false,
       onInputFilter,
+      truncate = false
     },
     ref
   ) => {
@@ -79,7 +80,7 @@ const SelectBookingPicker = forwardRef(
                     ))}
                 </div>
               ) : value?.label ? (
-                value?.label
+                <div className={clsx(truncate && "truncate")}>{value?.label}</div>
               ) : (
                 ""
               )}
@@ -114,7 +115,7 @@ const SelectBookingPicker = forwardRef(
               <div className="fixed z-[125001] inset-0 flex justify-end flex-col">
                 <motion.div
                   key={visible}
-                  className="absolute inset-0 bg-black/[.2] dark:bg-black/[.4] z-10"
+                  className="absolute inset-0 bg-black/[.5] z-10"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
@@ -169,7 +170,7 @@ const SelectBookingPicker = forwardRef(
                           ...values,
                           label: values.FullName,
                           value: values.ID,
-                          suffix: value?.MobilePhone
+                          suffix: value?.MobilePhone,
                         };
                         if (isMulti) {
                           onChange(value ? [...value, item] : [item]);

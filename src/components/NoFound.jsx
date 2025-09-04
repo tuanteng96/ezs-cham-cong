@@ -3,7 +3,7 @@ import React from "react";
 function NoFound({
   Title,
   Desc,
-  svgClassName = "w-10/12",
+  svgClassName = "w-8/12",
   className = "flex flex-col items-center min-h-full pt-8",
 }) {
   return (

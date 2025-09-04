@@ -4,6 +4,7 @@ import {
   ChevronLeftIcon,
   ChevronUpIcon,
   Cog6ToothIcon,
+  EllipsisHorizontalIcon,
   EllipsisVerticalIcon,
   InformationCircleIcon,
   PlusIcon,
@@ -19,14 +20,11 @@ import {
   NavTitle,
   Navbar,
   Page,
-  PhotoBrowser,
   Popover,
   f7,
   useStore,
 } from "framework7-react";
 import React, { useEffect, useRef, useState } from "react";
-// import { yupResolver } from "@hookform/resolvers/yup";
-// import * as yup from "yup";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
 import { SelectMembersServices } from "@/partials/forms/select";
 import { DatePicker, SelectPicker, SelectPickersGroup } from "@/partials/forms";
@@ -73,9 +71,6 @@ function EditOsCalendar({ f7route, f7router }) {
     auth: Auth,
     CrStocks,
   });
-  // let prevFee = f7route?.query?.prevFee
-  //   ? JSON.parse(f7route?.query?.prevFee)
-  //   : null;
 
   let formState = f7route?.query?.formState
     ? JSON.parse(f7route?.query?.formState)
@@ -83,7 +78,6 @@ function EditOsCalendar({ f7route, f7router }) {
 
   let [RoomsList, setRoomsList] = useState([]);
 
-  const standalone = useRef(null);
   const btnStaffRef = useRef(null);
 
   const [IsAutoSalaryMethod, setIsAutoSalaryMethod] = useState(false);
@@ -181,7 +175,18 @@ function EditOsCalendar({ f7route, f7router }) {
         }
       }
 
-      return rs ? { ...rs, Materials, ContextJSONApi } : null;
+      let Status = rs?.Status;
+      if (
+        Brand?.Global?.Admin?.Pos_quan_ly?.giao_ca_thao_tac === "Hoàn thành ca"
+      ) {
+        if (!Status) {
+          Status = "doing";
+        }
+      }
+
+      return rs
+        ? { ...rs, Materials, ContextJSONApi, Status, rsStatus: rs?.Status }
+        : null;
     },
     onSuccess: (data) => {
       let AutoSalaryMethod = data?.AutoSalaryMethod
@@ -228,71 +233,6 @@ function EditOsCalendar({ f7route, f7router }) {
               : [],
           }))
         : null;
-
-      // if (prevFee && prevFee.length > 0) {
-      //   for (let fee of prevFee) {
-      //     let indexFee = newFee.findIndex(
-      //       (x) => x.Title.replace("(Gốc)", "") === fee.Title
-      //     );
-      //     if (indexFee > -1) {
-      //       newFee[indexFee].Remain = {
-      //         label: fee.Qty,
-      //         value: fee.Qty,
-      //       };
-      //     }
-      //   }
-      //   if (appPOS) {
-      //     appPOS
-      //       .setOs(
-      //         {
-      //           ...data,
-      //           AutoSalaryMethod: AutoSalaryMethod?.value,
-      //         },
-      //         {
-      //           action: "TINH_LUONG",
-      //           data: {
-      //             feeList: newFee
-      //               ? newFee.map((x) => ({
-      //                   ...x,
-      //                   Assign: x?.Remain?.value || 0,
-      //                 }))
-      //               : [],
-      //             Staffs: newStaffs
-      //               ? newStaffs.map((m) => ({
-      //                   UserID: m?.value,
-      //                   FullName: m?.label,
-      //                   Value: 0,
-      //                   feeList: newFee
-      //                     ? newFee
-      //                         .filter((x) => Number(x?.Remain?.value) > 0)
-      //                         .map((x) => ({
-      //                           ...x,
-      //                           Assign: x?.Remain?.value || 0,
-      //                         }))
-      //                     : [],
-      //                 }))
-      //               : [],
-      //           },
-      //         }
-      //       )
-      //       .then((os) => {
-      //         newStaffs = os?.Staffs?.map((x) => ({
-      //           ...x,
-      //           label: x.FullName,
-      //           value: x.UserID,
-      //           Value: x.Salary || x.Value,
-      //           raw: x.Salary || x.Value,
-      //           feeList: x.feeList
-      //             ? x.feeList.map((f) => ({
-      //                 ...f,
-      //                 raw: f.Value,
-      //               }))
-      //             : [],
-      //         }));
-      //       })
-      //       .catch((e) => console.log(e));
-      //   }
-      // }
 
       let InfoJSON = data?.InfoJSON ? JSON.parse(data?.InfoJSON) : null;
 
@@ -378,6 +318,14 @@ function EditOsCalendar({ f7route, f7router }) {
     },
     enabled: Os?.data?.MemberID > 0,
   });
+
+  useEffect(() => {
+    if (Os?.data) {
+      if (Os?.data?.rsStatus === "" && !Os?.data?.ContextJSONApi) {
+        btnStaffRef?.current?.click();
+      }
+    }
+  }, [Os?.data, btnStaffRef]);
 
   useEffect(() => {
     if (Rooms?.data && Rooms?.data.length > 0) {
@@ -898,49 +846,52 @@ function EditOsCalendar({ f7route, f7router }) {
                     />
                   )}
                 />
-                <div className="mt-2">
-                  <Controller
-                    name="StockID"
-                    control={control}
-                    render={({ field, fieldState }) => (
-                      <SelectPicker
-                        isClearable={false}
-                        placeholder="Chọn cơ sở"
-                        value={field.value}
-                        options={pos_mng?.StockRoles || []}
-                        label="Cơ sở"
-                        onChange={(val) => {
-                          field.onChange(val || null);
-                          setValue("roomid", null);
-                          pos27 &&
-                            pos27
-                              .member(Os?.data?.MemberID)
-                              .service()
-                              .eachOS((os) => {
-                                if (os.ID === Os?.data?.ID) {
-                                  os.StockID = val?.value;
-                                }
-                              });
-                        }}
-                        errorMessage={fieldState?.error?.message}
-                        errorMessageForce={fieldState?.invalid}
-                      />
+                {pos_mng?.StockRoles && pos_mng?.StockRoles.length !== 1 && (
+                  <div className="mt-2">
+                    <Controller
+                      name="StockID"
+                      control={control}
+                      render={({ field, fieldState }) => (
+                        <SelectPicker
+                          isClearable={false}
+                          placeholder="Chọn cơ sở"
+                          value={field.value}
+                          options={pos_mng?.StockRoles || []}
+                          label="Cơ sở"
+                          onChange={(val) => {
+                            field.onChange(val || null);
+                            setValue("roomid", null);
+                            pos27 &&
+                              pos27
+                                .member(Os?.data?.MemberID)
+                                .service()
+                                .eachOS((os) => {
+                                  if (os.ID === Os?.data?.ID) {
+                                    os.StockID = val?.value;
+                                  }
+                                });
+                          }}
+                          errorMessage={fieldState?.error?.message}
+                          errorMessageForce={fieldState?.invalid}
+                        />
+                      )}
+                    />
+                    {Os?.data?.StockID !== StockID?.ID && (
+                      <div className="mt-1.5 text-[14px] font-light leading-5">
+                        (*) Buổi dịch vụ thuộc điểm
+                        <span className="text-danger font-medium pl-1.5">
+                          {Stocks &&
+                          Stocks.filter((x) => x.ID === Os?.data?.StockID)
+                            .length > 0
+                            ? Stocks.filter(
+                                (x) => x.ID === Os?.data?.StockID
+                              )[0].Title
+                            : "Chưa xác định"}
+                        </span>
+                      </div>
                     )}
-                  />
-                  {Os?.data?.StockID !== StockID?.ID && (
-                    <div className="mt-1.5 text-[14px] font-light leading-5">
-                      (*) Buổi dịch vụ thuộc điểm
-                      <span className="text-danger font-medium pl-1.5">
-                        {Stocks &&
-                        Stocks.filter((x) => x.ID === Os?.data?.StockID)
-                          .length > 0
-                          ? Stocks.filter((x) => x.ID === Os?.data?.StockID)[0]
-                              .Title
-                          : "Chưa xác định"}
-                      </span>
-                    </div>
-                  )}
-                </div>
+                  </div>
+                )}
               </div>
               {Os?.data?.hasFees && (
                 <div className="mb-3.5 last:mb-0 border rounded">
@@ -1379,6 +1330,82 @@ function EditOsCalendar({ f7route, f7router }) {
                           errorMessageForce={fieldState?.invalid}
                           isFilter
                           StockRoles={pos_mng?.StockRoles}
+                          actions={
+                            Os?.data?.Status === "done"
+                              ? null
+                              : [
+                                  {
+                                    Title: (
+                                      <div>
+                                        <EllipsisHorizontalIcon className="w-6" />
+                                      </div>
+                                    ),
+                                    className:
+                                      "bg-white max-w-[50px] text-black border border-[#d3d3d3]",
+                                    onClick: (close) => close(),
+                                    isLoading: updateMutation.isLoading,
+                                    isDisabled: updateMutation.isLoading,
+                                  },
+                                  {
+                                    renderButton: (
+                                      <Button
+                                        type="button"
+                                        className={clsx(
+                                          "flex-1 [&>span:not(.preloader)]:w-full px-0",
+                                          !Os?.data?.Status && "bg-primary",
+                                          Os?.data?.Status === "doing" &&
+                                            "bg-success",
+                                          Os?.data?.Status === "done" &&
+                                            "bg-black",
+                                          Os?.data?.Status !== "done" &&
+                                            "[&>span:not(.preloader)]:pr-12"
+                                        )}
+                                        fill
+                                        large
+                                        preloader
+                                        loading={
+                                          Os?.isLoading ||
+                                          Os?.isFetching ||
+                                          updateMutation.isLoading ||
+                                          CheckIn?.isLoading
+                                        }
+                                        disabled={
+                                          CheckIn?.isLoading ||
+                                          Os?.isLoading ||
+                                          Os?.data?.Status === "done" ||
+                                          updateMutation.isLoading
+                                        }
+                                        onClick={() =>
+                                          handleSubmit((data) =>
+                                            onSubmit({
+                                              ...data,
+                                              btn: !Os?.data?.Status
+                                                ? "CHUYEN"
+                                                : "HOAN_THANH",
+                                            })
+                                          )()
+                                        }
+                                      >
+                                        {!Os?.data?.Status &&
+                                          "Giao ca nhân viên"}
+                                        {Os?.data?.Status === "doing" &&
+                                          "Hoàn thành ca"}
+                                        {Os?.data?.Status === "done" &&
+                                          "Đã hoàn thành"}
+                                        {Os?.data?.Status !== "done" && (
+                                          <Link
+                                            className="absolute right-0 w-12 h-full flex items-center justify-center after:content-[''] after:w-[1px] after:h-[65%] after:bg-white after:left-0 after:absolute after:opacity-90 opacity-90"
+                                            popoverOpen=".popover-os-action"
+                                            onClick={(e) => e.stopPropagation()}
+                                          >
+                                            <ChevronUpIcon className="w-6" />
+                                          </Link>
+                                        )}
+                                      </Button>
+                                    ),
+                                  },
+                                ]
+                          }
                         />
                       )}
                     />
@@ -1645,9 +1672,7 @@ function EditOsCalendar({ f7route, f7router }) {
                             OsImages?.data && OsImages?.data.length > 0
                               ? OsImages?.data.map((x) => ({
                                   src: AssetsHelpers.toAbsoluteUrl(x.Src),
-                                  thumbSrc: AssetsHelpers.toAbsoluteUrl(
-                                    x.Src
-                                  ),
+                                  thumbSrc: AssetsHelpers.toAbsoluteUrl(x.Src),
                                 }))
                               : [],
                             {
@@ -1712,26 +1737,6 @@ function EditOsCalendar({ f7route, f7router }) {
                     isMultiple={true}
                   />
                 </div>
-                {/* <PhotoBrowser
-                  photos={
-                    OsImages?.data
-                      ? OsImages?.data.map((x) => ({
-                          ...x,
-                          url: AssetsHelpers.toAbsoluteUrl(x.Src),
-                        }))
-                      : []
-                  }
-                  thumbs={
-                    OsImages?.data
-                      ? OsImages?.data.map((x) =>
-                          AssetsHelpers.toAbsoluteUrl(x.Src)
-                        )
-                      : []
-                  }
-                  ref={standalone}
-                  navbarShowCount={true}
-                  toolbar={false}
-                /> */}
               </div>
             </div>
           </>
@@ -1824,7 +1829,6 @@ function EditOsCalendar({ f7route, f7router }) {
                 Chỉnh sửa
               </Button>
             )}
-
           <Button
             type="button"
             className={clsx(

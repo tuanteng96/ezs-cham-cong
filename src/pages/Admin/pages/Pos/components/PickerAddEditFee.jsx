@@ -150,14 +150,16 @@ const PHI_QUET_THE = ({ Client, Order, SettingFee, Auth, CrStocks, close }) => {
                     >
                       <XMarkIcon className="w-5" />
                     </div>
-                  ) : <></>}
+                  ) : (
+                    <></>
+                  )}
                 </div>
               </div>
             )}
           />
         </div>
         <div className="mb-3.5 last:mb-0">
-          <div className="mb-px font-light">Phí dịch vụ</div>
+          <div className="mb-px font-light">Phí dịch vụ (%)</div>
           <Controller
             name="Value"
             control={control}
@@ -194,13 +196,15 @@ const PHI_QUET_THE = ({ Client, Order, SettingFee, Auth, CrStocks, close }) => {
                       floatValue <= 100 || value === ""
                     }
                   />
-                  {field.value && (
+                  {field.value ? (
                     <div
                       className="absolute top-0 right-0 flex items-center justify-center w-12 h-full"
                       onClick={() => field.onChange("")}
                     >
                       <XMarkIcon className="w-5" />
                     </div>
+                  ) : (
+                    <></>
                   )}
                 </div>
               </div>
@@ -492,6 +496,7 @@ const PHI_DICH_VU = ({
       Value: "",
       FeeTotal: "",
       isDisabled: false,
+      People: 1
     },
   });
 
@@ -570,6 +575,7 @@ const PHI_DICH_VU = ({
           }
         }
       }
+
       if (index > -1) {
         newTotal = newTotal - Order.OrderItems[index].PriceOrder;
       }
@@ -654,6 +660,63 @@ const PHI_DICH_VU = ({
       <div className="mb-3 font-semibold uppercase">Phí dịch vụ</div>
       <div>
         <div className="mb-3.5 last:mb-0">
+          <div className="mb-px font-light">Số người</div>
+          <Controller
+            name="People"
+            control={control}
+            render={({ field, fieldState }) => (
+              <div>
+                <div className="relative">
+                  <NumericFormat
+                    className={clsx(
+                      "w-full input-number-format border shadow-[0_4px_6px_0_rgba(16,25,40,.06)] rounded py-3 px-4 focus:border-primary",
+                      fieldState?.invalid ? "border-danger" : "border-[#d5d7da]"
+                    )}
+                    type="text"
+                    autoComplete="off"
+                    thousandSeparator={true}
+                    placeholder="Nhập số người"
+                    value={field.value}
+                    onValueChange={(val) => {
+                      let newValue =
+                        typeof val.floatValue === "undefined"
+                          ? val.value
+                          : val.floatValue;
+                      field.onChange(newValue);
+
+                      let newFeeTotal = Math.round(
+                        ((Number(Total) > 0 && Value > 0
+                          ? (Number(Total) * Number(Value)) / 100
+                          : 0) *
+                          100) /
+                          100
+                      );
+
+                      setValue(
+                        "FeeTotal",
+                        newFeeTotal >
+                          SettingFee.PHIDICHVU.max * Number(newValue || 1)
+                          ? SettingFee.PHIDICHVU.max * Number(newValue || 1)
+                          : newFeeTotal
+                      );
+                    }}
+                  />
+                  {field.value ? (
+                    <div
+                      className="absolute top-0 right-0 flex items-center justify-center w-12 h-full"
+                      onClick={() => field.onChange("")}
+                    >
+                      <XMarkIcon className="w-5" />
+                    </div>
+                  ) : (
+                    <></>
+                  )}
+                </div>
+              </div>
+            )}
+          />
+        </div>
+        <div className="mb-3.5 last:mb-0">
           <div className="mb-px font-light">Tổng tiền</div>
           <Controller
             name="Total"
@@ -692,13 +755,15 @@ const PHI_DICH_VU = ({
                       );
                     }}
                   />
-                  {field.value && (
+                  {field.value ? (
                     <div
                       className="absolute top-0 right-0 flex items-center justify-center w-12 h-full"
                       onClick={() => field.onChange("")}
                     >
                       <XMarkIcon className="w-5" />
                     </div>
+                  ) : (
+                    <></>
                   )}
                 </div>
               </div>
@@ -706,7 +771,7 @@ const PHI_DICH_VU = ({
           />
         </div>
         <div className="mb-3.5 last:mb-0">
-          <div className="mb-px font-light">Phí dịch vụ</div>
+          <div className="mb-px font-light">Phí dịch vụ (%)</div>
           <Controller
             name="Value"
             control={control}
@@ -787,13 +852,15 @@ const PHI_DICH_VU = ({
                       )
                     }
                   />
-                  {field.value && (
+                  {field.value ? (
                     <div
                       className="absolute top-0 right-0 flex items-center justify-center w-12 h-full"
                       onClick={() => field.onChange("")}
                     >
                       <XMarkIcon className="w-5" />
                     </div>
+                  ) : (
+                    <></>
                   )}
                 </div>
               </div>
@@ -890,7 +957,7 @@ function PickerAddEditFee({ children, ServicesUse, Client, Order }) {
             <div className="fixed z-[125001] inset-0 flex justify-end flex-col">
               <motion.div
                 key={visible}
-                className="absolute inset-0 bg-black/[.2] dark:bg-black/[.4] z-10"
+                className="absolute inset-0 bg-black/[.5] z-10"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}

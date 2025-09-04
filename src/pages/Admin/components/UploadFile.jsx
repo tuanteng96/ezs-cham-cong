@@ -138,7 +138,7 @@ function UploadFile({
         createPortal(
           <div className="fixed z-[125001] inset-0 flex justify-end flex-col">
             <motion.div
-              className="absolute inset-0 bg-black/[.2] dark:bg-black/[.4] z-10"
+              className="absolute inset-0 bg-black/[.5] z-10"
               initial={{ opacity: 0, translateY: "100%" }}
               animate={{ opacity: 1, translateY: "0%" }}
               exit={{ opacity: 0, translateY: "100%" }}

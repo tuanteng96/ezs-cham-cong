@@ -25,11 +25,14 @@ const AdminAPI = {
       }
     ),
   ClientBirthDay: ({ StockID = "", Token = "", force = false }) =>
-    http.get(`/api/v3/MBirth@get?stockid=${StockID}${force ? "&force=1" : ""}`, {
-      headers: {
-        Authorization: `Bearer ${Token}`,
-      },
-    }),
+    http.get(
+      `/api/v3/MBirth@get?stockid=${StockID}${force ? "&force=1" : ""}`,
+      {
+        headers: {
+          Authorization: `Bearer ${Token}`,
+        },
+      }
+    ),
   ClientBirthDayCount: ({ Token }) =>
     http.get(`/api/v3/MBirth@sum`, {
       headers: {
@@ -778,11 +781,33 @@ const AdminAPI = {
     ps = 15,
     ForMember = "",
     StockID = 0,
+    From = "",
+    To = "",
   }) =>
     http.get(
       `/services/preview.aspx?cmd=search_order&key=${encodeURIComponent(
         Key
-      )}&typeSearch=sell&ps=${ps}&pi=${pi}&searchId=4&isAdmin=true&IsOnlineNewOrder=0&From=&To=&StaffID=0&StockID=${StockID}&zero=0&searchForMember=${ForMember}`,
+      )}&typeSearch=sell&ps=${ps}&pi=${pi}&searchId=4&isAdmin=true&IsOnlineNewOrder=0&From=${From}&To=${To}&StaffID=0&StockID=${StockID}&zero=0&searchForMember=${ForMember}`,
+      {
+        headers: {
+          Authorization: `Bearer ${Token}`,
+        },
+      }
+    ),
+  listOrdersSum: ({
+    Key = "",
+    Token,
+    pi = 1,
+    ps = 15,
+    ForMember = "",
+    StockID = 0,
+    From = "",
+    To = "",
+  }) =>
+    http.get(
+      `/services/preview.aspx?cmd=search_order&key=${encodeURIComponent(
+        Key
+      )}&typeSearch=sell&ps=${ps}&pi=${pi}&searchId=4&isAdmin=true&IsOnlineNewOrder=0&From=${From}&To=${To}&StaffID=0&StockID=${StockID}&zero=0&searchForMember=${ForMember}&sum=1`,
       {
         headers: {
           Authorization: `Bearer ${Token}`,

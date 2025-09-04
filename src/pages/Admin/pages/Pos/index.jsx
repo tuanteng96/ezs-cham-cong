@@ -6,6 +6,7 @@ import {
   Navbar,
   Page,
   Popover,
+  Subnavbar,
   f7,
   useStore,
 } from "framework7-react";
@@ -15,6 +16,7 @@ import {
   ChevronDownIcon,
   Cog6ToothIcon,
   EyeIcon,
+  HomeModernIcon,
 } from "@heroicons/react/24/outline";
 import PromHelpers from "@/helpers/PromHelpers";
 import AdminAPI from "@/api/Admin.api";
@@ -29,9 +31,10 @@ import interactionPlugin from "@fullcalendar/interaction";
 import listPlugin from "@fullcalendar/list";
 import { DatePickerWrap } from "@/partials/forms";
 import clsx from "clsx";
-import { PickerFilter } from "./components";
+import { MenuSubNavbar, PickerFilter } from "./components";
 import ConfigsAPI from "@/api/Configs.api";
 import DateTimeHelpers from "@/helpers/DateTimeHelpers";
+import NoFound from "@/components/NoFound";
 
 const getQueryParams = (queryConfig) => {
   let params = {
@@ -82,6 +85,33 @@ const getStatusClass = (Status, item) => {
   }
 };
 
+const getStatusText = (Status, item) => {
+  const isAuto =
+    item?.Desc && item.Desc.toUpperCase().indexOf("TỰ ĐỘNG ĐẶT LỊCH");
+  if (Status === "XAC_NHAN") {
+    if (isAuto !== "" && isAuto > -1) return "primary-2";
+    return "Đã xác nhận";
+  }
+  if (Status === "CHUA_XAC_NHAN") {
+    return "Chưa xác nhận";
+  }
+  if (Status === "KHACH_KHONG_DEN") {
+    return "Khách không đến";
+  }
+  if (Status === "KHACH_DEN") {
+    return "Khách đến";
+  }
+  if (Status === "TU_CHOI") {
+    return "Khách huỷ lịch";
+  }
+  if (Status === "doing") {
+    return "Đang thực hiện";
+  }
+  if (Status === "done") {
+    return "Thực hiện xong";
+  }
+};
+
 const checkStar = (item) => {
   if (item?.Member?.MobilePhone !== "0000000000") return "";
   if (item?.Member?.MobilePhone === "0000000000" && item?.IsNew) return "**";
@@ -89,19 +119,6 @@ const checkStar = (item) => {
     return "*";
   }
 };
-
-let Views = [
-  { Title: "Xem theo ngày", Key: "timeGridDay" },
-  { Title: "Xem theo danh sách", Key: "listWeek" },
-  {
-    Title: "Theo nhân viên",
-    Key: "resourceTimeGridDay",
-  },
-  {
-    Title: "Xem theo phòng",
-    Key: "resourceTimelineDay",
-  },
-];
 
 const viLocales = {
   code: "vi",
@@ -140,7 +157,7 @@ function PosAdmin({ f7router }) {
         return Views[index].Key;
       }
     }
-    return "timeGridDay";
+    return "listWeek";
   };
 
   const [filters, setFilters] = useState({
@@ -473,7 +490,7 @@ function PosAdmin({ f7router }) {
               ...item,
               id: item.id,
               title: item.text,
-              order: item?.source?.Order || 0
+              order: item?.source?.Order || 0,
             }))
           : [];
       return [{ id: 0, title: "Chưa chọn nhân viên", order: 0 }, ...newData];
@@ -543,6 +560,52 @@ function PosAdmin({ f7router }) {
     };
   }, [calendarRef]);
 
+  let Views = [
+    {
+      ID: 1,
+      Index: 1,
+      Title: "Danh sách",
+      Key: "listWeek",
+      visibleCount: true,
+    },
+    {
+      ID: 2,
+      Index: 2,
+      Title: "Dạng lưới",
+      Key: "timeGridDay",
+      visibleCount: true,
+    },
+    {
+      ID: 3,
+      Index: 3,
+      Title: "Nhân viên",
+      Key: "resourceTimeGridDay",
+      visibleCount: true,
+    },
+    {
+      ID: 4,
+      Index: 4,
+      Title: "Buồng / Phòng",
+      Key: "resourceTimelineDay",
+      visibleCount: true,
+    },
+    {
+      ID: 5,
+      Index: 5,
+      Title: "Lịch lớp học",
+      visibleCount: true,
+      Path: "/admin/pos/calendar/class-schedule/",
+      hidden: !Brand?.Global?.Admin?.lop_hoc_pt,
+    },
+    {
+      ID: 6,
+      Index: 6,
+      Title: "Lịch chăm sóc",
+      visibleCount: true,
+      Path: "/admin/pos/calendar/care-schedule/",
+    },
+  ];
+
   return (
     <Page
       className="bg-white"
@@ -562,34 +625,7 @@ function PosAdmin({ f7router }) {
           </Link>
           <Popover className="popover-setting-pos w-[220px]">
             <div className="py-3">
-              <div className="flex flex-col pb-2 mb-2 border-b">
-                {Views.map((view, index) => (
-                  <Link
-                    className={clsx(
-                      "relative px-4 py-2 flex",
-                      filters.view === view.Key && "text-app"
-                    )}
-                    noLinkClass
-                    popoverClose
-                    key={index}
-                    onClick={() =>
-                      setFilters((prevState) => ({
-                        ...prevState,
-                        view: view.Key,
-                      }))
-                    }
-                  >
-                    <span>{view.Title}</span>
-                    <EyeIcon
-                      className={clsx(
-                        "w-5 ml-2",
-                        filters.view === view.Key ? "opacity-100" : "opacity-0"
-                      )}
-                    />
-                  </Link>
-                ))}
-              </div>
-              <div className="flex flex-col pb-2 mb-2 border-b">
+              <div className="flex flex-col">
                 <Link
                   className="relative px-4 py-2"
                   noLinkClass
@@ -613,27 +649,6 @@ function PosAdmin({ f7router }) {
                   popoverClose
                 >
                   <span>Cài đặt phòng</span>
-                </Link>
-              </div>
-              <div className="flex flex-col">
-                {Brand?.Global?.Admin?.lop_hoc_pt && (
-                  <Link
-                    className="relative px-4 py-2"
-                    noLinkClass
-                    href="/admin/pos/calendar/class-schedule/"
-                    popoverClose
-                  >
-                    <span>Lịch lớp học</span>
-                  </Link>
-                )}
-
-                <Link
-                  className="relative px-4 py-2"
-                  noLinkClass
-                  href="/admin/pos/calendar/care-schedule/"
-                  popoverClose
-                >
-                  <span>Lịch chăm sóc</span>
                 </Link>
               </div>
             </div>
@@ -688,159 +703,319 @@ function PosAdmin({ f7router }) {
             )}
           </PickerFilter>
         </NavRight>
+        <Subnavbar>
+          <MenuSubNavbar
+            className="w-full h-full px-2"
+            data={Views ? Views.filter((x) => !x.hidden) : []}
+            selected={Views.filter((x) => x.Key === filters.view)[0].Index}
+            setSelected={(val) => {
+              let index = Views.findIndex((x) => x.ID === val);
+              if (index > -1) {
+                if (Views[index].Path) {
+                  f7router.navigate(Views[index].Path);
+                } else {
+                  setFilters((prevState) => ({
+                    ...prevState,
+                    view: Views[index].Key,
+                  }));
+                }
+              }
+            }}
+          />
+        </Subnavbar>
         <div className="absolute h-[2px] w-full bottom-0 left-0 bg-[rgba(255,255,255,0.3)]"></div>
       </Navbar>
       <div className="relative h-full">
-        <FullCalendar
-          firstDay={1}
-          schedulerLicenseKey="GPL-My-Project-Is-Open-Source"
-          themeSystem="unthemed"
-          locale={viLocales}
-          headerToolbar={false}
-          plugins={[
-            timeGridPlugin,
-            resourceTimeGridPlugin,
-            resourceTimelinePlugin,
-            scrollGridPlugin,
-            interactionPlugin,
-            listPlugin,
-          ]}
-          initialDate={filters.day}
-          initialView={filters.view}
-          handleWindowResize={true}
-          aspectRatio="3"
-          editable={false}
-          navLinks={true}
-          ref={calendarRef}
-          events={CalendarBookings?.data?.data || []}
-          resources={
-            filters.view === "resourceTimelineDay"
-              ? ListRooms?.data || []
-              : ResourcesBookings?.data || []
-          }
-          resourceGroupField="RoomTitle"
-          resourceOrder={filters?.view === "resourceTimelineDay" ? "title" : "order,id"}
-          views={{
-            timeGridDay: {
-              allDaySlot: false,
-              eventMaxStack: 4,
-              slotLabelContent: ({ date, text }) => {
-                return (
-                  <>
-                    <div className="text-[13px] w-full text-center font-medium pt-1 px-[3px]">
-                      {moment(date).format("HH:mm")}
+        {filters.view === "listWeek" && (
+          <div className="h-full bg-[var(--f7-page-bg-color)]">
+            {!CalendarBookings?.isLoading && (
+              <>
+                {CalendarBookings?.data?.data &&
+                  CalendarBookings?.data?.data.length > 0 && (
+                    <div className="flex flex-col h-full gap-3 p-4 overflow-auto">
+                      {CalendarBookings?.data?.data &&
+                        CalendarBookings?.data?.data.map((item, index) => (
+                          <div
+                            className="p-4 bg-white rounded-lg"
+                            key={index}
+                            onClick={() => {
+                              let extendedProps = item;
+                              if (extendedProps.os) {
+                                f7.views.main.router.navigate(
+                                  "/admin/pos/calendar/os/?formState=" +
+                                    encodeURIComponent(
+                                      JSON.stringify({
+                                        Os: {
+                                          ID: extendedProps.os?.ID,
+                                          MemberID:
+                                            extendedProps.os?.MemberID || "",
+                                          ProdService:
+                                            extendedProps.os?.ProdService || "",
+                                          ProdService2:
+                                            extendedProps.os?.ProdService2 ||
+                                            "",
+                                          Title: extendedProps.os?.Title || "",
+                                        },
+                                      })
+                                    )
+                                );
+                              } else {
+                                f7.views.main.router.navigate(
+                                  "/admin/pos/calendar/add/?formState=" +
+                                    encodeURIComponent(
+                                      JSON.stringify({
+                                        ...extendedProps,
+                                        Member: {
+                                          FullName:
+                                            extendedProps?.Member?.FullName,
+                                          MobilePhone:
+                                            extendedProps.Member?.MobilePhone,
+                                          ID: extendedProps.Member?.ID,
+                                        },
+                                        Roots: extendedProps.Roots
+                                          ? extendedProps.Roots.map((x) => ({
+                                              Title: x.Title,
+                                              ID: x.ID,
+                                            }))
+                                          : [],
+                                      })
+                                    )
+                                );
+                              }
+                            }}
+                          >
+                            <div className="flex items-start justify-between mb-3">
+                              <div className="flex-1 font-medium">
+                                {item?.AtHome && (
+                                  <HomeModernIcon className="inline-block w-4 mr-1.5 align-text-top text-primary" />
+                                )}
+                                {item?.Star && (
+                                  <span
+                                    className={clsx(
+                                      "pr-1.5",
+                                      item?.AtHome && "pl-1.5"
+                                    )}
+                                  >
+                                    ({item?.Star})
+                                  </span>
+                                )}
+                                {item?.MemberCurrent?.FullName ||
+                                  "Khách chưa xác định"}
+                              </div>
+                              <div className="px-2.5 rounded-xl bg-primary-light text-primary font-lato font-medium">
+                                {moment(item.BookDate).format("HH:mm")}
+                              </div>
+                            </div>
+                            <div>
+                              <div className="text-gray-500">
+                                {item.RootTitles || "Chưa chọn dịch vụ"}
+                                {item?.isBook && (
+                                  <span className="pl-1.5 font-medium font-lato">
+                                    ({item?.BookCount?.Done}/
+                                    {item?.BookCount?.Total})
+                                  </span>
+                                )}
+                              </div>
+                              {item.UserServices &&
+                                item.UserServices.length > 0 && (
+                                  <div className="mt-1 text-gray-500">
+                                    Thực hiện bởi
+                                    <span className="pl-1.5">
+                                      {item.UserServices.map(
+                                        (x) => x.FullName
+                                      ).join(", ")}
+                                    </span>
+                                  </div>
+                                )}
+                            </div>
+                            <div className="flex items-center gap-2 pt-3 mt-3 border-t">
+                              <div
+                                className={clsx(
+                                  "w-2 h-2 rounded-full",
+                                  "fc-bg-" + getStatusClass(item.Status || item?.os?.Status, item)
+                                )}
+                              ></div>
+                              <div
+                                className={clsx(
+                                  "fc-text-" + getStatusClass(item.Status || item?.os?.Status, item)
+                                )}
+                              >
+                                {getStatusText(item.Status || item?.os?.Status, item)}
+                              </div>
+                            </div>
+                          </div>
+                        ))}
                     </div>
-                  </>
-                );
-              },
-              dayHeaderContent: ({ date, isToday, ...arg }) => {
-                return (
-                  <>
-                    <div className="mb-1 text-sm">
-                      {moment(date).format("ddd")}
-                    </div>
-                    <div className="flex items-center justify-center w-10 h-10 text-white rounded-full bg-primary">
-                      {moment(date).format("DD")}
-                    </div>
-                  </>
-                );
-              },
-              dayHeaders: false,
-              nowIndicator: true,
-              now: moment(new Date()).format("YYYY-MM-DD HH:mm"),
-              scrollTime: moment(new Date()).format("HH:mm"),
-              slotMinWidth: "45",
-              dateClick: ({ date }) => {
-                f7.views.main.router.navigate(
-                  "/admin/pos/calendar/add/?BookDate=" + date
-                );
-              },
-              slotMinTime: TimeOpen,
-              slotMaxTime: TimeClose,
-            },
-            listWeek: {},
-            resourceTimeGridDay: {
-              dayMinWidth: 200,
-              allDaySlot: false,
-              type: "resourceTimeline",
-              nowIndicator: true,
-              now: moment(new Date()).format("YYYY-MM-DD HH:mm"),
-              scrollTime: moment(new Date()).format("HH:mm"),
-              resourceAreaWidth: "200px",
-              stickyHeaderDates: true,
-              slotMinTime: TimeOpen,
-              slotMaxTime: TimeClose,
-              buttonText: "Nhân viên",
-              resourceAreaHeaderContent: () => "Nhân viên",
-              resourceLabelContent: ({ resource }) => {
-                return (
-                  <>
-                    <div className="py-1.5 capitalize text-primary">
-                      {resource._resource.title}
-                    </div>
-                  </>
-                );
-              },
-              slotLabelContent: ({ date, text }) => {
-                return (
-                  <>
-                    <div className="text-[13px] w-full text-center font-medium pt-1 px-[3px]">
-                      {moment(date).format("HH:mm")}
-                    </div>
-                  </>
-                );
-              },
-              dateClick: ({ resource, jsEvent, date }) => {
-                if (jsEvent.target.classList.contains("fc-no-event")) return;
-                if (resource._resource?.id) {
-                  f7.views.main.router.navigate(
-                    "/admin/pos/calendar/add/?resource=" +
-                      JSON.stringify({
-                        label: resource._resource?.title,
-                        value: resource._resource?.id,
-                      }) +
-                      "&BookDate=" +
-                      date
+                  )}
+
+                {(!CalendarBookings?.data?.data ||
+                  CalendarBookings?.data?.data.length === 0) && (
+                  <div className="flex flex-col items-center justify-center h-full">
+                    <NoFound
+                      Title="Không có kết quả nào."
+                      Desc="Rất tiếc ... Không tìm thấy dữ liệu nào"
+                    />
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        )}
+        <div
+          className={clsx("h-full", filters.view === "listWeek" && "hidden")}
+        >
+          <FullCalendar
+            firstDay={1}
+            schedulerLicenseKey="GPL-My-Project-Is-Open-Source"
+            themeSystem="unthemed"
+            locale={viLocales}
+            headerToolbar={false}
+            plugins={[
+              timeGridPlugin,
+              resourceTimeGridPlugin,
+              resourceTimelinePlugin,
+              scrollGridPlugin,
+              interactionPlugin,
+              listPlugin,
+            ]}
+            initialDate={filters.day}
+            initialView={filters.view}
+            handleWindowResize={true}
+            aspectRatio="3"
+            editable={false}
+            navLinks={true}
+            ref={calendarRef}
+            events={CalendarBookings?.data?.data || []}
+            resources={
+              filters.view === "resourceTimelineDay"
+                ? ListRooms?.data || []
+                : ResourcesBookings?.data || []
+            }
+            resourceGroupField="RoomTitle"
+            resourceOrder={
+              filters?.view === "resourceTimelineDay" ? "title" : "order,id"
+            }
+            views={{
+              timeGridDay: {
+                allDaySlot: false,
+                eventMaxStack: 4,
+                slotLabelContent: ({ date, text }) => {
+                  return (
+                    <>
+                      <div className="text-[13px] w-full text-center font-medium pt-1 px-[3px]">
+                        {moment(date).format("HH:mm")}
+                      </div>
+                    </>
                   );
-                }
+                },
+                dayHeaderContent: ({ date, isToday, ...arg }) => {
+                  return (
+                    <>
+                      <div className="mb-1 text-sm">
+                        {moment(date).format("ddd")}
+                      </div>
+                      <div className="flex items-center justify-center w-10 h-10 text-white rounded-full bg-primary">
+                        {moment(date).format("DD")}
+                      </div>
+                    </>
+                  );
+                },
+                dayHeaders: false,
+                nowIndicator: true,
+                now: moment(new Date()).format("YYYY-MM-DD HH:mm"),
+                scrollTime: moment(new Date()).format("HH:mm"),
+                slotMinWidth: "45",
+                dateClick: ({ date }) => {
+                  f7.views.main.router.navigate(
+                    "/admin/pos/calendar/add/?BookDate=" + date
+                  );
+                },
+                slotMinTime: TimeOpen,
+                slotMaxTime: TimeClose,
               },
-            },
-            resourceTimelineDay: {
-              type: "resourceTimelineDay",
-              nowIndicator: true,
-              now: moment(new Date()).format("YYYY-MM-DD HH:mm"),
-              scrollTime: moment(new Date()).format("HH:mm"),
-              resourceAreaWidth: "100px",
-              slotMinWidth: 50,
-              stickyHeaderDates: true,
-              slotMinTime: TimeOpen,
-              slotMaxTime: TimeClose,
-              buttonText: "Phòng",
-              resourceAreaHeaderContent: () => "Phòng",
-              slotLabelContent: ({ date, text }) => {
-                return (
-                  <>
-                    <span className="text-primary">
-                      {moment(date).format("HH:mm")}
-                    </span>
-                  </>
-                );
+              listWeek: {},
+              resourceTimeGridDay: {
+                dayMinWidth: 200,
+                allDaySlot: false,
+                type: "resourceTimeline",
+                nowIndicator: true,
+                now: moment(new Date()).format("YYYY-MM-DD HH:mm"),
+                scrollTime: moment(new Date()).format("HH:mm"),
+                resourceAreaWidth: "200px",
+                stickyHeaderDates: true,
+                slotMinTime: TimeOpen,
+                slotMaxTime: TimeClose,
+                buttonText: "Nhân viên",
+                resourceAreaHeaderContent: () => "Nhân viên",
+                resourceLabelContent: ({ resource }) => {
+                  return (
+                    <>
+                      <div className="py-1.5 capitalize text-primary">
+                        {resource._resource.title}
+                      </div>
+                    </>
+                  );
+                },
+                slotLabelContent: ({ date, text }) => {
+                  return (
+                    <>
+                      <div className="text-[13px] w-full text-center font-medium pt-1 px-[3px]">
+                        {moment(date).format("HH:mm")}
+                      </div>
+                    </>
+                  );
+                },
+                dateClick: ({ resource, jsEvent, date }) => {
+                  if (jsEvent.target.classList.contains("fc-no-event")) return;
+                  if (resource._resource?.id) {
+                    f7.views.main.router.navigate(
+                      "/admin/pos/calendar/add/?resource=" +
+                        JSON.stringify({
+                          label: resource._resource?.title,
+                          value: resource._resource?.id,
+                        }) +
+                        "&BookDate=" +
+                        date
+                    );
+                  }
+                },
               },
-            },
-          }}
-          eventContent={(arg) => {
-            const { event, view } = arg;
-            const { extendedProps } = event._def;
-            let italicEl = document.createElement("div");
-            italicEl.classList.add("fc-content");
-            
-            if (
-              typeof extendedProps !== "object" ||
-              Object.keys(extendedProps).length > 0
-            ) {
-              if (view.type !== "listWeek") {
-                if (!extendedProps.noEvent) {
-                  italicEl.innerHTML = `
+              resourceTimelineDay: {
+                type: "resourceTimelineDay",
+                nowIndicator: true,
+                now: moment(new Date()).format("YYYY-MM-DD HH:mm"),
+                scrollTime: moment(new Date()).format("HH:mm"),
+                resourceAreaWidth: "100px",
+                slotMinWidth: 50,
+                stickyHeaderDates: true,
+                slotMinTime: TimeOpen,
+                slotMaxTime: TimeClose,
+                buttonText: "Phòng",
+                resourceAreaHeaderContent: () => "Phòng",
+                slotLabelContent: ({ date, text }) => {
+                  return (
+                    <>
+                      <span className="text-primary">
+                        {moment(date).format("HH:mm")}
+                      </span>
+                    </>
+                  );
+                },
+              },
+            }}
+            eventContent={(arg) => {
+              const { event, view } = arg;
+              const { extendedProps } = event._def;
+              let italicEl = document.createElement("div");
+              italicEl.classList.add("fc-content");
+
+              if (
+                typeof extendedProps !== "object" ||
+                Object.keys(extendedProps).length > 0
+              ) {
+                if (view.type !== "listWeek") {
+                  if (!extendedProps.noEvent) {
+                    italicEl.innerHTML = `
               <div class="fc-title">
                 <div class="flex">
                   ${
@@ -884,94 +1059,105 @@ function PosAdmin({ f7router }) {
                   </div>
                 </div>
               </div>`;
-                }
-              } else {
-                italicEl.innerHTML = `<div class="fc-title">
+                  }
+                } else {
+                  italicEl.innerHTML = `<div class="fc-title">
                     <div><span class="fullname">${
                       extendedProps?.AtHome
                         ? `<i class="fas fa-home font-size-xs"></i>`
                         : ""
                     } ${
-                  extendedProps?.Star ? `(${extendedProps?.Star})` : ""
-                } ${
-                  extendedProps?.MemberCurrent?.FullName || "Chưa xác định tên"
-                }</span><span class="d-none d-md-inline"> - ${
-                  extendedProps?.MemberCurrent?.MobilePhone ||
-                  "Chưa xác định số"
-                }</span> 
-              <div class="flex${filters.view === "listWeek" ? " flex-col" : ""}">
-                <div class="${filters.view !== "listWeek" ? 'truncate ' : ''}capitalize">${
-                  extendedProps.RootTitles || "Chưa chọn dịch vụ"
-                }</div>
+                    extendedProps?.Star ? `(${extendedProps?.Star})` : ""
+                  } ${
+                    extendedProps?.MemberCurrent?.FullName ||
+                    "Chưa xác định tên"
+                  }</span><span class="d-none d-md-inline"> - ${
+                    extendedProps?.MemberCurrent?.MobilePhone ||
+                    "Chưa xác định số"
+                  }</span> 
+              <div class="flex${
+                filters.view === "listWeek" ? " flex-col" : ""
+              }">
+                <div class="${
+                  filters.view !== "listWeek" ? "truncate " : ""
+                }capitalize">${
+                    extendedProps.RootTitles || "Chưa chọn dịch vụ"
+                  }</div>
                 ${
-                  filters.view === "listWeek" ? `<span class="${!extendedProps?.isBook && "d-none"} pl-1">(${
-                  extendedProps?.BookCount?.Done || 0
-                }/${extendedProps?.BookCount?.Total || 0})</span>` : `<span class="${!extendedProps?.isBook && "d-none"} pl-1">- ${
-                  extendedProps?.BookCount?.Done || 0
-                }/${extendedProps?.BookCount?.Total || 0}</span>`
+                  filters.view === "listWeek"
+                    ? `<span class="${
+                        !extendedProps?.isBook && "d-none"
+                      } pl-1">(${extendedProps?.BookCount?.Done || 0}/${
+                        extendedProps?.BookCount?.Total || 0
+                      })</span>`
+                    : `<span class="${
+                        !extendedProps?.isBook && "d-none"
+                      } pl-1">- ${extendedProps?.BookCount?.Done || 0}/${
+                        extendedProps?.BookCount?.Total || 0
+                      }</span>`
                 }
               
               </div>
             </div>
             </div>`;
+                }
+              } else {
+                italicEl.innerHTML = `<div>Chưa có lịch.</div>`;
               }
-            } else {
-              italicEl.innerHTML = `<div>Chưa có lịch.</div>`;
-            }
-            let arrayOfDomNodes = [italicEl];
-            return {
-              domNodes: arrayOfDomNodes,
-            };
-          }}
-          eventClick={({ event, el }) => {
-            const { _def } = event;
-            const { extendedProps } = _def;
+              let arrayOfDomNodes = [italicEl];
+              return {
+                domNodes: arrayOfDomNodes,
+              };
+            }}
+            eventClick={({ event, el }) => {
+              const { _def } = event;
+              const { extendedProps } = _def;
 
-            if (extendedProps?.os) {
-              f7.views.main.router.navigate(
-                "/admin/pos/calendar/os/?formState=" +
-                  encodeURIComponent(
-                    JSON.stringify({
-                      Os: {
-                        ID: extendedProps.os?.ID,
-                        MemberID: extendedProps.os?.MemberID || "",
-                        ProdService: extendedProps.os?.ProdService || "",
-                        ProdService2: extendedProps.os?.ProdService2 || "",
-                        Title: extendedProps.os?.Title || "",
-                      },
-                    })
-                  )
-              );
-            } else {
-              if (!extendedProps.noEvent) {
+              if (extendedProps?.os) {
                 f7.views.main.router.navigate(
-                  "/admin/pos/calendar/add/?formState=" +
+                  "/admin/pos/calendar/os/?formState=" +
                     encodeURIComponent(
                       JSON.stringify({
-                        ...extendedProps,
-                        Member: {
-                          FullName: extendedProps?.Member?.FullName,
-                          MobilePhone: extendedProps.Member?.MobilePhone,
-                          ID: extendedProps.Member?.ID,
+                        Os: {
+                          ID: extendedProps.os?.ID,
+                          MemberID: extendedProps.os?.MemberID || "",
+                          ProdService: extendedProps.os?.ProdService || "",
+                          ProdService2: extendedProps.os?.ProdService2 || "",
+                          Title: extendedProps.os?.Title || "",
                         },
-                        Roots: extendedProps.Roots
-                          ? extendedProps.Roots.map((x) => ({
-                              Title: x.Title,
-                              ID: x.ID,
-                            }))
-                          : [],
                       })
                     )
                 );
+              } else {
+                if (!extendedProps.noEvent) {
+                  f7.views.main.router.navigate(
+                    "/admin/pos/calendar/add/?formState=" +
+                      encodeURIComponent(
+                        JSON.stringify({
+                          ...extendedProps,
+                          Member: {
+                            FullName: extendedProps?.Member?.FullName,
+                            MobilePhone: extendedProps.Member?.MobilePhone,
+                            ID: extendedProps.Member?.ID,
+                          },
+                          Roots: extendedProps.Roots
+                            ? extendedProps.Roots.map((x) => ({
+                                Title: x.Title,
+                                ID: x.ID,
+                              }))
+                            : [],
+                        })
+                      )
+                  );
+                }
               }
-            }
-          }}
-          //   eventDidMount={(el) => {
-          //     console.log(el);
-          //   }}
-          datesSet={({ view, start, ...arg }) => {}}
-        />
-
+            }}
+            //   eventDidMount={(el) => {
+            //     console.log(el);
+            //   }}
+            datesSet={({ view, start, ...arg }) => {}}
+          />
+        </div>
         <div
           role="status"
           className={clsx(

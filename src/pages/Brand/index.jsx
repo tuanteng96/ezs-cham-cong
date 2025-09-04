@@ -29,7 +29,7 @@ const BrandPage = ({ f7router }) => {
       keys: ["_historyDomain"],
       success: ({ _historyDomain }) => {
         if (_historyDomain) {
-          setValue("Domain", _historyDomain.replaceAll("https://", ""));
+          setValue("Domain", String(_historyDomain).replace(/https:\/\//g, ""));
         }
       },
     });

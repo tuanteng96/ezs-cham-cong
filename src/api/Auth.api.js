@@ -22,8 +22,8 @@ const AuthAPI = {
     removeTokenFirebase: ({
         Type,
         ID,
-        bodyFormData
-    }) => http.get(`/api/v3/apptoken?cmd=call&accid=${ID}&acctype=${Type}&senderIndex=2&logout=1`, bodyFormData),
+        Token
+    }) => http.get(`/api/v3/apptoken?cmd=call&token=${Token}&accid=${ID}&acctype=${Type}&senderIndex=2&logout=1`, bodyFormData),
     otpVerify: ({Value, Token}) => http.get(`/admin/otp.aspx?cmd=valid&secure=${Value}&token=${Token}`),
     listNotifications: (UserId) => http.get(`/api/v3/noti2?cmd=nextoffset&acctype=U&accid=${UserId}&offset=0&next=200`),
     deleteNotification: (body) => http.post(`api/v3/noti2/?cmd=clear2`, body),

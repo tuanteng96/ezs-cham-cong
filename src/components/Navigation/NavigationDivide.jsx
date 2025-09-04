@@ -421,11 +421,11 @@ function NavigationDivide({ pathname }) {
           <div
             className={clsx(
               "flex flex-col items-center justify-center pt-1",
-              pathname === "/home/" ? "text-app" : "text-gray-700"
+              pathname === "/home/" ? "text-app" : "text-gray-600"
             )}
           >
             <HomeIcon className="w-6" />
-            <span className="text-[10px] mt-px leading-4">Chấm công</span>
+            <span className="text-[10px] mt-px leading-4">Trang chủ</span>
           </div>
         </Link>
         <Link href="/technicians/">
@@ -435,7 +435,7 @@ function NavigationDivide({ pathname }) {
               pathname === "/technicians/" ||
                 pathname === "/technicians/?Type=dl"
                 ? "text-app"
-                : "text-gray-700"
+                : "text-gray-600"
             )}
           >
             <UserGroupIcon className="w-6" />
@@ -499,7 +499,7 @@ function NavigationDivide({ pathname }) {
           <div
             className={clsx(
               "flex flex-col items-center justify-center pt-1",
-              pathname.includes("statistical") ? "text-app" : "text-gray-700"
+              pathname.includes("statistical") ? "text-app" : "text-gray-600"
             )}
           >
             <ChartBarIcon className="w-6" />
@@ -538,7 +538,7 @@ function NavigationDivide({ pathname }) {
             className={clsx(
               "flex flex-col items-center justify-center pt-1",
               RouterHelpers.PATH_NAVIGATION_PAGES.includes(pathname)
-                ? "text-gray-700"
+                ? "text-gray-600"
                 : "text-app"
             )}
           >

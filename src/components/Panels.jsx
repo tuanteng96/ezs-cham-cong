@@ -102,7 +102,7 @@ function Panels(props) {
   useEffect(() => {
     setMenus([
       {
-        Title: "Chấm công",
+        Title: "Trang chủ",
         Link: "/home/",
         ActiveLink: ["/", "/home/"],
         active: true,
@@ -116,6 +116,7 @@ function Panels(props) {
         ActiveLink: [
           "/admin/pos/calendar/",
           "/admin/pos/clients/",
+          "/admin/pos/orders/",
           "/admin/pos/processings/",
           "/admin/pos/invoice-processings/",
         ],
@@ -197,18 +198,6 @@ function Panels(props) {
         active: false,
         Id: f7.utils.id("xxxx-xxxx-xxxx-xxxx"),
         Icon: <BellIcon className="w-5" />,
-        // SubMenu: [
-        //   {
-        //     Title: "Tạo mới",
-        //     Link: "/admin/notifications/add/",
-        //     active: false,
-        //   },
-        //   {
-        //     Title: "Danh sách",
-        //     Link: "/admin/notifications/",
-        //     active: false,
-        //   },
-        // ],
         hasRight: notification?.hasRight || false,
       },
       {
@@ -216,18 +205,6 @@ function Panels(props) {
         Link: "/admin/article/",
         Icon: <PencilSquareIcon className="w-5" />,
         ActiveLink: ["/admin/article/", "/admin/banner/"],
-        // SubMenu: [
-        //   {
-        //     Title: "Bài viết",
-        //     Link: "/admin/article/",
-        //     active: false,
-        //   },
-        //   {
-        //     Title: "Banner & Quảng cáo",
-        //     Link: "/admin/banner/",
-        //     active: false,
-        //   },
-        // ],
         active: false,
         Id: f7.utils.id("xxxx-xxxx-xxxx-xxxx"),
         hasRight: article?.hasRight || false,
@@ -248,70 +225,6 @@ function Panels(props) {
         Id: f7.utils.id("xxxx-xxxx-xxxx-xxxx"),
         hasRight: cong_ca?.hasRight || printConfig?.hasRight || false,
       },
-      // {
-      //   Title: "Chấm công",
-      //   Icon: <FingerPrintIcon className="w-5" />,
-      //   ActiveLink: ["/timekeeping/", "/take-break/"],
-      //   SubMenu: [
-      //     {
-      //       Title: "Bảng công",
-      //       Link: "/timekeeping/",
-      //       active: false,
-      //     },
-      //     {
-      //       Title: "Xin nghỉ",
-      //       Link: "/take-break/",
-      //       active: false,
-      //     },
-      //   ],
-      //   active: false,
-      //   Id: f7.utils.id("xxxx-xxxx-xxxx-xxxx"),
-      //   hasRight: true,
-      // },
-      // {
-      //   Title: "Kỹ thuật viên",
-      //   ActiveLink: ["/technicians/", "/technicians/?Type=dl"],
-      //   SubMenu: [
-      //     {
-      //       Title: "Dịch vụ",
-      //       Link: "/technicians/",
-      //       active: false,
-      //     },
-      //     {
-      //       Title: "Đặt lịch",
-      //       Link: "/technicians/?Type=dl",
-      //       active: false,
-      //     },
-      //   ],
-      //   active: false,
-      //   Id: f7.utils.id("xxxx-xxxx-xxxx-xxxx"),
-      //   hasRight: true,
-      // },
-      // {
-      //   Title: "Thông báo",
-      //   Link: "/notifications/",
-      //   ActiveLink: ["/notifications/"],
-      //   active: false,
-      //   Id: f7.utils.id("xxxx-xxxx-xxxx-xxxx"),
-      //   hasRight: true,
-      // },
-      // {
-      //   Title: "Bảng lương",
-      //   Link: "/statistical/",
-      //   ActiveLink: ["/statistical/"],
-      //   active: false,
-      //   Id: f7.utils.id("xxxx-xxxx-xxxx-xxxx"),
-      //   hasRight: true,
-      // },
-      // {
-      //   Title: "Debug",
-      //   Link: "/debug/",
-      //   ActiveLink: ["/debug/"],
-      //   active: false,
-      //   Id: f7.utils.id("xxxx-xxxx-xxxx-xxxx"),
-      //   hasRight: Brand?.Domain === "https://cserbeauty.com",
-      //   Icon: <CodeBracketIcon className="w-5" />,
-      // },
     ]);
   }, [Auth, CrStocks, Brand]);
 
@@ -403,7 +316,7 @@ function Panels(props) {
       f7.panel.close("#panel-app");
     }, 10);
   };
-  window.f7panel = f7.panel
+  window.f7panel = f7.panel;
   return (
     <Panel
       floating
@@ -424,7 +337,7 @@ function Panels(props) {
             className="w-11 h-11"
           >
             {Auth?.Avatar ? (
-              <div className="w-full h-full overflow-hidden rounded-xl">
+              <div className="flex items-center w-full h-full overflow-hidden bg-gray-100 rounded-xl">
                 <img
                   src={AssetsHelpers.toAbsoluteUrl(Auth?.Avatar)}
                   alt={Auth?.FullName}
@@ -524,8 +437,28 @@ function Panels(props) {
                     </CSubMenu>
                   ) : (
                     <MenuItem
-                      onClick={() => f7.panel.close("#panel-app")}
-                      component={<Link href={menu.Link} />}
+                      onClick={() => {
+                        if (
+                          Brand?.Domain === "https://app.facewashfox.com" &&
+                          menu.Link === "/admin/pos/clients/"
+                        ) {
+                          f7.dialog.alert(
+                            "Thương hiệu không hỗ trợ trên APP."
+                          );
+                        } else {
+                          f7.panel.close("#panel-app");
+                        }
+                      }}
+                      component={
+                        <Link
+                          href={
+                            Brand?.Domain === "https://app.facewashfox.com" &&
+                            menu.Link === "/admin/pos/clients/"
+                              ? ""
+                              : menu.Link
+                          }
+                        />
+                      }
                       className="font-medium border-b"
                       active={menu.active}
                       key={index}

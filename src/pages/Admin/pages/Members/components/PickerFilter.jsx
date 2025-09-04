@@ -24,7 +24,6 @@ function PickerFilter({ children, initialValues, onChange }) {
 
   const Auth = useStore("Auth");
   const CrStocks = useStore("CrStocks");
-  const StocksAll = useStore("StocksAll");
 
   const { usrmng } = RolesHelpers.useRoles({
     nameRoles: ["usrmng"],
@@ -69,7 +68,7 @@ function PickerFilter({ children, initialValues, onChange }) {
             <div className="fixed z-[13501] inset-0 flex justify-end flex-col">
               <motion.div
                 key={visible}
-                className="absolute inset-0 bg-black/[.2] dark:bg-black/[.4] z-10"
+                className="absolute inset-0 bg-black/[.5] z-10"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
@@ -107,8 +106,8 @@ function PickerFilter({ children, initialValues, onChange }) {
                             placeholder="Chọn cơ sở"
                             value={field.value}
                             options={
-                              StocksAll
-                                ? StocksAll.map((x) => ({
+                              Auth?.Info?.StocksAll
+                                ? Auth?.Info?.StocksAll.map((x) => ({
                                     ...x,
                                     label: x.ID === 778 ? "Hệ thống" : x.Title,
                                     value: x.ID,

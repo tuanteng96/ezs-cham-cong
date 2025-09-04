@@ -332,7 +332,7 @@ function OrderViewAdmin({ f7router, f7route }) {
 
   return (
     <Page
-      className="!bg-white"
+      className="bg-[var(--f7-page-bg-color)]"
       name="Order-view"
       noToolbar
       onPageBeforeIn={() => PromHelpers.STATUS_BAR_COLOR("light")}
@@ -353,7 +353,7 @@ function OrderViewAdmin({ f7router, f7route }) {
       <div className="flex flex-col h-full pb-safe-b">
         {!isLoading && (
           <div className="overflow-auto grow">
-            <div className="p-4 bg-white border-b">
+            <div className="p-4 bg-white rounded-b-xl">
               <div className="flex items-end justify-between mb-2 text-gray-500">
                 <span className="text-[15px] font-medium leading-4 font-lato">
                   {moment(data?.Order?.CreateDate).format("HH:mm DD/MM/YYYY")}
@@ -384,14 +384,18 @@ function OrderViewAdmin({ f7router, f7route }) {
               </div>
             </div>
             <div className="p-4">
-              <div className="flex items-center justify-center p-4 bg-white border rounded">
+              <div className="flex items-center justify-center p-4 bg-white rounded">
                 <div className="flex-1 pr-2">
                   <div className="mb-1 font-medium">
                     {data?.Order?.SenderName || "Chưa có"}
                   </div>
                   <div className="leading-5 text-gray-500">
                     <div>{data?.Order?.SenderPhone || "Chưa có"}</div>
-                    <div>{data?.Order?.SenderAddress || "Chưa có địa chỉ"}</div>
+                    {data?.Order?.SenderAddress && (
+                      <div>
+                        {data?.Order?.SenderAddress || "Chưa có địa chỉ"}
+                      </div>
+                    )}
                   </div>
                 </div>
                 <div className="flex items-center justify-center text-xl uppercase rounded-full bg-primary-light w-14 h-14 text-primary">
@@ -400,7 +404,7 @@ function OrderViewAdmin({ f7router, f7route }) {
                     : "No"}
                 </div>
               </div>
-              <div className="mt-3 overflow-hidden bg-white border rounded">
+              <div className="mt-3 overflow-hidden bg-white border">
                 {data?.Items && data?.Items.length > 0 && (
                   <>
                     {data?.Items.map((item, index) => (
@@ -432,7 +436,9 @@ function OrderViewAdmin({ f7router, f7route }) {
                                   className="mb-1 font-medium"
                                   onClick={() => item.ProdOrService && open()}
                                 >
-                                  <span className="pr-1">[{item.ProdCode}]</span>
+                                  <span className="pr-1">
+                                    [{item.ProdCode}]
+                                  </span>
                                   {item.ProdTitle}
                                   {item.ProdOrService === 1 && (
                                     <InformationCircleIcon className="inline w-5 ml-1 text-warning align-sub" />
@@ -467,138 +473,173 @@ function OrderViewAdmin({ f7router, f7route }) {
                   </div>
                 )}
               </div>
+              {!(
+                data?.Order?.TotalProdValue ===
+                  data?.Order?.thanhtoan?.tong_gia_tri_dh -
+                    data?.Order?.thanhtoan?.thanh_toan_tien -
+                    data?.Order?.thanhtoan?.thanh_toan_vi -
+                    data?.Order?.thanhtoan?.thanh_toan_ao &&
+                data?.Order?.TotalProdValue - data?.Order?.TotalValue === 0 &&
+                data?.Order?.CustomeDiscount === 0 &&
+                !(
+                  data?.Order?.Discount !== "0%" ||
+                  data?.Order?.VoucherFix ||
+                  data?.Order?.VoucherSamePrice
+                )
+              ) && (
+                <div className="py-2 mt-3 bg-white rounded">
+                  <div className="flex items-center justify-between px-4 py-2">
+                    <div className="text-gray-500">Nguyên giá</div>
+                    <div className="font-bold font-lato">
+                      {StringHelpers.formatVND(data?.Order?.TotalProdValue)}
+                    </div>
+                  </div>
+                  {data?.Order?.TotalProdValue - data?.Order?.TotalValue > 0 ? (
+                    <>
+                      <div className="flex items-center justify-between px-4 py-2">
+                        <div className="text-gray-500">Giảm giá</div>
+                        <div className="font-bold font-lato">
+                          {data?.Order?.TotalProdValue -
+                            data?.Order?.TotalValue >
+                          0
+                            ? StringHelpers.formatVND(
+                                data?.Order?.TotalProdValue -
+                                  data?.Order?.TotalValue
+                              )
+                            : 0}
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between px-4 py-2">
+                        <div className="text-gray-500">Còn lại</div>
+                        <div className="font-bold font-lato">
+                          {StringHelpers.formatVND(data?.Order?.TotalValue)}
+                        </div>
+                      </div>
+                    </>
+                  ) : (
+                    <></>
+                  )}
+                  {data?.Order?.Discount !== "0%" ||
+                  data?.Order?.VoucherFix ||
+                  data?.Order?.VoucherSamePrice ? (
+                    <>
+                      <div className="flex items-center justify-between px-4 py-2">
+                        <div className="text-gray-500">
+                          Mã giảm giá
+                          {data?.Order?.VoucherCode && (
+                            <span className="pl-1">
+                              ({data?.Order?.VoucherCode})
+                            </span>
+                          )}
+                        </div>
+                        <div className="font-bold font-lato">
+                          {data?.Order?.Discount ||
+                            data?.Order?.VoucherFix ||
+                            data?.Order?.VoucherSamePrice}
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between px-4 py-2">
+                        <div className="text-gray-500">Sau mã giảm giá</div>
+                        <div className="font-bold font-lato">
+                          {StringHelpers.formatVND(data?.Order?.ToMoney)}
+                        </div>
+                      </div>
+                    </>
+                  ) : (
+                    <></>
+                  )}
 
-              <div className="py-2 mt-3 bg-white border rounded">
-                <div className="flex items-center justify-between px-4 py-2">
-                  <div className="text-gray-500">Nguyên giá</div>
-                  <div className="font-bold font-lato">
-                    {StringHelpers.formatVND(data?.Order?.TotalProdValue)}
-                  </div>
+                  {data?.Order?.CustomeDiscount > 0 ? (
+                    <>
+                      <div className="flex items-center justify-between px-4 py-2">
+                        <div className="text-gray-500">Chiết khấu cả đơn</div>
+                        <div className="font-bold font-lato">
+                          {data?.Order?.CustomeDiscount > 100
+                            ? StringHelpers.formatVND(
+                                data?.Order?.CustomeDiscount
+                              )
+                            : `${data?.Order?.CustomeDiscount || 0}%`}
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between px-4 py-2">
+                        <div className="text-base text-gray-500">
+                          Cần thanh toán
+                        </div>
+                        <div className="text-lg font-bold font-lato">
+                          {StringHelpers.formatVND(data?.Order?.ToPay)}
+                        </div>
+                      </div>
+                    </>
+                  ) : (
+                    <></>
+                  )}
                 </div>
-                <div className="flex items-center justify-between px-4 py-2">
-                  <div className="text-gray-500">Giảm giá</div>
-                  <div className="font-bold font-lato">
-                    {data?.Order?.TotalProdValue - data?.Order?.TotalValue > 0
-                      ? StringHelpers.formatVND(
-                          data?.Order?.TotalProdValue - data?.Order?.TotalValue
-                        )
-                      : 0}
-                  </div>
-                </div>
-                <div className="flex items-center justify-between px-4 py-2">
-                  <div className="text-gray-500">Còn lại</div>
-                  <div className="font-bold font-lato">
-                    {StringHelpers.formatVND(data?.Order?.TotalValue)}
-                  </div>
-                </div>
-                <div className="flex items-center justify-between px-4 py-2">
-                  <div className="text-gray-500">Mã giảm giá</div>
-                  <div className="font-bold font-lato">
-                    {data?.Order?.Discount ||
-                      data?.Order?.VoucherFix ||
-                      data?.Order?.VoucherSamePrice}
-                  </div>
-                </div>
-                <div className="flex items-center justify-between px-4 py-2">
-                  <div className="text-gray-500">Sau mã giảm giá</div>
-                  <div className="font-bold font-lato">
-                    {StringHelpers.formatVND(data?.Order?.ToMoney)}
-                  </div>
-                </div>
-                <div className="flex items-center justify-between px-4 py-2">
-                  <div className="text-gray-500">Chiết khấu cả đơn</div>
-                  <div className="font-bold font-lato">
-                    {data?.Order?.CustomeDiscount > 100
-                      ? StringHelpers.formatVND(data?.Order?.CustomeDiscount)
-                      : `${data?.Order?.CustomeDiscount || 0}%`}
-                  </div>
-                </div>
-                <div className="flex items-center justify-between px-4 py-2">
-                  <div className="text-base text-gray-500">Cần thanh toán</div>
-                  <div className="text-lg font-bold font-lato">
-                    {StringHelpers.formatVND(data?.Order?.ToPay)}
-                  </div>
-                </div>
-              </div>
+              )}
+
               {data?.Order?.Status !== "user_sent" && (
-                <div className="py-2 mt-3 bg-white border rounded">
-                  <div className="flex items-center justify-between px-4 py-2">
-                    <div className="text-gray-500">TM + CK + Q.Thẻ</div>
-                    <div className="font-bold font-lato">
-                      {StringHelpers.formatVND(
-                        data?.Order?.thanhtoan?.thanh_toan_tien
-                      )}
+                <div className="py-2 mt-3 bg-white rounded">
+                  {data?.Order?.thanhtoan?.thanh_toan_tien > 0 ? (
+                    <div className="flex items-center justify-between px-4 py-2">
+                      <div className="text-gray-500">TM + CK + Q.Thẻ</div>
+                      <div className="font-bold font-lato">
+                        {StringHelpers.formatVND(
+                          data?.Order?.thanhtoan?.thanh_toan_tien
+                        )}
+                      </div>
                     </div>
-                  </div>
-                  <div className="flex items-center justify-between px-4 py-2">
-                    <div className="text-gray-500">
-                      Thanh toán ví + Thẻ tiền
+                  ) : (
+                    <></>
+                  )}
+
+                  {data?.Order?.thanhtoan?.thanh_toan_vi > 0 ? (
+                    <div className="flex items-center justify-between px-4 py-2">
+                      <div className="text-gray-500">
+                        Thanh toán ví + Thẻ tiền
+                      </div>
+                      <div className="font-bold font-lato">
+                        {StringHelpers.formatVND(
+                          data?.Order?.thanhtoan?.thanh_toan_vi
+                        )}
+                      </div>
                     </div>
-                    <div className="font-bold font-lato">
-                      {StringHelpers.formatVND(
-                        data?.Order?.thanhtoan?.thanh_toan_vi
-                      )}
+                  ) : (
+                    <></>
+                  )}
+
+                  {data?.Order?.thanhtoan?.thanh_toan_ao_tra_hang > 0 ? (
+                    <div className="flex items-center justify-between px-4 py-2">
+                      <div className="text-gray-500">
+                        Thanh toán ảo trả hàng
+                      </div>
+                      <div className="font-bold font-lato">
+                        {StringHelpers.formatVND(
+                          data?.Order?.thanhtoan?.thanh_toan_ao_tra_hang
+                        )}
+                      </div>
                     </div>
-                  </div>
-                  {/* <div className="flex items-center justify-between px-4 py-2">
-                    <div className="text-gray-500">Trả hàng hoàn ví</div>
-                    <div className="font-bold font-lato">
-                      {StringHelpers.formatVND(
-                        data?.Order?.thanhtoan?.tra_hang_hoan_vi
-                      )}
+                  ) : (
+                    <></>
+                  )}
+
+                  {data?.Order?.thanhtoan?.tong_gia_tri_dh -
+                    data?.Order?.thanhtoan?.thanh_toan_tien -
+                    data?.Order?.thanhtoan?.thanh_toan_vi -
+                    data?.Order?.thanhtoan?.thanh_toan_ao >
+                  0 ? (
+                    <div className="flex items-center justify-between px-4 py-2">
+                      <div className="text-base text-gray-500">Còn nợ</div>
+                      <div className="text-lg font-bold font-lato text-danger">
+                        {StringHelpers.formatVND(
+                          data?.Order?.thanhtoan?.tong_gia_tri_dh -
+                            data?.Order?.thanhtoan?.thanh_toan_tien -
+                            data?.Order?.thanhtoan?.thanh_toan_vi -
+                            data?.Order?.thanhtoan?.thanh_toan_ao
+                        )}
+                      </div>
                     </div>
-                  </div>
-                  <div className="flex items-center justify-between px-4 py-2">
-                    <div className="text-gray-500">Trả hàng hoàn tiền</div>
-                    <div className="font-bold font-lato">
-                      {StringHelpers.formatVND(
-                        data?.Order?.thanhtoan?.tra_hang_hoan_tien
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-between px-4 py-2">
-                    <div className="text-gray-500">Kết thúc hoàn ví</div>
-                    <div className="font-bold font-lato">
-                      {StringHelpers.formatVND(
-                        data?.Order?.thanhtoan?.ket_thuc_the_hoan_vi
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-between px-4 py-2">
-                    <div className="text-gray-500">Kết thúc hoàn tiền</div>
-                    <div className="font-bold font-lato">
-                      {StringHelpers.formatVND(
-                        data?.Order?.thanhtoan?.ket_thuc_the_hoan_tien
-                      )}
-                    </div>
-                  </div> */}
-                  <div className="flex items-center justify-between px-4 py-2">
-                    <div className="text-gray-500">Thanh toán ảo trả hàng</div>
-                    <div className="font-bold font-lato">
-                      {StringHelpers.formatVND(
-                        data?.Order?.thanhtoan?.thanh_toan_ao_tra_hang
-                      )}
-                    </div>
-                  </div>
-                  {/* <div className="flex items-center justify-between px-4 py-2">
-                    <div className="text-gray-500">Thanh toán ảo kết thúc</div>
-                    <div className="font-bold font-lato">
-                      {StringHelpers.formatVND(
-                        data?.Order?.thanhtoan?.thanh_toan_ao_ket_thuc_the
-                      )}
-                    </div>
-                  </div> */}
-                  <div className="flex items-center justify-between px-4 py-2">
-                    <div className="text-base text-gray-500">Còn nợ</div>
-                    <div className="text-lg font-bold font-lato text-danger">
-                      {StringHelpers.formatVND(
-                        data?.Order?.thanhtoan?.tong_gia_tri_dh -
-                          data?.Order?.thanhtoan?.thanh_toan_tien -
-                          data?.Order?.thanhtoan?.thanh_toan_vi -
-                          data?.Order?.thanhtoan?.thanh_toan_ao
-                      )}
-                    </div>
-                  </div>
+                  ) : (
+                    <></>
+                  )}
                 </div>
               )}
             </div>

@@ -23,7 +23,6 @@ import KeyboardsHelper from "@/helpers/KeyboardsHelper";
 function TimekeepingsWifiLocaiton({ f7route }) {
   const queryClient = useQueryClient();
 
-  const StocksAll = useStore("StocksAll");
   const Brand = useStore("Brand");
 
   const { control, handleSubmit, reset, setValue } = useForm({
@@ -39,9 +38,9 @@ function TimekeepingsWifiLocaiton({ f7route }) {
 
   useEffect(() => {
     reset({
-      Updated: StocksAll,
+      Updated: Auth?.Info?.StocksAll,
     });
-  }, [StocksAll]);
+  }, [Auth]);
 
   const updateMutation = useMutation({
     mutationFn: async (body) => {

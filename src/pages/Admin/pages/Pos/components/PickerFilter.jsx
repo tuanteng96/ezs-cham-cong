@@ -1,7 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "framer-motion";
-import { CheckIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import {
+  CheckIcon,
+  ChevronDownIcon,
+  XMarkIcon,
+} from "@heroicons/react/24/outline";
 import { Controller, useForm } from "react-hook-form";
 import { Button } from "framework7-react";
 import {
@@ -10,6 +14,7 @@ import {
   SelectPicker,
 } from "@/partials/forms/select";
 import clsx from "clsx";
+import { Disclosure } from "@/partials/components";
 
 const StatusMembers = [
   {
@@ -145,14 +150,14 @@ function PickerFilter({ children, initialValues, TagsList, onChange }) {
             <div className="fixed z-[13501] inset-0 flex justify-end flex-col">
               <motion.div
                 key={visible}
-                className="absolute inset-0 bg-black/[.2] dark:bg-black/[.4] z-10"
+                className="absolute inset-0 bg-black/[.5] z-10"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 onClick={close}
               ></motion.div>
               <motion.div
-                className="relative z-20 bg-white rounded-t-[var(--f7-sheet-border-radius)] h-[90%]"
+                className="relative z-20 bg-[var(--f7-page-bg-color)] rounded-t-[var(--f7-sheet-border-radius)] h-[90%]"
                 initial={{ opacity: 0, translateY: "100%" }}
                 animate={{ opacity: 1, translateY: "0%" }}
                 exit={{ opacity: 0, translateY: "100%" }}
@@ -171,249 +176,366 @@ function PickerFilter({ children, initialValues, TagsList, onChange }) {
                       <XMarkIcon className="w-6" />
                     </div>
                   </div>
-                  <div className="px-4 overflow-auto grow">
-                    <div className="mb-3.5 last:mb-0">
-                      <div className="mb-px">Khách hàng</div>
-                      <Controller
-                        name="MemberIDs"
-                        control={control}
-                        render={({ field, fieldState }) => (
-                          <SelectClients
-                            placeholderInput="Tên khách hàng"
-                            placeholder="Chọn khách hàng"
-                            value={field.value}
-                            label="Chọn khách hàng"
-                            onChange={(val) => {
-                              field.onChange(val);
-                            }}
-                            isFilter
-                            isMulti
-                          />
-                        )}
-                      />
-                    </div>
-                    <div className="mb-3.5 last:mb-0">
-                      <div className="mb-px">Nhân viên</div>
-                      <Controller
-                        name="UserIDs"
-                        control={control}
-                        render={({ field, fieldState }) => (
-                          <SelectMembersServices
-                            placeholderInput="Tên nhân viên"
-                            placeholder="Chọn nhân viên"
-                            value={field.value}
-                            label="Chọn nhân viên"
-                            onChange={(val) => {
-                              field.onChange(val);
-                            }}
-                            isFilter
-                            isMulti
-                          />
-                        )}
-                      />
-                    </div>
-                    <div className="mb-3.5 last:mb-0">
-                      <div className="mb-px">Loại khách hàng</div>
-                      <Controller
-                        name="StatusMember"
-                        control={control}
-                        render={({ field, fieldState }) => (
-                          <SelectPicker
-                            placeholder="Chọn loại khách hàng"
-                            value={field.value}
-                            options={StatusMembers}
-                            label="Chọn loại khách hàng"
-                            onChange={(val) => {
-                              field.onChange(val);
-                            }}
-                            errorMessage={fieldState?.error?.message}
-                            errorMessageForce={fieldState?.invalid}
-                          />
-                        )}
-                      />
-                    </div>
-                    <div className="mb-3.5 last:mb-0">
-                      <div className="mb-px">Loại nhân viên</div>
-                      <Controller
-                        name="StatusBook"
-                        control={control}
-                        render={({ field, fieldState }) => (
-                          <SelectPicker
-                            placeholder="Chọn loại nhân viên"
-                            value={field.value}
-                            options={StatusBooks}
-                            label="Chọn loại nhân viên"
-                            onChange={(val) => {
-                              field.onChange(val);
-                            }}
-                            errorMessage={fieldState?.error?.message}
-                            errorMessageForce={fieldState?.invalid}
-                          />
-                        )}
-                      />
-                    </div>
-                    <div className="mb-3.5 last:mb-0">
-                      <div className="mb-px">Loại thực hiện</div>
-                      <Controller
-                        name="StatusAtHome"
-                        control={control}
-                        render={({ field, fieldState }) => (
-                          <SelectPicker
-                            placeholder="Chọn loại thực hiện"
-                            value={field.value}
-                            options={StatusAtHome}
-                            label="Chọn loại thực hiện"
-                            onChange={(val) => {
-                              field.onChange(val);
-                            }}
-                            errorMessage={fieldState?.error?.message}
-                            errorMessageForce={fieldState?.invalid}
-                          />
-                        )}
-                      />
-                    </div>
-                    <div className="mb-3.5 last:mb-0">
-                      <div className="mb-px">Tags</div>
-                      <Controller
-                        name="Tags"
-                        control={control}
-                        render={({ field, fieldState }) => (
-                          <SelectPicker
-                            placeholder="Chọn tags"
-                            value={field.value}
-                            options={TagsList}
-                            label="Chọn tags"
-                            onChange={(val) => {
-                              field.onChange(val);
-                            }}
-                            errorMessage={fieldState?.error?.message}
-                            errorMessageForce={fieldState?.invalid}
-                          />
-                        )}
-                      />
-                    </div>
-                    <Controller
-                      name="status"
-                      control={control}
-                      render={({ field, fieldState }) => (
-                        <div className="mb-3.5 last:mb-0">
-                          <div className="flex flex-col gap-2">
-                            {StatusArr &&
-                              StatusArr.slice(0, 6).map((status, index) => (
-                                <div
-                                  className="relative px-4 py-3 font-medium rounded-sm"
-                                  key={index}
-                                  style={{
-                                    backgroundColor: status.bg,
-                                    color: status.color,
-                                  }}
-                                  onClick={() => {
-                                    let newValues = field.value
-                                      ? field.value.split(",")
-                                      : [];
-                                    if (newValues.includes(status.value)) {
-                                      newValues = newValues.filter(
-                                        (x) => x !== status.value
-                                      );
-                                    } else {
-                                      newValues.push(status.value);
-                                    }
-                                    field.onChange(newValues.toString());
-                                  }}
-                                >
-                                  <span
-                                    className={clsx(
-                                      field.value &&
-                                        field.value.includes(status.value)
-                                        ? ""
-                                        : "line-through"
-                                    )}
-                                  >
-                                    {status.label}
-                                  </span>
-                                  <div
-                                    className="absolute flex items-center justify-center w-5 h-5 rounded-full right-4 top-2/4 -translate-y-2/4"
-                                    style={{ backgroundColor: status.color }}
-                                  >
-                                    <CheckIcon
-                                      className={clsx(
-                                        "w-4 text-white",
-                                        field.value &&
-                                          field.value.includes(status.value)
-                                          ? "opacity-100"
-                                          : "opacity-0"
-                                      )}
-                                    />
-                                  </div>
-                                </div>
-                              ))}
-                          </div>
-                          <div className="mt-3.5">
-                            <div className="mb-2">Lịch thực hiện</div>
-                            <div className="flex flex-col gap-2">
-                              {StatusArr &&
-                                StatusArr.slice(7, StatusArr.length).map(
-                                  (status, index) => (
-                                    <div
-                                      className="relative px-4 py-3 font-medium rounded-sm"
-                                      key={index}
-                                      style={{
-                                        backgroundColor: status.bg,
-                                        color: status.color,
-                                      }}
-                                      onClick={() => {
-                                        let newValues = field.value
-                                          ? field.value.split(",")
-                                          : [];
-                                        if (newValues.includes(status.value)) {
-                                          newValues = newValues.filter(
-                                            (x) => x !== status.value
-                                          );
-                                        } else {
-                                          newValues.push(status.value);
-                                        }
-                                        field.onChange(newValues.toString());
-                                      }}
-                                    >
-                                      <span
-                                        className={clsx(
-                                          field.value &&
-                                            field.value.includes(status.value)
-                                            ? ""
-                                            : "line-through"
-                                        )}
-                                      >
-                                        {status.label}
-                                      </span>
-                                      <div
-                                        className="absolute flex items-center justify-center w-5 h-5 rounded-full right-4 top-2/4 -translate-y-2/4"
-                                        style={{
-                                          backgroundColor: status.color,
-                                        }}
-                                      >
-                                        <CheckIcon
-                                          className={clsx(
-                                            "w-4 text-white",
-                                            field.value &&
-                                              field.value.includes(status.value)
-                                              ? "opacity-100"
-                                              : "opacity-0"
-                                          )}
-                                        />
-                                      </div>
-                                    </div>
-                                  )
-                                )}
+                  <div className="px-4 pb-4 overflow-auto grow">
+                    <Disclosure initialState={false}>
+                      {({ isOpen, toggle }) => (
+                        <div className="mb-4 bg-white rounded-lg last:mb-0">
+                          <div
+                            className="flex items-center justify-between px-4 py-4"
+                            onClick={toggle}
+                          >
+                            <div className="font-medium text-[15px]">
+                              Theo khách hàng
                             </div>
+                            <div>
+                              <ChevronDownIcon
+                                className={clsx(
+                                  "w-5 text-gray-500 transition-all",
+                                  isOpen && "rotate-180"
+                                )}
+                              />
+                            </div>
+                          </div>
+
+                          <div className="px-4 pt-1 pb-5">
+                            <div className="mb-3.5 last:mb-0">
+                              <div className="mb-px">Khách hàng</div>
+                              <Controller
+                                name="MemberIDs"
+                                control={control}
+                                render={({ field, fieldState }) => (
+                                  <SelectClients
+                                    placeholderInput="Tên khách hàng"
+                                    placeholder="Chọn khách hàng"
+                                    value={field.value}
+                                    label="Chọn khách hàng"
+                                    onChange={(val) => {
+                                      field.onChange(val);
+                                    }}
+                                    isFilter
+                                    isMulti
+                                  />
+                                )}
+                              />
+                            </div>
+                            <div className="mb-3.5 last:mb-0">
+                              <div className="mb-px">Nhân viên</div>
+                              <Controller
+                                name="UserIDs"
+                                control={control}
+                                render={({ field, fieldState }) => (
+                                  <SelectMembersServices
+                                    placeholderInput="Tên nhân viên"
+                                    placeholder="Chọn nhân viên"
+                                    value={field.value}
+                                    label="Chọn nhân viên"
+                                    onChange={(val) => {
+                                      field.onChange(val);
+                                    }}
+                                    isFilter
+                                    isMulti
+                                  />
+                                )}
+                              />
+                            </div>
+                            {isOpen && (
+                              <>
+                                <div className="mb-3.5 last:mb-0">
+                                  <div className="mb-px">Loại khách hàng</div>
+                                  <Controller
+                                    name="StatusMember"
+                                    control={control}
+                                    render={({ field, fieldState }) => (
+                                      <SelectPicker
+                                        placeholder="Chọn loại khách hàng"
+                                        value={field.value}
+                                        options={StatusMembers}
+                                        label="Chọn loại khách hàng"
+                                        onChange={(val) => {
+                                          field.onChange(val);
+                                        }}
+                                        errorMessage={
+                                          fieldState?.error?.message
+                                        }
+                                        errorMessageForce={fieldState?.invalid}
+                                      />
+                                    )}
+                                  />
+                                </div>
+                                <div className="mb-3.5 last:mb-0">
+                                  <div className="mb-px">Loại nhân viên</div>
+                                  <Controller
+                                    name="StatusBook"
+                                    control={control}
+                                    render={({ field, fieldState }) => (
+                                      <SelectPicker
+                                        placeholder="Chọn loại nhân viên"
+                                        value={field.value}
+                                        options={StatusBooks}
+                                        label="Chọn loại nhân viên"
+                                        onChange={(val) => {
+                                          field.onChange(val);
+                                        }}
+                                        errorMessage={
+                                          fieldState?.error?.message
+                                        }
+                                        errorMessageForce={fieldState?.invalid}
+                                      />
+                                    )}
+                                  />
+                                </div>
+                                <div className="mb-3.5 last:mb-0">
+                                  <div className="mb-px">Loại thực hiện</div>
+                                  <Controller
+                                    name="StatusAtHome"
+                                    control={control}
+                                    render={({ field, fieldState }) => (
+                                      <SelectPicker
+                                        placeholder="Chọn loại thực hiện"
+                                        value={field.value}
+                                        options={StatusAtHome}
+                                        label="Chọn loại thực hiện"
+                                        onChange={(val) => {
+                                          field.onChange(val);
+                                        }}
+                                        errorMessage={
+                                          fieldState?.error?.message
+                                        }
+                                        errorMessageForce={fieldState?.invalid}
+                                      />
+                                    )}
+                                  />
+                                </div>
+                                <div className="mb-3.5 last:mb-0">
+                                  <div className="mb-px">Tags</div>
+                                  <Controller
+                                    name="Tags"
+                                    control={control}
+                                    render={({ field, fieldState }) => (
+                                      <SelectPicker
+                                        placeholder="Chọn tags"
+                                        value={field.value}
+                                        options={TagsList}
+                                        label="Chọn tags"
+                                        onChange={(val) => {
+                                          field.onChange(val);
+                                        }}
+                                        errorMessage={
+                                          fieldState?.error?.message
+                                        }
+                                        errorMessageForce={fieldState?.invalid}
+                                      />
+                                    )}
+                                  />
+                                </div>
+                              </>
+                            )}
                           </div>
                         </div>
                       )}
-                    />
+                    </Disclosure>
+                    <Disclosure initialState={true}>
+                      {({ isOpen, toggle }) => (
+                        <div className="mb-4 bg-white rounded-lg last:mb-0">
+                          <div
+                            className="flex items-center justify-between px-4 py-4 mb-2"
+                            onClick={toggle}
+                          >
+                            <div className="font-medium text-[15px]">
+                              Theo trạng thái
+                            </div>
+                            <div>
+                              <ChevronDownIcon
+                                className={clsx(
+                                  "w-5 text-gray-500 transition-all",
+                                  isOpen && "rotate-180"
+                                )}
+                              />
+                            </div>
+                          </div>
+                          {isOpen && (
+                            <div>
+                              <Controller
+                                name="status"
+                                control={control}
+                                render={({ field, fieldState }) => (
+                                  <div className="mb-3.5 last:mb-0">
+                                    <div className="flex flex-col gap-2">
+                                      {StatusArr &&
+                                        StatusArr.slice(0, 6).map(
+                                          (status, index) => (
+                                            <div
+                                              className="relative flex items-center gap-4 px-4 pb-3 mb-1 last:after:hidden after:content-[''] after:w-[calc(100%-30px)] after:h-[1px] after:bg-[var(--f7-page-bg-color)] after:absolute after:right-0 after:bottom-0"
+                                              key={index}
+                                              onClick={() => {
+                                                let newValues = field.value
+                                                  ? field.value.split(",")
+                                                  : [];
+
+                                                if (
+                                                  newValues.includes(
+                                                    status.value
+                                                  )
+                                                ) {
+                                                  newValues = newValues.filter(
+                                                    (x) => x !== status.value
+                                                  );
+                                                } else {
+                                                  newValues.push(status.value);
+                                                }
+
+                                                field.onChange(
+                                                  newValues.toString()
+                                                );
+                                              }}
+                                            >
+                                              <div
+                                                className="w-[8px] h-[8px] rounded-full"
+                                                style={{
+                                                  backgroundColor: status.color,
+                                                }}
+                                              ></div>
+                                              <div className={clsx("flex-1")}>
+                                                {status.label}
+                                              </div>
+                                              <div
+                                                className={clsx(
+                                                  "flex items-center justify-center w-5 h-5 rounded",
+                                                  field.value &&
+                                                    field.value
+                                                      .split(",")
+                                                      .includes(status.value)
+                                                    ? "bg-primary"
+                                                    : "bg-gray-200"
+                                                )}
+                                              >
+                                                <CheckIcon
+                                                  className={clsx(
+                                                    "w-4 text-white",
+                                                    field.value &&
+                                                      field.value
+                                                        .split(",")
+                                                        .includes(status.value)
+                                                      ? "opacity-100"
+                                                      : "opacity-0"
+                                                  )}
+                                                />
+                                              </div>
+                                            </div>
+                                          )
+                                        )}
+                                    </div>
+                                  </div>
+                                )}
+                              />
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </Disclosure>
+                    <Disclosure initialState={true}>
+                      {({ isOpen, toggle }) => (
+                        <div className="mb-4 bg-white rounded-lg last:mb-0">
+                          <div
+                            className="flex items-center justify-between px-4 py-4"
+                            onClick={toggle}
+                          >
+                            <div className="font-medium text-[15px">
+                              Lịch thực hiện
+                            </div>
+                            <div>
+                              <ChevronDownIcon
+                                className={clsx(
+                                  "w-5 text-gray-500 transition-all",
+                                  isOpen && "rotate-180"
+                                )}
+                              />
+                            </div>
+                          </div>
+                          {isOpen && (
+                            <div className="mt-2">
+                              <Controller
+                                name="status"
+                                control={control}
+                                render={({ field, fieldState }) => (
+                                  <div className="mb-3.5 last:mb-0">
+                                    <div className="flex flex-col gap-2">
+                                      {StatusArr &&
+                                        StatusArr.slice(
+                                          7,
+                                          StatusArr.length
+                                        ).map((status, index) => (
+                                          <div
+                                            className="relative flex items-center gap-4 px-4 pb-3 mb-1 last:after:hidden after:content-[''] after:w-[calc(100%-30px)] after:h-[1px] after:bg-[var(--f7-page-bg-color)] after:absolute after:right-0 after:bottom-0"
+                                            key={index}
+                                            onClick={() => {
+                                              let newValues = field.value
+                                                ? field.value.split(",")
+                                                : [];
+
+                                              if (
+                                                newValues.includes(status.value)
+                                              ) {
+                                                newValues = newValues.filter(
+                                                  (x) => x !== status.value
+                                                );
+                                              } else {
+                                                newValues.push(status.value);
+                                              }
+
+                                              field.onChange(
+                                                newValues.toString()
+                                              );
+                                            }}
+                                          >
+                                            <div
+                                              className="w-[8px] h-[8px] rounded-full"
+                                              style={{
+                                                backgroundColor: status.color,
+                                              }}
+                                            ></div>
+                                            <div className={clsx("flex-1")}>
+                                              {status.label}
+                                            </div>
+                                            <div
+                                              className={clsx(
+                                                "flex items-center justify-center w-5 h-5 rounded",
+                                                field.value &&
+                                                  field.value
+                                                    .split(",")
+                                                    .includes(status.value)
+                                                  ? "bg-primary"
+                                                  : "bg-gray-200"
+                                              )}
+                                            >
+                                              <CheckIcon
+                                                className={clsx(
+                                                  "w-4 text-white",
+                                                  field.value &&
+                                                    field.value
+                                                      .split(",")
+                                                      .includes(status.value)
+                                                    ? "opacity-100"
+                                                    : "opacity-0"
+                                                )}
+                                              />
+                                            </div>
+                                          </div>
+                                        ))}
+                                    </div>
+                                  </div>
+                                )}
+                              />
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </Disclosure>
                   </div>
                   <div className="grid grid-cols-2 gap-3 p-4">
                     <Button
                       type="button"
-                      className="text-black bg-gray-200 rounded-full"
+                      className="text-black bg-white rounded-full"
                       fill
                       large
                       preloader

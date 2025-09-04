@@ -58,7 +58,7 @@ const Item = ({ itemId, selected, onClick, item }) => {
   );
 };
 
-function MenuSubNavbar({ data, selected, setSelected }) {
+function MenuSubNavbar({ data, selected, setSelected, className = "w-full h-full" }) {
   const dragState = useRef(new useDrag());
 
   const handleDrag =
@@ -88,11 +88,11 @@ function MenuSubNavbar({ data, selected, setSelected }) {
   };
 
   return (
-    <div className="w-full h-full" onMouseLeave={dragState.current.dragStop}>
+    <div className={className} onMouseLeave={dragState.current.dragStop}>
       <ScrollMenu
         wrapperClassName="h-full"
         scrollContainerClassName="no-scrollbar"
-        itemClassName="mr-5 last:mr-0"
+        itemClassName="mr-4 last:mr-0"
         onInit={onInit}
         onWheel={onWheel}
         onMouseDown={() => dragState.current.dragStart}

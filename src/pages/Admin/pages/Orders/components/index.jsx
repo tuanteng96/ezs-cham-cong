@@ -17,6 +17,7 @@ import PickerMultiEmployees from "./PickerMultiEmployees";
 import PickerOneEmployees from "./PickerOneEmployees";
 import PickerPaymentDateOrder from "./PickerPaymentDateOrder";
 import PickerPaymentNoteOrder from "./PickerPaymentNoteOrder";
+import PickerSalesCommissionSharing from "./PickerSalesCommissionSharing";
 import PickerServiceUseOrder from "./PickerServiceUseOrder";
 import SelectMembersBouns from "./SelectMembersBouns";
 
@@ -41,5 +42,6 @@ export {
   PickerChangeDateBonus,
   SelectMembersBouns,
   MenuSubSplitPay,
-  PickerDiscountEnterOrder
+  PickerDiscountEnterOrder,
+  PickerSalesCommissionSharing
 };

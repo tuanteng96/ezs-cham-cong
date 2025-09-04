@@ -172,14 +172,20 @@ function PickerPayments({ children, Order, Client }) {
           if (Type.MethodID === 1) {
             setVisibleCalculator(false);
             close();
-            f7.dialog.confirm(
-              "Bạn có muốn thực hiện thưởng hoa hồng & doanh số cho lần thanh toán này ?",
-              () => {
-                f7.views.main.router.navigate(
-                  `/admin/pos/orders/view/${Order?.ID}/bonus-sales-commission/`
-                );
-              }
-            );
+            if (Brand?.Global?.BASICAPPIDEZS) {
+              f7.views.main.router.navigate(
+                `/admin/pos/orders/view/${Order?.ID}/bonus-sales-commission-sharing/`
+              );
+            } else {
+              f7.dialog.confirm(
+                "Bạn có muốn thực hiện thưởng hoa hồng & doanh số cho lần thanh toán này ?",
+                () => {
+                  f7.views.main.router.navigate(
+                    `/admin/pos/orders/view/${Order?.ID}/bonus-sales-commission/`
+                  );
+                }
+              );
+            }
           }
           if (Type.MethodID === 2) {
             let p = {
@@ -233,6 +239,29 @@ function PickerPayments({ children, Order, Client }) {
                 });
             } else {
               close();
+              if (Brand?.Global?.BASICAPPIDEZS) {
+                f7.views.main.router.navigate(
+                  `/admin/pos/orders/view/${Order?.ID}/bonus-sales-commission-sharing/`
+                );
+              } else {
+                f7.dialog.confirm(
+                  "Bạn có muốn thực hiện thưởng hoa hồng & doanh số cho lần thanh toán này ?",
+                  () => {
+                    f7.views.main.router.navigate(
+                      `/admin/pos/orders/view/${Order?.ID}/bonus-sales-commission/`
+                    );
+                  }
+                );
+              }
+            }
+          }
+          if (Type.MethodID === 3) {
+            close();
+            if (Brand?.Global?.BASICAPPIDEZS) {
+              f7.views.main.router.navigate(
+                `/admin/pos/orders/view/${Order?.ID}/bonus-sales-commission-sharing/`
+              );
+            } else {
               f7.dialog.confirm(
                 "Bạn có muốn thực hiện thưởng hoa hồng & doanh số cho lần thanh toán này ?",
                 () => {
@@ -242,17 +271,6 @@ function PickerPayments({ children, Order, Client }) {
                 }
               );
             }
-          }
-          if (Type.MethodID === 3) {
-            close();
-            f7.dialog.confirm(
-              "Bạn có muốn thực hiện thưởng hoa hồng & doanh số cho lần thanh toán này ?",
-              () => {
-                f7.views.main.router.navigate(
-                  `/admin/pos/orders/view/${Order?.ID}/bonus-sales-commission/`
-                );
-              }
-            );
           }
           window?.noti27?.TIN_NHAN &&
             window?.noti27.TIN_NHAN({
@@ -297,7 +315,7 @@ function PickerPayments({ children, Order, Client }) {
             <div className="fixed z-[12501] inset-0 flex justify-end flex-col">
               <motion.div
                 key={visible}
-                className="absolute inset-0 bg-black/[.2] dark:bg-black/[.4] z-10"
+                className="absolute inset-0 bg-black/[.5] z-10"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
@@ -584,14 +602,20 @@ function PickerPayments({ children, Order, Client }) {
                   onCloseQR={() => {
                     if (endPayMutation?.data?.data) {
                       close();
-                      f7.dialog.confirm(
-                        "Bạn có muốn thực hiện thưởng hoa hồng & doanh số cho lần thanh toán này ?",
-                        () => {
-                          f7.views.main.router.navigate(
-                            `/admin/pos/orders/view/${Order?.ID}/bonus-sales-commission/`
-                          );
-                        }
-                      );
+                      if (Brand?.Global?.BASICAPPIDEZS) {
+                        f7.views.main.router.navigate(
+                          `/admin/pos/orders/view/${Order?.ID}/bonus-sales-commission-sharing/`
+                        );
+                      } else {
+                        f7.dialog.confirm(
+                          "Bạn có muốn thực hiện thưởng hoa hồng & doanh số cho lần thanh toán này ?",
+                          () => {
+                            f7.views.main.router.navigate(
+                              `/admin/pos/orders/view/${Order?.ID}/bonus-sales-commission/`
+                            );
+                          }
+                        );
+                      }
                     }
                   }}
                   key={index}
@@ -622,7 +646,7 @@ function PickerPayments({ children, Order, Client }) {
             <div className="fixed z-[125001] inset-0 flex justify-end flex-col">
               <motion.div
                 key={visible}
-                className="absolute inset-0 bg-black/[.2] dark:bg-black/[.4] z-10"
+                className="absolute inset-0 bg-black/[.5] z-10"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}

@@ -44,7 +44,7 @@ const Photos = ({ PhotoList, Title }) => {
   useEffect(() => {
     if (PhotoList) {
       setPhotoWeb(() =>
-        PhotoList.map((item) => `${Brand.Domain}/upload/image/${item.Src}`)
+        PhotoList.map((item) => `${Brand?.Domain}/upload/image/${item.Src}`)
       );
     }
   }, [PhotoList]);
@@ -59,7 +59,7 @@ const Photos = ({ PhotoList, Title }) => {
       </button>
       <PhotoBrowser
         photos={PhotoList.map((x) => ({
-          url: `${Brand.Domain}/upload/image/${x.Src}`,
+          url: `${Brand?.Domain}/upload/image/${x.Src}`,
           caption: Title,
         }))}
         thumbs={PhotoWeb}

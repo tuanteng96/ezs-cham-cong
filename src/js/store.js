@@ -5,7 +5,7 @@ import { f7 } from "framework7-react";
 import SubscribeHelpers from "../helpers/SubscribeHelpers";
 import axios from "axios";
 import { pick, keys } from "lodash-es";
-import { initializeApp, deleteApp } from "firebase/app";
+import { initializeApp } from "firebase/app";
 import CDNHelpers from "@/helpers/CDNHelpers";
 
 const store = createStore({
@@ -16,9 +16,10 @@ const store = createStore({
     StockRights: [],
     StocksAll: [],
     CrStocks: JSON.parse(localStorage.getItem("CrStocks")) || null,
-    RightTree: null,
+    RightTree: JSON.parse(localStorage.getItem("RightTree")) || null,
     WorkTimeSettings:
       JSON.parse(localStorage.getItem("WorkTimeSettings")) || null,
+    CrsInOut: JSON.parse(localStorage.getItem("CrsInOut")) || null,
     Notifications: [],
     Processings: null,
     InvoiceProcessings: null,
@@ -30,25 +31,29 @@ const store = createStore({
       return state.Brand;
     },
     Auth({ state }) {
-      return state.Auth;
+      return {
+        ...state.Auth,
+        Info: state.Auth?.Info
+          ? {
+              ...state.Auth?.Info,
+              rightTree: state.RightTree,
+              StockRights: state.StockRights,
+              StocksAll: state.StocksAll,
+            }
+          : null,
+      };
     },
     Stocks({ state }) {
       return state.Stocks;
     },
-    StockRights({ state }) {
-      return state.StockRights;
-    },
-    StocksAll({ state }) {
-      return state.StocksAll;
-    },
     CrStocks({ state }) {
       return state.CrStocks;
     },
-    RightTree({ state }) {
-      return state.RightTree;
-    },
     WorkTimeSettings({ state }) {
       return state.WorkTimeSettings;
+    },
+    CrsInOut({ state }) {
+      return state.CrsInOut;
     },
     Notifications({ state }) {
       return state.Notifications;
@@ -123,6 +128,7 @@ const store = createStore({
         GroupTitles: null,
         Groups: null,
         WorkTrack: null,
+        ServerTime: new Date(),
       };
 
       window.Info = value?.Info || null;
@@ -153,7 +159,7 @@ const store = createStore({
               label: x.Title,
             })
           ),
-          StocksAll: value?.Info?.Stocks,
+          RightTree: value?.Info?.rightTree || null,
         },
         success: () => {
           if (
@@ -236,6 +242,35 @@ const store = createStore({
         },
       });
     },
+    setCrsInOut({ state }, value) {
+      let newState = [...(state.CrsInOut || [])];
+
+      if (value?.success) {
+        newState = newState.filter((x) => x.Uuid !== value?.Uuid);
+      } else {
+        let index = newState.findIndex((x) =>
+          value?.CheckOut
+            ? value?.CheckOut === x.CheckOut
+            : value?.CheckIn === x.CheckIn
+        );
+
+        if (index === -1) {
+          newState.push({
+            ...value,
+            Uuid: new Date().getTime(),
+          });
+        }
+      }
+
+      StorageHelpers.set({
+        data: {
+          CrsInOut: newState,
+        },
+        success: () => {
+          state.CrsInOut = newState;
+        },
+      });
+    },
     setLogout: ({ state }) => {
       StorageHelpers.remove({
         keys: ["Auth", "CrStocks", "WorkTimeSettings", "Stocks", "_noti_id"],
@@ -253,14 +288,10 @@ const store = createStore({
         f7.dialog.preloader("Đang thực hiện ...");
         PromHelpers.SEND_TOKEN_FIREBASE().then(({ token, error }) => {
           if (!error) {
-            var bodyFormData = new FormData();
-            bodyFormData.append("token", token);
             if (state?.Auth?.ID) {
               axios
                 .get(
-                  `${state.Brand.Domain}/api/v3/apptoken?cmd=call&accid=${state.Auth.ID}&acctype=${state.Auth.acc_type}&senderIndex=2&logout=1`,
-                  bodyFormData
-                )
+                  `${state.Brand.Domain}/api/v3/apptoken?cmd=call&token=${token}&accid=${state.Auth.ID}&acctype=${state.Auth.acc_type}&senderIndex=2&logout=1`)
                 .then(() => {
                   dispatch("setLogout").then(() => {
                     f7.dialog.close();

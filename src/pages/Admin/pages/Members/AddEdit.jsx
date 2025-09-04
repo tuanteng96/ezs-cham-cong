@@ -51,7 +51,6 @@ function MembersAdminAddEdit({ f7route, f7router }) {
   let Auth = useStore("Auth");
   let Brand = useStore("Brand");
   let CrStocks = useStore("CrStocks");
-  let StocksAll = useStore("StocksAll");
 
   const { usrmng, csluong_bangluong, cong_ca } = RolesHelpers.useRoles({
     nameRoles: ["usrmng", "csluong_bangluong", "cong_ca"],
@@ -107,12 +106,12 @@ function MembersAdminAddEdit({ f7route, f7router }) {
         setValue("fn", rs?.FullName);
         setValue("usn", rs?.UserName);
 
-        let index = StocksAll?.findIndex((x) => x.ID === rs?.StockID);
+        let index = Auth?.Info?.StocksAll?.findIndex((x) => x.ID === rs?.StockID);
         if (index > -1) {
           setValue("stockid", {
-            ...StocksAll[index],
-            label: StocksAll[index].Title,
-            value: StocksAll[index].ID,
+            ...Auth?.Info?.StocksAll[index],
+            label: Auth?.Info?.StocksAll[index].Title,
+            value: Auth?.Info?.StocksAll[index].ID,
           });
         } else {
           setValue("stockid", null);

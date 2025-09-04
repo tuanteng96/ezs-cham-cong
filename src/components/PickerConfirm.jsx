@@ -1,5 +1,5 @@
 import { Button, Input, Sheet, f7 } from "framework7-react";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { SelectPicker } from "../partials/forms";
 import KeyboardsHelper from "../helpers/KeyboardsHelper";
 import { Controller, useForm } from "react-hook-form";
@@ -7,7 +7,10 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { useMutation, useQueryClient } from "react-query";
 import WorkTrackAPI from "../api/WorkTrack.api";
-import { toast } from "react-toastify";
+import store from "@/js/store";
+import AlertHelpers from "@/helpers/AlertHelpers";
+import { createPortal } from "react-dom";
+import { AnimatePresence, motion } from "framer-motion";
 
 const schemaConfirm = yup
   .object({
@@ -45,23 +48,31 @@ function PickerConfirm({ children }) {
   });
   const [visible, setVisible] = useState(false);
 
+  const [portalRoot, setPortalRoot] = useState(null);
+
+  useEffect(() => {
+    const el = document.getElementById("framework7-root");
+    setPortalRoot(el);
+  }, []);
+
   const confirmMutation = useMutation({
     mutationFn: async (body) => {
-      // let newBody = {
-      //   list: [],
-      // };
-      // if (body?.list && body?.list.length > 0) {
-      //   for (let item of body?.list) {
-      //     let newItem = {...item}
-      //   }
-      // }
-      let data = await WorkTrackAPI.CheckInOut(body);
-      await Promise.all([
-        queryClient.invalidateQueries(["Auth"]),
-        queryClient.invalidateQueries(["TimekeepingHome"]),
-        queryClient.invalidateQueries(["TimekeepingList"]),
-      ]);
-      return data;
+      try {
+        let { data } = await WorkTrackAPI.CheckInOut(body);
+        if (!data?.list || data?.list?.length === 0) {
+          await store.dispatch("setCrsInOut", body.list[0]);
+        }
+
+        await Promise.all([
+          queryClient.invalidateQueries(["Auth"]),
+          queryClient.invalidateQueries(["TimekeepingHome"]),
+          queryClient.invalidateQueries(["TimekeepingList"]),
+        ]);
+        return data ? { ...data, body: body.list[0] } : { body: body.list[0] };
+      } catch (error) {
+        await store.dispatch("setCrsInOut", body.list[0]);
+        throw { body: body.list[0] };
+      }
     },
   });
 
@@ -152,12 +163,18 @@ function PickerConfirm({ children }) {
     };
 
     confirmMutation.mutate(dataConfirm, {
-      onSettled: () => {
-        f7.dialog.close();
+      onSuccess: (data) => {
         setVisible(false);
-        toast.success("Chấm công thành công.", {
-          position: toast.POSITION.TOP_CENTER,
-          autoClose: 2000,
+        AlertHelpers.CheckInOut({
+          data,
+          dataCheckInOut: dataConfirm,
+        });
+      },
+      onError: (error) => {
+        setVisible(false);
+        AlertHelpers.CheckInOut({
+          data: error,
+          dataCheckInOut: dataConfirm,
         });
       },
     });
@@ -167,6 +184,8 @@ function PickerConfirm({ children }) {
     reset();
     setVisible(false);
   };
+
+  if (!portalRoot) return null;
 
   return (
     <>
@@ -184,88 +203,112 @@ function PickerConfirm({ children }) {
             });
           }
         },
-        close: close,
+        close,
       })}
-      <Sheet
-        style={{ height: "auto" }}
-        // closeByBackdropClick={false}
-        // closeByOutsideClick={false}
-        //push
-        swipeToClose
-        backdrop
-        opened={visible}
-        onSheetClose={close}
-      >
-        <form className="page-scrollbar" onSubmit={handleSubmit(onSubmit)}>
-          <div className="flex items-center justify-center h-6">
-            <span className="inline-block w-12 h-[6px] rounded-[3px] bg-[#e9ebed] m-[calc(calc(24px-6px)/2)]"></span>
-          </div>
-          <div className="pb-safe-b">
-            <div className="px-4 mt-3">
-              <div className="text-xl font-medium">{watch()?.Info?.Title}</div>
-              <div className="mt-1 font-light">
-                Hãy thông báo cho chúng tôi biết lý do để đảm bảo quyền lợi của
-                bạn.
-              </div>
-            </div>
-            <div className="p-4">
-              <div className="mb-3.5 last:mb-0">
-                <div className="mb-px">Lý do</div>
-                <Controller
-                  name="Info.Type"
-                  control={control}
-                  render={({ field, fieldState }) => (
-                    <SelectPicker
-                      placeholder="Chọn loại"
-                      value={field.value}
-                      options={options}
-                      label="Chọn loại"
-                      onChange={(val) => field.onChange(val)}
-                      errorMessage={fieldState?.error?.message}
-                      errorMessageForce={fieldState?.invalid}
-                    />
-                  )}
-                />
-              </div>
-              <div className="mb-3.5 last:mb-0">
-                <div className="mb-px">Mô tả</div>
-                <Controller
-                  name="Info.Desc"
-                  control={control}
-                  render={({ field, fieldState }) => (
-                    <Input
-                      className="[&_textarea]:rounded [&_textarea]:placeholder:normal-case [&_textarea]:min-h-[150px]"
-                      type="textarea"
-                      placeholder="Nhập mô tả lý do"
-                      rows="5"
-                      value={field.value}
-                      errorMessage={fieldState?.error?.message}
-                      errorMessageForce={fieldState?.invalid}
-                      onChange={field.onChange}
-                      onFocus={(e) =>
-                        KeyboardsHelper.setAndroid({ Type: "modal", Event: e })
-                      }
-                    />
-                  )}
-                />
-              </div>
-              <div className="mb-3.5 last:mb-0">
-                <Button
-                  type="submit"
-                  className="rounded-full bg-app"
-                  fill
-                  large
-                  preloader
-                  loading={confirmMutation.isLoading}
-                  disabled={confirmMutation.isLoading}
+
+      {createPortal(
+        <AnimatePresence>
+          {visible && (
+            <div className="fixed z-[125001] inset-0 flex justify-end flex-col">
+              {/* Backdrop */}
+              <motion.div
+                key="backdrop"
+                className="absolute inset-0 bg-black/[.5] z-10"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={close}
+              />
+
+              {/* Sheet content */}
+              <motion.div
+                key="sheet"
+                className="relative flex flex-col z-20 bg-white rounded-t-[var(--f7-sheet-border-radius)]"
+                initial={{ opacity: 0, translateY: "100%" }}
+                animate={{ opacity: 1, translateY: "0%" }}
+                exit={{ opacity: 0, translateY: "100%" }}
+                transition={{ duration: 0.25, ease: "easeInOut" }}
+              >
+                <div className="p-4 my-2">
+                  <div className="text-xl font-medium">
+                    {watch()?.Info?.Title}
+                  </div>
+                  <div className="mt-1 font-light">
+                    Hãy thông báo cho chúng tôi biết lý do để đảm bảo quyền lợi
+                    của bạn.
+                  </div>
+                </div>
+
+                <form
+                  className="flex flex-col h-full pb-safe-b"
+                  onSubmit={handleSubmit(onSubmit)}
                 >
-                  Cập nhật
-                </Button>
-              </div>
+                  <div className="px-4 overflow-auto grow">
+                    <div className="mb-3.5 last:mb-0">
+                      <div className="mb-px">Lý do</div>
+                      <Controller
+                        name="Info.Type"
+                        control={control}
+                        render={({ field, fieldState }) => (
+                          <SelectPicker
+                            placeholder="Chọn loại"
+                            value={field.value}
+                            options={options}
+                            label="Chọn loại"
+                            onChange={(val) => field.onChange(val)}
+                            errorMessage={fieldState?.error?.message}
+                            errorMessageForce={fieldState?.invalid}
+                            autoHeight
+                          />
+                        )}
+                      />
+                    </div>
+                    <div className="mb-3.5 last:mb-0">
+                      <div className="mb-px">Mô tả</div>
+                      <Controller
+                        name="Info.Desc"
+                        control={control}
+                        render={({ field, fieldState }) => (
+                          <Input
+                            className="[&_textarea]:rounded [&_textarea]:placeholder:normal-case [&_textarea]:min-h-[150px]"
+                            type="textarea"
+                            placeholder="Nhập mô tả lý do"
+                            rows="5"
+                            value={field.value}
+                            errorMessage={fieldState?.error?.message}
+                            errorMessageForce={fieldState?.invalid}
+                            onChange={field.onChange}
+                            onFocus={(e) =>
+                              KeyboardsHelper.setAndroid({
+                                Type: "modal",
+                                Event: e,
+                              })
+                            }
+                          />
+                        )}
+                      />
+                    </div>
+                  </div>
+                  <div className="p-4">
+                    <Button
+                      type="submit"
+                      className="rounded-full bg-app"
+                      fill
+                      large
+                      preloader
+                      loading={confirmMutation.isLoading}
+                      disabled={confirmMutation.isLoading}
+                    >
+                      Cập nhật
+                    </Button>
+                  </div>
+                </form>
+              </motion.div>
             </div>
-          </div>
-        </form>
-      </Sheet>
+          )}
+        </AnimatePresence>,
+        document.getElementById("framework7-root")
+      )}
     </>
   );
 }

@@ -55,6 +55,7 @@ import OrderViewAdminPage from "@/pages/Admin/pages/Orders/OrderView.jsx";
 import OrdersAdminPage from "@/pages/Admin/pages/Orders/index.jsx";
 import OrderBonusSalesCommissionPage from "@/pages/Admin/pages/Orders/OrderBonusSalesCommission.jsx";
 import OrderBonusSalesCommissionAutoPage from "@/pages/Admin/pages/Orders/OrderBonusSalesCommissionAuto.jsx";
+import OrderBonusSalesCommissionSharingPage from "@/pages/Admin/pages/Orders/OrderBonusSalesCommissionSharing.jsx";
 import OrderSplitPaymentsPage from "@/pages/Admin/pages/Orders/OrderSplitPayments.jsx";
 import OrderReturnPage from "@/pages/Admin/pages/Orders/OrderReturn.jsx";
 
@@ -93,8 +94,6 @@ import StudentPage from "../pages/Courses/Student.jsx";
 
 import OsClassPage from "@/pages/OsClass/index.jsx";
 import OsClassViewPage from "@/pages/OsClass/OsClassView.jsx";
-
-import DebugPage from "@/pages/Debug/index.jsx";
 
 var routes = [
   {
@@ -457,6 +456,13 @@ var routes = [
                 },
               },
               {
+                path: "/bonus-sales-commission-sharing",
+                component: OrderBonusSalesCommissionSharingPage,
+                options: {
+                  transition: "f7-cover-v",
+                },
+              },
+              {
                 path: "/split-payments",
                 component: OrderSplitPaymentsPage,
                 options: {
@@ -776,13 +782,6 @@ var routes = [
   {
     path: "/stocks/",
     component: StocksPage,
-    options: {
-      transition: "f7-cover",
-    },
-  },
-  {
-    path: "/debug/",
-    component: DebugPage,
     options: {
       transition: "f7-cover",
     },

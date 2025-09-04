@@ -6,7 +6,7 @@ const SRC_DIR = path.resolve(__dirname, "./src");
 const PUBLIC_DIR = path.resolve(__dirname, "./public");
 const BUILD_DIR = path.resolve(__dirname, "./www");
 
-const BASE = "https://ids.ezs.vn/AppCore/";
+const BASE = "https://ids.ezs.vn/AppCoreV2/";
 
 export default async () => {
   return {
@@ -49,7 +49,7 @@ export default async () => {
         treeshake: false,
         output: {
           manualChunks: (id) => {        
-            // if (id.includes("node_modules") && !(/\.css$/.test(id))) return "vendor";
+            if (id.includes("node_modules") && !(/\.css$/.test(id))) return "vendor";
             const url = new URL(id, import.meta.url);
             const chunkName = url.searchParams.get("chunkName");
             if (chunkName) {

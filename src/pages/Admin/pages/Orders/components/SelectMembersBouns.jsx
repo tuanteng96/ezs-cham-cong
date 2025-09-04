@@ -1,7 +1,7 @@
 import { SelectPickersGroup } from "@/partials/forms";
-import React, { useEffect, useState } from "react";
+import React, { forwardRef, useEffect, useState } from "react";
 
-function SelectMembersBouns({ options, ...props }) {
+const SelectMembersBouns = forwardRef(({ options, ...props }, ref) => {
   let [key, setKey] = useState("");
   let [data, setData] = useState([]);
 
@@ -26,12 +26,13 @@ function SelectMembersBouns({ options, ...props }) {
   return (
     <SelectPickersGroup
       {...props}
+      ref={ref}
       isFilter={true}
       placeholderInput="Nhập tên nhân viên"
       options={key ? data : options}
       onInputFilter={(value) => setKey(value)}
     />
   );
-}
+});
 
 export default SelectMembersBouns;

@@ -1,50 +1,121 @@
 import {
   Input,
   Link,
-  NavLeft,
-  NavRight,
   NavTitle,
   Navbar,
   Page,
+  Popover,
   Subnavbar,
   useStore,
 } from "framework7-react";
 import React, { useRef, useState } from "react";
 import {
   ArrowRightIcon,
+  ChevronDownIcon,
   MagnifyingGlassIcon,
-  PlusIcon,
-  UsersIcon,
 } from "@heroicons/react/24/outline";
 import PromHelpers from "@/helpers/PromHelpers";
-import { useInfiniteQuery } from "react-query";
+import { useInfiniteQuery, useQuery } from "react-query";
 import AdminAPI from "@/api/Admin.api";
 import ArrayHelpers from "@/helpers/ArrayHelpers";
 import NoFound from "@/components/NoFound";
 import clsx from "clsx";
 import StringHelpers from "@/helpers/StringHelpers";
+import InfiniteScroll from "react-infinite-scroll-component";
+import moment from "moment";
+import { useDebounce } from "@/hooks";
 
 function OrdersAdmin({ f7router }) {
-  const allowInfinite = useRef(true);
+  let elRef = useRef();
+
   let Auth = useStore("Auth");
-  let InvoiceProcessings = useStore("InvoiceProcessings");
+  let Brand = useStore("Brand");
+
   const [filters, setFilters] = useState({
     Key: "",
     pi: 1,
     ps: 20,
+    Type: "Hôm nay",
+  });
+
+  const debouncedKey = useDebounce(filters, 500);
+
+  let getFromTo = () => {
+    let From = "";
+    let To = "";
+
+    if (filters.Type === "Hôm nay") {
+      From = moment().format("DD-MM-YYYY");
+      To = moment().format("DD-MM-YYYY");
+    }
+
+    if (filters.Type === "Hôm qua") {
+      From = moment().subtract(1, "days").format("DD-MM-YYYY");
+      To = moment().subtract(1, "days").format("DD-MM-YYYY");
+    }
+
+    if (filters.Type === "7 ngày trước") {
+      From = moment().subtract(7, "days").format("DD-MM-YYYY");
+      To = moment().format("DD-MM-YYYY");
+    }
+    return { From, To };
+  };
+
+  let { data, isLoading } = useQuery({
+    queryKey: ["OrdersSum", debouncedKey],
+    queryFn: async () => {
+      let isAdmin = false;
+      if (Auth?.ID === 1 || Auth?.Info?.Groups?.some((x) => x.ID === 1))
+        isAdmin = true;
+
+      let { From, To } = getFromTo();
+
+      const { data: dataSum } = await AdminAPI.listOrdersSum({
+        ...filters,
+        pi: 1,
+        ps: 12,
+        Token: Auth.token,
+        StockID:
+          !Brand?.Global?.Admin?.cho_phep_tim_khac_diem && !isAdmin
+            ? CrStocks?.ID
+            : "",
+        From,
+        To,
+      });
+      return dataSum && dataSum.length > 0 ? dataSum[0] : null;
+    },
+    enabled: Boolean(
+      Brand?.Global?.EZSIDVersion &&
+        debouncedKey.Key === "" &&
+        debouncedKey.Type !== "Toàn thời gian"
+    ),
   });
 
   const OrdersQuery = useInfiniteQuery({
-    queryKey: ["OrdersList", filters],
+    queryKey: ["OrdersList", debouncedKey],
     queryFn: async ({ pageParam = 1 }) => {
+      let isAdmin = false;
+      if (Auth?.ID === 1 || Auth?.Info?.Groups?.some((x) => x.ID === 1))
+        isAdmin = true;
+
+      let { From, To } = getFromTo();
+
       const { data } = await AdminAPI.listOrders({
         ...filters,
         pi: pageParam,
         ps: 12,
         Token: Auth.token,
+        StockID:
+          !Brand?.Global?.Admin?.cho_phep_tim_khac_diem && !isAdmin
+            ? CrStocks?.ID
+            : "",
+        From,
+        To,
       });
 
-      return data;
+      return {
+        ...data,
+      };
     },
     getNextPageParam: (lastPage, pages) =>
       lastPage.pi === lastPage.pCount ? undefined : lastPage.pi + 1,
@@ -53,184 +124,333 @@ function OrdersAdmin({ f7router }) {
 
   const Lists = ArrayHelpers.useInfiniteQuery(OrdersQuery?.data?.pages, "data");
 
-  const loadMore = () => {
-    if (!allowInfinite.current) return;
-    allowInfinite.current = false;
-
-    OrdersQuery.fetchNextPage().then(() => {
-      allowInfinite.current = true;
-    });
+  const renderMetaJSON = (MetaJSON) => {
+    if (!MetaJSON) return <></>;
+    let parseMetaJSON = JSON.parse(MetaJSON);
+    if (parseMetaJSON && parseMetaJSON?.oi?.length > 0) {
+      return (
+        <div className="truncate">
+          {parseMetaJSON?.oi?.map((x) => x.name).join(", ")}
+        </div>
+      );
+    }
+    return <></>;
   };
 
   return (
     <Page
-      className="bg-white"
+      className="bg-[var(--f7-page-bg-color)]"
       name="OrderAdmin"
       onPageBeforeIn={() => PromHelpers.STATUS_BAR_COLOR("light")}
-      ptr
-      onPtrRefresh={(done) => OrdersQuery.refetch().then(() => done())}
-      infinite
-      infiniteDistance={50}
-      infinitePreloader={OrdersQuery.isFetchingNextPage}
-      onInfinite={loadMore}
     >
       <Navbar innerClass="!px-0 text-white" outline={false}>
-        <NavLeft className="h-full">
-          <Link
-            noLinkClass
-            className="!text-white h-full flex item-center justify-center w-12"
-            href="/admin/pos/invoice-processings/"
-          >
-            <UsersIcon className="w-6" />
-            {InvoiceProcessings && InvoiceProcessings.length > 0 && (
-              <div className="absolute top-2 right-1 text-white bg-danger text-[11px] px-1 py-[2px] leading-none rounded">
-                {InvoiceProcessings.length}
-              </div>
-            )}
-          </Link>
-        </NavLeft>
-        <NavTitle>
-          Đơn hàng
-          {OrdersQuery?.data?.pages &&
-            OrdersQuery?.data?.pages[0].total > 0 && (
-              <span className="pl-1">
-                ({OrdersQuery?.data?.pages[0].total})
-              </span>
-            )}
-        </NavTitle>
-        <NavRight className="h-full">
-          <Link
-            noLinkClass
-            className="!text-white h-full flex item-center justify-center w-12"
-          >
-            <PlusIcon className="w-6" />
-          </Link>
-        </NavRight>
+        <NavTitle>Hoá đơn</NavTitle>
 
         <div className="absolute h-[2px] w-full bottom-0 left-0 bg-[rgba(255,255,255,0.3)]"></div>
 
-        <Subnavbar className="[&>div]:px-0 shadow-lg">
-          <div className="relative w-full">
-            <Input
-              className="[&_input]:border-0 [&_input]:placeholder:normal-case [&_input]:text-[15px] [&_input]:pl-14"
-              type="text"
-              placeholder="Tìm kiếm đơn hàng ..."
-              value={filters.Key}
-              clearButton={true}
-              onInput={(e) => {
-                setFilters((prevState) => ({
-                  ...prevState,
-                  Key: e.target.value,
-                }));
-              }}
-            />
-            <div className="absolute top-0 left-0 flex items-center justify-center h-full px-4 pointer-events-none">
-              <MagnifyingGlassIcon className="w-6 text-gray-500" />
+        <Subnavbar className="[&>div]:px-0 border-b">
+          <div className="relative flex w-full">
+            <div className="relative flex-1">
+              <Input
+                className="[&_input]:shadow-none [&_input]:border-0 [&_input]:placeholder:normal-case [&_input]:text-[15px] [&_input]:pl-14"
+                type="text"
+                placeholder="Tìm đơn hàng ..."
+                value={filters.Key}
+                clearButton={true}
+                onInput={(e) => {
+                  setFilters((prevState) => ({
+                    ...prevState,
+                    Key: e.target.value,
+                    Type: e.target.value ? "Toàn thời gian" : "Hôm nay",
+                  }));
+                }}
+              />
+              <div className="absolute top-0 left-0 flex items-center justify-center h-full px-4 pointer-events-none">
+                <MagnifyingGlassIcon className="w-6 text-gray-500" />
+              </div>
             </div>
+            <div className="flex items-center justify-end pr-4">
+              <Link
+                popoverOpen=".popover-orders"
+                noLinkClass
+                className="flex h-[30px] w-full items-center justify-center text-sm bg-gray-200 rounded-[20px] px-3 !text-gray-900"
+              >
+                <span>{filters.Type}</span>
+                <ChevronDownIcon className="w-4 ml-1" />
+              </Link>
+            </div>
+            <Popover className="popover-orders w-[160px]">
+              <div className="flex flex-col py-1">
+                {[
+                  {
+                    Title: "Hôm nay",
+                  },
+                  {
+                    Title: "Hôm qua",
+                  },
+                  {
+                    Title: "7 ngày trước",
+                  },
+                  {
+                    Title: "Toàn thời gian",
+                  },
+                ].map((item, index) => (
+                  <Link
+                    popoverClose
+                    key={index}
+                    className={clsx(
+                      "relative px-4 py-3 font-medium border-b last:border-0",
+                      item.Title === filters.Type && "text-app"
+                    )}
+                    noLinkClass
+                    onClick={() =>
+                      setFilters((prevState) => ({
+                        ...prevState,
+                        Type: item.Title,
+                        Key: "",
+                      }))
+                    }
+                  >
+                    {item.Title}
+                  </Link>
+                ))}
+              </div>
+            </Popover>
           </div>
         </Subnavbar>
       </Navbar>
 
-      <div>
-        {OrdersQuery.isLoading && (
-          <>
-            {Array(4)
-              .fill()
-              .map((_, index) => (
-                <div
-                  className="flex items-center p-4 border-b last:mb-0 last:border-b-0"
-                  key={index}
-                >
-                  <div className="flex-1 pr-4">
-                    <div className="flex mb-1 font-medium">
-                      <div className="animate-pulse h-2.5 bg-gray-200 rounded-full w-10/12 mb-1"></div>
-                    </div>
-                    <div className="flex items-center font-light text-gray-500 text-[14px] mb-1">
-                      <div className="animate-pulse h-2.5 bg-gray-200 rounded-full w-8/12"></div>
-                    </div>
+      <div
+        className={clsx(
+          "flex flex-col h-full overflow-hidden relative transition-[padding] duration-300 ease-in-out",
+          Brand?.Global?.EZSIDVersion ? !(debouncedKey.Key === "" && debouncedKey.Type !== "Toàn thời gian")
+            ? "pt-0"
+            : "pt-[67px]" : ''
+        )}
+      >
+        {Brand?.Global?.EZSIDVersion ? (
+          <div
+            className={clsx(
+              "px-4 py-2.5 bg-white rounded-b-xl min-h-[67px] h-[67px] absolute top-0 left-0 w-full transition",
+              !(
+                debouncedKey.Key === "" &&
+                debouncedKey.Type !== "Toàn thời gian"
+              )
+                ? "-translate-y-full"
+                : "translate-y-0"
+            )}
+          >
+            <div className="flex items-end justify-between mb-px">
+              <div className="text-base font-semibold">Tổng</div>
+              <div className="text-lg font-semibold leading-6 font-lato">
+                {isLoading && (
+                  <div className="animate-pulse h-4 bg-gray-200 rounded-full w-[80px] mb-1.5"></div>
+                )}
+                {!isLoading && <>{StringHelpers.formatVND(data?.ToPay)}</>}
+              </div>
+            </div>
+            <div className="flex items-end justify-between">
+              <div>
+                {OrdersQuery?.data?.pages &&
+                OrdersQuery?.data?.pages[0].total > 0 ? (
+                  <span className="pr-1.5 font-lato">
+                    {OrdersQuery?.data?.pages[0].total}
+                  </span>
+                ) : (
+                  <span className="pr-1.5 font-lato">0</span>
+                )}
+                Hoá đơn
+              </div>
+              {isLoading && (
+                <div className="animate-pulse h-2.5 bg-gray-200 rounded-full w-[100px] mb-1"></div>
+              )}
+              {!isLoading && (
+                <>
+                  {data?.TotalDebt > 0 ? (
                     <div>
-                      <div className="h-2.5 bg-gray-200 rounded-full w-8/12"></div>
+                      Còn nợ
+                      <span className="pl-1.5 font-lato font-semibold text-danger">
+                        {StringHelpers.formatVND(data?.TotalDebt)}
+                      </span>
                     </div>
-                  </div>
-                  <div className="flex justify-end w-10 gap-2">
-                    <div className="flex items-center justify-center w-10 h-10 rounded-full shadow-lg animate-pulse bg-primary-light text-primary"></div>
-                  </div>
+                  ) : (
+                    <></>
+                  )}
+                </>
+              )}
+            </div>
+          </div>
+        ) : (
+          <></>
+        )}
+
+        <div
+          id="scrollableDivOrders"
+          className="overflow-auto grow"
+          ref={elRef}
+        >
+          <InfiniteScroll
+            dataLength={Lists.length}
+            next={OrdersQuery.fetchNextPage}
+            hasMore={OrdersQuery.hasNextPage}
+            loader={
+              OrdersQuery.isLoading ? null : (
+                <>
+                  {Lists && Lists.length > 0 && (
+                    <div className="flex justify-center ezs-ptr">
+                      <div className="lds-ellipsis">
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                      </div>
+                    </div>
+                  )}
+                </>
+              )
+            }
+            scrollableTarget="scrollableDivOrders"
+            refreshFunction={OrdersQuery.refetch}
+            pullDownToRefresh
+            pullDownToRefreshThreshold={50}
+            pullDownToRefreshContent={
+              <div className="flex justify-center ezs-ptr">
+                <div className="lds-ellipsis">
+                  <div></div>
+                  <div></div>
+                  <div></div>
+                  <div></div>
                 </div>
-              ))}
-          </>
-        )}
-        {!OrdersQuery.isLoading && (
-          <>
-            {Lists && Lists.length > 0 && (
-              <>
-                {Lists.map((item, index) => (
-                  <div
-                    className="flex items-center p-4 border-b last:mb-0 last:border-b-0"
-                    key={index}
-                  >
-                    <div className="flex-1 pr-4">
-                      <div className="flex mb-px font-medium">
-                        <div className="max-w-[140px] truncate">
-                          {item?.Member?.FullName}
+              </div>
+            }
+            releaseToRefreshContent={
+              <div className="flex justify-center ezs-ptr">
+                <div className="lds-ellipsis">
+                  <div></div>
+                  <div></div>
+                  <div></div>
+                  <div></div>
+                </div>
+              </div>
+            }
+          >
+            <div className="p-4">
+              {OrdersQuery.isLoading && (
+                <>
+                  {Array(4)
+                    .fill()
+                    .map((_, index) => (
+                      <div
+                        className="flex flex-col p-4 mb-3.5 bg-white rounded-lg last:mb-0"
+                        key={index}
+                      >
+                        <div className="flex justify-between mb-3">
+                          <div className="animate-pulse h-3.5 bg-gray-200 rounded-full w-7/12"></div>
+                          <div className="animate-pulse h-3.5 bg-gray-200 rounded-full w-[80px]"></div>
                         </div>
-                        <div className="px-1">-</div>
-                        <div>{item?.Member?.MobilePhone}</div>
+                        <div>
+                          <div className="flex mb-1.5 font-medium">
+                            <div className="animate-pulse h-2.5 bg-gray-200 rounded-full w-10/12"></div>
+                          </div>
+                          <div className="flex items-center font-light text-gray-500 text-[14px] mb-1.5">
+                            <div className="animate-pulse h-2.5 bg-gray-200 rounded-full w-8/12"></div>
+                          </div>
+                          <div>
+                            <div className="h-2.5 bg-gray-200 rounded-full w-8/12"></div>
+                          </div>
+                        </div>
                       </div>
-                      <div className="flex items-center font-light text-gray-500 text-[14px]">
-                        <span>
-                          ID <b className="font-medium">#{item.ID}</b>
-                        </span>
-                        <span className="px-1">-</span>
-                        <span
-                          className={clsx(
-                            "font-medium",
-                            StringHelpers.getClassOrder(item).Color
-                          )}
+                    ))}
+                </>
+              )}
+              {!OrdersQuery.isLoading && (
+                <>
+                  {Lists && Lists.length > 0 && (
+                    <>
+                      {Lists.map((item, index) => (
+                        <Link
+                          noLinkClass
+                          className="flex flex-col p-4 mb-3.5 bg-white rounded-lg last:mb-0"
+                          href={`/admin/pos/orders/view/${item.ID}`}
+                          key={index}
                         >
-                          {StringHelpers.getClassOrder(item).Value}
-                        </span>
-                      </div>
-                      <div>
-                        {StringHelpers.formatVND(
-                          item?.thanhtoan?.tong_gia_tri_dh
-                        )}
-                        {item?.thanhtoan?.tong_gia_tri_dh -
-                          item?.thanhtoan?.thanh_toan_tien -
-                          item?.thanhtoan?.thanh_toan_vi -
-                          item?.thanhtoan?.thanh_toan_ao >
-                          0 && (
-                          <span>
-                            <span className="px-1">-</span>
-                            <span className="pr-1 text-danger">Nợ</span>
-                            <span className="font-medium text-danger">
+                          <div className="flex justify-between mb-1">
+                            <div className="font-semibold">
+                              {item?.Member?.FullName}
+                            </div>
+                            <div className="items-end font-semibold">
                               {StringHelpers.formatVND(
-                                item?.thanhtoan?.tong_gia_tri_dh -
-                                  item?.thanhtoan?.thanh_toan_tien -
-                                  item?.thanhtoan?.thanh_toan_vi -
-                                  item?.thanhtoan?.thanh_toan_ao
+                                item?.thanhtoan?.tong_gia_tri_dh
                               )}
-                            </span>
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                    <div className="flex justify-end w-10 gap-2">
-                      <div className="flex items-center justify-center w-10 h-10 rounded-full shadow-lg bg-primary-light text-primary">
-                        <ArrowRightIcon className="w-5" />
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </>
-            )}
-            {(!Lists || Lists.length === 0) && (
-              <NoFound
-                Title="Không có kết quả nào."
-                Desc="Rất tiếc ... Không tìm thấy dữ liệu nào"
-              />
-            )}
-          </>
-        )}
+                            </div>
+                          </div>
+                          <div className="text-gray-500">
+                            <div>#{item?.ID}</div>
+                            {renderMetaJSON(item?.MetaJSON)}
+                          </div>
+                          <div className="flex justify-between pt-3 mt-3 border-t">
+                            <div className="flex items-center gap-2">
+                              <div className="font-medium text-gray-500 font-lato">
+                                {moment(item?.CreateDate).format(
+                                  "HH:mm DD-MM-YYYY"
+                                )}
+                              </div>
+
+                              {StringHelpers.getClassOrder(item).Value ===
+                              "Trả hàng" ? (
+                                <>
+                                  <div className="w-[5px] h-[5px] bg-gray-300 rounded-full"></div>
+                                  <div
+                                    className={
+                                      StringHelpers.getClassOrder(item).Color
+                                    }
+                                  >
+                                    {StringHelpers.getClassOrder(item).Value}
+                                  </div>
+                                </>
+                              ) : (
+                                <>
+                                  {item?.thanhtoan?.tong_gia_tri_dh -
+                                    item?.thanhtoan?.thanh_toan_tien -
+                                    item?.thanhtoan?.thanh_toan_vi -
+                                    item?.thanhtoan?.thanh_toan_ao >
+                                  0 ? (
+                                    <div className="text-gray-500">
+                                      Nợ
+                                      <span className="pl-1 font-medium font-lato text-danger">
+                                        {StringHelpers.formatVND(
+                                          item?.thanhtoan?.tong_gia_tri_dh -
+                                            item?.thanhtoan?.thanh_toan_tien -
+                                            item?.thanhtoan?.thanh_toan_vi -
+                                            item?.thanhtoan?.thanh_toan_ao
+                                        )}
+                                      </span>
+                                    </div>
+                                  ) : (
+                                    <></>
+                                  )}
+                                </>
+                              )}
+                            </div>
+                            <div className="text-primary">
+                              <ArrowRightIcon className="w-5" />
+                            </div>
+                          </div>
+                        </Link>
+                      ))}
+                    </>
+                  )}
+                  {(!Lists || Lists.length === 0) && (
+                    <NoFound
+                      Title="Không có kết quả nào."
+                      Desc="Rất tiếc ... Không tìm thấy dữ liệu nào"
+                    />
+                  )}
+                </>
+              )}
+            </div>
+          </InfiniteScroll>
+        </div>
       </div>
     </Page>
   );

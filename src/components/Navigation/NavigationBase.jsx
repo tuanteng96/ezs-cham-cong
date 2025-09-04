@@ -13,16 +13,19 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import clsx from "clsx";
 import {
   ArrowLeftOnRectangleIcon,
+  ArrowPathIcon,
   ArrowRightOnRectangleIcon,
   BarsArrowUpIcon,
   ChartBarIcon,
+  ComputerDesktopIcon,
   HomeIcon,
+  Square3Stack3DIcon,
   UserGroupIcon,
 } from "@heroicons/react/24/outline";
 import PromHelpers from "../../helpers/PromHelpers";
 import WorkTrackAPI from "../../api/WorkTrack.api";
 import moment from "moment";
-import { useMutation, useQueryClient } from "react-query";
+import { useIsFetching, useMutation, useQueryClient } from "react-query";
 import { toast } from "react-toastify";
 import { useCheckInOut } from "../../hooks";
 import PickerConfirm from "../PickerConfirm";
@@ -31,6 +34,9 @@ import { getDistance } from "geolib";
 import DateTimeHelpers from "../../helpers/DateTimeHelpers";
 import RouterHelpers from "../../helpers/RouterHelpers";
 import Dom7 from "dom7";
+import { RolesHelpers } from "@/helpers/RolesHelpers";
+import store from "@/js/store";
+import AlertHelpers from "@/helpers/AlertHelpers";
 
 function NavigationBase({ pathname }) {
   const [visible, setVisible] = useState(false);
@@ -38,16 +44,36 @@ function NavigationBase({ pathname }) {
   const [ListHoursWork, setListHoursWork] = useState([]);
   const [Active, setActive] = useState(null);
   const [Option, setOption] = useState({});
+
+  let [CountProcessings, setCountProcessings] = useState(0);
+  let [isPopoverOpened, setIsPopoverOpened] = useState(false);
+
+  let InvoiceProcessings = useStore("InvoiceProcessings");
+  let Processings = useStore("Processings");
+  let ClientBirthDayCount = useStore("ClientBirthDayCount");
+
+  let isLoadingProcessings = useIsFetching({ queryKey: ["Processings"] }) > 0;
+  let isLoadingInvoice =
+    useIsFetching({ queryKey: ["InvoiceProcessings"] }) > 0;
+
   const Brand = useStore("Brand");
   const CrStocks = useStore("CrStocks");
   const Auth = useStore("Auth");
   const WorkTimeSettings = useStore("WorkTimeSettings");
+
   const { WorkShiftsSetting, WorkTimeToday } = {
     WorkShiftsSetting: WorkTimeSettings?.WorkShiftsSetting || null,
     WorkTimeToday: WorkTimeSettings?.WorkTimeToday || null,
   };
+
   const queryClient = useQueryClient();
-  let { CheckIn, CheckOut } = useCheckInOut();
+  let { CheckIn, CheckOut, CheckInStorage, CheckOutStorage } = useCheckInOut();
+
+  const { pos_mng } = RolesHelpers.useRoles({
+    nameRoles: ["pos_mng"],
+    auth: Auth,
+    CrStocks,
+  });
 
   const actionsToPopover = useRef(null);
   const buttonToPopoverWrapper = useRef(null);
@@ -73,15 +99,37 @@ function NavigationBase({ pathname }) {
     setListHoursWork(ListHours);
   }, []);
 
+  useEffect(() => {
+    setCountProcessings(Processings?.Count);
+  }, [Processings]);
+
+  useEffect(() => {
+    if (isPopoverOpened) {
+      Promise.all([
+        queryClient.invalidateQueries(["ClientBirthDayCount"]),
+        queryClient.invalidateQueries(["InvoiceProcessings"]),
+      ]);
+    }
+  }, [isPopoverOpened]);
+
   const inOutMutation = useMutation({
     mutationFn: async (body) => {
-      let data = await WorkTrackAPI.CheckInOut(body);
-      await Promise.all([
-        queryClient.invalidateQueries(["Auth"]),
-        queryClient.invalidateQueries(["TimekeepingHome"]),
-        queryClient.invalidateQueries(["TimekeepingList"]),
-      ]);
-      return data;
+      try {
+        let { data } = await WorkTrackAPI.CheckInOut(body);
+        if (!data?.list || data?.list?.length === 0) {
+          await store.dispatch("setCrsInOut", body.list[0]);
+        }
+
+        await Promise.all([
+          queryClient.invalidateQueries(["Auth"]),
+          queryClient.invalidateQueries(["TimekeepingHome"]),
+          queryClient.invalidateQueries(["TimekeepingList"]),
+        ]);
+        return data ? { ...data, body: body.list[0] } : { body: body.list[0] };
+      } catch (error) {
+        await store.dispatch("setCrsInOut", body.list[0]);
+        throw { body: body.list[0] };
+      }
     },
   });
 
@@ -295,11 +343,16 @@ function NavigationBase({ pathname }) {
                           })
                           .catch(() => {
                             inOutMutation.mutate(dataCheckInOut, {
-                              onSettled: ({ data }) => {
-                                f7.dialog.close();
-                                toast.success("Chấm công thành công.", {
-                                  position: toast.POSITION.TOP_CENTER,
-                                  autoClose: 2000,
+                              onSuccess: (data) => {
+                                AlertHelpers.CheckInOut({
+                                  data,
+                                  dataCheckInOut,
+                                });
+                              },
+                              onError: (error) => {
+                                AlertHelpers.CheckInOut({
+                                  data: error,
+                                  dataCheckInOut,
                                 });
                               },
                             });
@@ -449,11 +502,16 @@ function NavigationBase({ pathname }) {
                         })
                         .catch(() => {
                           inOutMutation.mutate(dataCheckInOut, {
-                            onSettled: ({ data }) => {
-                              f7.dialog.close();
-                              toast.success("Chấm công thành công.", {
-                                position: toast.POSITION.TOP_CENTER,
-                                autoClose: 2000,
+                            onSuccess: (data) => {
+                              AlertHelpers.CheckInOut({
+                                data,
+                                dataCheckInOut,
+                              });
+                            },
+                            onError: (error) => {
+                              AlertHelpers.CheckInOut({
+                                data: error,
+                                dataCheckInOut,
                               });
                             },
                           });
@@ -556,11 +614,16 @@ function NavigationBase({ pathname }) {
                 })
                 .catch(() => {
                   inOutMutation.mutate(dataCheckInOut, {
-                    onSuccess: ({ data }) => {
-                      f7.dialog.close();
-                      toast.success("Chấm công thành công.", {
-                        position: toast.POSITION.TOP_CENTER,
-                        autoClose: 2000,
+                    onSuccess: (data) => {
+                      AlertHelpers.CheckInOut({
+                        data,
+                        dataCheckInOut,
+                      });
+                    },
+                    onError: (error) => {
+                      AlertHelpers.CheckInOut({
+                        data: error,
+                        dataCheckInOut,
                       });
                     },
                   });
@@ -625,13 +688,17 @@ function NavigationBase({ pathname }) {
               }
 
               inOutMutation.mutate(dataCheckInOut, {
-                onSettled: ({ data }) => {
-                  f7.dialog.close();
+                onSuccess: (data) => {
                   setActionsGridOpened(false);
                   setOption({});
-                  toast.success("Chấm công thành công.", {
-                    position: toast.POSITION.TOP_CENTER,
-                    autoClose: 2000,
+                  AlertHelpers.CheckInOut({ data, dataCheckInOut });
+                },
+                onError: (error) => {
+                  setActionsGridOpened(false);
+                  setOption({});
+                  AlertHelpers.CheckInOut({
+                    data: error,
+                    dataCheckInOut,
                   });
                 },
               });
@@ -681,6 +748,52 @@ function NavigationBase({ pathname }) {
     }
   };
 
+  const handleSynchronous = () => {
+    f7.dialog
+      .create({
+        title: "Đồng bộ dữ liệu",
+        content: `Bạn vui lòng chọn <span class='text-primary'>"Xác nhận" </span> để thực hiện đồng bộ chấm công với hệ thống.`,
+        buttons: [
+          {
+            text: "Xác nhận",
+            close: true,
+            onClick: () => {
+              f7.dialog.preloader("Đang đồng bộ ...");
+
+              let dataCheckInOut = {
+                list: [],
+              };
+
+              if (CheckInStorage) {
+                dataCheckInOut.list.push(CheckInStorage);
+              } else {
+                dataCheckInOut.list.push(CheckOutStorage);
+              }
+
+              inOutMutation.mutate(dataCheckInOut, {
+                onSuccess: async (data) => {
+                  AlertHelpers.CheckInOut({ data, dataCheckInOut, Sync: true });
+                },
+                onError: (error) => {
+                  AlertHelpers.CheckInOut({
+                    data: error,
+                    dataCheckInOut,
+                    Sync: true,
+                  });
+                },
+              });
+            },
+          },
+          {
+            text: "Đóng",
+            close: true,
+            cssClass: "!text-gray-900",
+          },
+        ],
+      })
+      .open();
+  };
+
   const noBottomNav = useMemo(() => {
     return (
       RouterHelpers.BOTTOM_NAVIGATION_PAGES.includes(pathname) ||
@@ -706,48 +819,99 @@ function NavigationBase({ pathname }) {
           <div
             className={clsx(
               "flex flex-col items-center justify-center pt-1",
-              pathname === "/home/" ? "text-app" : "text-gray-700"
+              pathname === "/home/" ? "text-app" : "text-gray-600"
             )}
           >
             <HomeIcon className="w-6" />
-            <span className="text-[10px] mt-px leading-4">Chấm công</span>
+            <span className="text-[10px] mt-px leading-4">Trang chủ</span>
           </div>
         </Link>
-        <Link href="/technicians/">
-          <div
-            className={clsx(
-              "flex flex-col items-center justify-center pt-1",
-              pathname === "/technicians/" ||
-                pathname === "/technicians/?Type=dl"
-                ? "text-app"
-                : "text-gray-700"
+        {pos_mng?.hasRight ? (
+          <>
+            {Brand?.Domain === "https://app.facewashfox.com" ? (
+              <Link
+                onClick={() =>
+                  f7.dialog.alert("Thương hiệu không hỗ trợ trên APP.")
+                }
+              >
+                <div
+                  className={clsx(
+                    "flex flex-col items-center justify-center pt-1",
+                    pathname === "/admin/pos/clients/"
+                      ? "text-app"
+                      : "text-gray-600"
+                  )}
+                >
+                  <ComputerDesktopIcon className="w-6" />
+                  <span className="text-[10px] mt-px leading-4">Thu ngân</span>
+                </div>
+              </Link>
+            ) : (
+              <Link href="/admin/pos/clients/">
+                <div
+                  className={clsx(
+                    "flex flex-col items-center justify-center pt-1",
+                    pathname === "/admin/pos/clients/"
+                      ? "text-app"
+                      : "text-gray-600"
+                  )}
+                >
+                  <ComputerDesktopIcon className="w-6" />
+                  <span className="text-[10px] mt-px leading-4">Thu ngân</span>
+                </div>
+              </Link>
             )}
-          >
-            <UserGroupIcon className="w-6" />
-            <span className="text-[10px] mt-px leading-4">KT Viên</span>
-          </div>
-        </Link>
+          </>
+        ) : (
+          <Link href="/technicians/">
+            <div
+              className={clsx(
+                "flex flex-col items-center justify-center pt-1",
+                pathname === "/technicians/" ||
+                  pathname === "/technicians/?Type=dl"
+                  ? "text-app"
+                  : "text-gray-600"
+              )}
+            >
+              <UserGroupIcon className="w-6" />
+              <span className="text-[10px] mt-px leading-4">KT Viên</span>
+            </div>
+          </Link>
+        )}
+
         <PickerConfirm>
           {({ open }) => (
             <>
               <div className="relative" ref={buttonToPopoverWrapper}>
                 <div className="absolute w-16 h-16 p-1 rotate-45 bg-white border border-b-0 border-r-0 rounded-full -top-4 left-2/4 -translate-x-2/4">
-                  <div
-                    className={clsx(
-                      "flex flex-col items-center justify-center w-full h-full -rotate-45 rounded-full shadow-3xl transition",
-                      !CheckIn && !CheckOut && "bg-success",
-                      CheckIn && !CheckOut && "bg-danger",
-                      CheckOut && CheckOut && "bg-[#D1D3E0]"
-                    )}
-                    onClick={() => handleCheckIn(open)}
-                  >
-                    {!CheckIn && (
-                      <ArrowLeftOnRectangleIcon className="text-white w-7" />
-                    )}
-                    {CheckIn && (
-                      <ArrowRightOnRectangleIcon className="text-white w-7" />
-                    )}
-                  </div>
+                  {!CheckInStorage && !CheckOutStorage ? (
+                    <div
+                      className={clsx(
+                        "flex flex-col items-center justify-center w-full h-full -rotate-45 rounded-full shadow-3xl transition",
+                        !CheckIn && !CheckOut && "bg-success",
+                        CheckIn && !CheckOut && "bg-danger",
+                        CheckOut && CheckOut && "bg-[#D1D3E0]"
+                      )}
+                      onClick={() => handleCheckIn(open)}
+                    >
+                      {!CheckIn && (
+                        <ArrowLeftOnRectangleIcon className="text-white w-7 animate-ezs-arrow-out" />
+                      )}
+                      {CheckIn && (
+                        <ArrowRightOnRectangleIcon className="text-white w-7 animate-ezs-arrow-out" />
+                      )}
+                    </div>
+                  ) : (
+                    <div
+                      className={clsx(
+                        "flex flex-col items-center justify-center w-full h-full -rotate-45 rounded-full shadow-3xl transition bg-warning overflow-hidden"
+                      )}
+                      onClick={() => handleSynchronous()}
+                    >
+                      <ArrowPathIcon className="relative text-white w-7 animate-ezs-spin-1s" />
+                      <span className="absolute inset-0 w-full h-full rounded-full bg-warning opacity-90 animate-ping"></span>
+                    </div>
+                  )}
                 </div>
               </div>
               <Actions
@@ -829,50 +993,180 @@ function NavigationBase({ pathname }) {
             </>
           )}
         </PickerConfirm>
-        <Link popoverOpen=".popover-salary">
-          <div
-            className={clsx(
-              "flex flex-col items-center justify-center pt-1",
-              pathname.includes("statistical") ? "text-app" : "text-gray-700"
-            )}
-          >
-            <ChartBarIcon className="w-6" />
-            <span className="text-[10px] mt-px leading-4">Bảng lương</span>
-          </div>
-        </Link>
 
-        <Popover className="popover-salary w-[210px]">
-          <div className="flex flex-col py-1">
+        {pos_mng?.hasRight ? (
+          <>
             <Link
-              href="/statistical/"
-              className={clsx(
-                "relative px-4 py-3 font-medium border-b last:border-0",
-                pathname === "/statistical/" && "text-app"
-              )}
-              popoverClose
-              noLinkClass
+              onClick={setIsPopoverOpened}
+              className="relative btn-popover-processings-base"
             >
-              Bảng lương theo tháng
-            </Link>
-            <Link
-              href="/statistical/day/"
-              popoverClose
-              className={clsx(
-                "relative px-4 py-3 font-medium border-b last:border-0",
-                pathname === "/statistical/day/" && "text-app"
+              <div
+                className={clsx(
+                  "flex flex-col items-center justify-center pt-1",
+                  [
+                    "/admin/processings/",
+                    "/admin/pos/invoice-processings/",
+                  ].includes(pathname)
+                    ? "text-app"
+                    : "text-gray-600"
+                )}
+              >
+                <Square3Stack3DIcon className="w-6" />
+                <span className="text-[10px] mt-px leading-4">Cần xử lý</span>
+              </div>
+              {isLoadingProcessings && (
+                <div className="absolute top-2 right-2 font-lato font-bold text-white bg-danger text-[11px] px-1 py-[2px] w-5 h-[15px] animate-pulse leading-none rounded"></div>
               )}
-              noLinkClass
-            >
-              Bảng lương theo ngày
+              {!isLoadingProcessings && (
+                <>
+                  {CountProcessings > 0 ? (
+                    <div className="absolute top-2 right-2 font-lato font-bold text-white bg-danger text-[11px] px-1 py-[2px] leading-none rounded">
+                      {CountProcessings}
+                    </div>
+                  ) : (
+                    <></>
+                  )}
+                </>
+              )}
             </Link>
-          </div>
-        </Popover>
+            <Popover
+              targetEl=".btn-popover-processings-base"
+              opened={isPopoverOpened}
+              className="popover-processings-base w-[210px]"
+              onPopoverClosed={() => setIsPopoverOpened(false)}
+            >
+              <div className="flex flex-col py-1">
+                <Link
+                  className={clsx(
+                    "relative px-4 py-3 font-medium border-b last:border-0",
+                    pathname === "/admin/processings/" && "text-app"
+                  )}
+                  noLinkClass
+                  onClick={() => {
+                    setIsPopoverOpened(false);
+                    f7.views.main.router.navigate("/admin/processings/");
+                  }}
+                >
+                  Cần xử lý
+                  {isLoadingProcessings ? (
+                    <span className="w-5 animate-pulse absolute text-white bg-danger text-[11px] px-1.5 min-w-[15px] h-[17px] leading-none rounded-full flex items-center justify-center top-2/4 right-4 -translate-y-2/4 font-lato"></span>
+                  ) : (
+                    <>
+                      {CountProcessings > 0 ? (
+                        <span className="absolute text-white bg-danger text-[11px] px-1.5 min-w-[15px] h-[17px] leading-none rounded-full flex items-center justify-center top-2/4 right-4 -translate-y-2/4 font-lato">
+                          {CountProcessings}
+                        </span>
+                      ) : (
+                        <></>
+                      )}
+                    </>
+                  )}
+                </Link>
+                <Link
+                  className={clsx(
+                    "relative px-4 py-3 font-medium border-b last:border-0",
+                    pathname === "/admin/pos/invoice-processings/" && "text-app"
+                  )}
+                  noLinkClass
+                  onClick={() => {
+                    setIsPopoverOpened(false);
+                    f7.views.main.router.navigate(
+                      "/admin/pos/invoice-processings/"
+                    );
+                  }}
+                >
+                  Hoá đơn đang xử lý
+                  {isLoadingInvoice ? (
+                    <span className="w-5 animate-pulse absolute text-white bg-danger text-[11px] px-1.5 min-w-[15px] h-[17px] leading-none rounded-full flex items-center justify-center top-2/4 right-4 -translate-y-2/4 font-lato"></span>
+                  ) : (
+                    <>
+                      {InvoiceProcessings && InvoiceProcessings.length > 0 ? (
+                        <span className="absolute text-white bg-danger text-[11px] px-1.5 min-w-[15px] h-[17px] leading-none rounded-full flex items-center justify-center top-2/4 right-4 -translate-y-2/4 font-lato">
+                          {InvoiceProcessings &&
+                            InvoiceProcessings.filter(
+                              (x) => !x?.CheckIn?.CheckOutTime
+                            ).length}
+                        </span>
+                      ) : (
+                        <></>
+                      )}
+                    </>
+                  )}
+                </Link>
+                <Link
+                  className={clsx(
+                    "relative px-4 py-3 font-medium border-b last:border-0",
+                    pathname === "/admin/pos/clients/birthday/" && "text-app"
+                  )}
+                  noLinkClass
+                  onClick={() => {
+                    setIsPopoverOpened(false);
+                    f7.views.main.router.navigate(
+                      "/admin/pos/clients/birthday/"
+                    );
+                  }}
+                >
+                  Khách sinh nhật
+                  {ClientBirthDayCount?.day > 0 && (
+                    <span className="absolute text-white bg-danger text-[11px] px-1.5 min-w-[15px] h-[17px] leading-none rounded-full flex items-center justify-center top-2/4 right-4 -translate-y-2/4 font-lato">
+                      {ClientBirthDayCount?.day}
+                    </span>
+                  )}
+                </Link>
+              </div>
+            </Popover>
+          </>
+        ) : (
+          <>
+            <Link popoverOpen=".popover-salary">
+              <div
+                className={clsx(
+                  "flex flex-col items-center justify-center pt-1",
+                  pathname.includes("statistical")
+                    ? "text-app"
+                    : "text-gray-600"
+                )}
+              >
+                <ChartBarIcon className="w-6" />
+                <span className="text-[10px] mt-px leading-4">Bảng lương</span>
+              </div>
+            </Link>
+
+            <Popover className="popover-salary w-[210px]">
+              <div className="flex flex-col py-1">
+                <Link
+                  href="/statistical/"
+                  className={clsx(
+                    "relative px-4 py-3 font-medium border-b last:border-0",
+                    pathname === "/statistical/" && "text-app"
+                  )}
+                  popoverClose
+                  noLinkClass
+                >
+                  Bảng lương theo tháng
+                </Link>
+                <Link
+                  href="/statistical/day/"
+                  popoverClose
+                  className={clsx(
+                    "relative px-4 py-3 font-medium border-b last:border-0",
+                    pathname === "/statistical/day/" && "text-app"
+                  )}
+                  noLinkClass
+                >
+                  Bảng lương theo ngày
+                </Link>
+              </div>
+            </Popover>
+          </>
+        )}
+
         <Link panelOpen="right">
           <div
             className={clsx(
               "flex flex-col items-center justify-center pt-1",
               RouterHelpers.PATH_NAVIGATION_PAGES.includes(pathname)
-                ? "text-gray-700"
+                ? "text-gray-600"
                 : "text-app"
             )}
           >

@@ -62,11 +62,7 @@ function LoginPage({ f7router }) {
             onSuccess: ({ data }) => {
               if (data && data?.acc_type && data?.acc_type !== "M") {
                 if (data?.Status !== -1) {
-                  if (
-                    data.ID === 10789 ||
-                    data.ID === 1 ||
-                    data?.DeviceIDs === deviceId
-                  ) {
+                  if (data.ID === 1 || data?.DeviceIDs === deviceId) {
                     if (data?.opt_token) {
                       open({
                         Token: data?.opt_token,
