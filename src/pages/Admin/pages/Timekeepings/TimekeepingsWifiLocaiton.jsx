@@ -23,6 +23,7 @@ import KeyboardsHelper from "@/helpers/KeyboardsHelper";
 function TimekeepingsWifiLocaiton({ f7route }) {
   const queryClient = useQueryClient();
 
+  const Auth = useStore("Auth");
   const Brand = useStore("Brand");
 
   const { control, handleSubmit, reset, setValue } = useForm({

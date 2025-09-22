@@ -130,6 +130,10 @@
     --f7-page-navbar-offset: 0;
 }
 
+.navbar-previous .navbar-custom {
+    @apply opacity-0;
+}
+
 /* Input */
 
 .input input,

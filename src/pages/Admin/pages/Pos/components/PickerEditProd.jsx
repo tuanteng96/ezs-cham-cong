@@ -19,12 +19,20 @@ import { NumericFormat } from "react-number-format";
 import clsx from "clsx";
 import StringHelpers from "@/helpers/StringHelpers";
 import { RolesHelpers } from "@/helpers/RolesHelpers";
+import ArrayHelpers from "@/helpers/ArrayHelpers";
 
 const schemaAdd = yup.object().shape({
   Qty: yup.string().required("Vui lòng nhập số lượng."),
 });
 
-function PickerEditProd({ children, item, CheckInID, MemberID, Order }) {
+function PickerEditProd({
+  children,
+  item,
+  CheckInID,
+  MemberID,
+  Order,
+  OrderItems = [],
+}) {
   const queryClient = useQueryClient();
   const [visible, setVisible] = useState(false);
   const [isPercent, setIsPercent] = useState(false);
@@ -76,14 +84,21 @@ function PickerEditProd({ children, item, CheckInID, MemberID, Order }) {
 
   const updateMutation = useMutation({
     mutationFn: async (body) => {
-      let data = await AdminAPI.clientsOrderUpdateId(body);
+      let { data } = await AdminAPI.clientsOrderUpdateId(body);
+
       await AdminAPI.clientsPresentAppId({
         MemberID: MemberID,
         Token: Auth.token,
       });
       await queryClient.invalidateQueries(["OrderManageID"]);
       await queryClient.invalidateQueries(["ClientManageID"]);
-      return data;
+      return data?.data
+        ? {
+            ...data?.data,
+            OrderItemsOld: OrderItems || null,
+            OrderItemsNew: data.data.OrderItems || null,
+          }
+        : null;
     },
   });
 
@@ -113,10 +128,10 @@ function PickerEditProd({ children, item, CheckInID, MemberID, Order }) {
         Token: Auth?.token,
       },
       {
-        onSuccess: ({ data }) => {
+        onSuccess: (data) => {
           toast.success("Cập nhật thành công");
           setVisible(false);
-          if (data?.data?.prePayedValue) {
+          if (data?.prePayedValue) {
             f7.dialog
               .create({
                 title: "Đơn hàng đã thay đổi",
@@ -131,6 +146,42 @@ function PickerEditProd({ children, item, CheckInID, MemberID, Order }) {
                 ],
               })
               .open();
+          }
+
+          if (Number(values?.Qty) > item.Qty) {
+            let oldItems = data.OrderItemsOld
+              ? data.OrderItemsOld.map((x) => ({ ...x, ID: x.ProdID }))
+              : [];
+
+            let addItems = [
+              {
+                Title: item.ProdTitle,
+                ID: item.ProdID,
+                Qty: values?.Qty - item.Qty,
+              },
+            ];
+            let newItems = data.OrderItemsNew
+              ? data.OrderItemsNew.map((x) => ({ ...x, ID: x.ProdID }))
+              : [];
+
+            let notIncreased = ArrayHelpers.getNotIncreased(
+              oldItems,
+              addItems,
+              newItems
+            );
+
+            if (notIncreased && notIncreased.length > 0) {
+              setTimeout(() => {
+                toast.error(
+                  `Số lượng bán lớn hơn tồn kho : ${notIncreased
+                    .map((x) => x.Title)
+                    .join(", ")}`,
+                  {
+                    autoClose: 2500,
+                  }
+                );
+              }, 300);
+            }
           }
         },
       }
@@ -260,16 +311,6 @@ function PickerEditProd({ children, item, CheckInID, MemberID, Order }) {
                               <button
                                 disabled={item.HasFeeInUse}
                                 type="button"
-                                className="disabled:opacity-40 flex items-center justify-center w-12 h-full border border-[#d5d7da] shadow-[0_4px_6px_0_rgba(16,25,40,.06)] -ml-[1px] bg-gray-50"
-                                onClick={() =>
-                                  field.onChange(Number(field.value) + 1)
-                                }
-                              >
-                                <PlusIcon className="w-5" />
-                              </button>
-                              <button
-                                disabled={item.HasFeeInUse}
-                                type="button"
                                 className="disabled:opacity-40 flex items-center justify-center w-12 h-full border border-[#d5d7da] shadow-[0_4px_6px_0_rgba(16,25,40,.06)] -ml-[1px] bg-gray-50 rounded-r"
                                 onClick={() => {
                                   if (Number(field.value) > 1) {
@@ -280,6 +321,16 @@ function PickerEditProd({ children, item, CheckInID, MemberID, Order }) {
                                 }}
                               >
                                 <MinusIcon className="w-5" />
+                              </button>
+                              <button
+                                disabled={item.HasFeeInUse}
+                                type="button"
+                                className="disabled:opacity-40 flex items-center justify-center w-12 h-full border border-[#d5d7da] shadow-[0_4px_6px_0_rgba(16,25,40,.06)] -ml-[1px] bg-gray-50"
+                                onClick={() =>
+                                  field.onChange(Number(field.value) + 1)
+                                }
+                              >
+                                <PlusIcon className="w-5" />
                               </button>
                             </div>
                           </div>

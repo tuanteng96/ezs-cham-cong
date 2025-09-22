@@ -1,4 +1,4 @@
-import React, { useContext, useRef } from "react";
+import React, { useContext, useEffect, useRef } from "react";
 import {
   ScrollMenu,
   VisibilityContext,
@@ -10,15 +10,14 @@ import "react-horizontal-scrolling-menu/dist/styles.css";
 import { useDrag } from "@/hooks";
 
 function onWheel({ getItemById, items, visibleItems, scrollToItem }, ev) {
-  const isThouchpad = Math.abs(ev.deltaX) !== 0 || Math.abs(ev.deltaY) < 15;
+  const isTouchpad = Math.abs(ev.deltaX) !== 0 || Math.abs(ev.deltaY) < 15;
 
-  if (isThouchpad) {
+  if (isTouchpad) {
     ev.stopPropagation();
     return;
   }
 
   if (ev.deltaY < 0) {
-    // NOTE: for center items
     const nextGroupItems = slidingWindow(
       items.toItemsKeys(),
       visibleItems
@@ -37,7 +36,6 @@ function onWheel({ getItemById, items, visibleItems, scrollToItem }, ev) {
 
 const Item = ({ itemId, selected, onClick, item }) => {
   const visibility = useContext(VisibilityContext);
-  const visible = visibility.isItemVisible(itemId);
 
   return (
     <div
@@ -52,14 +50,32 @@ const Item = ({ itemId, selected, onClick, item }) => {
           "whitespace-nowrap h-full flex items-center text-[14px]"
         )}
       >
-        {item.Title} {!item.visibleCount && <>({item?.Total || item?.children.length})</>}
+        {item.Title}{" "}
+        {!item.visibleCount && <>({item?.Total || item?.children.length})</>}
       </div>
     </div>
   );
 };
 
-function MenuSubNavbar({ data, selected, setSelected, className = "w-full h-full" }) {
+function MenuSubNavbar({
+  data,
+  selected,
+  setSelected,
+  className = "w-full h-full",
+}) {
   const dragState = useRef(new useDrag());
+  const apiRef = useRef(null);
+
+  // scroll khi selected thay đổi
+  useEffect(() => {
+    if (apiRef.current && selected) {
+      const { getItemById, scrollToItem } = apiRef.current;
+      requestAnimationFrame(() => {
+        // lần đầu mount dùng auto để tránh giật
+        scrollToItem(getItemById(selected), "auto", "center");
+      });
+    }
+  }, [selected]);
 
   const handleDrag =
     ({ scrollContainer }) =>
@@ -71,50 +87,55 @@ function MenuSubNavbar({ data, selected, setSelected, className = "w-full h-full
       });
 
   const handleItemClick =
-    (itemId, Index) =>
-    ({ getItemById, scrollToItem, getItemElementByIndex }) => {
-      if (dragState.current.dragging) {
-        return false;
-      }
-
+    (itemId) =>
+    ({ getItemById, scrollToItem }) => {
+      if (dragState.current.dragging) return;
       setSelected(itemId);
-      scrollToItem(getItemElementByIndex(Index), "smooth", "center", "nearest");
+      scrollToItem(getItemById(itemId), "smooth", "center");
     };
 
-  const onInit = ({ getItemById, scrollToItem }) => {
+  const handleInit = ({ getItemById, scrollToItem }) => {
     if (selected) {
-      scrollToItem(getItemById(selected), "smooth", "center", "nearest");
+      const tryScroll = () => {
+        const el = getItemById(selected);
+
+        if (el) {
+          scrollToItem(el, "smooth", "center");
+        } else {
+          setTimeout(tryScroll, 50);
+        }
+      };
+      tryScroll();
     }
   };
 
   return (
     <div className={className} onMouseLeave={dragState.current.dragStop}>
       <ScrollMenu
+        apiRef={apiRef}
         wrapperClassName="h-full"
         scrollContainerClassName="no-scrollbar"
-        itemClassName="mr-4 last:mr-0"
-        onInit={onInit}
+        itemClassName="mr-5 last:mr-0"
+        onInit={handleInit}
         onWheel={onWheel}
-        onMouseDown={() => dragState.current.dragStart}
-        onMouseUp={({ getItemById, scrollToItem, items }) =>
-          () => {
-            dragState.current.dragStop();
-            const { center } = getItemsPos(items.getVisible());
-            scrollToItem(getItemById(center), "smooth", "center");
-          }}
+        onMouseDown={dragState.current.dragStart}
+        onMouseUp={({ getItemById, scrollToItem, items }) => {
+          dragState.current.dragStop();
+          const { center } = getItemsPos(items.getVisible());
+          scrollToItem(getItemById(center), "smooth", "center");
+        }}
         onMouseMove={handleDrag}
         options={{ throttle: 0 }}
       >
-        {data &&
-          data.map((item) => (
-            <Item
-              itemID={item.ID}
-              key={item.ID}
-              onClick={handleItemClick(item.ID, item.Index)}
-              selected={item.ID === selected}
-              item={item}
-            />
-          ))}
+        {data?.map((item) => (
+          <Item
+            itemId={item.ID}
+            key={item.ID}
+            onClick={handleItemClick(item.ID)}
+            selected={item.ID === selected}
+            item={item}
+          />
+        ))}
       </ScrollMenu>
     </div>
   );

@@ -57,7 +57,7 @@ const ArrayHelpers = {
     let response = null;
     let findNameItem = (tree) => {
       let result = null;
-      if (tree.name === name && !tree?.subs) {
+      if ((tree?.name_and_group === name || tree?.name === name) && !tree?.subs) {
         return tree;
       }
 
@@ -197,6 +197,57 @@ const ArrayHelpers = {
       (y, e, t) => ((t = y.indexOf(e)), t >= 0 && y.splice(t, 1), y),
       [...y]
     ).length;
+  },
+  getNotIncreased: (oldItems = [], addItems = [], newItems = []) => {
+    const oldMap = Object.create(null);
+    const addMap = Object.create(null);
+    const newMap = Object.create(null);
+
+    // 🔹 Hợp nhất vòng lặp để tính toán nhanh
+    for (const it of oldItems) {
+      const id = it.ID;
+      const qty = +it.Qty || 0;
+      if (!oldMap[id]) oldMap[id] = { qty: 0, title: it.Title || "" };
+      oldMap[id].qty += qty;
+    }
+
+    for (const it of addItems) {
+      const id = it.ID;
+      const qty = +it.Qty || 0;
+      if (!addMap[id]) addMap[id] = { qty: 0, title: it.Title || "" };
+      addMap[id].qty += qty;
+    }
+
+    for (const it of newItems) {
+      const id = it.ID;
+      const qty = +it.Qty || 0;
+      if (!newMap[id]) newMap[id] = { qty: 0 };
+      newMap[id].qty += qty;
+    }
+
+    const notIncreased = [];
+
+    // 🔹 Duyệt trực tiếp addMap để so sánh
+    for (const idKey in addMap) {
+      const oldQty = oldMap[idKey]?.qty || 0;
+      const addQty = addMap[idKey].qty || 0;
+      const expected = oldQty + addQty;
+      const newQty = newMap[idKey]?.qty || 0;
+
+      if (newQty < expected) {
+        notIncreased.push({
+          ID: isNaN(+idKey) ? idKey : +idKey,
+          Title: addMap[idKey].title || "",
+          oldQty,
+          addQty,
+          expected,
+          newQty,
+          missing: expected - newQty,
+        });
+      }
+    }
+
+    return notIncreased;
   },
 };
 

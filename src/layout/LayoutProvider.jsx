@@ -127,20 +127,24 @@ function LayoutProvider({ children }) {
                 data.ID !== 1 &&
                 data.DeviceIDs !== deviceId
               ) {
-                f7.dialog.alert(
-                  "Tài khoản đang đăng nhập trên thiết bị khác.",
-                  () => {
-                    store
-                      .dispatch("setLogout")
-                      .then(() => f7.views.main.router.navigate("/login/"));
-                  }
-                );
+                store.dispatch("setAuth", data);
+                
+                // f7.dialog.alert(
+                //   "Tài khoản đang đăng nhập trên thiết bị khác.",
+                //   () => {
+                //     store
+                //       .dispatch("setLogout")
+                //       .then(() => f7.views.main.router.navigate("/login/"));
+                //   }
+                // );
               } else if (data && data.ID && !data.DeviceIDs) {
-                f7.dialog.alert("Phiên đăng nhập của bạn đã hết hạn.", () => {
-                  store
-                    .dispatch("setLogout")
-                    .then(() => f7.views.main.router.navigate("/login/"));
-                });
+                store.dispatch("setAuth", data);
+
+                // f7.dialog.alert("Phiên đăng nhập của bạn đã hết hạn.", () => {
+                //   store
+                //     .dispatch("setLogout")
+                //     .then(() => f7.views.main.router.navigate("/login/"));
+                // });
               } else if (data) {
                 store.dispatch("setAuth", data);
               }
@@ -194,12 +198,7 @@ function LayoutProvider({ children }) {
             "ValueText"
           ];
 
-          let firebase = {
-            initializeApp: (obj) => {
-              FirebaseApp = obj;
-            },
-          };
-          eval(firebaseStr);
+          FirebaseApp = firebaseStr;
         }
         store.dispatch("setBrand", {
           Domain: Brand?.Domain,
@@ -390,7 +389,15 @@ function LayoutProvider({ children }) {
       return {
         ...rs,
         ...data,
-        items: rs?.items ? rs.items.sort((a, b) => a?.Index - b?.Index) : [],
+        items: rs?.items
+          ? rs.items
+              .sort((a, b) => a?.Index - b?.Index)
+              .map((x) => ({
+                ...x,
+                Count: x?.children ? x.children.length : 0,
+              }))
+              .sort((a, b) => b?.Count - a?.Count)
+          : [],
       };
     },
     onSettled: (data) => {

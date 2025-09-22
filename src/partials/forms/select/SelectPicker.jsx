@@ -8,8 +8,14 @@ import {
 } from "@heroicons/react/24/outline";
 import clsx from "clsx";
 import { AnimatePresence, motion } from "framer-motion";
-import { Button, Input } from "framework7-react";
-import React, { forwardRef, Fragment, useState } from "react";
+import { Button, f7, f7ready, Input } from "framework7-react";
+import React, {
+  forwardRef,
+  Fragment,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { createPortal } from "react-dom";
 
 const SelectPicker = forwardRef(
@@ -28,6 +34,7 @@ const SelectPicker = forwardRef(
       isClearable = true,
       isDisabled = false,
       isFilter = false,
+      isFilterFocus = false,
       onInputFilter,
       autoHeight = false,
       onClose,
@@ -39,6 +46,18 @@ const SelectPicker = forwardRef(
   ) => {
     const [key, setKey] = useState("");
     const [visible, setVisible] = useState(false);
+    const inputRef = useRef(null);
+
+    useEffect(() => {
+      if (visible && isFilter && isFilterFocus && inputRef?.current) {
+        const timer = setTimeout(() => {
+          requestAnimationFrame(() => {
+            inputRef.current?.focus();
+          });
+        }, 300);
+        return () => clearTimeout(timer);
+      }
+    }, [visible, isFilter, isFilterFocus]);
 
     let open = () => {
       setVisible(true);
@@ -52,81 +71,79 @@ const SelectPicker = forwardRef(
     };
 
     return (
-      <AnimatePresence initial={false}>
-        <>
+      <>
+        <div
+          className="relative"
+          onClick={() => !isDisabled && open()}
+          ref={ref}
+        >
           <div
-            className="relative"
-            onClick={() => !isDisabled && open()}
-            ref={ref}
+            className={clsx(
+              "no-keyboard flex w-full pl-4 pr-24 py-3 border rounded focus:border-primary shadow-input",
+              errorMessageForce ? "border-danger" : "border-[#d5d7da]",
+              isDisabled && "bg-[#f0f0f0]"
+            )}
           >
-            <div
-              className={clsx(
-                "no-keyboard flex w-full pl-4 pr-24 py-3 border rounded focus:border-primary shadow-input",
-                errorMessageForce ? "border-danger" : "border-[#d5d7da]",
-                isDisabled && "bg-[#f0f0f0]"
-              )}
-            >
-              {(!value || value.length === 0) && (
-                <span className="text-[#b5b6c3]">{placeholder}</span>
-              )}
-              {isMulti && (
-                <div className="flex flex-wrap gap-2">
-                  {value &&
-                    value.map((x, idx) => (
-                      <div className="flex bg-gray-100 rounded-sm" key={idx}>
-                        <div className="px-1.5 py-px text-[13px]">
-                          {x.label}
-                        </div>
-                        <div
-                          className="flex items-center px-1 bg-gray-200"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onChange(value.filter((o) => x.value !== o.value));
-                          }}
-                        >
-                          <XMarkIcon className="w-3.5" />
-                        </div>
+            {(!value || value.length === 0) && (
+              <span className="text-[#b5b6c3]">{placeholder || "Chọn"}</span>
+            )}
+            {isMulti && value && (
+              <div className="flex flex-wrap gap-2">
+                {value &&
+                  value.map((x, idx) => (
+                    <div className="flex bg-gray-100 rounded-sm" key={idx}>
+                      <div className="px-1.5 py-px text-[13px]">{x.label}</div>
+                      <div
+                        className="flex items-center px-1 bg-gray-200"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onChange(value.filter((o) => x.value !== o.value));
+                        }}
+                      >
+                        <XMarkIcon className="w-3.5" />
                       </div>
-                    ))}
-                </div>
-              )}
-              {!isMulti && (
-                <div className="truncate">
-                  {Array.isArray(value)
-                    ? value.map((x) => x.label).toString()
-                    : value?.label || ""}
-                </div>
-              )}
-            </div>
-            <div className="absolute right-0 flex h-full top-2/4 -translate-y-2/4">
-              <div className="flex items-center justify-center w-12 h-full">
-                <ChevronDownIcon className="w-5" />
+                    </div>
+                  ))}
               </div>
-              {isClearable &&
-              !isDisabled &&
-              (value && Array.isArray(value) ? value.length > 0 : value) ? (
-                <div
-                  className="flex items-center justify-center w-12 h-full relative after:content-[''] after:absolute after:right-0 after:h-4/6 after:w-[1px] after:bg-[#d5d7da] after:left-0"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onChange("");
-                  }}
-                >
-                  <XMarkIcon className="w-5" />
-                </div>
-              ) : (
-                <></>
-              )}
-            </div>
+            )}
+            {!isMulti && value && (
+              <div className="truncate">
+                {Array.isArray(value)
+                  ? value.map((x) => x.label).toString()
+                  : value?.label || ""}
+              </div>
+            )}
           </div>
-          {errorMessage && errorMessageForce && (
-            <div className="mt-1.5 text-xs text-danger font-light">
-              {errorMessage}
+          <div className="absolute right-0 flex h-full top-2/4 -translate-y-2/4">
+            <div className="flex items-center justify-center w-12 h-full">
+              <ChevronDownIcon className="w-5" />
             </div>
-          )}
+            {isClearable &&
+            !isDisabled &&
+            (value && Array.isArray(value) ? value.length > 0 : value) ? (
+              <div
+                className="flex items-center justify-center w-12 h-full relative after:content-[''] after:absolute after:right-0 after:h-4/6 after:w-[1px] after:bg-[#d5d7da] after:left-0"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onChange("");
+                }}
+              >
+                <XMarkIcon className="w-5" />
+              </div>
+            ) : (
+              <></>
+            )}
+          </div>
+        </div>
+        {errorMessage && errorMessageForce && (
+          <div className="mt-1.5 text-xs text-danger font-light">
+            {errorMessage}
+          </div>
+        )}
 
-          {visible &&
-            createPortal(
+        {createPortal(
+          <AnimatePresence>
+            {visible && (
               <div className="fixed z-[125001] inset-0 flex justify-end flex-col">
                 <motion.div
                   key={visible}
@@ -158,22 +175,22 @@ const SelectPicker = forwardRef(
                   {isFilter && (
                     <div className="px-4 mb-4">
                       <div className="relative">
-                        <Input
-                          className="[&_input]:rounded [&_input]:placeholder:normal-case [&_input]:text-[15px] [&_input]:pl-14"
+                        <input
+                          ref={inputRef}
+                          className="text-[15px] pl-14 rounded border w-full focus:border-primary shadow-input border-[#d5d7da] h-12"
                           type="text"
                           placeholder={placeholderInput}
                           value={key}
-                          clearButton={true}
                           onInput={(e) => {
                             setKey(e.target.value);
                             onInputFilter && onInputFilter(e.target.value);
                           }}
-                          onFocus={(e) =>
-                            KeyboardsHelper.setAndroid({
-                              Type: "body",
-                              Event: e,
-                            })
-                          }
+                          // onFocus={(e) =>
+                          //   KeyboardsHelper.setAndroid({
+                          //     Type: "body",
+                          //     Event: e,
+                          //   })
+                          // }
                         />
                         <div className="absolute top-0 left-0 flex items-center justify-center h-full px-4 pointer-events-none">
                           <MagnifyingGlassIcon className="w-6 text-gray-500" />
@@ -245,7 +262,7 @@ const SelectPicker = forwardRef(
                         </div>
                       ))}
                     {(!options || options.length === 0) && (
-                      <div>
+                      <div className="mb-4">
                         <NoFound
                           Title="Không có kết quả nào."
                           Desc="Rất tiếc ... Không tìm thấy dữ liệu nào"
@@ -297,11 +314,12 @@ const SelectPicker = forwardRef(
                     </div>
                   )}
                 </motion.div>
-              </div>,
-              document.getElementById("framework7-root")
+              </div>
             )}
-        </>
-      </AnimatePresence>
+          </AnimatePresence>,
+          document.getElementById("framework7-root")
+        )}
+      </>
     );
   }
 );

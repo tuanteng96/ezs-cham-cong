@@ -153,36 +153,33 @@ function InvoiceProcessings(props) {
                   />
                 </div>
                 <div className="flex-1 pl-4 pr-4">
-                  <div className="flex mb-px font-medium">
-                    <div className="max-w-[110px] truncate">
-                      {item.FullName}
-                    </div>
-                    <div className="px-1">-</div>
-                    <div>{item.MobilePhone}</div>
+                  <div className="flex mb-px font-medium max-w-[200px]">
+                    <div className="truncate">{item.FullName}</div>
                   </div>
-                  <div className="flex items-center font-light text-gray-500 text-[14px]">
-                    <span>
-                      <span>In</span>
-                      <span className="pl-1 font-medium text-success">
-                        {moment(item?.CheckIn?.CreateDate).format("HH:mm")}
+                  <div className="flex items-center gap-1.5 text-gray-500 font-lato">
+                    <div>{item.MobilePhone}</div>
+                    <div className="w-1 h-1 bg-gray-300 rounded-full"></div>
+                    <div>
+                      <span>
+                        <span>In</span>
+                        <span className="pl-1 font-medium text-success">
+                          {moment(item?.CheckIn?.CreateDate).format("HH:mm")}
+                        </span>
                       </span>
-                    </span>
-
-                    {item?.CheckIn?.CheckOutTime && (
-                      <>
-                        <span className="px-2.5">
-                          <ArrowRightIcon className="w-4" />
-                        </span>
-                        <span>
-                          <span className="pl-5px">Out</span>
-                          <span className="pl-1 font-medium text-danger">
-                            {moment(item?.CheckIn?.CheckOutTime).format(
-                              "HH:mm"
-                            )}
+                      {item?.CheckIn?.CheckOutTime && (
+                        <>
+                          <span className="px-1">-</span>
+                          <span>
+                            <span>Out</span>
+                            <span className="pl-1 font-medium text-danger">
+                              {moment(item?.CheckIn?.CheckOutTime).format(
+                                "HH:mm"
+                              )}
+                            </span>
                           </span>
-                        </span>
-                      </>
-                    )}
+                        </>
+                      )}
+                    </div>
                   </div>
                 </div>
                 <div className="flex justify-end w-10 gap-2">

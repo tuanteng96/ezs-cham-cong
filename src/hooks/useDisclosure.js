@@ -1,10 +1,15 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 
 function useDisclosure(initialState = false) {
   const [isOpen, setIsOpen] = useState(initialState);
 
+  // Đồng bộ lại khi initialState thay đổi
+  useEffect(() => {
+    setIsOpen(initialState);
+  }, [initialState]);
+
   const toggle = useCallback(() => {
-    setIsOpen(prev => !prev);
+    setIsOpen((prev) => !prev);
   }, []);
 
   const open = useCallback(() => {
@@ -15,12 +20,12 @@ function useDisclosure(initialState = false) {
     setIsOpen(false);
   }, []);
 
-  // Return an object with the state and a set of helper functions
   return {
     isOpen,
     toggle,
     open,
     close,
+    setIsOpen, // xuất thêm setter nếu cần điều khiển trực tiếp
   };
 }
 

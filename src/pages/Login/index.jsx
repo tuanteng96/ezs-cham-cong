@@ -15,9 +15,9 @@ import DeviceHelpers from "../../helpers/DeviceHelpers";
 import PromHelpers from "../../helpers/PromHelpers";
 import SubscribeHelpers from "../../helpers/SubscribeHelpers";
 import KeyboardsHelper from "../../helpers/KeyboardsHelper";
-import Dom7 from "dom7";
 import StorageHelpers from "../../helpers/StorageHelpers";
 import { PickerOTP } from "./components";
+import { useFirebase } from "@/hooks";
 
 const schemaLogin = yup
   .object({
@@ -30,6 +30,11 @@ function LoginPage({ f7router }) {
   const [hiddenPassword, setHiddenPassword] = useState(true);
 
   let Brand = useStore("Brand");
+
+  let FirebaseApp = useStore("FirebaseApp");
+
+  const firebase = useFirebase(FirebaseApp);
+
 
   const { control, handleSubmit, setError, setValue } = useForm({
     defaultValues: {
@@ -142,7 +147,14 @@ function LoginPage({ f7router }) {
   };
 
   const onToBack = () => {
-    store.dispatch("setBrand", null).then(() => f7router.navigate("/brand/"));
+    store.dispatch("setBrand", null).then(async () => {
+      if (firebase?.logout) {
+        f7.dialog.preloader("Đang xoá dữ liệu ...");
+        await firebase.logout();
+        f7.dialog.close();
+      }
+      f7router.navigate("/brand/");
+    });
   };
 
   return (

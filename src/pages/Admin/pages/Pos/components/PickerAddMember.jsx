@@ -1,7 +1,7 @@
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import { AnimatePresence, motion } from "framer-motion";
 import { Button, Input, useStore } from "framework7-react";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
@@ -24,7 +24,7 @@ const schemaAdd = yup.object().shape({
     .max(11, "Số điện thoại không hợ lệ."),
 });
 
-function PickerAddMember({ children, onChange }) {
+function PickerAddMember({ children, onChange, keySearch }) {
   const queryClient = useQueryClient();
   const [visible, setVisible] = useState(false);
 
@@ -38,6 +38,24 @@ function PickerAddMember({ children, onChange }) {
     },
     resolver: yupResolver(schemaAdd),
   });
+
+  useEffect(() => {
+    if (keySearch) {
+      const regexVN =
+        /^(?:\+84|0)(?:3[2-9]|5[6|8|9]|7[0|6-9]|8[1-9]|9\d)\d{7}$/;
+      if (regexVN.test(keySearch)) {
+        reset({
+          FullName: "",
+          MobilePhone: keySearch,
+        });
+      } else {
+        reset({
+          FullName: keySearch,
+          MobilePhone: "",
+        });
+      }
+    }
+  }, [keySearch]);
 
   let open = () => {
     setVisible(true);
@@ -67,7 +85,7 @@ function PickerAddMember({ children, onChange }) {
       {
         data: obj,
         Token: Auth?.token,
-        StockID: CrStocks?.ID || ""
+        StockID: CrStocks?.ID || "",
       },
       {
         onSuccess: ({ data }) => {
@@ -94,11 +112,11 @@ function PickerAddMember({ children, onChange }) {
   };
 
   return (
-    <AnimatePresence initial={false}>
-      <>
-        {children({ open, close })}
-        {visible &&
-          createPortal(
+    <>
+      {children({ open, close })}
+      {createPortal(
+        <AnimatePresence initial={false}>
+          {visible && (
             <div className="fixed z-[125001] inset-0 flex justify-end flex-col">
               <motion.div
                 key={visible}
@@ -194,11 +212,12 @@ function PickerAddMember({ children, onChange }) {
                   </div>
                 </form>
               </motion.div>
-            </div>,
-            document.getElementById("framework7-root")
+            </div>
           )}
-      </>
-    </AnimatePresence>
+        </AnimatePresence>,
+        document.getElementById("framework7-root")
+      )}
+    </>
   );
 }
 

@@ -13,6 +13,7 @@ import PickerDiscountCodeOrder from "./PickerDiscountCodeOrder";
 import PickerDiscountEnterOrder from "./PickerDiscountEnterOrder";
 import PickerEditHisPayment from "./PickerEditHisPayment";
 import PickerGiftOrder from "./PickerGiftOrder";
+import PickerGuestsOrder from "./PickerGuestsOrder";
 import PickerMultiEmployees from "./PickerMultiEmployees";
 import PickerOneEmployees from "./PickerOneEmployees";
 import PickerPaymentDateOrder from "./PickerPaymentDateOrder";

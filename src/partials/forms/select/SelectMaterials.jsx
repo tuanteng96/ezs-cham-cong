@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { useQuery } from "react-query";
 import { SelectPicker } from "..";
 
-function SelectMaterials(props) {
+function SelectMaterials({ Catenames, ...props }) {
   let Auth = useStore("Auth");
 
   let [key, setKey] = useState("");
@@ -15,6 +15,7 @@ function SelectMaterials(props) {
       const { data } = await AdminAPI.selectMaterials({
         Key: key,
         Token: Auth?.token || "",
+        Catenames,
       });
       return data?.data
         ? data?.data

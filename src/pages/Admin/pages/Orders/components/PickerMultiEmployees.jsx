@@ -201,32 +201,30 @@ function PickerMultiEmployees({ children, Order }) {
   const onSubmit = (values) => {
     const { Divided, Type } = values;
     const newDivided =
-      Divided && Divided.length > 0 ? Divided.filter((item) => item.Staff) : [];
+      Divided && Divided.length > 0
+        ? Divided.filter((item) => item.Staff && item.Staff.length > 0)
+        : [];
 
     if (newDivided.length > 0) {
       const newArr = newDivided.map((item) => ({
         Product: item.Product,
-        Hoa_Hong: [
-          {
-            Product: item.Product,
-            Staff: item.Staff,
-            Value:
-              item.Type.value === "KY_THUAT_VIEN"
-                ? getValueKTV({ item: item.Product, user: item.Staff })
-                : getValueHH({
-                    item: item.Product,
-                    user: item.Staff,
-                    Type: item.Type,
-                  }),
-          },
-        ],
-        Doanh_So: [
-          {
-            Product: item.Product,
-            Staff: item.Staff,
-            Value: item.Product.gia_tri_doanh_so,
-          },
-        ],
+        Hoa_Hong: item.Staff.map((x) => ({
+          Product: item.Product,
+          Staff: x,
+          Value:
+            item.Type.value === "KY_THUAT_VIEN"
+              ? getValueKTV({ item: item.Product, user: x }) / item.Staff.length
+              : getValueHH({
+                  item: item.Product,
+                  user: item.Staff,
+                  Type: item.Type,
+                }) / item.Staff.length,
+        })),
+        Doanh_So: item.Staff.map((x) => ({
+          Product: item.Product,
+          Staff: x,
+          Value: item.Product.gia_tri_doanh_so / item.Staff.length,
+        })),
       }));
       setValue("DividedValues", newArr);
       openValues();
@@ -352,6 +350,7 @@ function PickerMultiEmployees({ children, Order }) {
                               control={control}
                               render={({ field, fieldState }) => (
                                 <SelectMembersBouns
+                                  isMulti
                                   isClearable
                                   placeholder="Chọn nhân viên"
                                   value={field.value}

@@ -40,6 +40,8 @@ import {
 import clsx from "clsx";
 import { RolesHelpers } from "@/helpers/RolesHelpers";
 import { UploadImages } from "@/partials/forms/files";
+import { MinusCircleIcon } from "@heroicons/react/24/outline";
+import { Disclosure } from "@/partials/components";
 
 const initialValues = {
   InputGroups: "",
@@ -362,12 +364,32 @@ function AddEditClients({ f7router, f7route }) {
             );
             reset();
             if (isAddMode) {
-              f7router.navigate(
+              const router = f7.views.main.router;
+
+              const handler = () => {
+                router.off("routeChanged", handler);
+                router.navigate(
+                  `/admin/pos/manage/${data?.Member?.ID}/add-prods`
+                );
+              };
+
+              router.on("routeChanged", handler);
+              router.navigate(
                 `/admin/pos/manage/${data?.Member?.ID}/?state=${JSON.stringify({
                   MobilePhone: data?.Member?.MobilePhone,
                   FullName: data?.Member?.FullName,
-                })}`
+                })}&add=prods`,
+                {
+                  replaceState: true, // 🔹 không thêm entry mới vào lịch sử
+                }
               );
+
+              // f7router.navigate(
+              //   `/admin/pos/manage/${data?.Member?.ID}/?state=${JSON.stringify({
+              //     MobilePhone: data?.Member?.MobilePhone,
+              //     FullName: data?.Member?.FullName,
+              //   })}`
+              // );
             } else {
               f7router.back();
             }
@@ -378,13 +400,23 @@ function AddEditClients({ f7router, f7route }) {
     );
   };
 
-  let { ProvinceID } = watch();
+  let {
+    ProvinceID,
+    DistrictID,
+    HomeAddress,
+    HandCardID,
+    Email,
+    InputGroups,
+    AFFMemberID,
+    Book,
+    Desc,
+  } = watch();
 
   let HistoryEditAff = Member?.AFFJSON && JSON.parse(Member?.AFFJSON);
 
   return (
     <Page
-      className="bg-white"
+      className="bg-[var(--f7-page-bg-color)]"
       name="add-edit-calendar"
       onPageBeforeIn={() => PromHelpers.STATUS_BAR_COLOR("light")}
       noToolbar
@@ -412,445 +444,615 @@ function AddEditClients({ f7router, f7route }) {
         >
           {(isAddMode || !isLoading) && (
             <div className="relative p-4 overflow-auto grow page-scrollbar">
-              <div className="mb-3.5 last:mb-0">
-                <div className="mb-px">Ảnh khách hàng</div>
-                <Controller
-                  name="Photo"
-                  control={control}
-                  render={({ field, fieldState }) => (
-                    <UploadImages
-                      width="w-[120px]"
-                      height="h-[120px]"
-                      onChange={field.onChange}
-                      value={field.value}
-                    />
-                  )}
-                />
-              </div>
-              <div className="mb-3.5 last:mb-0">
-                <div className="mb-px">Họ và tên</div>
-                <Controller
-                  name="FullName"
-                  control={control}
-                  render={({ field: { ref, ...field }, fieldState }) => (
-                    <Input
-                      clearButton
-                      className="[&_input]:rounded [&_input]:placeholder:normal-case"
-                      type="text"
-                      placeholder="Nhập tên khách"
-                      value={field.value}
-                      errorMessage={fieldState?.error?.message}
-                      errorMessageForce={fieldState?.invalid}
-                      onInput={field.onChange}
-                      onFocus={(e) =>
-                        KeyboardsHelper.setAndroid({
-                          Type: "body",
-                          Event: e,
-                        })
-                      }
-                      enterkeyhint="next"
-                    />
-                  )}
-                />
-              </div>
-              <div className="mb-3.5 last:mb-0">
-                <div className="mb-px">Số điện thoại</div>
-                <ClientFieldPhone isAddMode={isAddMode} />
-              </div>
-              <div className="mb-3.5 last:mb-0">
-                <div className="mb-px">Email</div>
-                <Controller
-                  name="Email"
-                  control={control}
-                  render={({ field: { ref, ...field }, fieldState }) => (
-                    <Input
-                      clearButton
-                      className="[&_input]:rounded [&_input]:placeholder:normal-case"
-                      type="input"
-                      placeholder="Nhập Email"
-                      value={field.value}
-                      errorMessage={fieldState?.error?.message}
-                      errorMessageForce={fieldState?.invalid}
-                      onInput={field.onChange}
-                      onFocus={(e) =>
-                        KeyboardsHelper.setAndroid({
-                          Type: "body",
-                          Event: e,
-                        })
-                      }
-                    />
-                  )}
-                />
-              </div>
-              <div className="mb-3.5 last:mb-0">
-                <div className="mb-px">Ngày sinh</div>
-                <Controller
-                  name="Birth"
-                  control={control}
-                  render={({ field: { ref, ...field }, fieldState }) => (
-                    <DatePicker
-                      format="DD/MM/YYYY"
-                      errorMessage={fieldState?.error?.message}
-                      errorMessageForce={fieldState?.invalid}
-                      value={field.value}
-                      onChange={field.onChange}
-                      placeholder="Chọn ngày"
-                      showHeader
-                      clear
-                      disabled={
-                        !isAddMode &&
-                        Brand?.Global?.Admin?.chi_admin_chinh_sua_khach_hang ===
-                          "Birth" &&
-                        Auth?.ID !== 1
-                      }
-                    />
-                  )}
-                />
-              </div>
-              <div className="mb-3.5 last:mb-0">
-                <div className="mb-px">Giới tính</div>
-                <Controller
-                  name="Gender"
-                  control={control}
-                  render={({ field, fieldState }) => (
-                    <>
-                      <SelectGender
-                        placeholder="Chọn giới tính"
-                        value={field.value}
-                        label="Số giới tính"
-                        onChange={(val) => {
-                          field.onChange(val?.value !== "" ? val?.value : "");
-                        }}
-                        errorMessage={fieldState?.error?.message}
-                        errorMessageForce={fieldState?.invalid}
-                        isClearable={false}
-                        autoHeight
-                      />
-                    </>
-                  )}
-                />
-              </div>
-
-              <div className="mb-3.5 last:mb-0">
-                <div className="mb-px">Tỉnh / Thành phố</div>
-                <Controller
-                  name="ProvinceID"
-                  control={control}
-                  render={({ field, fieldState }) => (
-                    <SelectProvinces
-                      placeholderInput="Tên tỉnh / thành phố"
-                      placeholder="Chọn tỉnh / thành phố"
-                      value={field.value}
-                      label="Chọn tỉnh / thành phố"
-                      onChange={(val) => {
-                        setValue("DistrictID", "");
-                        field.onChange(val);
-                      }}
-                      errorMessage={fieldState?.error?.message}
-                      errorMessageForce={fieldState?.invalid}
-                      isFilter
-                    />
-                  )}
-                />
-              </div>
-
-              <div className="mb-3.5 last:mb-0">
-                <div className="mb-px">Quận / Huyện</div>
-                <Controller
-                  name="DistrictID"
-                  control={control}
-                  render={({ field, fieldState }) => (
-                    <SelectDistricts
-                      ProvinceID={ProvinceID?.value || ""}
-                      placeholderInput="Tên Quận / Huyện"
-                      placeholder="Chọn Quận / Huyện"
-                      value={field.value}
-                      label="Chọn Quận / Huyện"
-                      onChange={(val) => {
-                        field.onChange(val);
-                      }}
-                      errorMessage={fieldState?.error?.message}
-                      errorMessageForce={fieldState?.invalid}
-                      isFilter
-                    />
-                  )}
-                />
-              </div>
-
-              <div className="mb-3.5 last:mb-0">
-                <div className="mb-px">Địa chỉ</div>
-                <Controller
-                  name="HomeAddress"
-                  control={control}
-                  render={({ field: { ref, ...field }, fieldState }) => (
-                    <Input
-                      clearButton
-                      className="[&_input]:rounded [&_input]:placeholder:normal-case"
-                      type="input"
-                      placeholder="Nhập địa chỉ"
-                      value={field.value}
-                      errorMessage={fieldState?.error?.message}
-                      errorMessageForce={fieldState?.invalid}
-                      onInput={field.onChange}
-                      onFocus={(e) =>
-                        KeyboardsHelper.setAndroid({
-                          Type: "body",
-                          Event: e,
-                        })
-                      }
-                    />
-                  )}
-                />
-              </div>
-
-              <div className="mb-3.5 last:mb-0">
-                <div className="mb-px">Cơ sở</div>
-                <Controller
-                  name="ByStockID"
-                  control={control}
-                  render={({ field, fieldState }) => (
-                    <SelectPicker
-                      isClearable={false}
-                      placeholder="Chọn cơ sở"
-                      value={field.value}
-                      options={pos_mng?.StockRoles || []}
-                      label="Cơ sở"
-                      onChange={(val) => {
-                        field.onChange(val || null);
-                      }}
-                      errorMessage={fieldState?.error?.message}
-                      errorMessageForce={fieldState?.invalid}
-                    />
-                  )}
-                />
-              </div>
-
-              <div className="mb-3.5 last:mb-0">
-                <div className="mb-px">Nhân viên phụ trách</div>
-                <Controller
-                  name="ByUserID"
-                  control={control}
-                  render={({ field, fieldState }) => (
-                    <SelectMembersCharge
-                      placeholderInput="Tên nhân viên"
-                      placeholder="Chọn nhân viên"
-                      value={field.value}
-                      label="Chọn nhân viên"
-                      onChange={(val) => {
-                        field.onChange(val);
-                      }}
-                      errorMessage={fieldState?.error?.message}
-                      errorMessageForce={fieldState?.invalid}
-                      isFilter
-                      //isMulti
-                    />
-                  )}
-                />
-              </div>
-
-              <div className="mb-3.5 last:mb-0">
-                <div className="mb-px">Mã vạch</div>
-                <Controller
-                  name="HandCardID"
-                  control={control}
-                  render={({ field: { ref, ...field }, fieldState }) => (
-                    <Input
-                      clearButton
-                      className="[&_input]:rounded [&_input]:placeholder:normal-case"
-                      type="input"
-                      placeholder="Nhập mã vạch"
-                      value={field.value}
-                      errorMessage={fieldState?.error?.message}
-                      errorMessageForce={fieldState?.invalid}
-                      onInput={field.onChange}
-                      onFocus={(e) =>
-                        KeyboardsHelper.setAndroid({
-                          Type: "body",
-                          Event: e,
-                        })
-                      }
-                    />
-                  )}
-                />
-              </div>
-
-              <div className="mb-3.5 last:mb-0">
-                <div className="mb-px">Nguồn</div>
-                <Controller
-                  name="Source"
-                  control={control}
-                  render={({ field, fieldState }) => (
-                    <SelectPicker
-                      placeholder="Chọn nguồn"
-                      value={
-                        dataAdd?.data?.Sources?.filter(
-                          (x) => x.value === field.value
-                        ) || null
-                      }
-                      options={dataAdd?.data?.Sources || []}
-                      label="Nguồn khách hàng"
-                      onChange={(val) => {
-                        field.onChange(val?.value || "");
-                      }}
-                      errorMessage={fieldState?.error?.message}
-                      errorMessageForce={fieldState?.invalid}
-                      autoHeight
-                    />
-                  )}
-                />
-              </div>
-
-              <div className="mb-3.5 last:mb-0">
-                <div className="mb-px">Nhóm thành viên</div>
-                <Controller
-                  name="InputGroups"
-                  control={control}
-                  render={({ field, fieldState }) => (
-                    <SelectPicker
-                      placeholder="Chọn nhóm"
-                      value={field.value}
-                      options={dataAdd?.data?.MemberGroups || []}
-                      label="Nhóm thành viên"
-                      onChange={(val) => {
-                        field.onChange(val);
-                      }}
-                      errorMessage={fieldState?.error?.message}
-                      errorMessageForce={fieldState?.invalid}
-                      autoHeight
-                    />
-                  )}
-                />
-              </div>
-
-              <div className="flex items-end justify-between mb-3.5 last:mb-0">
-                <div>Giữ nhóm không bị hạ cấp</div>
-                <Controller
-                  name="IsKeepGroup"
-                  control={control}
-                  render={({ field: { ref, ...field }, fieldState }) => (
-                    <label className="relative inline-flex items-center cursor-pointer">
-                      <input
-                        type="checkbox"
-                        className="sr-only peer"
-                        {...field}
-                        checked={field.value}
-                      />
-                      <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600" />
-                    </label>
-                  )}
-                />
-              </div>
-
-              <div className="mb-3.5 last:mb-0">
-                <div className="mb-px">Nghề nghiệp</div>
-                <Controller
-                  name="Jobs"
-                  control={control}
-                  render={({ field, fieldState }) => (
-                    <SelectPicker
-                      placeholder="Chọn nghề nghiệp"
-                      value={
-                        dataAdd?.data?.Jobs?.filter(
-                          (x) => x.value === field.value
-                        ) || null
-                      }
-                      options={dataAdd?.data?.Jobs || []}
-                      label="Nghề nghiệp"
-                      onChange={(val) => {
-                        field.onChange(val?.value || "");
-                      }}
-                      errorMessage={fieldState?.error?.message}
-                      errorMessageForce={fieldState?.invalid}
-                      autoHeight
-                    />
-                  )}
-                />
-              </div>
-
-              <div className="mb-3.5 last:mb-0">
-                <div className="mb-px">Ghi chú</div>
-                <Controller
-                  name="Desc"
-                  control={control}
-                  render={({ field, fieldState }) => (
-                    <Input
-                      className="[&_textarea]:rounded [&_textarea]:placeholder:normal-case"
-                      type="textarea"
-                      placeholder="Nhập ghi chú"
-                      value={field.value}
-                      errorMessage={fieldState?.error?.message}
-                      errorMessageForce={fieldState?.invalid}
-                      onInput={field.onChange}
-                      onFocus={(e) =>
-                        KeyboardsHelper.setAndroid({ Type: "body", Event: e })
-                      }
-                      resizable
-                    />
-                  )}
-                />
-              </div>
-
-              <div className="mb-3.5 last:mb-0">
-                <div className="mb-px">Ghi chú lịch trình</div>
-                <Controller
-                  name="Book.Desc"
-                  control={control}
-                  render={({ field, fieldState }) => (
-                    <Input
-                      className="[&_textarea]:rounded [&_textarea]:placeholder:normal-case"
-                      type="textarea"
-                      placeholder="Nhập ghi chú"
-                      value={field.value}
-                      errorMessage={fieldState?.error?.message}
-                      errorMessageForce={fieldState?.invalid}
-                      onInput={field.onChange}
-                      onFocus={(e) =>
-                        KeyboardsHelper.setAndroid({ Type: "body", Event: e })
-                      }
-                      resizable
-                    />
-                  )}
-                />
-              </div>
-              {Brand?.Global?.Admin?.maff && (
+              <div className="p-4 bg-white rounded-lg mb-3.5 last:mb-0">
                 <div className="mb-3.5 last:mb-0">
-                  <PickerHistoryAff data={HistoryEditAff}>
-                    {({ open }) => (
-                      <div
-                        className="flex items-end mb-1"
-                        onClick={() => HistoryEditAff && open()}
-                      >
-                        Khách hàng giới thiệu
-                        {HistoryEditAff && (
-                          <ExclamationCircleIcon className="w-5 ml-1 text-warning" />
-                        )}
-                      </div>
-                    )}
-                  </PickerHistoryAff>
-
+                  <div className="mb-px">Ảnh khách hàng</div>
                   <Controller
-                    name="AFFMemberID"
+                    name="Photo"
                     control={control}
                     render={({ field, fieldState }) => (
-                      <SelectClients
-                        placeholderInput="Tên khách hàng"
-                        placeholder="Chọn khách hàng"
+                      <UploadImages
+                        width="w-[120px]"
+                        height="h-[120px]"
+                        onChange={field.onChange}
                         value={field.value}
-                        label="Chọn khách hàng"
-                        onChange={(val) => {
-                          field.onChange(val);
-                        }}
-                        isFilter
-                        isClearable={true}
-                        isDisabled={
-                          Brand?.Global?.Admin?.maffadmin
-                            ? Auth?.ID !== 1
-                            : Brand?.Global?.Admin?.maffadmin
+                      />
+                    )}
+                  />
+                </div>
+                <div className="mb-3.5 last:mb-0">
+                  <div className="mb-px">Họ và tên</div>
+                  <Controller
+                    name="FullName"
+                    control={control}
+                    render={({ field: { ref, ...field }, fieldState }) => (
+                      <Input
+                        clearButton
+                        className="[&_input]:rounded [&_input]:placeholder:normal-case"
+                        type="text"
+                        placeholder="Nhập tên khách"
+                        value={field.value}
+                        errorMessage={fieldState?.error?.message}
+                        errorMessageForce={fieldState?.invalid}
+                        onInput={field.onChange}
+                        onFocus={(e) =>
+                          KeyboardsHelper.setAndroid({
+                            Type: "body",
+                            Event: e,
+                          })
+                        }
+                        enterkeyhint="next"
+                      />
+                    )}
+                  />
+                </div>
+                <div className="mb-3.5 last:mb-0">
+                  <div className="mb-px">Số điện thoại</div>
+                  <ClientFieldPhone isAddMode={isAddMode} />
+                </div>
+                <div className="mb-3.5 last:mb-0">
+                  <div className="mb-px">Ngày sinh</div>
+                  <Controller
+                    name="Birth"
+                    control={control}
+                    render={({ field: { ref, ...field }, fieldState }) => (
+                      <DatePicker
+                        format="DD/MM/YYYY"
+                        errorMessage={fieldState?.error?.message}
+                        errorMessageForce={fieldState?.invalid}
+                        value={field.value}
+                        onChange={field.onChange}
+                        placeholder="Chọn ngày"
+                        showHeader
+                        clear
+                        disabled={
+                          !isAddMode &&
+                          Brand?.Global?.Admin
+                            ?.chi_admin_chinh_sua_khach_hang === "Birth" &&
+                          Auth?.ID !== 1
                         }
                       />
                     )}
                   />
                 </div>
+                <div className="mb-3.5 last:mb-0">
+                  <div className="mb-px">Giới tính</div>
+                  <Controller
+                    name="Gender"
+                    control={control}
+                    render={({ field, fieldState }) => (
+                      <>
+                        <SelectGender
+                          placeholder="Chọn giới tính"
+                          value={field.value}
+                          label="Số giới tính"
+                          onChange={(val) => {
+                            field.onChange(val?.value !== "" ? val?.value : "");
+                          }}
+                          errorMessage={fieldState?.error?.message}
+                          errorMessageForce={fieldState?.invalid}
+                          isClearable={false}
+                          autoHeight
+                        />
+                      </>
+                    )}
+                  />
+                </div>
+              </div>
+              <Disclosure initialState={Boolean(HandCardID)}>
+                {({ isOpen, toggle }) => (
+                  <div className="p-4 bg-white rounded-lg mb-3.5 last:mb-0">
+                    {!isOpen && (
+                      <div
+                        className="font-medium text-primary"
+                        onClick={toggle}
+                      >
+                        {HandCardID
+                          ? "Thay đổi thành viên"
+                          : "Thêm mã thành viên"}
+                      </div>
+                    )}
+
+                    {isOpen && (
+                      <div>
+                        <div className="flex items-center justify-between mb-2">
+                          <div>Mã thành viên</div>
+                          <div onClick={toggle}>
+                            <MinusCircleIcon className="w-6" />
+                          </div>
+                        </div>
+                        <Controller
+                          name="HandCardID"
+                          control={control}
+                          render={({
+                            field: { ref, ...field },
+                            fieldState,
+                          }) => (
+                            <Input
+                              clearButton
+                              className="[&_input]:rounded [&_input]:placeholder:normal-case"
+                              type="input"
+                              placeholder="Nhập mã thành viên"
+                              value={field.value}
+                              errorMessage={fieldState?.error?.message}
+                              errorMessageForce={fieldState?.invalid}
+                              onInput={field.onChange}
+                              onFocus={(e) =>
+                                KeyboardsHelper.setAndroid({
+                                  Type: "body",
+                                  Event: e,
+                                })
+                              }
+                            />
+                          )}
+                        />
+                      </div>
+                    )}
+                  </div>
+                )}
+              </Disclosure>
+
+              <Disclosure initialState={Boolean(Email)}>
+                {({ isOpen, toggle }) => (
+                  <div className="p-4 bg-white rounded-lg mb-3.5 last:mb-0">
+                    {!isOpen && (
+                      <div
+                        className="font-medium text-primary"
+                        onClick={toggle}
+                      >
+                        {Email ? "Thay đổi Email" : "Thêm Email"}
+                      </div>
+                    )}
+
+                    {isOpen && (
+                      <div>
+                        <div className="flex items-center justify-between mb-2">
+                          <div>Email</div>
+                          <div onClick={toggle}>
+                            <MinusCircleIcon className="w-6" />
+                          </div>
+                        </div>
+                        <Controller
+                          name="Email"
+                          control={control}
+                          render={({
+                            field: { ref, ...field },
+                            fieldState,
+                          }) => (
+                            <Input
+                              clearButton
+                              className="[&_input]:rounded [&_input]:placeholder:normal-case"
+                              type="input"
+                              placeholder="Nhập Email"
+                              value={field.value}
+                              errorMessage={fieldState?.error?.message}
+                              errorMessageForce={fieldState?.invalid}
+                              onInput={field.onChange}
+                              onFocus={(e) =>
+                                KeyboardsHelper.setAndroid({
+                                  Type: "body",
+                                  Event: e,
+                                })
+                              }
+                            />
+                          )}
+                        />
+                      </div>
+                    )}
+                  </div>
+                )}
+              </Disclosure>
+
+              <Disclosure
+                initialState={Boolean(ProvinceID || DistrictID || HomeAddress)}
+              >
+                {({ isOpen, toggle }) => (
+                  <div className="p-4 bg-white rounded-lg mb-3.5 last:mb-0">
+                    {!isOpen && (
+                      <div
+                        className="font-medium text-primary"
+                        onClick={toggle}
+                      >
+                        {ProvinceID || DistrictID || HomeAddress
+                          ? "Thay đổi địa chỉ"
+                          : "Thêm địa chỉ"}
+                      </div>
+                    )}
+
+                    {isOpen && (
+                      <div>
+                        <div className="flex items-center justify-between mb-2">
+                          <div>Địa chỉ</div>
+                          <div onClick={toggle}>
+                            <MinusCircleIcon className="w-6" />
+                          </div>
+                        </div>
+                        <div>
+                          <div className="mb-3 last:mb-0">
+                            <Controller
+                              name="ProvinceID"
+                              control={control}
+                              render={({ field, fieldState }) => (
+                                <SelectProvinces
+                                  placeholderInput="Tên tỉnh / thành phố"
+                                  placeholder="Chọn tỉnh / thành phố"
+                                  value={field.value}
+                                  label="Chọn tỉnh / thành phố"
+                                  onChange={(val) => {
+                                    setValue("DistrictID", "");
+                                    field.onChange(val);
+                                  }}
+                                  errorMessage={fieldState?.error?.message}
+                                  errorMessageForce={fieldState?.invalid}
+                                  isFilter
+                                />
+                              )}
+                            />
+                          </div>
+                          <div className="mb-3 last:mb-0">
+                            <Controller
+                              name="DistrictID"
+                              control={control}
+                              render={({ field, fieldState }) => (
+                                <SelectDistricts
+                                  ProvinceID={ProvinceID?.value || ""}
+                                  placeholderInput="Tên Quận / Huyện"
+                                  placeholder="Chọn Quận / Huyện"
+                                  value={field.value}
+                                  label="Chọn Quận / Huyện"
+                                  onChange={(val) => {
+                                    field.onChange(val);
+                                  }}
+                                  errorMessage={fieldState?.error?.message}
+                                  errorMessageForce={fieldState?.invalid}
+                                  isFilter
+                                />
+                              )}
+                            />
+                          </div>
+                          <div className="mb-3 last:mb-0">
+                            <Controller
+                              name="HomeAddress"
+                              control={control}
+                              render={({
+                                field: { ref, ...field },
+                                fieldState,
+                              }) => (
+                                <Input
+                                  clearButton
+                                  className="[&_input]:rounded [&_input]:placeholder:normal-case"
+                                  type="input"
+                                  placeholder="Nhập địa chỉ"
+                                  value={field.value}
+                                  errorMessage={fieldState?.error?.message}
+                                  errorMessageForce={fieldState?.invalid}
+                                  onInput={field.onChange}
+                                  onFocus={(e) =>
+                                    KeyboardsHelper.setAndroid({
+                                      Type: "body",
+                                      Event: e,
+                                    })
+                                  }
+                                />
+                              )}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </Disclosure>
+
+              <div className="mb-3.5 last:mb-3.5 bg-white rounded-lg p-4">
+                <div className="mb-3.5 last:mb-0">
+                  <div className="mb-px">Cơ sở</div>
+                  <Controller
+                    name="ByStockID"
+                    control={control}
+                    render={({ field, fieldState }) => (
+                      <SelectPicker
+                        isClearable={false}
+                        placeholder="Chọn cơ sở"
+                        value={field.value}
+                        options={pos_mng?.StockRoles || []}
+                        label="Cơ sở"
+                        onChange={(val) => {
+                          field.onChange(val || null);
+                        }}
+                        errorMessage={fieldState?.error?.message}
+                        errorMessageForce={fieldState?.invalid}
+                      />
+                    )}
+                  />
+                </div>
+
+                <div className="mb-3.5 last:mb-0">
+                  <div className="mb-px">Nhân viên phụ trách</div>
+                  <Controller
+                    name="ByUserID"
+                    control={control}
+                    render={({ field, fieldState }) => (
+                      <SelectMembersCharge
+                        placeholderInput="Tên nhân viên"
+                        placeholder="Chọn nhân viên"
+                        value={field.value}
+                        label="Chọn nhân viên"
+                        onChange={(val) => {
+                          field.onChange(val);
+                        }}
+                        errorMessage={fieldState?.error?.message}
+                        errorMessageForce={fieldState?.invalid}
+                        isFilter
+                        //isMulti
+                      />
+                    )}
+                  />
+                </div>
+              </div>
+              <div className="mb-3.5 last:mb-3.5 bg-white rounded-lg p-4">
+                <div className="mb-3.5 last:mb-0">
+                  <div className="mb-px">Nguồn</div>
+                  <Controller
+                    name="Source"
+                    control={control}
+                    render={({ field, fieldState }) => (
+                      <SelectPicker
+                        placeholder="Chọn nguồn"
+                        value={
+                          dataAdd?.data?.Sources?.filter(
+                            (x) => x.value === field.value
+                          ) || null
+                        }
+                        options={dataAdd?.data?.Sources || []}
+                        label="Nguồn khách hàng"
+                        onChange={(val) => {
+                          field.onChange(val?.value || "");
+                        }}
+                        errorMessage={fieldState?.error?.message}
+                        errorMessageForce={fieldState?.invalid}
+                        autoHeight
+                      />
+                    )}
+                  />
+                </div>
+                <div className="mb-3.5 last:mb-0">
+                  <div className="mb-px">Nghề nghiệp</div>
+                  <Controller
+                    name="Jobs"
+                    control={control}
+                    render={({ field, fieldState }) => (
+                      <SelectPicker
+                        placeholder="Chọn nghề nghiệp"
+                        value={
+                          dataAdd?.data?.Jobs?.filter(
+                            (x) => x.value === field.value
+                          ) || null
+                        }
+                        options={dataAdd?.data?.Jobs || []}
+                        label="Nghề nghiệp"
+                        onChange={(val) => {
+                          field.onChange(val?.value || "");
+                        }}
+                        errorMessage={fieldState?.error?.message}
+                        errorMessageForce={fieldState?.invalid}
+                        autoHeight
+                      />
+                    )}
+                  />
+                </div>
+              </div>
+
+              <Disclosure initialState={Boolean(InputGroups)}>
+                {({ isOpen, toggle }) => (
+                  <div className="p-4 bg-white rounded-lg mb-3.5 last:mb-0">
+                    {!isOpen && (
+                      <div
+                        className="font-medium text-primary"
+                        onClick={toggle}
+                      >
+                        {InputGroups
+                          ? "Thay đổi nhóm thành viên"
+                          : "Thêm nhóm thành viên"}
+                      </div>
+                    )}
+
+                    {isOpen && (
+                      <div>
+                        <div className="flex items-center justify-between mb-2">
+                          <div>Nhóm thành viên</div>
+                          <div onClick={toggle}>
+                            <MinusCircleIcon className="w-6" />
+                          </div>
+                        </div>
+                        <div>
+                          <div className="mb-3.5 last:mb-0">
+                            <Controller
+                              name="InputGroups"
+                              control={control}
+                              render={({ field, fieldState }) => (
+                                <SelectPicker
+                                  placeholder="Chọn nhóm"
+                                  value={field.value}
+                                  options={dataAdd?.data?.MemberGroups || []}
+                                  label="Nhóm thành viên"
+                                  onChange={(val) => {
+                                    field.onChange(val);
+                                  }}
+                                  errorMessage={fieldState?.error?.message}
+                                  errorMessageForce={fieldState?.invalid}
+                                  autoHeight
+                                />
+                              )}
+                            />
+                          </div>
+                          <div className="flex items-end justify-between mb-3.5 last:mb-0">
+                            <div>Giữ nhóm không bị hạ cấp</div>
+                            <Controller
+                              name="IsKeepGroup"
+                              control={control}
+                              render={({
+                                field: { ref, ...field },
+                                fieldState,
+                              }) => (
+                                <label className="relative inline-flex items-center cursor-pointer">
+                                  <input
+                                    type="checkbox"
+                                    className="sr-only peer"
+                                    {...field}
+                                    checked={field.value}
+                                  />
+                                  <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600" />
+                                </label>
+                              )}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </Disclosure>
+
+              <Disclosure initialState={Boolean(Desc || Book.Desc)}>
+                {({ isOpen, toggle }) => (
+                  <div className="p-4 bg-white rounded-lg mb-3.5 last:mb-0">
+                    {!isOpen && (
+                      <div
+                        className="font-medium text-primary"
+                        onClick={toggle}
+                      >
+                        {Desc || Book.Desc
+                          ? "Thay đổi ghi chú"
+                          : "Thêm ghi chú"}
+                      </div>
+                    )}
+                    {isOpen && (
+                      <div>
+                        <div className="flex items-center justify-between mb-2">
+                          <div>Ghi chú</div>
+                          <div onClick={toggle}>
+                            <MinusCircleIcon className="w-6" />
+                          </div>
+                        </div>
+                        <div className="mb-3.5 last:mb-0">
+                          <Controller
+                            name="Desc"
+                            control={control}
+                            render={({ field, fieldState }) => (
+                              <Input
+                                className="[&_textarea]:rounded [&_textarea]:placeholder:normal-case"
+                                type="textarea"
+                                placeholder="Nhập ghi chú"
+                                value={field.value}
+                                errorMessage={fieldState?.error?.message}
+                                errorMessageForce={fieldState?.invalid}
+                                onInput={field.onChange}
+                                onFocus={(e) =>
+                                  KeyboardsHelper.setAndroid({
+                                    Type: "body",
+                                    Event: e,
+                                  })
+                                }
+                                resizable
+                              />
+                            )}
+                          />
+                        </div>
+                        <div className="mb-3.5 last:mb-0">
+                          <div className="mb-px">Ghi chú lịch trình</div>
+                          <Controller
+                            name="Book.Desc"
+                            control={control}
+                            render={({ field, fieldState }) => (
+                              <Input
+                                className="[&_textarea]:rounded [&_textarea]:placeholder:normal-case"
+                                type="textarea"
+                                placeholder="Nhập ghi chú"
+                                value={field.value}
+                                errorMessage={fieldState?.error?.message}
+                                errorMessageForce={fieldState?.invalid}
+                                onInput={field.onChange}
+                                onFocus={(e) =>
+                                  KeyboardsHelper.setAndroid({
+                                    Type: "body",
+                                    Event: e,
+                                  })
+                                }
+                                resizable
+                              />
+                            )}
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </Disclosure>
+              {Brand?.Global?.Admin?.maff && (
+                <Disclosure initialState={Boolean(AFFMemberID)}>
+                  {({ isOpen, toggle }) => (
+                    <div className="p-4 bg-white rounded-lg mb-3.5 last:mb-0">
+                      {!isOpen && (
+                        <div
+                          className="font-medium text-primary"
+                          onClick={toggle}
+                        >
+                          {AFFMemberID
+                            ? "Thay đổi khách hàng giới thiệu"
+                            : "Thêm khách hàng giới thiệu"}
+                        </div>
+                      )}
+
+                      {isOpen && (
+                        <div>
+                          <PickerHistoryAff data={HistoryEditAff}>
+                            {({ open }) => (
+                              <div className="flex items-center justify-between mb-2">
+                                <div
+                                  className="flex gap-1"
+                                  onClick={() => HistoryEditAff && open()}
+                                >
+                                  Khách hàng giới thiệu
+                                  {HistoryEditAff && (
+                                    <ExclamationCircleIcon className="w-5 text-warning" />
+                                  )}
+                                </div>
+                                <div onClick={toggle}>
+                                  <MinusCircleIcon className="w-6" />
+                                </div>
+                              </div>
+                            )}
+                          </PickerHistoryAff>
+                          <div>
+                            <Controller
+                              name="AFFMemberID"
+                              control={control}
+                              render={({ field, fieldState }) => (
+                                <SelectClients
+                                  placeholderInput="Tên khách hàng"
+                                  placeholder="Chọn khách hàng"
+                                  value={field.value}
+                                  label="Chọn khách hàng"
+                                  onChange={(val) => {
+                                    field.onChange(val);
+                                  }}
+                                  isFilter
+                                  isClearable={true}
+                                  isDisabled={
+                                    Brand?.Global?.Admin?.maffadmin
+                                      ? Auth?.ID !== 1
+                                      : Brand?.Global?.Admin?.maffadmin
+                                  }
+                                />
+                              )}
+                            />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </Disclosure>
               )}
             </div>
           )}
@@ -858,8 +1060,7 @@ function AddEditClients({ f7router, f7route }) {
             <div
               role="status"
               className={clsx(
-                "grow left-0 flex items-center justify-center w-full transition h-full top-0 z-10 bg-white/50",
-                1 == 2 && "hidden"
+                "grow left-0 flex items-center justify-center w-full transition h-full top-0 z-10 bg-white/50"
               )}
             >
               <svg

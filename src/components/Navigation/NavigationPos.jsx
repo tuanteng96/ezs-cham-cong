@@ -2,44 +2,42 @@ import { f7, Link, Popover, Toolbar, useStore } from "framework7-react";
 import React, { useEffect, useMemo, useState } from "react";
 import clsx from "clsx";
 import {
+  BanknotesIcon,
   BarsArrowUpIcon,
+  BellAlertIcon,
   CalendarDaysIcon,
   DocumentTextIcon,
   HomeIcon,
   PlusIcon,
-  Square3Stack3DIcon,
   UserGroupIcon,
 } from "@heroicons/react/24/outline";
 import RouterHelpers from "../../helpers/RouterHelpers";
-import { useIsFetching, useQueryClient } from "react-query";
 import { PickerSheet } from "@/partials/components/Sheet";
+import { PickerCashAddEdit } from "@/pages/Admin/pages/Cash/components";
+import {
+  PickerAddDebt,
+  PickerInvoiceNew,
+} from "@/pages/Admin/pages/Pos/components";
+import { RolesHelpers } from "@/helpers/RolesHelpers";
 
 function NavigationPos({ pathname }) {
-  const queryClient = useQueryClient();
-
   let InvoiceProcessings = useStore("InvoiceProcessings");
   let Processings = useStore("Processings");
-  let ClientBirthDayCount = useStore("ClientBirthDayCount");
 
   let [CountProcessings, setCountProcessings] = useState(0);
-  let [isPopoverOpened, setIsPopoverOpened] = useState(false);
 
-  let isLoadingProcessings = useIsFetching({ queryKey: ["Processings"] }) > 0;
-  let isLoadingInvoice =
-    useIsFetching({ queryKey: ["InvoiceProcessings"] }) > 0;
+  let Auth = useStore("Auth");
+  let CrStocks = useStore("CrStocks");
+
+  const { thu_chi_cash, tong_hop_cash } = RolesHelpers.useRoles({
+    nameRoles: ["thu_chi_cash", "tong_hop_cash"],
+    auth: Auth,
+    CrStocks,
+  });
 
   useEffect(() => {
     setCountProcessings(Processings?.Count);
   }, [Processings]);
-
-  useEffect(() => {
-    if (isPopoverOpened) {
-      Promise.all([
-        queryClient.invalidateQueries(["ClientBirthDayCount"]),
-        queryClient.invalidateQueries(["InvoiceProcessings"]),
-      ]);
-    }
-  }, [isPopoverOpened]);
 
   const noBottomNav = useMemo(() => {
     return (
@@ -56,39 +54,177 @@ function NavigationPos({ pathname }) {
 
   return (
     <>
-      {["/admin/pos/clients/", "/admin/pos/calendar/", "/admin/pos/orders/"].includes(pathname) && (
-        <PickerSheet
-          Title="Bạn muốn thực hiện ?"
-          Options={[
-            {
-              Title: "Tạo đặt lịch mới",
-              onClick: (e) => {
-                f7.views.main.router.navigate(e.Path);
-              },
-              Path: "/admin/pos/calendar/add/",
-            },
-            {
-              Title: "Tạo khách hàng mới",
-              onClick: (e) => {
-                f7.views.main.router.navigate(e.Path);
-              },
-              Path: "/admin/pos/clients/add/",
-            },
-          ]}
-          Close={{
-            Title: "Đóng",
-          }}
-        >
-          {({ open }) => (
+      {[
+        "/admin/pos/clients/",
+        "/admin/pos/calendar/",
+        "/admin/pos/orders/",
+        "/admin/cash/",
+      ].includes(pathname) && (
+        <>
+          {CountProcessings > 0 && (
             <Link
-              onClick={open}
+              href="/admin/processings/"
               noLinkClass
-              className="button-to-popover fixed z-[600] bg-primary text-white w-[50px] h-[50px] rounded-full flex items-center justify-center shadow-fab right-4 bottom-[calc(var(--f7-toolbar-height)+16px+var(--f7-safe-area-bottom))]"
+              className="button-to-popover fixed z-[600] bg-danger text-white w-[50px] h-[50px] rounded-full flex items-center justify-center shadow-fab right-4 bottom-[calc(var(--f7-toolbar-height)+80px+var(--f7-safe-area-bottom))]"
             >
-              <PlusIcon className="w-7" />
+              <BellAlertIcon className="w-7 animate-ezs-bell" />
+              {CountProcessings > 0 ? (
+                <div className="absolute -top-px -right-px font-lato font-bold text-white bg-danger text-[11px] px-1 py-[2px] leading-none border border-white rounded-full">
+                  {CountProcessings}
+                </div>
+              ) : (
+                <></>
+              )}
             </Link>
           )}
-        </PickerSheet>
+
+          <PickerSheet
+            Title="Bạn muốn thực hiện ?"
+            Options={[
+              {
+                GroupTitle: "",
+                Options: [
+                  {
+                    Title: "Tạo khách hàng",
+                    onClick: (e) => {
+                      f7.views.main.router.navigate(e.Path);
+                    },
+                    Path: "/admin/pos/clients/add/",
+                  },
+                  {
+                    Title: "Tạo hoá đơn",
+                    component: ({ children, close, setHideForChild }) => (
+                      <PickerInvoiceNew
+                        onOpen={() => {
+                          setHideForChild(true);
+                        }}
+                        onClose={() => {
+                          setHideForChild(false);
+                          close();
+                        }}
+                        onOpenParent={() => setHideForChild(false)}
+                      >
+                        {({ open }) => (
+                          <div
+                            className="flex items-center justify-center h-[54px] border-b last:border-0 text-[15px] cursor-pointer"
+                            onClick={() => {
+                              open();
+                            }}
+                          >
+                            {children}
+                          </div>
+                        )}
+                      </PickerInvoiceNew>
+                    ),
+                  },
+                  {
+                    Title: "Tạo đặt lịch",
+                    onClick: (e) => {
+                      f7.views.main.router.navigate(e.Path);
+                    },
+                    Path: "/admin/pos/calendar/add/",
+                  },
+                ],
+              },
+              {
+                GroupTitle: "",
+                Options: [
+                  {
+                    Title: "Tạo thanh toán nợ",
+                    component: ({ children, close, setHideForChild }) => (
+                      <PickerAddDebt
+                        onOpen={() => {
+                          setHideForChild(true);
+                        }}
+                        onClose={() => {
+                          setHideForChild(false);
+                          close();
+                        }}
+                        onOpenParent={() => setHideForChild(false)}
+                      >
+                        {({ open }) => (
+                          <div
+                            className="flex items-center justify-center h-[54px] border-b last:border-0 text-[15px] cursor-pointer"
+                            onClick={() => {
+                              open();
+                            }}
+                          >
+                            {children}
+                          </div>
+                        )}
+                      </PickerAddDebt>
+                    ),
+                  },
+                  {
+                    Title: "Tạo chi / Thu khác",
+                    component: ({ children, close, setHideForChild }) => (
+                      <PickerCashAddEdit
+                        onOpen={() => {
+                          setHideForChild(true);
+                        }}
+                        onClose={() => {
+                          setHideForChild(false);
+                          close();
+                        }}
+                        onOpenParent={() => setHideForChild(false)}
+                      >
+                        {({ open }) => (
+                          <div
+                            className="flex items-center justify-center h-[54px] border-b last:border-0 text-[15px] cursor-pointer"
+                            onClick={() => {
+                              open();
+                            }}
+                          >
+                            {children}
+                          </div>
+                        )}
+                      </PickerCashAddEdit>
+                    ),
+                    hidden: !thu_chi_cash?.hasRight && !tong_hop_cash?.hasRight,
+                  },
+                ],
+              },
+              {
+                GroupTitle: "",
+                Options: [
+                  {
+                    Title: "Hoá đơn đang xử lý",
+                    onClick: (e) => {
+                      f7.views.main.router.navigate(e.Path);
+                    },
+                    Path: "/admin/pos/invoice-processings/",
+                    Count:
+                      InvoiceProcessings && InvoiceProcessings.length > 0
+                        ? InvoiceProcessings.filter(
+                            (x) => !x?.CheckIn?.CheckOutTime
+                          ).length
+                        : 0,
+                  },
+                ],
+              },
+            ]
+              .map((g) => ({
+                ...g,
+                Options: g.Options.filter(
+                  (o) => !o.hidden && (o.Count === undefined || o.Count > 0)
+                ),
+              }))
+              .filter((g) => g.Options.length > 0)}
+            // Close={{
+            //   Title: "Đóng",
+            // }}
+          >
+            {({ open }) => (
+              <Link
+                onClick={open}
+                noLinkClass
+                className="button-to-popover fixed z-[600] bg-primary text-white w-[50px] h-[50px] rounded-full flex items-center justify-center shadow-fab right-4 bottom-[calc(var(--f7-toolbar-height)+16px+var(--f7-safe-area-bottom))]"
+              >
+                <PlusIcon className="w-7" />
+              </Link>
+            )}
+          </PickerSheet>
+        </>
       )}
 
       <Toolbar
@@ -122,7 +258,7 @@ function NavigationPos({ pathname }) {
               <span className="text-[10px] mt-px leading-4">Bảng lịch</span>
             </div>
           </Link>
-          
+
           <Link href="/admin/pos/clients/">
             <div
               className={clsx(
@@ -141,9 +277,7 @@ function NavigationPos({ pathname }) {
             <div
               className={clsx(
                 "flex flex-col items-center justify-center pt-1",
-                pathname === "/admin/pos/orders/"
-                  ? "text-app"
-                  : "text-gray-600"
+                pathname === "/admin/pos/orders/" ? "text-app" : "text-gray-600"
               )}
             >
               <DocumentTextIcon className="w-6" />
@@ -151,124 +285,17 @@ function NavigationPos({ pathname }) {
             </div>
           </Link>
 
-          <Link
-            onClick={setIsPopoverOpened}
-            className="relative btn-popover-processings"
-          >
+          <Link href="/admin/cash/" noLinkClass className="relative">
             <div
               className={clsx(
                 "flex flex-col items-center justify-center pt-1",
-                [
-                  "/admin/processings/",
-                  "/admin/pos/invoice-processings/",
-                ].includes(pathname)
-                  ? "text-app"
-                  : "text-gray-600"
+                pathname === "/admin/cash/" ? "text-app" : "text-gray-600"
               )}
             >
-              <Square3Stack3DIcon className="w-6" />
-              <span className="text-[10px] mt-px leading-4">Cần xử lý</span>
+              <BanknotesIcon className="w-6" />
+              <span className="text-[10px] mt-px leading-4">Sổ quỹ</span>
             </div>
-            {isLoadingProcessings && (
-              <div className="absolute top-2 right-2 font-lato font-bold text-white bg-danger text-[11px] px-1 py-[2px] w-5 h-[15px] animate-pulse leading-none rounded"></div>
-            )}
-            {!isLoadingProcessings && (
-              <>
-                {CountProcessings > 0 ? (
-                  <div className="absolute top-2 right-2 font-lato font-bold text-white bg-danger text-[11px] px-1 py-[2px] leading-none rounded">
-                    {CountProcessings}
-                  </div>
-                ) : (
-                  <></>
-                )}
-              </>
-            )}
           </Link>
-
-          <Popover
-            targetEl={".btn-popover-processings"}
-            opened={isPopoverOpened}
-            className="popover-processings w-[210px]"
-            onPopoverClosed={() => setIsPopoverOpened(false)}
-          >
-            <div className="flex flex-col py-1">
-              <Link
-                className={clsx(
-                  "relative px-4 py-3 font-medium border-b last:border-0",
-                  pathname === "/admin/processings/" && "text-app"
-                )}
-                noLinkClass
-                onClick={() => {
-                  setIsPopoverOpened(false);
-                  f7.views.main.router.navigate("/admin/processings/");
-                }}
-              >
-                Cần xử lý
-                {isLoadingProcessings ? (
-                  <span className="w-5 animate-pulse absolute text-white bg-danger text-[11px] px-1.5 min-w-[15px] h-[17px] leading-none rounded-full flex items-center justify-center top-2/4 right-4 -translate-y-2/4 font-lato"></span>
-                ) : (
-                  <>
-                    {CountProcessings > 0 ? (
-                      <span className="absolute text-white bg-danger text-[11px] px-1.5 min-w-[15px] h-[17px] leading-none rounded-full flex items-center justify-center top-2/4 right-4 -translate-y-2/4 font-lato">
-                        {CountProcessings}
-                      </span>
-                    ) : (
-                      <></>
-                    )}
-                  </>
-                )}
-              </Link>
-              <Link
-                className={clsx(
-                  "relative px-4 py-3 font-medium border-b last:border-0",
-                  pathname === "/admin/pos/invoice-processings/" && "text-app"
-                )}
-                noLinkClass
-                onClick={() => {
-                  setIsPopoverOpened(false);
-                  f7.views.main.router.navigate(
-                    "/admin/pos/invoice-processings/"
-                  );
-                }}
-              >
-                Hoá đơn đang xử lý
-                {isLoadingInvoice ? (
-                  <span className="w-5 animate-pulse absolute text-white bg-danger text-[11px] px-1.5 min-w-[15px] h-[17px] leading-none rounded-full flex items-center justify-center top-2/4 right-4 -translate-y-2/4 font-lato"></span>
-                ) : (
-                  <>
-                    {InvoiceProcessings && InvoiceProcessings.length > 0 ? (
-                      <span className="absolute text-white bg-danger text-[11px] px-1.5 min-w-[15px] h-[17px] leading-none rounded-full flex items-center justify-center top-2/4 right-4 -translate-y-2/4 font-lato">
-                        {InvoiceProcessings &&
-                          InvoiceProcessings.filter(
-                            (x) => !x?.CheckIn?.CheckOutTime
-                          ).length}
-                      </span>
-                    ) : (
-                      <></>
-                    )}
-                  </>
-                )}
-              </Link>
-              <Link
-                className={clsx(
-                  "relative px-4 py-3 font-medium border-b last:border-0",
-                  pathname === "/admin/pos/clients/birthday/" && "text-app"
-                )}
-                noLinkClass
-                onClick={() => {
-                  setIsPopoverOpened(false);
-                  f7.views.main.router.navigate("/admin/pos/clients/birthday/");
-                }}
-              >
-                Khách sinh nhật
-                {ClientBirthDayCount?.day > 0 && (
-                  <span className="absolute text-white bg-danger text-[11px] px-1.5 min-w-[15px] h-[17px] leading-none rounded-full flex items-center justify-center top-2/4 right-4 -translate-y-2/4 font-lato">
-                    {ClientBirthDayCount?.day}
-                  </span>
-                )}
-              </Link>
-            </div>
-          </Popover>
 
           <Link panelOpen="right">
             <div

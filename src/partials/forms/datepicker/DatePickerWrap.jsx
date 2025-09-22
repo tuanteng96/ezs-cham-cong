@@ -19,7 +19,14 @@ const minuteList = Array(59)
   .fill()
   .map((_, i) => (i < 10 ? "0" + i : i.toString()));
 
-function DatePickerWrap({ children, value, format, onChange, label, showHeader = false }) {
+function DatePickerWrap({
+  children,
+  value,
+  format,
+  onChange,
+  label,
+  showHeader = false,
+}) {
   const [visible, setVisible] = useState(false);
   const [pickerValue, setPickerValue] = useState({
     minutes: "",
@@ -30,7 +37,7 @@ function DatePickerWrap({ children, value, format, onChange, label, showHeader =
     months: "",
     years: "",
   });
-  
+
   useEffect(() => {
     setPickerValue((prevState) => ({
       ...prevState,
@@ -62,13 +69,13 @@ function DatePickerWrap({ children, value, format, onChange, label, showHeader =
   };
 
   return (
-    <AnimatePresence initial={false}>
-      <>
-        {children({
-          open: open,
-        })}
-        {visible &&
-          createPortal(
+    <>
+      {children({
+        open: open,
+      })}
+      {createPortal(
+        <AnimatePresence>
+          {visible && (
             <div className="fixed z-[125001] inset-0 flex justify-end flex-col">
               <motion.div
                 key={visible}
@@ -160,7 +167,7 @@ function DatePickerWrap({ children, value, format, onChange, label, showHeader =
                         ))}
                       </Picker.Column>
                     )}
-                    
+
                     {format.includes("mm") && (
                       <Picker.Column key="minutes" name="minutes">
                         {minuteList.map((minute, i) => (
@@ -265,11 +272,12 @@ function DatePickerWrap({ children, value, format, onChange, label, showHeader =
                   </Picker>
                 </div>
               </motion.div>
-            </div>,
-            document.getElementById("framework7-root")
+            </div>
           )}
-      </>
-    </AnimatePresence>
+        </AnimatePresence>,
+        document.getElementById("framework7-root")
+      )}
+    </>
   );
 }
 

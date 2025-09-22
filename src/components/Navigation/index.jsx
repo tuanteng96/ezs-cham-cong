@@ -58,7 +58,7 @@ function Navigation(props) {
     }
   }, [CrStocks?.ID, pathname]);
 
-  if (pathname.includes("pos/")) {
+  if (pathname.includes("pos/") || ["/admin/cash/"].includes(pathname)) {
     return <NavigationPos pathname={pathname} />;
   }
 

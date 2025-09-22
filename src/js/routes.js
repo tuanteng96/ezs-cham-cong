@@ -61,6 +61,7 @@ import OrderReturnPage from "@/pages/Admin/pages/Orders/OrderReturn.jsx";
 
 import PrinterIPSettingsPage from "@/pages/Admin/pages/Utility/PrinterIPSettings.jsx";
 
+import PosInvoiceNewPage from "@/pages/Admin/pages/Pos/PosInvoiceNew.jsx";
 import PosLocksCalendarPage from "@/pages/Admin/pages/Pos/PosLocksCalendar.jsx";
 import PosRoomsCalendarPage from "@/pages/Admin/pages/Pos/PosRoomsCalendar.jsx";
 import PosSettingsCalendarPage from "@/pages/Admin/pages/Pos/PosSettingsCalendar.jsx";
@@ -70,6 +71,7 @@ import PosClassOsSchedulePage from "@/pages/Admin/pages/Pos/PosClassOsSchedule.j
 import PosClassRequestSchedulePage from "@/pages/Admin/pages/Pos/PosClassRequestSchedule.jsx";
 import PosClassReportSchedulePage from "@/pages/Admin/pages/Pos/PosClassReportSchedule.jsx";
 import PosClassStudentSchedulePage from "@/pages/Admin/pages/Pos/PosClassStudentSchedule.jsx";
+import PosClientInfoClientPage from "@/pages/Admin/pages/Pos/PosClientInfoClient.jsx";
 import AddEditCalendarPage from "@/pages/Admin/pages/Pos/AddEditCalendar.jsx";
 import EditOsCalendarPage from "@/pages/Admin/pages/Pos/EditOsCalendar.jsx";
 import EditOsMaterialsPage from "@/pages/Admin/pages/Pos/EditOsMaterials.jsx";
@@ -94,6 +96,8 @@ import StudentPage from "../pages/Courses/Student.jsx";
 
 import OsClassPage from "@/pages/OsClass/index.jsx";
 import OsClassViewPage from "@/pages/OsClass/OsClassView.jsx";
+
+import CashAdminPage from "@/pages/Admin/pages/Cash/index.jsx";
 
 var routes = [
   {
@@ -216,6 +220,14 @@ var routes = [
       transition: "f7-cover",
     },
     routes: [
+      {
+        path: "cash",
+        component: CashAdminPage,
+        options: {
+          transition: "f7-cover",
+        },
+        routes: [],
+      },
       {
         path: "processings/",
         component: ProcessingsPage,
@@ -381,19 +393,6 @@ var routes = [
                 },
               },
             ],
-            // beforeEnter: function ({ resolve, reject }) {
-            //   var router = this;
-            //   router.app.dialog.password(
-            //     "Đúng mật khẩu thì vào anh Ngọc nhé :)))",
-            //     (password) => {
-            //       if (password === "020202") {
-            //         resolve();
-            //       } else {
-            //         reject();
-            //       }
-            //     }
-            //   );
-            // },
           },
         ],
       },
@@ -424,7 +423,7 @@ var routes = [
             options: {
               transition: "f7-cover-v",
             },
-          },
+          }
         ],
       },
       {
@@ -483,6 +482,14 @@ var routes = [
       {
         path: "pos/invoice-processings",
         component: InvoiceProcessingsPage,
+        options: {
+          transition: "f7-cover",
+        },
+        routes: [],
+      },
+      {
+        path: "pos/new-invoice",
+        component: PosInvoiceNewPage,
         options: {
           transition: "f7-cover",
         },
@@ -562,6 +569,13 @@ var routes = [
           {
             path: "/add-prods",
             component: PosAddProdPage,
+            options: {
+              transition: "f7-cover-v",
+            },
+          },
+          {
+            path: "/info-client",
+            component: PosClientInfoClientPage,
             options: {
               transition: "f7-cover-v",
             },

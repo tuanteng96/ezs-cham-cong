@@ -446,19 +446,62 @@ function HomePage(props) {
                   </div>
                 </Link>
               </div>
-              <Link
-                noLinkClass
-                href="/technicians/"
-                className="flex flex-col items-center p-4 mb-4 text-center rounded-lg last:mb-0 bg-[#fef5e5]"
-              >
-                <div className="mb-1 font-semibold uppercase">
-                  Dành cho kỹ thuật viên
-                </div>
-                <div className="font-light text-gray-700">
-                  Danh sách dịch vụ đã & đang thực hiện, đặt lịch sắp tới. Được
-                  phân ca cho chính mình.
-                </div>
-              </Link>
+
+              {Auth.Info?.Groups && Auth.Info?.Groups.length > 0 && (
+                <>
+                  {Auth.Info?.Groups.findIndex((x) =>
+                    x.Title.toUpperCase().includes("SERVICE")
+                  ) > -1 && (
+                    <Link
+                      noLinkClass
+                      href="/technicians/"
+                      className="flex flex-col items-center p-4 mb-4 text-center rounded-lg last:mb-0 bg-[#fef5e5]"
+                    >
+                      <div className="mb-1 font-semibold uppercase">
+                        Dành cho kỹ thuật viên
+                      </div>
+                      <div className="font-light text-gray-700">
+                        Danh sách dịch vụ đã & đã thực hiện, đặt lịch do mình
+                        phụ trách.
+                      </div>
+                    </Link>
+                  )}
+                  {Auth.Info?.Groups.findIndex((x) =>
+                    x.Title.toUpperCase().includes("GIÁO VIÊN")
+                  ) > -1 && (
+                    <Link
+                      noLinkClass
+                      href="/courses/"
+                      className="flex flex-col items-center p-4 mb-4 text-center rounded-lg last:mb-0 bg-[#fef5e5]"
+                    >
+                      <div className="mb-1 font-semibold uppercase">
+                        Dành cho giáo viên
+                      </div>
+                      <div className="font-light text-gray-700">
+                        Danh sách các lớp đào tạo spa / thẩm mỹ viện do bạn quản
+                        lý
+                      </div>
+                    </Link>
+                  )}
+                  {Auth.Info?.Groups.findIndex((x) =>
+                    x.Title.toUpperCase().includes("HUẤN LUYỆN VIÊN")
+                  ) > -1 && (
+                    <Link
+                      noLinkClass
+                      href="/osclass/"
+                      className="flex flex-col items-center p-4 mb-4 text-center rounded-lg last:mb-0 bg-[#fef5e5]"
+                    >
+                      <div className="mb-1 font-semibold uppercase">
+                        Dành cho huấn luyện viên
+                      </div>
+                      <div className="font-light text-gray-700">
+                        Danh sách các lớp tập do bạn quản lý ( điểm danh, thống
+                        kê )
+                      </div>
+                    </Link>
+                  )}
+                </>
+              )}
             </div>
           </div>
         </div>

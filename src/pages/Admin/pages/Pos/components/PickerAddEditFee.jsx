@@ -9,7 +9,8 @@ import { useMutation, useQueryClient } from "react-query";
 import { toast } from "react-toastify";
 import { NumericFormat } from "react-number-format";
 import clsx from "clsx";
-import { getDatabase, ref, remove, set } from "firebase/database";
+import { ref, remove, set } from "firebase/database";
+import { useFirebase } from "@/hooks";
 
 const PHI_QUET_THE = ({ Client, Order, SettingFee, Auth, CrStocks, close }) => {
   const queryClient = useQueryClient();
@@ -267,7 +268,9 @@ const PHI_QUET_THE = ({ Client, Order, SettingFee, Auth, CrStocks, close }) => {
 const TIP = ({ Client, Order, SettingFee, Auth, CrStocks, Brand, close }) => {
   const FirebaseApp = useStore("FirebaseApp");
 
-  const database = FirebaseApp && getDatabase(FirebaseApp);
+  const firebase = useFirebase(FirebaseApp);
+
+  const database = firebase.db;
 
   const queryClient = useQueryClient();
   let { control, handleSubmit, reset, setValue, watch } = useForm({
@@ -496,7 +499,7 @@ const PHI_DICH_VU = ({
       Value: "",
       FeeTotal: "",
       isDisabled: false,
-      People: 1
+      People: 1,
     },
   });
 

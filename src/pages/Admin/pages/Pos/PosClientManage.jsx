@@ -6,26 +6,27 @@ import {
   ChevronDownIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
-  EllipsisHorizontalCircleIcon,
+  CreditCardIcon,
   EllipsisVerticalIcon,
   ExclamationTriangleIcon,
+  InformationCircleIcon,
+  ListBulletIcon,
   PlusIcon,
+  ShoppingBagIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
 import {
   Button,
   Input,
   Link,
-  NavLeft,
-  NavRight,
-  NavTitle,
   Navbar,
   Page,
   Popover,
   f7,
+  f7ready,
   useStore,
 } from "framework7-react";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import {
   PanelPos,
@@ -47,21 +48,28 @@ import {
 } from "../Orders/components";
 import { toast } from "react-toastify";
 import { RolesHelpers } from "@/helpers/RolesHelpers";
-import { getDatabase, ref, remove, set } from "firebase/database";
+import { ref, remove, set } from "firebase/database";
 import ArrayHelpers from "@/helpers/ArrayHelpers";
+import { useFirebase } from "@/hooks";
+import PickerGuestsOrder from "../Orders/components/PickerGuestsOrder";
 
 function PosClientManage({ f7route, f7router }) {
   let Auth = useStore("Auth");
   let CrStocks = useStore("CrStocks");
   let Brand = useStore("Brand");
 
+  let panelRef = useRef();
+
   const FirebaseApp = useStore("FirebaseApp");
 
-  const database = FirebaseApp && getDatabase(FirebaseApp);
+  const firebase = useFirebase(FirebaseApp);
+
+  const database = firebase.db;
 
   const queryClient = useQueryClient();
 
   let state = f7route?.query?.state ? JSON.parse(f7route?.query?.state) : null;
+  let add = f7route?.query?.add || "";
 
   const { adminTools_byStock } = RolesHelpers.useRoles({
     nameRoles: ["adminTools_byStock"],
@@ -339,26 +347,45 @@ function PosClientManage({ f7route, f7router }) {
   });
 
   useEffect(() => {
-    if (
-      !isLoading &&
-      !Order?.isLoading &&
-      !Client?.isLoading &&
-      !ServicesUse?.isLoading
-    ) {
+    let timer = null; // khai báo timer bên ngoài để cleanup hoạt động
+
+    f7ready(() => {
+      const add = f7route?.query?.add || "";
+      
+      // Ưu tiên kiểm tra add ngay lập tức
+      if (add === "prods") return;
+
+      // Đảm bảo các trạng thái load xong mới chạy
       if (
-        (!Order?.data?.OrderItems || Order?.data?.OrderItems.length === 0) &&
-        (!ServicesUse?.data || ServicesUse?.data.length === 0)
+        !isLoading &&
+        !Order?.isLoading &&
+        !Client?.isLoading &&
+        !ServicesUse?.isLoading
       ) {
-        if (
-          f7.panel.get(Dom7("#panel-pos"))?.containerEl?.f7Page?.position !==
-            "previous" &&
-          !f7.panel.get(Dom7("#panel-pos"))?.opened
-        ) {
-          f7.panel.open(Dom7("#panel-pos"));
+        const panel = f7.panel.get(Dom7("#panel-pos"));
+        const isPrev = panel?.containerEl?.f7Page?.position === "previous";
+        const opened = panel?.opened;
+
+        if (!isPrev && !opened) {
+          panel?.open();
+          timer = setTimeout(() => {
+            panelRef?.current?.openPopover();
+          }, 300);
         }
       }
-    }
-  }, [isLoading, Order?.isLoading, Client?.isLoading, ServicesUse?.isLoading]);
+    });
+
+    // Cleanup để tránh memory leak
+    return () => {
+      if (timer) clearTimeout(timer);
+    };
+  }, [
+    f7route?.query?.add, // bám trực tiếp vào route.query.add thay vì biến ngoài
+    isLoading,
+    Order?.isLoading,
+    Client?.isLoading,
+    ServicesUse?.isLoading,
+  ]);
 
   const onRemoveVoucher = () => {
     f7.dialog.confirm(
@@ -710,7 +737,7 @@ function PosClientManage({ f7route, f7router }) {
       noToolbar
     >
       <Navbar innerClass="!px-0 text-white" outline={false}>
-        <NavLeft className="h-full">
+        <div className="flex w-full h-full navbar-custom">
           <Link
             noLinkClass
             className="!text-white h-full flex item-center justify-center w-12"
@@ -724,80 +751,112 @@ function PosClientManage({ f7route, f7router }) {
           >
             <ChevronLeftIcon className="w-6" />
           </Link>
-        </NavLeft>
-        <NavTitle>
-          <Link
-            className={clsx(
-              "!text-white",
-              !Client?.isLoading &&
-                Client?.data?.CheckIn &&
-                Client?.data?.CheckIn?.StockID !== CrStocks?.ID &&
-                "pointer-events-none"
-            )}
-            noLinkClass
-            panelToggle="left"
-          >
-            <div className="truncate">{Client?.data?.FullName}</div>
-            <div className="text-[11px] leading-4 font-medium opacity-75 font-lato">
-              {Client?.data?.MobilePhone}
-            </div>
-          </Link>
-        </NavTitle>
-        <NavRight className="h-full">
-          {!isLoading &&
-          !Order?.isLoading &&
-          !Client?.isLoading &&
-          !ServicesUse?.isLoading ? (
+          <div className="flex-1 h-full">
             <Link
-              noLinkClass
               className={clsx(
-                "!text-white h-full flex item-center justify-center w-12",
+                "!text-white flex h-full flex-col justify-center",
                 !Client?.isLoading &&
                   Client?.data?.CheckIn &&
                   Client?.data?.CheckIn?.StockID !== CrStocks?.ID &&
                   "pointer-events-none"
               )}
+              noLinkClass
               panelToggle="left"
             >
-              <EllipsisHorizontalCircleIcon className="w-8" />
+              <div className="text-[15px] truncate w-[150px] leading-5 font-medium">
+                {Client?.data?.FullName}
+              </div>
+              <div className="text-[11px] leading-3 font-medium opacity-75 font-lato">
+                {Client?.data?.MobilePhone}
+              </div>
             </Link>
-          ) : (
-            <div className="flex justify-center w-12">
-              <svg
-                aria-hidden="true"
-                role="status"
-                className="inline w-6 text-white animate-spin"
-                viewBox="0 0 100 101"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
+          </div>
+          <div className="flex h-full pr-1">
+            {!isLoading &&
+            !Order?.isLoading &&
+            !Client?.isLoading &&
+            !ServicesUse?.isLoading ? (
+              <Link
+                panelToggle="left"
+                noLinkClass
+                className="flex flex-col items-center justify-center w-12 h-full text-center !text-white"
               >
-                <path
-                  d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z"
-                  fill="#E5E7EB"
-                />
-                <path
-                  d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z"
-                  fill="currentColor"
-                />
-              </svg>
-            </div>
-          )}
-        </NavRight>
+                <InformationCircleIcon className="w-6" />
+                <div className="text-[10px] leading-3 mt-px">T.Quan</div>
+              </Link>
+            ) : (
+              <Link
+                noLinkClass
+                className="flex flex-col items-center justify-center w-12 h-full text-center !text-white"
+              >
+                <svg
+                  aria-hidden="true"
+                  role="status"
+                  className="inline w-6 text-white animate-spin"
+                  viewBox="0 0 100 101"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z"
+                    fill="#E5E7EB"
+                  />
+                  <path
+                    d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z"
+                    fill="currentColor"
+                  />
+                </svg>
+              </Link>
+            )}
+
+            <Link
+              noLinkClass
+              className="flex flex-col items-center justify-center w-12 h-full text-center !text-white"
+              onClick={(e) => {
+                e.preventDefault();
+                f7.panel.close("left");
+                f7.views.main.router.navigate(
+                  `/admin/pos/manage/${f7route?.params?.id}/services`
+                );
+              }}
+            >
+              <CreditCardIcon className="w-6" />
+              <div className="text-[10px] leading-3 mt-px">Thẻ LT</div>
+            </Link>
+            <Link
+              noLinkClass
+              className="flex flex-col items-center justify-center w-12 h-full text-center !text-white"
+              onClick={(e) => {
+                e.preventDefault();
+                f7.panel.close("left");
+                f7.views.main.router.navigate(
+                  `/admin/pos/manage/${f7route?.params?.id}/diary/?activeTab=ServicesHistory`
+                );
+              }}
+            >
+              <ListBulletIcon className="w-6" />
+              <div className="text-[10px] leading-3 mt-px">L.Sử</div>
+            </Link>
+          </div>
+        </div>
+
         <div className="absolute h-[2px] w-full bottom-0 left-0 bg-[rgba(255,255,255,0.3)]"></div>
       </Navbar>
-      <div className="flex flex-col h-full">
+      <div className="flex flex-col h-full bg-[var(--f7-page-bg-color)]">
         {!Client?.isLoading &&
           Client?.data?.CheckIn &&
           Client?.data?.CheckIn?.StockID !== CrStocks?.ID && (
-            <div className="flex justify-center px-4 py-3.5 border-b text-danger">
-              <ExclamationTriangleIcon className="w-5 mr-2" />
-              Đang Check In tại {Client?.data?.CheckIn?.StockTitle}
+            <div className="px-3 pt-3">
+              <div className="flex justify-center px-4 py-3.5 border-b text-danger bg-white rounded-lg mb-3.5 last:mb-0">
+                <ExclamationTriangleIcon className="w-5 mr-2" />
+                Đang Check In tại {Client?.data?.CheckIn?.StockTitle}
+              </div>
             </div>
           )}
 
         <div
           className={clsx(
-            "overflow-auto grow",
+            "overflow-auto grow p-3.5",
             !Client?.isLoading &&
               Client?.data?.CheckIn &&
               Client?.data?.CheckIn?.StockID !== CrStocks?.ID &&
@@ -806,7 +865,7 @@ function PosClientManage({ f7route, f7router }) {
         >
           <>
             {(isLoading || Order?.isLoading || Client?.isLoading) && (
-              <>
+              <div className="bg-white rounded-lg mb-3.5 last:mb-0">
                 {Array(2)
                   .fill()
                   .map((_, index) => (
@@ -836,13 +895,26 @@ function PosClientManage({ f7route, f7router }) {
                       </div>
                     </div>
                   ))}
-              </>
+              </div>
             )}
             {!isLoading && !Order?.isLoading && !Client?.isLoading && (
               <>
                 {Order?.data?.OrderItems &&
                   Order?.data?.OrderItems.length > 0 && (
-                    <div className="border-b border-dashed">
+                    <div className="flex flex-col p-3 bg-white rounded-lg mb-3.5 last:mb-0">
+                      <Link
+                        className="flex items-center gap-3"
+                        noLinkClass
+                        popoverOpen=".popover-add-pos"
+                      >
+                        <div className="flex items-center justify-center w-10 h-10 bg-gray-200 rounded-full">
+                          <ShoppingBagIcon className="w-5" />
+                        </div>
+                        <div className="font-medium text-primary">
+                          Thêm mới mặt hàng, tích thẻ
+                        </div>
+                      </Link>
+                      {/* <div className="border-b border-dashed">
                       <Link
                         popoverOpen=".popover-add-pos"
                         noLinkClass
@@ -864,12 +936,13 @@ function PosClientManage({ f7route, f7router }) {
                           Thêm mới mặt hàng, tích thẻ
                         </span>
                       </Link>
+                    </div> */}
                     </div>
                   )}
 
                 {Order?.data?.OrderItems &&
                   Order?.data?.OrderItems.length > 0 && (
-                    <>
+                    <div className="bg-white rounded-lg mb-3.5 last:mb-0">
                       <div className="px-4 pt-4 uppercase font-bold text-[#B5B5C3] text-[12px]">
                         Đơn hàng mới
                       </div>
@@ -881,6 +954,7 @@ function PosClientManage({ f7route, f7router }) {
                             CheckInID={Client?.data?.CheckIn?.ID}
                             key={index}
                             Order={Order?.data?.Order}
+                            OrderItems={Order?.data?.OrderItems}
                           >
                             {({ open }) => (
                               <div
@@ -1088,7 +1162,7 @@ function PosClientManage({ f7route, f7router }) {
                           </PickerEditProd>
                         ))}
                       </div>
-                    </>
+                    </div>
                   )}
                 {(!Order?.data?.OrderItems ||
                   Order?.data?.OrderItems.length === 0) && (
@@ -1135,7 +1209,7 @@ function PosClientManage({ f7route, f7router }) {
           </>
 
           {ServicesUse?.isLoading && (
-            <div className="border-t">
+            <div className="bg-white mb-3.5 last:mb-0">
               {Array(2)
                 .fill()
                 .map((_, index) => (
@@ -1170,7 +1244,7 @@ function PosClientManage({ f7route, f7router }) {
           {!ServicesUse?.isLoading && (
             <>
               {ServicesUse?.data && ServicesUse?.data.length > 0 && (
-                <div className="border-t">
+                <div className="bg-white rounded-lg last:mb-0">
                   <div className="px-4 pt-4 uppercase font-bold text-[#B5B5C3] text-[12px]">
                     Dịch vụ đang sử dụng
                   </div>
@@ -1331,7 +1405,7 @@ function PosClientManage({ f7route, f7router }) {
 
         <div
           className={clsx(
-            "shadow-lg pb-safe-b",
+            "shadow-lg pb-safe-b bg-white",
             !Client?.isLoading &&
               Client?.data?.CheckIn &&
               Client?.data?.CheckIn?.StockID !== CrStocks?.ID &&
@@ -1407,7 +1481,7 @@ function PosClientManage({ f7route, f7router }) {
                       <Input
                         className="[&_input]:border-0 [&_input]:shadow-none [&_input]:placeholder:normal-case [&_input]:text-[15px] [&_input]:pl-14 pointer-events-none"
                         type="text"
-                        placeholder="Nhập mã giảm giá"
+                        placeholder="Mã giảm giá"
                         readonly
                       />
                     </div>
@@ -1783,6 +1857,28 @@ function PosClientManage({ f7route, f7router }) {
                   ) : (
                     <></>
                   )}
+                  {Brand?.Global?.Admin?.cai_dat_sl_khach &&
+                  Order?.data?.mck?.ID ? (
+                    <PickerGuestsOrder CheckInID={Order?.data?.mck}>
+                      {({ open }) => (
+                        <Link
+                          popoverClose
+                          className="flex justify-between p-3 font-medium border-b last:border-0"
+                          noLinkClass
+                          onClick={open}
+                        >
+                          Số khách
+                          {Order?.data?.mck?.GuestCount > 0 && (
+                            <div className="px-1.5 font-semibold text-xs text-white rounded bg-danger font-lato flex items-center">
+                              {Order?.data?.mck?.GuestCount}
+                            </div>
+                          )}
+                        </Link>
+                      )}
+                    </PickerGuestsOrder>
+                  ) : (
+                    <></>
+                  )}
                 </div>
               </Popover>
               <PickerPayments Order={Order?.data?.Order} Client={Client?.data}>
@@ -1876,7 +1972,7 @@ function PosClientManage({ f7route, f7router }) {
         </div>
       </Popover>
 
-      <PanelPos Client={Client?.data} />
+      <PanelPos Client={Client?.data} ref={panelRef} />
     </Page>
   );
 }

@@ -1,3 +1,4 @@
+import { data } from "dom7";
 import http from "../helpers/http";
 
 const AdminAPI = {
@@ -154,9 +155,9 @@ const AdminAPI = {
         },
       }
     ),
-  selectMaterials: ({ Key = "", Token }) =>
+  selectMaterials: ({ Key = "", Token, Catenames = "nvl" }) =>
     http.get(
-      `/api/gl/select2?cmd=prod&cateids=3298&includeSource=1&term=a&_type=query&q=${Key}`,
+      `/api/gl/select2?cmd=prod&cate_name=${Catenames}&includeSource=1&term=a&_type=query&q=${Key}`,
       {
         headers: {
           Authorization: `Bearer ${Token}`,
@@ -223,6 +224,18 @@ const AdminAPI = {
         },
       }
     ),
+  selectCashClassify: ({ Token }) =>
+    http.get(`/api/gl/select2?cmd=cash_customtype&_type=query`, {
+      headers: {
+        Authorization: `Bearer ${Token}`,
+      },
+    }),
+  selectCashMethod: ({ Token }) =>
+    http.get(`/api/gl/select2?cmd=methods&_type=query`, {
+      headers: {
+        Authorization: `Bearer ${Token}`,
+      },
+    }),
   createOldCardClient: ({ data, Token }) =>
     http.post(`/api/v3/Import24@MemberDones`, JSON.stringify(data), {
       headers: {
@@ -289,11 +302,19 @@ const AdminAPI = {
         Authorization: `Bearer ${Token}`,
       },
     }),
-  listClients: ({ Key = "", Token, pi = 1, ps = 15, StockID = "" }) =>
+  listClients: ({
+    Key = "",
+    Token,
+    pi = 1,
+    ps = 15,
+    StockID = "",
+    CrStockID = "",
+    isAdmin = false,
+  }) =>
     http.get(
       `/services/preview.aspx?cmd=search_member&key=${encodeURIComponent(
         Key
-      )}&typeSearch=sell&ps=${ps}&pi=${pi}&searchId=3&select=ID,FullName,MobilePhone,HomeAddress,ByStockID,Present,Source,AppInfo,BirthDate,TeleNote,Jobs,ReceiveInformation,Present,Photo&includes=GroupNames&isAdmin=true&__MemberCheckin=&__MemberMoney=0&__MyNoti=0&__AllNoti=0&__Birth=0&__MBirth=0&__Cate=false&__HasOrderService=0&__MemberGroups=false&__StaffID=0&__StockID=${StockID}&__Source=&__Tags=&from=top`,
+      )}&typeSearch=sell&ps=${ps}&pi=${pi}&searchId=3&select=ID,FullName,MobilePhone,HomeAddress,ByStockID,Present,Source,AppInfo,BirthDate,TeleNote,Jobs,ReceiveInformation,Present,Photo,CreateDate&includes=GroupNames&isAdmin=${isAdmin}&__MemberCheckin=&__MemberMoney=0&__MyNoti=0&__AllNoti=0&__Birth=0&__MBirth=0&__Cate=false&__HasOrderService=0&__MemberGroups=false&__StaffID=0&__StockID=${StockID}&__Source=&__Tags=&from=top&stockid=${CrStockID}`,
       {
         headers: {
           Authorization: `Bearer ${Token}`,
@@ -515,6 +536,12 @@ const AdminAPI = {
     }),
   clientsUpdateDiscountOrderId: ({ data, Token }) =>
     http.post(`/api/v3/common?cmd=priceorder_OrderAdd20`, data, {
+      headers: {
+        Authorization: `Bearer ${Token}`,
+      },
+    }),
+  clientsUpdateGuestOrderId: ({ data, Token }) =>
+    http.post(`/api/v3/MemberCheckIn@GuestCount`, data, {
       headers: {
         Authorization: `Bearer ${Token}`,
       },
@@ -1021,6 +1048,31 @@ const AdminAPI = {
         Authorization: `Bearer ${Token}`,
       },
     }),
+  listCashs: ({ params, Token }) =>
+    http.get(`/api/v3/cash`, {
+      headers: {
+        Authorization: `Bearer ${Token}`,
+      },
+      params,
+    }),
+  addEditCashs: ({ data, Token }) =>
+    http.post(`/api/v3/cash?cmd=save`, data, {
+      headers: {
+        Authorization: `Bearer ${Token}`,
+      },
+    }),
+  deleteCashs: ({ data, Token }) =>
+    http.post(`/api/v3/cash?cmd=delete`, data, {
+      headers: {
+        Authorization: `Bearer ${Token}`,
+      },
+    }),
+  withSourceCashs: ({ data, Token }) =>
+    http.post(`/api/v3/cash?cmd=get_with_source`, data, {
+      headers: {
+        Authorization: `Bearer ${Token}`,
+      },
+    })
 };
 
 export default AdminAPI;

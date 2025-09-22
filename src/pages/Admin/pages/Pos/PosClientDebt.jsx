@@ -21,7 +21,7 @@ import { toast } from "react-toastify";
 function PosClientDebt({ f7router, f7route }) {
   const queryClient = useQueryClient();
   let Auth = useStore("Auth");
-
+  
   const { data, isLoading, refetch } = useQuery({
     queryKey: ["ClientDebtID", { ID: f7route?.params?.id }],
     queryFn: async () => {

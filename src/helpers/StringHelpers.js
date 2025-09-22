@@ -13,13 +13,31 @@ const StringHelpers = {
     }
   },
   formatVNDPositive: (price) => {
-    if (!price || price === 0) {
-      return "0";
-    } else {
-      return Math.abs(price)
-        .toFixed(0)
-        .replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1.");
+    if (!price || price === 0) return "0";
+
+    const absPrice = Math.abs(price);
+
+    if (absPrice >= 10_000_000_000) {
+      // >= 10 tỷ
+      const ty = Math.floor(absPrice / 1_000_000_000); // phần tỷ
+      const remaining = absPrice % 1_000_000_000; // phần còn lại
+
+      let remStr = "";
+      if (remaining >= 1_000) {
+        // Lấy 3 chữ số đầu của phần còn lại chia 1.000 để ra k
+        remStr = `${Math.floor(remaining / 1_000_000)}${Math.floor(
+          (remaining % 1_000_000) / 1_000
+        )
+          .toString()
+          .padStart(2, "0")}k`;
+        // ví dụ 350.000.000 -> 350k
+      }
+
+      return `${ty} tỷ${remStr ? " " + remStr : ""}`;
     }
+
+    // Dưới 10 tỷ thì format bình thường
+    return absPrice.toFixed(0).replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1.");
   },
   fixedContentDomain: (content) => {
     if (!content) return "";
@@ -90,7 +108,11 @@ const StringHelpers = {
       obj.Background = "bg-success-light";
       return obj;
     }
-    if (item?.Status === "finish" && item?.AdminAction !== "KHOA_NO_KET_THUC_NO" && item?.AdminAction !== "TANG_DH_KET_THUC_NO") {
+    if (
+      item?.Status === "finish" &&
+      item?.AdminAction !== "KHOA_NO_KET_THUC_NO" &&
+      item?.AdminAction !== "TANG_DH_KET_THUC_NO"
+    ) {
       obj.Value = "Hoàn thành";
       obj.Color = "text-success";
       obj.Background = "bg-success-light";
@@ -109,10 +131,10 @@ const StringHelpers = {
       return obj;
     }
   },
-  formatQty : (v) =>  {
+  formatQty: (v) => {
     if (typeof v === "number") return v;
-    return parseFloat((v || '').replace(/\,/gmi, ''));
-  } 
+    return parseFloat((v || "").replace(/\,/gim, ""));
+  },
 };
 
 export default StringHelpers;

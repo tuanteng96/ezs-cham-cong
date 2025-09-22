@@ -37,7 +37,6 @@ import NoFound from "@/components/NoFound";
 import AdminAPI from "@/api/Admin.api";
 import { toast } from "react-toastify";
 import clsx from "clsx";
-import Dom7 from "dom7";
 import { MenuSubNavbar, PickerPriceProdAdd } from "./components";
 import InfiniteScroll from "react-infinite-scroll-component";
 
@@ -132,7 +131,7 @@ function PosAddProd({ f7route, f7router }) {
             ...item,
             Qty: 0,
           };
-          let index = stocks.findIndex((x) => x.DynamicID);
+          let index = stocks.findIndex((x) => x.DynamicID === item.DynamicID);
           if (index > -1) {
             obj.stockCount = stocks[index].stockCount;
           }
@@ -219,7 +218,7 @@ function PosAddProd({ f7route, f7router }) {
               ID: 0,
               Title: "Tất cả",
             },
-            ...ProdsCateQuery.data.filter((x) => x.ID !== 0),
+            ...ProdsCateQuery.data.filter((x) => x.ID !== 0 && x.ID !== 4),
           ],
         });
       }
@@ -229,10 +228,17 @@ function PosAddProd({ f7route, f7router }) {
   const addMutation = useMutation({
     mutationFn: async (body) => {
       let data = await AdminAPI.addOrderCheckIn(body);
-      AdminAPI.clientsPresentAppId({
+
+      await AdminAPI.clientsPresentAppId({
         MemberID: id,
         Token: Auth.token,
       });
+
+      const OrderItemsOld = await queryClient.getQueryData([
+        "OrderManageID",
+        { ID: CheckIn?.data?.ID },
+      ]);
+
       await Promise.all([
         queryClient.invalidateQueries(["OrderManageID"]),
         queryClient.invalidateQueries(["ServiceUseManageID"]),
@@ -245,7 +251,13 @@ function PosAddProd({ f7route, f7router }) {
           )
         );
       }
-      return data?.data?.data || null;
+      return data?.data?.data
+        ? {
+            ...data?.data?.data,
+            OrderItemsOld: OrderItemsOld?.OrderItems || null,
+            OrderItemsNew: data?.data?.data?.OrderItems || null,
+          }
+        : null;
     },
   });
 
@@ -261,9 +273,16 @@ function PosAddProd({ f7route, f7router }) {
         data: bodyFormDataCheckIn,
       });
 
+      let OrderItemsOld = [];
+
       let OrderRs = null;
 
       if (data?.mc?.ID) {
+        OrderItemsOld = await queryClient.getQueryData([
+          "OrderManageID",
+          { ID: CheckIn?.data?.ID },
+        ]);
+
         var bodyFormData = new FormData();
         bodyFormData.append("CheckInID", data?.mc?.ID);
         bodyFormData.append("arr", body.arr);
@@ -285,7 +304,13 @@ function PosAddProd({ f7route, f7router }) {
         queryClient.invalidateQueries(["ServiceUseManageID"]),
         queryClient.invalidateQueries(["InvoiceProcessings"]),
       ]);
-      return OrderRs?.data?.data || null;
+      return OrderRs?.data?.data
+        ? {
+            ...OrderRs?.data?.data,
+            OrderItemsOld: OrderItemsOld?.OrderItems || null,
+            OrderItemsNew: OrderRs?.data?.data?.OrderItems || null,
+          }
+        : null;
     },
   });
 
@@ -329,26 +354,6 @@ function PosAddProd({ f7route, f7router }) {
           onSuccess: (data) => {
             toast.success("Thêm vào hoá đơn thành công.");
             f7router.back();
-            // if (
-            //   selected.filter((x) => x.IsAddFee).length > 0 &&
-            //   f7router.previousRoute.path.includes("/admin/pos/calendar/os")
-            // ) {
-            //   f7.view.main.router.back(
-            //     `${f7router.previousRoute.url}&prevFee=${JSON.stringify(
-            //       selected
-            //         .filter((x) => x.IsAddFee)
-            //         .map((x) => ({
-            //           Title: x.Title,
-            //           Qty: x.Qty,
-            //         }))
-            //     )}`,
-            //     {
-            //       force: true,
-            //     }
-            //   );
-            // } else {
-            //   f7router.back();
-            // }
 
             if (data?.prePayedValue) {
               f7.dialog
@@ -365,6 +370,30 @@ function PosAddProd({ f7route, f7router }) {
                   ],
                 })
                 .open();
+            }
+
+            let oldItems = data.OrderItemsOld
+              ? data.OrderItemsOld.map((x) => ({ ...x, ID: x.ProdID }))
+              : [];
+
+            let addItems = selected || [];
+            let newItems = data.OrderItemsNew
+              ? data.OrderItemsNew.map((x) => ({ ...x, ID: x.ProdID }))
+              : [];
+
+            let notIncreased = ArrayHelpers.getNotIncreased(oldItems, addItems, newItems);
+
+            if (notIncreased && notIncreased.length > 0) {
+              setTimeout(() => {
+                toast.error(
+                  `Số lượng bán lớn hơn tồn kho : ${notIncreased
+                    .map((x) => x.Title)
+                    .join(", ")}`,
+                  {
+                    autoClose: 2500,
+                  }
+                );
+              }, 300);
             }
           },
         }
@@ -393,26 +422,6 @@ function PosAddProd({ f7route, f7router }) {
           onSuccess: (data) => {
             toast.success("Thêm vào hoá đơn thành công.");
             f7router.back();
-            // if (
-            //   selected.filter((x) => x.IsAddFee).length > 0 &&
-            //   f7router.previousRoute.path.includes("/admin/pos/calendar/os")
-            // ) {
-            //   f7.view.main.router(
-            //     `${f7router.previousRoute.url}&prevFee=${JSON.stringify(
-            //       selected
-            //         .filter((x) => x.IsAddFee)
-            //         .map((x) => ({
-            //           Title: x.Title,
-            //           Qty: x.Qty,
-            //         }))
-            //     )}`,
-            //     {
-            //       force: true,
-            //     }
-            //   );
-            // } else {
-            //   f7router.back();
-            // }
 
             if (data?.prePayedValue) {
               f7.dialog
@@ -429,6 +438,30 @@ function PosAddProd({ f7route, f7router }) {
                   ],
                 })
                 .open();
+            }
+
+            let oldItems = data.OrderItemsOld
+              ? data.OrderItemsOld.map((x) => ({ ...x, ID: x.ProdID }))
+              : [];
+
+            let addItems = selected || [];
+            let newItems = data.OrderItemsNew
+              ? data.OrderItemsNew.map((x) => ({ ...x, ID: x.ProdID }))
+              : [];
+
+            let notIncreased = ArrayHelpers.getNotIncreased(oldItems, addItems, newItems);
+
+            if (notIncreased && notIncreased.length > 0) {
+              setTimeout(() => {
+                toast.error(
+                  `Số lượng bán lớn hơn tồn kho : ${notIncreased
+                    .map((x) => x.Title)
+                    .join(", ")}`,
+                  {
+                    autoClose: 2500,
+                  }
+                );
+              }, 300);
             }
           },
         }
@@ -610,34 +643,34 @@ function PosAddProd({ f7route, f7router }) {
                           key={index}
                         >
                           {({ open }) => (
-                            <div className="overflow-hidden border rounded">
-                              <div
-                                className="relative aspect-square"
-                                onClick={() => {
-                                  let newSelected = [...selected];
-                                  let index = newSelected.findIndex(
-                                    (x) => x.ID === item.ID
-                                  );
-                                  if (index > -1) {
-                                    newSelected[index].Qty =
-                                      newSelected[index].Qty + 1;
-                                  } else {
-                                    if (
-                                      Brand?.Global?.Admin
-                                        ?.chinh_gia_0_dong_mua_hang
-                                    ) {
-                                      if (item.PriceProduct) {
-                                        newSelected.push({ ...item, Qty: 1 });
-                                      } else {
-                                        open();
-                                      }
-                                    } else {
+                            <div
+                              className="overflow-hidden border rounded"
+                              onClick={() => {
+                                let newSelected = [...selected];
+                                let index = newSelected.findIndex(
+                                  (x) => x.ID === item.ID
+                                );
+                                if (index > -1) {
+                                  newSelected[index].Qty =
+                                    newSelected[index].Qty + 1;
+                                } else {
+                                  if (
+                                    Brand?.Global?.Admin
+                                      ?.chinh_gia_0_dong_mua_hang
+                                  ) {
+                                    if (item.PriceProduct) {
                                       newSelected.push({ ...item, Qty: 1 });
+                                    } else {
+                                      open();
                                     }
+                                  } else {
+                                    newSelected.push({ ...item, Qty: 1 });
                                   }
-                                  setSelected(newSelected);
-                                }}
-                              >
+                                }
+                                setSelected(newSelected);
+                              }}
+                            >
+                              <div className="relative aspect-square">
                                 <img
                                   className="object-cover w-full h-full"
                                   src={AssetsHelpers.toAbsoluteUrl(
@@ -654,7 +687,6 @@ function PosAddProd({ f7route, f7router }) {
                                 />
                                 {!item.IsMoney &&
                                   !item.IsService &&
-                                  !item.IsNVL &&
                                   !item.IsAddFee &&
                                   !item.IsCourse && (
                                     <div className="absolute text-white bg-danger top-2 right-2 font-lato px-1.5 rounded">
@@ -683,79 +715,83 @@ function PosAddProd({ f7route, f7router }) {
                                     {StringHelpers.formatVND(item.PriceProduct)}
                                   </div>
                                 </div>
-                                <div className="px-3 mt-2.5 flex">
-                                  <button
-                                    type="button"
-                                    className="flex items-center justify-center h-8 text-white rounded-l w-9 bg-danger border-danger disabled:opacity-60"
-                                    onClick={() => {
-                                      let newSelected = [...selected];
-                                      let index = newSelected.findIndex(
-                                        (x) => x.ID === item.ID
-                                      );
-                                      if (index > -1) {
-                                        if (newSelected[index].Qty <= 1) {
-                                          newSelected = newSelected.filter(
-                                            (x) =>
-                                              x.ID !== newSelected[index].ID
-                                          );
-                                        } else {
-                                          newSelected[index].Qty =
-                                            newSelected[index].Qty - 1;
+                                {getValues(item) > 0 && (
+                                  <div className="px-3 mt-2.5 flex">
+                                    <button
+                                      type="button"
+                                      className="flex items-center justify-center h-8 text-white rounded-l w-9 bg-danger border-danger disabled:opacity-60"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        let newSelected = [...selected];
+                                        let index = newSelected.findIndex(
+                                          (x) => x.ID === item.ID
+                                        );
+                                        if (index > -1) {
+                                          if (newSelected[index].Qty <= 1) {
+                                            newSelected = newSelected.filter(
+                                              (x) =>
+                                                x.ID !== newSelected[index].ID
+                                            );
+                                          } else {
+                                            newSelected[index].Qty =
+                                              newSelected[index].Qty - 1;
+                                          }
                                         }
-                                      }
-                                      setSelected(newSelected);
-                                    }}
-                                    disabled={isDisabled({
-                                      Item: item,
-                                      Type: "Minus",
-                                    })}
-                                  >
-                                    <MinusIcon className="w-4" />
-                                  </button>
-                                  <div className="flex items-center justify-center flex-1 w-12 border-y font-lato">
-                                    {getValues(item)}
-                                  </div>
-                                  <button
-                                    type="button"
-                                    className="flex items-center justify-center h-8 text-white rounded-r w-9 bg-success border-danger"
-                                    disabled={isDisabled({
-                                      Item: item,
-                                      Type: "Plus",
-                                    })}
-                                    onClick={() => {
-                                      let newSelected = [...selected];
-                                      let index = newSelected.findIndex(
-                                        (x) => x.ID === item.ID
-                                      );
-                                      if (index > -1) {
-                                        newSelected[index].Qty =
-                                          newSelected[index].Qty + 1;
-                                      } else {
-                                        if (
-                                          Brand?.Global?.Admin
-                                            ?.chinh_gia_0_dong_mua_hang
-                                        ) {
-                                          if (item.PriceProduct) {
+                                        setSelected(newSelected);
+                                      }}
+                                      disabled={isDisabled({
+                                        Item: item,
+                                        Type: "Minus",
+                                      })}
+                                    >
+                                      <MinusIcon className="w-4" />
+                                    </button>
+                                    <div className="flex items-center justify-center flex-1 w-12 border-y font-lato">
+                                      {getValues(item)}
+                                    </div>
+                                    <button
+                                      type="button"
+                                      className="flex items-center justify-center h-8 text-white rounded-r w-9 bg-success border-danger"
+                                      disabled={isDisabled({
+                                        Item: item,
+                                        Type: "Plus",
+                                      })}
+                                      onClick={() => {
+                                        e.stopPropagation();
+                                        let newSelected = [...selected];
+                                        let index = newSelected.findIndex(
+                                          (x) => x.ID === item.ID
+                                        );
+                                        if (index > -1) {
+                                          newSelected[index].Qty =
+                                            newSelected[index].Qty + 1;
+                                        } else {
+                                          if (
+                                            Brand?.Global?.Admin
+                                              ?.chinh_gia_0_dong_mua_hang
+                                          ) {
+                                            if (item.PriceProduct) {
+                                              newSelected.push({
+                                                ...item,
+                                                Qty: 1,
+                                              });
+                                            } else {
+                                              open();
+                                            }
+                                          } else {
                                             newSelected.push({
                                               ...item,
                                               Qty: 1,
                                             });
-                                          } else {
-                                            open();
                                           }
-                                        } else {
-                                          newSelected.push({
-                                            ...item,
-                                            Qty: 1,
-                                          });
                                         }
-                                      }
-                                      setSelected(newSelected);
-                                    }}
-                                  >
-                                    <PlusIcon className="w-4" />
-                                  </button>
-                                </div>
+                                        setSelected(newSelected);
+                                      }}
+                                    >
+                                      <PlusIcon className="w-4" />
+                                    </button>
+                                  </div>
+                                )}
                               </div>
                             </div>
                           )}

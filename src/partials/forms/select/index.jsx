@@ -22,6 +22,9 @@ import SelectServiceRoots from "./SelectServiceRoots";
 import SelectServicesOsClass from "./SelectServicesOsClass";
 import SelectServicesTransfer from "./SelectServicesTransfer";
 import SelectUserLevels from "./SelectUserLevels";
+import SelectTagCash from "./SelectTagCash";
+import SelectMethodCash from "./SelectMethodCash";
+import SelectClassifyCash from "./SelectClassifyCash";
 
 export {
   SelectPicker,
@@ -47,5 +50,8 @@ export {
   SelectClassOs,
   SelectGroupRoles,
   SelectUserShifts,
-  SelectUserLevels
+  SelectUserLevels,
+  SelectTagCash,
+  SelectMethodCash,
+  SelectClassifyCash
 };

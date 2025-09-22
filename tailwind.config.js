@@ -50,8 +50,22 @@ module.exports = {
         "ezs-spin-1s": "spin 2s linear infinite",
         "ezs-wave-x": "waveX 2s linear infinite",
         "ezs-arrow-out": "arrowOut 1s ease-in-out infinite",
+        "ezs-bell": 'bell 1s ease-in-out infinite',
+
       },
       keyframes: {
+        bell: {
+          '0%, 100%': { transform: 'rotate(0deg)' },
+          '10%': { transform: 'rotate(15deg)' },
+          '20%': { transform: 'rotate(-15deg)' },
+          '30%': { transform: 'rotate(10deg)' },
+          '40%': { transform: 'rotate(-10deg)' },
+          '50%': { transform: 'rotate(5deg)' },
+          '60%': { transform: 'rotate(-5deg)' },
+          '70%': { transform: 'rotate(2deg)' },
+          '80%': { transform: 'rotate(-2deg)' },
+          '90%': { transform: 'rotate(1deg)' },
+        },
         fadeIn: {
           from: {
             opacity: 0,

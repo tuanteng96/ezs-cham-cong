@@ -1,10 +1,10 @@
 import AdminAPI from "@/api/Admin.api";
 import { useStore } from "framework7-react";
-import React, { useState } from "react";
+import React, { forwardRef, useState } from "react";
 import { useQuery } from "react-query";
 import { SelectPicker } from "..";
 
-function SelectClients(props) {
+const SelectClients = forwardRef((props, ref) => {
   let Auth = useStore("Auth");
   let CrStocks = useStore("CrStocks");
 
@@ -27,16 +27,17 @@ function SelectClients(props) {
           }))
         : [];
     },
-    keepPreviousData: true
+    keepPreviousData: true,
   });
 
   return (
     <SelectPicker
+      ref={ref}
       options={data || []}
       {...props}
       onInputFilter={(value) => setKey(value)}
     />
   );
-}
+});
 
 export default SelectClients;

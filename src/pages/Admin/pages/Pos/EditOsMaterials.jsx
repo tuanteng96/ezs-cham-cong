@@ -35,7 +35,8 @@ import { toast } from "react-toastify";
 
 function EditOsMaterials({ f7route }) {
   let Auth = useStore("Auth");
-
+  let Brand = useStore("Brand");
+  
   const queryClient = useQueryClient();
 
   let btnMaterialsRef = useRef();
@@ -333,6 +334,7 @@ function EditOsMaterials({ f7route }) {
                 control={control}
                 render={({ field, fieldState }) => (
                   <SelectMaterials
+                    Catenames={Brand?.Global?.Admin?.nvl_cho_dich_vu || "nvl"}
                     elRef={btnMaterialsRef}
                     isMulti
                     isRequired={false}

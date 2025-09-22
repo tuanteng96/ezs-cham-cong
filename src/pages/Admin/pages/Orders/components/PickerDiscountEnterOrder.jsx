@@ -134,11 +134,11 @@ function PickerDiscountEnterOrder({
   let { discount } = watch();
 
   return (
-    <AnimatePresence initial={false}>
-      <>
-        {children({ open, close })}
-        {visible &&
-          createPortal(
+    <>
+      {children({ open, close })}
+      {createPortal(
+        <AnimatePresence initial={false}>
+          {visible && (
             <div className="fixed z-[125001] inset-0 flex justify-end flex-col">
               <motion.div
                 key={visible}
@@ -230,11 +230,12 @@ function PickerDiscountEnterOrder({
                   </div>
                 </form>
               </motion.div>
-            </div>,
-            document.getElementById("framework7-root")
+            </div>
           )}
-      </>
-    </AnimatePresence>
+        </AnimatePresence>,
+        document.getElementById("framework7-root")
+      )}
+    </>
   );
 }
 

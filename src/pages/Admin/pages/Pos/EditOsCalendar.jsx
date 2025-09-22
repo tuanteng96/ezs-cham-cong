@@ -1,6 +1,7 @@
 import PromHelpers from "@/helpers/PromHelpers";
 import {
   BanknotesIcon,
+  ChevronDownIcon,
   ChevronLeftIcon,
   ChevronUpIcon,
   Cog6ToothIcon,
@@ -45,6 +46,7 @@ import {
 } from "./components";
 import { UploadImages } from "@/partials/forms/files";
 import { Fancybox } from "@fancyapps/ui";
+import { Disclosure } from "@/partials/components";
 
 const AutoSalaryMethodOptions = [
   {
@@ -183,7 +185,7 @@ function EditOsCalendar({ f7route, f7router }) {
           Status = "doing";
         }
       }
-
+      
       return rs
         ? { ...rs, Materials, ContextJSONApi, Status, rsStatus: rs?.Status }
         : null;
@@ -789,7 +791,7 @@ function EditOsCalendar({ f7route, f7router }) {
         <div className="absolute h-[2px] w-full bottom-0 left-0 bg-[rgba(255,255,255,0.3)]"></div>
       </Navbar>
       <form
-        className="flex flex-col h-full pb-safe-b"
+        className="flex flex-col h-full pb-safe-b bg-[var(--f7-page-bg-color)]"
         onSubmit={handleSubmit(onSubmit)}
       >
         {Os?.isLoading && (
@@ -822,8 +824,13 @@ function EditOsCalendar({ f7route, f7router }) {
         {!Os?.isLoading && (
           <>
             <div className="p-4 overflow-auto grow page-scrollbar">
-              <div className="mb-3.5 last:mb-0">
-                <div className="mb-px">Thời gian / Cơ sở</div>
+              <div className="mb-3.5 last:mb-0 bg-white p-4 rounded-lg">
+                <div className="mb-1.5">
+                  Thời gian
+                  {pos_mng?.StockRoles && pos_mng?.StockRoles.length !== 1 && (
+                    <span className="pl-1">/ Cơ sở</span>
+                  )}
+                </div>
                 <Controller
                   name="date"
                   control={control}
@@ -894,131 +901,161 @@ function EditOsCalendar({ f7route, f7router }) {
                 )}
               </div>
               {Os?.data?.hasFees && (
-                <div className="mb-3.5 last:mb-0 border rounded">
-                  <div className="flex justify-between p-4 mb-px bg-gray-100">
-                    <div className="font-medium">Phụ phí</div>
-
-                    {isAddFreeShow() && (
-                      <Link
-                        noLinkClass
-                        className="flex font-medium text-primary"
-                        href={`/admin/pos/manage/${
-                          Os?.data?.MemberID
-                        }/add-prods?filters=${JSON.stringify({
-                          cateid: "890",
-                        })}&prevState=${JSON.stringify({
-                          invalidateQueries: ["OsDetailID"],
-                          OrderServiceID: Os?.data?.ID,
-                          MemberID: Os?.data?.MemberID,
-                        })}`}
-                      >
-                        <PlusIcon className="w-4 mr-1" />
-                        Mua mới phụ phí
-                      </Link>
-                    )}
-                  </div>
-                  <div className="p-4">
-                    {fieldsFee &&
-                      fieldsFee?.map((item, index) => (
-                        <div className="mb-3.5 last:mb-0" key={item.id}>
-                          <div className="mb-px text-gray-500">
-                            {item.Title}
+                <>
+                  <Disclosure initialState={fieldsFee && fieldsFee.length > 0}>
+                    {({ isOpen, toggle }) => (
+                      <div className="mb-3.5 last:mb-0 bg-white rounded-lg overflow-hidden">
+                        <div className="flex justify-between p-4 mb-px bg-gray-50">
+                          <div
+                            className="flex gap-1.5 font-medium"
+                            onClick={toggle}
+                          >
+                            Phụ phí
+                            {fieldsFee && fieldsFee.length > 0 && (
+                              <span className="pl-1">({fieldsFee.length})</span>
+                            )}
+                            <ChevronDownIcon className="w-5 text-gray-600" />
                           </div>
-                          <div>
-                            <Controller
-                              name={`fee[${index}].Remain`}
-                              control={control}
-                              render={({ field, fieldState }) => (
-                                <SelectPicker
-                                  isClearable={false}
-                                  placeholder="Số lượng"
-                                  value={field.value}
-                                  options={item?.Remains || []}
-                                  label="Số lượng"
-                                  onChange={(val) => {
-                                    field.onChange(val || null);
-                                    if (appPOS) {
-                                      appPOS
-                                        .setOs(
-                                          {
-                                            ...Os?.data,
-                                            AutoSalaryMethod:
-                                              AutoSalaryMethod?.value,
-                                          },
-                                          {
-                                            action: "TINH_LUONG",
-                                            data: {
-                                              feeList: fee
-                                                ? fee.map((x) => ({
-                                                    ...x,
-                                                    Assign:
-                                                      x?.Remain?.value || 0,
-                                                  }))
-                                                : [],
-                                              Staffs: Staffs
-                                                ? Staffs.map((m) => ({
-                                                    UserID: m?.value,
-                                                    FullName: m?.label,
-                                                    Value: 0,
-                                                    feeList: fee
-                                                      ? fee
-                                                          .filter(
-                                                            (x) =>
-                                                              Number(
-                                                                x?.Remain?.value
-                                                              ) > 0
-                                                          )
-                                                          .map((x) => ({
+
+                          {isAddFreeShow() && (
+                            <Link
+                              noLinkClass
+                              className="flex font-medium text-primary"
+                              href={`/admin/pos/manage/${
+                                Os?.data?.MemberID
+                              }/add-prods?filters=${JSON.stringify({
+                                cateid: "890",
+                              })}&prevState=${JSON.stringify({
+                                invalidateQueries: ["OsDetailID"],
+                                OrderServiceID: Os?.data?.ID,
+                                MemberID: Os?.data?.MemberID,
+                              })}`}
+                            >
+                              <PlusIcon className="w-4 mr-1" />
+                              Mua mới phụ phí
+                            </Link>
+                          )}
+                        </div>
+                        {isOpen && (
+                          <div className="p-4">
+                            {fieldsFee &&
+                              fieldsFee?.map((item, index) => (
+                                <div className="mb-3.5 last:mb-0" key={item.id}>
+                                  <div className="mb-px text-gray-500">
+                                    {item.Title}
+                                  </div>
+                                  <div>
+                                    <Controller
+                                      name={`fee[${index}].Remain`}
+                                      control={control}
+                                      render={({ field, fieldState }) => (
+                                        <SelectPicker
+                                          isClearable={false}
+                                          placeholder="Số lượng"
+                                          value={field.value}
+                                          options={item?.Remains || []}
+                                          label="Số lượng"
+                                          onChange={(val) => {
+                                            field.onChange(val || null);
+                                            if (appPOS) {
+                                              appPOS
+                                                .setOs(
+                                                  {
+                                                    ...Os?.data,
+                                                    AutoSalaryMethod:
+                                                      AutoSalaryMethod?.value,
+                                                  },
+                                                  {
+                                                    action: "TINH_LUONG",
+                                                    data: {
+                                                      feeList: fee
+                                                        ? fee.map((x) => ({
                                                             ...x,
                                                             Assign:
                                                               x?.Remain
                                                                 ?.value || 0,
                                                           }))
-                                                      : [],
-                                                  }))
-                                                : [],
-                                            },
+                                                        : [],
+                                                      Staffs: Staffs
+                                                        ? Staffs.map((m) => ({
+                                                            UserID: m?.value,
+                                                            FullName: m?.label,
+                                                            Value: 0,
+                                                            feeList: fee
+                                                              ? fee
+                                                                  .filter(
+                                                                    (x) =>
+                                                                      Number(
+                                                                        x
+                                                                          ?.Remain
+                                                                          ?.value
+                                                                      ) > 0
+                                                                  )
+                                                                  .map((x) => ({
+                                                                    ...x,
+                                                                    Assign:
+                                                                      x?.Remain
+                                                                        ?.value ||
+                                                                      0,
+                                                                  }))
+                                                              : [],
+                                                          }))
+                                                        : [],
+                                                    },
+                                                  }
+                                                )
+                                                .then((os) => {
+                                                  setValue(
+                                                    "Staffs",
+                                                    os?.Staffs?.map((x) => ({
+                                                      ...x,
+                                                      label: x.FullName,
+                                                      value: x.UserID,
+                                                      Value:
+                                                        x.Salary || x.Value,
+                                                      raw: x.Salary || x.Value,
+                                                      feeList: x.feeList
+                                                        ? x.feeList.map(
+                                                            (f) => ({
+                                                              ...f,
+                                                              raw: f.Value,
+                                                            })
+                                                          )
+                                                        : [],
+                                                    }))
+                                                  );
+                                                })
+                                                .catch((e) => console.log(e));
+                                            }
+                                          }}
+                                          errorMessage={
+                                            fieldState?.error?.message
                                           }
-                                        )
-                                        .then((os) => {
-                                          setValue(
-                                            "Staffs",
-                                            os?.Staffs?.map((x) => ({
-                                              ...x,
-                                              label: x.FullName,
-                                              value: x.UserID,
-                                              Value: x.Salary || x.Value,
-                                              raw: x.Salary || x.Value,
-                                              feeList: x.feeList
-                                                ? x.feeList.map((f) => ({
-                                                    ...f,
-                                                    raw: f.Value,
-                                                  }))
-                                                : [],
-                                            }))
-                                          );
-                                        })
-                                        .catch((e) => console.log(e));
-                                    }
-                                  }}
-                                  errorMessage={fieldState?.error?.message}
-                                  errorMessageForce={fieldState?.invalid}
-                                />
-                              )}
-                            />
+                                          errorMessageForce={
+                                            fieldState?.invalid
+                                          }
+                                        />
+                                      )}
+                                    />
+                                  </div>
+                                </div>
+                              ))}
+                            {(!fieldsFee || fieldsFee.length === 0) && (
+                              <div className="font-light text-gray-600">
+                                Chưa có
+                              </div>
+                            )}
                           </div>
-                        </div>
-                      ))}
-                    {(!fieldsFee || fieldsFee.length === 0) && (
-                      <div className="font-light text-gray-600">Chưa có</div>
+                        )}
+                      </div>
                     )}
-                  </div>
-                </div>
+                  </Disclosure>
+                </>
               )}
 
-              <div className="mb-3.5 last:mb-0">
-                <div className="border rounded">
-                  <div className="flex justify-between p-4 mb-px bg-gray-100">
+              <div className="mb-3.5 last:mb-0 bg-white rounded-lg overflow-hidden">
+                <div>
+                  <div className="flex justify-between p-4 mb-px bg-gray-50">
                     <div
                       className="flex font-medium"
                       onClick={() => setIsAutoSalaryMethod(!IsAutoSalaryMethod)}
@@ -1070,172 +1107,162 @@ function EditOsCalendar({ f7route, f7router }) {
                       </Link>
                     )}
                   </div>
-                  <div className="p-4">
-                    {fieldsStaffs && fieldsStaffs.length > 0 && (
-                      <>
-                        {fieldsStaffs.map((item, index) => (
-                          <div
-                            className="mb-3 pb-3.5 border-b border-dashed last:mb-0 last:pb-0 last:border-0"
-                            key={item.id}
-                          >
-                            <div className="mb-1.5 flex justify-between items-center">
-                              <div className="font-medium text-gray-500">
-                                {item.FullName}
-                              </div>
-                              <div
-                                onClick={() =>
-                                  f7.dialog.confirm(
-                                    "Xác nhận loại bỏ thưởng cho nhân viên này ? ",
-                                    () => remove(index)
-                                  )
-                                }
-                              >
-                                <XCircleIcon className="w-5 text-danger" />
-                              </div>
+                  {fieldsStaffs && fieldsStaffs.length > 0 && (
+                    <div className="px-4 pt-4">
+                      {fieldsStaffs.map((item, index) => (
+                        <div
+                          className="mb-3 pb-3.5 border-b border-dashed last:mb-0 last:pb-0 last:border-0"
+                          key={item.id}
+                        >
+                          <div className="mb-1.5 flex justify-between items-center last:mb-0">
+                            <div className="font-medium">{item.FullName}</div>
+                            <div
+                              onClick={() =>
+                                f7.dialog.confirm(
+                                  "Xác nhận loại bỏ thưởng cho nhân viên này ? ",
+                                  () => remove(index)
+                                )
+                              }
+                            >
+                              <XCircleIcon className="w-5 text-danger" />
                             </div>
-                            <div className="mb-1.5">
-                              <Controller
-                                name={`Staffs[${index}].Value`}
-                                control={control}
-                                render={({ field, fieldState }) => (
-                                  <div className="flex">
-                                    <div className="bg-gray-100 px-4 rounded-s w-[100px] flex items-center border-l border-t border-b border-[#d5d7da] text-[13px]">
-                                      Lương ca
-                                    </div>
-                                    <div className="relative flex-1">
-                                      <NumericFormat
-                                        disabled={
-                                          Brand?.Global?.Admin
-                                            ?.cam_sua_luong_tour
-                                            ? !adminTools_byStock?.hasRight
-                                            : Brand?.Global?.Admin
-                                                ?.cam_sua_luong_tour
-                                        }
-                                        className={clsx(
-                                          "w-full input-number-format border shadow-[0_4px_6px_0_rgba(16,25,40,.06)] rounded-s-none rounded-e py-3 px-4 focus:border-primary",
-                                          fieldState?.invalid
-                                            ? "border-danger"
-                                            : "border-[#d5d7da]"
-                                        )}
-                                        type="text"
-                                        autoComplete="off"
-                                        thousandSeparator={true}
-                                        placeholder="Nhập số tiền"
-                                        value={field.value}
-                                        onValueChange={(val) =>
-                                          field.onChange(val.floatValue || "")
-                                        }
-                                        onFocus={(e) =>
-                                          KeyboardsHelper.setAndroid({
-                                            Type: "body",
-                                            Event: e,
-                                          })
-                                        }
-                                      />
-                                      {field.value ? (
-                                        <div
-                                          className="absolute top-0 right-0 flex items-center justify-center w-12 h-full"
-                                          onClick={() => {
-                                            if (
-                                              Brand?.Global?.Admin
-                                                ?.cam_sua_luong_tour
-                                                ? !adminTools_byStock?.hasRight
-                                                : Brand?.Global?.Admin
-                                                    ?.cam_sua_luong_tour
-                                            ) {
-                                              return;
-                                            }
-                                            field.onChange("");
-                                          }}
-                                        >
-                                          <XMarkIcon className="w-5" />
-                                        </div>
-                                      ) : (
-                                        <></>
-                                      )}
-                                    </div>
-                                  </div>
-                                )}
-                              />
-                            </div>
-                            {item.feeList &&
-                              item.feeList.map((fe, idx) => (
-                                <div className="mb-1.5 last:mb-0" key={idx}>
-                                  <Controller
-                                    name={`Staffs[${index}].feeList[${idx}].Value`}
-                                    control={control}
-                                    render={({ field, fieldState }) => (
-                                      <div className="flex">
-                                        <div className="bg-gray-100 px-4 rounded-s w-[100px] flex items-center border-l border-t border-b border-[#d5d7da] text-[13px]">
-                                          PP [{idx + 1}]
-                                        </div>
-                                        <div className="relative flex-1">
-                                          <NumericFormat
-                                            disabled={
-                                              Brand?.Global?.Admin
-                                                ?.cam_sua_luong_tour
-                                                ? !adminTools_byStock?.hasRight
-                                                : Brand?.Global?.Admin
-                                                    ?.cam_sua_luong_tour
-                                            }
-                                            className={clsx(
-                                              "w-full input-number-format border shadow-[0_4px_6px_0_rgba(16,25,40,.06)] rounded-s-none rounded-e py-3 px-4 focus:border-primary",
-                                              fieldState?.invalid
-                                                ? "border-danger"
-                                                : "border-[#d5d7da]"
-                                            )}
-                                            type="text"
-                                            autoComplete="off"
-                                            thousandSeparator={true}
-                                            placeholder="Nhập số tiền"
-                                            value={field.value}
-                                            onValueChange={(val) =>
-                                              field.onChange(
-                                                val.floatValue || ""
-                                              )
-                                            }
-                                            onFocus={(e) =>
-                                              KeyboardsHelper.setAndroid({
-                                                Type: "body",
-                                                Event: e,
-                                              })
-                                            }
-                                          />
-                                          {field.value ? (
-                                            <div
-                                              className="absolute top-0 right-0 flex items-center justify-center w-12 h-full"
-                                              onClick={() => {
-                                                if (
-                                                  Brand?.Global?.Admin
-                                                    ?.cam_sua_luong_tour
-                                                    ? !adminTools_byStock?.hasRight
-                                                    : Brand?.Global?.Admin
-                                                        ?.cam_sua_luong_tour
-                                                ) {
-                                                  return;
-                                                }
-                                                field.onChange("");
-                                              }}
-                                            >
-                                              <XMarkIcon className="w-5" />
-                                            </div>
-                                          ) : (
-                                            <></>
-                                          )}
-                                        </div>
-                                      </div>
-                                    )}
-                                  />
-                                </div>
-                              ))}
                           </div>
-                        ))}
-                      </>
-                    )}
-                    {(!fieldsStaffs || fieldsStaffs.length === 0) && (
-                      <div className="font-light text-gray-600">Chưa có</div>
-                    )}
-                  </div>
+                          <div className="mb-1.5 last:mb-0">
+                            <Controller
+                              name={`Staffs[${index}].Value`}
+                              control={control}
+                              render={({ field, fieldState }) => (
+                                <div className="flex">
+                                  <div className="bg-gray-100 px-4 rounded-s w-[100px] flex items-center border-l border-t border-b border-[#d5d7da] text-[13px]">
+                                    Lương ca
+                                  </div>
+                                  <div className="relative flex-1">
+                                    <NumericFormat
+                                      disabled={
+                                        Brand?.Global?.Admin?.cam_sua_luong_tour
+                                          ? !adminTools_byStock?.hasRight
+                                          : Brand?.Global?.Admin
+                                              ?.cam_sua_luong_tour
+                                      }
+                                      className={clsx(
+                                        "w-full input-number-format border shadow-[0_4px_6px_0_rgba(16,25,40,.06)] rounded-s-none rounded-e py-3 px-4 focus:border-primary",
+                                        fieldState?.invalid
+                                          ? "border-danger"
+                                          : "border-[#d5d7da]"
+                                      )}
+                                      type="text"
+                                      autoComplete="off"
+                                      thousandSeparator={true}
+                                      placeholder="Nhập số tiền"
+                                      value={field.value}
+                                      onValueChange={(val) =>
+                                        field.onChange(val.floatValue || "")
+                                      }
+                                      onFocus={(e) =>
+                                        KeyboardsHelper.setAndroid({
+                                          Type: "body",
+                                          Event: e,
+                                        })
+                                      }
+                                    />
+                                    {field.value ? (
+                                      <div
+                                        className="absolute top-0 right-0 flex items-center justify-center w-12 h-full"
+                                        onClick={() => {
+                                          if (
+                                            Brand?.Global?.Admin
+                                              ?.cam_sua_luong_tour
+                                              ? !adminTools_byStock?.hasRight
+                                              : Brand?.Global?.Admin
+                                                  ?.cam_sua_luong_tour
+                                          ) {
+                                            return;
+                                          }
+                                          field.onChange("");
+                                        }}
+                                      >
+                                        <XMarkIcon className="w-5" />
+                                      </div>
+                                    ) : (
+                                      <></>
+                                    )}
+                                  </div>
+                                </div>
+                              )}
+                            />
+                          </div>
+                          {item.feeList &&
+                            item.feeList.map((fe, idx) => (
+                              <div className="mb-1.5 last:mb-0" key={idx}>
+                                <Controller
+                                  name={`Staffs[${index}].feeList[${idx}].Value`}
+                                  control={control}
+                                  render={({ field, fieldState }) => (
+                                    <div className="flex">
+                                      <div className="bg-gray-100 px-4 rounded-s w-[100px] flex items-center border-l border-t border-b border-[#d5d7da] text-[13px]">
+                                        PP [{idx + 1}]
+                                      </div>
+                                      <div className="relative flex-1">
+                                        <NumericFormat
+                                          disabled={
+                                            Brand?.Global?.Admin
+                                              ?.cam_sua_luong_tour
+                                              ? !adminTools_byStock?.hasRight
+                                              : Brand?.Global?.Admin
+                                                  ?.cam_sua_luong_tour
+                                          }
+                                          className={clsx(
+                                            "w-full input-number-format border shadow-[0_4px_6px_0_rgba(16,25,40,.06)] rounded-s-none rounded-e py-3 px-4 focus:border-primary",
+                                            fieldState?.invalid
+                                              ? "border-danger"
+                                              : "border-[#d5d7da]"
+                                          )}
+                                          type="text"
+                                          autoComplete="off"
+                                          thousandSeparator={true}
+                                          placeholder="Nhập số tiền"
+                                          value={field.value}
+                                          onValueChange={(val) =>
+                                            field.onChange(val.floatValue || "")
+                                          }
+                                          onFocus={(e) =>
+                                            KeyboardsHelper.setAndroid({
+                                              Type: "body",
+                                              Event: e,
+                                            })
+                                          }
+                                        />
+                                        {field.value ? (
+                                          <div
+                                            className="absolute top-0 right-0 flex items-center justify-center w-12 h-full"
+                                            onClick={() => {
+                                              if (
+                                                Brand?.Global?.Admin
+                                                  ?.cam_sua_luong_tour
+                                                  ? !adminTools_byStock?.hasRight
+                                                  : Brand?.Global?.Admin
+                                                      ?.cam_sua_luong_tour
+                                              ) {
+                                                return;
+                                              }
+                                              field.onChange("");
+                                            }}
+                                          >
+                                            <XMarkIcon className="w-5" />
+                                          </div>
+                                        ) : (
+                                          <></>
+                                        )}
+                                      </div>
+                                    </div>
+                                  )}
+                                />
+                              </div>
+                            ))}
+                        </div>
+                      ))}
+                    </div>
+                  )}
 
                   <div className="hidden">
                     <Controller
@@ -1411,8 +1438,9 @@ function EditOsCalendar({ f7route, f7router }) {
                     />
                   </div>
                 </div>
+
                 {IsAutoSalaryMethod && (
-                  <div className="mt-2">
+                  <div className="p-4">
                     <Controller
                       name={`AutoSalaryMethod`}
                       control={control}
@@ -1489,255 +1517,295 @@ function EditOsCalendar({ f7route, f7router }) {
               {Brand?.Global?.Admin?.isRooms &&
                 RoomsList &&
                 RoomsList.length > 0 && (
-                  <div className="mb-3.5 last:mb-0">
-                    <div className="mb-px">Giường</div>
-                    <Controller
-                      name="roomid"
-                      control={control}
-                      render={({ field, fieldState }) => (
-                        <SelectPickersGroup
-                          isRequired={true}
-                          placeholder="Chọn giường"
-                          value={field.value}
-                          options={RoomsList || []}
-                          label="Chọn giường"
-                          onChange={(val) => {
-                            field.onChange(val);
-                          }}
-                          errorMessage={fieldState?.error?.message}
-                          errorMessageForce={fieldState?.invalid}
-                        />
-                      )}
-                    />
+                  <div className="p-4 bg-white rounded-lg mb-3.5 last:mb-0">
+                    <div className="mb-3.5 last:mb-0">
+                      <div className="mb-px">Giường</div>
+                      <Controller
+                        name="roomid"
+                        control={control}
+                        render={({ field, fieldState }) => (
+                          <SelectPickersGroup
+                            isRequired={true}
+                            placeholder="Chọn giường"
+                            value={field.value}
+                            options={RoomsList || []}
+                            label="Chọn giường"
+                            onChange={(val) => {
+                              field.onChange(val);
+                            }}
+                            errorMessage={fieldState?.error?.message}
+                            errorMessageForce={fieldState?.invalid}
+                          />
+                        )}
+                      />
+                    </div>
                   </div>
                 )}
-
-              <div className="flex items-end justify-between mb-3.5 last:mb-0">
-                <div>Khách hàng chọn nhân viên</div>
-                <Controller
-                  name="IsMemberSet"
-                  control={control}
-                  render={({ field: { ref, ...field }, fieldState }) => (
-                    <label className="relative inline-flex items-center cursor-pointer">
-                      <input
-                        type="checkbox"
-                        className="sr-only peer"
-                        checked={field.value}
-                        {...field}
-                      />
-                      <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600" />
-                    </label>
-                  )}
-                />
-              </div>
-              <div className="mb-3.5 last:mb-0">
-                <div className="mb-px">Ghi chú</div>
-                <Controller
-                  name="desc"
-                  control={control}
-                  render={({ field, fieldState }) => (
-                    <Input
-                      className="[&_textarea]:rounded [&_textarea]:placeholder:normal-case [&_textarea]:min-h-[80px]"
-                      type="textarea"
-                      placeholder="Nhập ghi chú"
-                      rows="4"
-                      value={field.value}
-                      errorMessage={fieldState?.error?.message}
-                      errorMessageForce={fieldState?.invalid}
-                      onChange={field.onChange}
-                      onFocus={(e) =>
-                        KeyboardsHelper.setAndroid({
-                          Type: "body",
-                          Event: e,
-                        })
-                      }
-                    />
-                  )}
-                />
-              </div>
-              {Brand?.Global?.Admin?.os_4_chi_tiet && (
-                <>
-                  <div className="mb-3.5 last:mb-0">
-                    <div className="mb-px">Tình trạng</div>
-                    <Controller
-                      name="TINH_TRANG"
-                      control={control}
-                      render={({ field, fieldState }) => (
-                        <Input
-                          className="[&_textarea]:rounded [&_textarea]:placeholder:normal-case [&_textarea]:min-h-[80px]"
-                          type="textarea"
-                          placeholder="Nhập tình trạng"
-                          rows="4"
-                          value={field.value}
-                          errorMessage={fieldState?.error?.message}
-                          errorMessageForce={fieldState?.invalid}
-                          onChange={field.onChange}
-                          onFocus={(e) =>
-                            KeyboardsHelper.setAndroid({
-                              Type: "body",
-                              Event: e,
-                            })
-                          }
+              <Disclosure initialState={false}>
+                {({ isOpen, toggle }) => (
+                  <div className="bg-white rounded-lg mb-3.5 last:mb-0">
+                    <div
+                      className="flex items-center justify-between px-4 py-4"
+                      onClick={toggle}
+                    >
+                      <div className="font-medium text-[15px]">
+                        Thông tin khác
+                      </div>
+                      <div>
+                        <ChevronDownIcon
+                          className={clsx(
+                            "w-5 text-gray-500 transition-all",
+                            isOpen && "rotate-180"
+                          )}
                         />
-                      )}
-                    />
-                  </div>
-                  <div className="mb-3.5 last:mb-0">
-                    <div className="mb-px">Thủ thuật</div>
-                    <Controller
-                      name="THU_THUAT"
-                      control={control}
-                      render={({ field, fieldState }) => (
-                        <Input
-                          className="[&_textarea]:rounded [&_textarea]:placeholder:normal-case [&_textarea]:min-h-[80px]"
-                          type="textarea"
-                          placeholder="Nhập thủ thuật"
-                          rows="4"
-                          value={field.value}
-                          errorMessage={fieldState?.error?.message}
-                          errorMessageForce={fieldState?.invalid}
-                          onChange={field.onChange}
-                          onFocus={(e) =>
-                            KeyboardsHelper.setAndroid({
-                              Type: "body",
-                              Event: e,
-                            })
-                          }
-                        />
-                      )}
-                    />
-                  </div>
-                  <div className="mb-3.5 last:mb-0">
-                    <div className="mb-px">Đánh giá sau buổi liệu trình</div>
-                    <Controller
-                      name="DANH_GIA"
-                      control={control}
-                      render={({ field, fieldState }) => (
-                        <Input
-                          className="[&_textarea]:rounded [&_textarea]:placeholder:normal-case [&_textarea]:min-h-[80px]"
-                          type="textarea"
-                          placeholder="Nhập đánh giá"
-                          rows="4"
-                          value={field.value}
-                          errorMessage={fieldState?.error?.message}
-                          errorMessageForce={fieldState?.invalid}
-                          onChange={field.onChange}
-                          onFocus={(e) =>
-                            KeyboardsHelper.setAndroid({
-                              Type: "body",
-                              Event: e,
-                            })
-                          }
-                        />
-                      )}
-                    />
-                  </div>
-                  <div className="mb-3.5 last:mb-0">
-                    <div className="mb-px">Lưu ý cho buổi sau</div>
-                    <Controller
-                      name="LUU_Y"
-                      control={control}
-                      render={({ field, fieldState }) => (
-                        <Input
-                          className="[&_textarea]:rounded [&_textarea]:placeholder:normal-case [&_textarea]:min-h-[80px]"
-                          type="textarea"
-                          placeholder="Nhập lưu ý"
-                          rows="4"
-                          value={field.value}
-                          errorMessage={fieldState?.error?.message}
-                          errorMessageForce={fieldState?.invalid}
-                          onChange={field.onChange}
-                          onFocus={(e) =>
-                            KeyboardsHelper.setAndroid({
-                              Type: "body",
-                              Event: e,
-                            })
-                          }
-                        />
-                      )}
-                    />
-                  </div>
-                </>
-              )}
-              <div className="mb-3.5 last:mb-0">
-                <div className="mb-px font-light">Hình ảnh</div>
-                <div className="grid grid-cols-3 gap-4">
-                  {OsImages?.data &&
-                    OsImages?.data.map((item, index) => (
-                      <div
-                        className="relative flex items-center border aspect-square"
-                        key={index}
-                        onClick={() => {
-                          Fancybox.show(
-                            OsImages?.data && OsImages?.data.length > 0
-                              ? OsImages?.data.map((x) => ({
-                                  src: AssetsHelpers.toAbsoluteUrl(x.Src),
-                                  thumbSrc: AssetsHelpers.toAbsoluteUrl(x.Src),
-                                }))
-                              : [],
-                            {
-                              Carousel: {
-                                Toolbar: {
-                                  items: {
-                                    downloadImage: {
-                                      tpl: '<button class="f-button"><svg tabindex="-1" width="24" height="24" viewBox="0 0 24 24"><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2M7 11l5 5 5-5M12 4v12"></path></svg></button>',
-                                      click: () => {
-                                        PromHelpers.OPEN_LINK(
-                                          AssetsHelpers.toAbsoluteUrl(item.Src)
-                                        );
-                                      },
-                                    },
-                                  },
-                                  display: {
-                                    left: ["counter"],
-                                    middle: [
-                                      "zoomIn",
-                                      "zoomOut",
-                                      // "toggle1to1",
-                                      "rotateCCW",
-                                      "rotateCW",
-                                      // "flipX",
-                                      // "flipY",
-                                    ],
-                                    right: [
-                                      "downloadImage",
-                                      //"thumbs",
-                                      "close",
-                                    ],
-                                  },
-                                },
-                              },
-                              startIndex: index,
-                            }
-                          );
-                        }}
-                      >
-                        <img
-                          className="object-contain w-full h-full rounded"
-                          src={AssetsHelpers.toAbsoluteUrl(item?.Src)}
-                          alt=""
-                        />
-                        <div
-                          className="absolute flex items-center justify-center bg-white rounded-full shadow-lg w-7 h-7 -top-3 -right-3"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onRemoveImagesID(item.ID);
-                          }}
-                        >
-                          <XMarkIcon className="w-5 opacity-75" />
+                      </div>
+                    </div>
+                    {isOpen && (
+                      <div className="px-4 pb-4 mt-1">
+                        <div className="flex items-end justify-between mb-3.5 last:mb-0">
+                          <div>Khách hàng chọn nhân viên</div>
+                          <Controller
+                            name="IsMemberSet"
+                            control={control}
+                            render={({
+                              field: { ref, ...field },
+                              fieldState,
+                            }) => (
+                              <label className="relative inline-flex items-center cursor-pointer">
+                                <input
+                                  type="checkbox"
+                                  className="sr-only peer"
+                                  checked={field.value}
+                                  {...field}
+                                />
+                                <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600" />
+                              </label>
+                            )}
+                          />
+                        </div>
+                        <div className="mb-3.5 last:mb-0">
+                          <div className="mb-px">Ghi chú</div>
+                          <Controller
+                            name="desc"
+                            control={control}
+                            render={({ field, fieldState }) => (
+                              <Input
+                                className="[&_textarea]:rounded [&_textarea]:placeholder:normal-case [&_textarea]:min-h-[80px]"
+                                type="textarea"
+                                placeholder="Nhập ghi chú"
+                                rows="4"
+                                value={field.value}
+                                errorMessage={fieldState?.error?.message}
+                                errorMessageForce={fieldState?.invalid}
+                                onChange={field.onChange}
+                                onFocus={(e) =>
+                                  KeyboardsHelper.setAndroid({
+                                    Type: "body",
+                                    Event: e,
+                                  })
+                                }
+                              />
+                            )}
+                          />
+                        </div>
+                        {Brand?.Global?.Admin?.os_4_chi_tiet && (
+                          <>
+                            <div className="mb-3.5 last:mb-0">
+                              <div className="mb-px">Tình trạng</div>
+                              <Controller
+                                name="TINH_TRANG"
+                                control={control}
+                                render={({ field, fieldState }) => (
+                                  <Input
+                                    className="[&_textarea]:rounded [&_textarea]:placeholder:normal-case [&_textarea]:min-h-[80px]"
+                                    type="textarea"
+                                    placeholder="Nhập tình trạng"
+                                    rows="4"
+                                    value={field.value}
+                                    errorMessage={fieldState?.error?.message}
+                                    errorMessageForce={fieldState?.invalid}
+                                    onChange={field.onChange}
+                                    onFocus={(e) =>
+                                      KeyboardsHelper.setAndroid({
+                                        Type: "body",
+                                        Event: e,
+                                      })
+                                    }
+                                  />
+                                )}
+                              />
+                            </div>
+                            <div className="mb-3.5 last:mb-0">
+                              <div className="mb-px">Thủ thuật</div>
+                              <Controller
+                                name="THU_THUAT"
+                                control={control}
+                                render={({ field, fieldState }) => (
+                                  <Input
+                                    className="[&_textarea]:rounded [&_textarea]:placeholder:normal-case [&_textarea]:min-h-[80px]"
+                                    type="textarea"
+                                    placeholder="Nhập thủ thuật"
+                                    rows="4"
+                                    value={field.value}
+                                    errorMessage={fieldState?.error?.message}
+                                    errorMessageForce={fieldState?.invalid}
+                                    onChange={field.onChange}
+                                    onFocus={(e) =>
+                                      KeyboardsHelper.setAndroid({
+                                        Type: "body",
+                                        Event: e,
+                                      })
+                                    }
+                                  />
+                                )}
+                              />
+                            </div>
+                            <div className="mb-3.5 last:mb-0">
+                              <div className="mb-px">
+                                Đánh giá sau buổi liệu trình
+                              </div>
+                              <Controller
+                                name="DANH_GIA"
+                                control={control}
+                                render={({ field, fieldState }) => (
+                                  <Input
+                                    className="[&_textarea]:rounded [&_textarea]:placeholder:normal-case [&_textarea]:min-h-[80px]"
+                                    type="textarea"
+                                    placeholder="Nhập đánh giá"
+                                    rows="4"
+                                    value={field.value}
+                                    errorMessage={fieldState?.error?.message}
+                                    errorMessageForce={fieldState?.invalid}
+                                    onChange={field.onChange}
+                                    onFocus={(e) =>
+                                      KeyboardsHelper.setAndroid({
+                                        Type: "body",
+                                        Event: e,
+                                      })
+                                    }
+                                  />
+                                )}
+                              />
+                            </div>
+                            <div className="mb-3.5 last:mb-0">
+                              <div className="mb-px">Lưu ý cho buổi sau</div>
+                              <Controller
+                                name="LUU_Y"
+                                control={control}
+                                render={({ field, fieldState }) => (
+                                  <Input
+                                    className="[&_textarea]:rounded [&_textarea]:placeholder:normal-case [&_textarea]:min-h-[80px]"
+                                    type="textarea"
+                                    placeholder="Nhập lưu ý"
+                                    rows="4"
+                                    value={field.value}
+                                    errorMessage={fieldState?.error?.message}
+                                    errorMessageForce={fieldState?.invalid}
+                                    onChange={field.onChange}
+                                    onFocus={(e) =>
+                                      KeyboardsHelper.setAndroid({
+                                        Type: "body",
+                                        Event: e,
+                                      })
+                                    }
+                                  />
+                                )}
+                              />
+                            </div>
+                          </>
+                        )}
+                        <div className="mb-3.5 last:mb-0">
+                          <div className="mb-px font-light">Hình ảnh</div>
+                          <div className="grid grid-cols-3 gap-4">
+                            {OsImages?.data &&
+                              OsImages?.data.map((item, index) => (
+                                <div
+                                  className="relative flex items-center border aspect-square"
+                                  key={index}
+                                  onClick={() => {
+                                    Fancybox.show(
+                                      OsImages?.data &&
+                                        OsImages?.data.length > 0
+                                        ? OsImages?.data.map((x) => ({
+                                            src: AssetsHelpers.toAbsoluteUrl(
+                                              x.Src
+                                            ),
+                                            thumbSrc:
+                                              AssetsHelpers.toAbsoluteUrl(
+                                                x.Src
+                                              ),
+                                          }))
+                                        : [],
+                                      {
+                                        Carousel: {
+                                          Toolbar: {
+                                            items: {
+                                              downloadImage: {
+                                                tpl: '<button class="f-button"><svg tabindex="-1" width="24" height="24" viewBox="0 0 24 24"><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2M7 11l5 5 5-5M12 4v12"></path></svg></button>',
+                                                click: () => {
+                                                  PromHelpers.OPEN_LINK(
+                                                    AssetsHelpers.toAbsoluteUrl(
+                                                      item.Src
+                                                    )
+                                                  );
+                                                },
+                                              },
+                                            },
+                                            display: {
+                                              left: ["counter"],
+                                              middle: [
+                                                "zoomIn",
+                                                "zoomOut",
+                                                // "toggle1to1",
+                                                "rotateCCW",
+                                                "rotateCW",
+                                                // "flipX",
+                                                // "flipY",
+                                              ],
+                                              right: [
+                                                "downloadImage",
+                                                //"thumbs",
+                                                "close",
+                                              ],
+                                            },
+                                          },
+                                        },
+                                        startIndex: index,
+                                      }
+                                    );
+                                  }}
+                                >
+                                  <img
+                                    className="object-contain w-full h-full rounded"
+                                    src={AssetsHelpers.toAbsoluteUrl(item?.Src)}
+                                    alt=""
+                                  />
+                                  <div
+                                    className="absolute flex items-center justify-center bg-white rounded-full shadow-lg w-7 h-7 -top-3 -right-3"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      onRemoveImagesID(item.ID);
+                                    }}
+                                  >
+                                    <XMarkIcon className="w-5 opacity-75" />
+                                  </div>
+                                </div>
+                              ))}
+                            <UploadImages
+                              width="w-auto"
+                              height="h-auto"
+                              className="aspect-square"
+                              onChange={(images) => UploadImagesOs(images)}
+                              size="xs"
+                              isMultiple={true}
+                            />
+                          </div>
                         </div>
                       </div>
-                    ))}
-                  <UploadImages
-                    width="w-auto"
-                    height="h-auto"
-                    className="aspect-square"
-                    onChange={(images) => UploadImagesOs(images)}
-                    size="xs"
-                    isMultiple={true}
-                  />
-                </div>
-              </div>
+                    )}
+                  </div>
+                )}
+              </Disclosure>
             </div>
           </>
         )}

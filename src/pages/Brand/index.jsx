@@ -61,12 +61,7 @@ const BrandPage = ({ f7router }) => {
               (x) => x.Name === "App.webnoti"
             )[0]["ValueText"];
 
-            let firebase = {
-              initializeApp: (obj) => {
-                FirebaseApp = obj;
-              },
-            };
-            eval(firebaseStr);
+            FirebaseApp = firebaseStr;
           }
           store
             .dispatch("setBrand", {

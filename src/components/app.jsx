@@ -122,7 +122,7 @@ const MyApp = () => {
       <ToastContainer
         icon={false}
         theme="colored"
-        limit={1}
+        limit={2}
         autoClose={800}
         draggable={false}
       />

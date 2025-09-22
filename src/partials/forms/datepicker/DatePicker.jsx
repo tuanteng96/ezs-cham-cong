@@ -99,59 +99,59 @@ function DatePicker({
   };
 
   return (
-    <AnimatePresence initial={false}>
-      <>
-        <div
-          className="relative"
-          onClick={() => !props?.disabled && open()}
-          //onMouseDown={(e) => e.stopPropagation()}
-        >
-          {icon && icon()}
+    <>
+      <div
+        className="relative"
+        onClick={() => !props?.disabled && open()}
+        //onMouseDown={(e) => e.stopPropagation()}
+      >
+        {icon && icon()}
 
-          <input
-            className={clsx(
-              "no-keyboard w-full py-3 border transition focus:border-primary font-normal shadow-[0_4px_6px_0_rgba(16,25,40,.06)] rounded",
-              errorMessageForce ? "border-danger" : "border-[#d5d7da]",
-              icon ? "pr-4 pl-10" : "px-4"
+        <input
+          className={clsx(
+            "no-keyboard w-full py-3 border transition focus:border-primary font-normal shadow-[0_4px_6px_0_rgba(16,25,40,.06)] rounded",
+            errorMessageForce ? "border-danger" : "border-[#d5d7da]",
+            icon ? "pr-4 pl-10" : "px-4"
+          )}
+          type="text"
+          placeholder={placeholder}
+          value={value ? moment(value).format(format) : ""}
+          readOnly
+          {...props}
+        />
+        {clear && (
+          <>
+            {!value && (
+              <CalendarDaysIcon className="absolute w-5 text-gray-700 right-3 top-2/4 -translate-y-2/4 pointer-none" />
             )}
-            type="text"
-            placeholder={placeholder}
-            value={value && moment(value).format(format)}
-            readOnly
-            {...props}
-          />
-          {clear && (
-            <>
-              {!value && (
-                <CalendarDaysIcon className="absolute w-5 text-gray-700 right-3 top-2/4 -translate-y-2/4 pointer-none" />
-              )}
-              {value && (
-                <div
-                  className="absolute right-0 flex items-center justify-center w-12 h-full top-2/4 -translate-y-2/4"
-                  onClick={(e) => {
-                    if (!props?.disabled) {
-                      e.stopPropagation();
-                      onChange("");
-                      close();
-                    }
-                  }}
-                >
-                  <XMarkIcon className="w-5 text-gray-700" />
-                </div>
-              )}
-            </>
-          )}
-          {!clear && !value && (
-            <CalendarDaysIcon className="absolute w-5 text-gray-700 right-3 top-2/4 -translate-y-2/4 pointer-none" />
-          )}
-        </div>
-        {errorMessage && errorMessageForce && (
-          <div className="mt-1.5 text-xs text-danger font-light">
-            {errorMessage}
-          </div>
+            {value && (
+              <div
+                className="absolute right-0 flex items-center justify-center w-12 h-full top-2/4 -translate-y-2/4"
+                onClick={(e) => {
+                  if (!props?.disabled) {
+                    e.stopPropagation();
+                    onChange("");
+                    close();
+                  }
+                }}
+              >
+                <XMarkIcon className="w-5 text-gray-700" />
+              </div>
+            )}
+          </>
         )}
-        {visible &&
-          createPortal(
+        {!clear && !value && (
+          <CalendarDaysIcon className="absolute w-5 text-gray-700 right-3 top-2/4 -translate-y-2/4 pointer-none" />
+        )}
+      </div>
+      {errorMessage && errorMessageForce && (
+        <div className="mt-1.5 text-xs text-danger font-light">
+          {errorMessage}
+        </div>
+      )}
+      {createPortal(
+        <AnimatePresence>
+          {visible && (
             <div className="fixed z-[125001] inset-0 flex justify-end flex-col">
               <motion.div
                 key={visible}
@@ -387,11 +387,12 @@ function DatePicker({
                   </Picker>
                 </div>
               </motion.div>
-            </div>,
-            document.getElementById("framework7-root")
+            </div>
           )}
-      </>
-    </AnimatePresence>
+        </AnimatePresence>,
+        document.getElementById("framework7-root")
+      )}
+    </>
   );
 }
 

@@ -6,6 +6,7 @@ import {
   Page,
   Popover,
   Subnavbar,
+  f7,
   useStore,
 } from "framework7-react";
 import React, { useRef, useState } from "react";
@@ -30,6 +31,7 @@ function OrdersAdmin({ f7router }) {
 
   let Auth = useStore("Auth");
   let Brand = useStore("Brand");
+  let CrStocks = useStore("CrStocks");
 
   const [filters, setFilters] = useState({
     Key: "",
@@ -75,10 +77,11 @@ function OrdersAdmin({ f7router }) {
         pi: 1,
         ps: 12,
         Token: Auth.token,
-        StockID:
-          !Brand?.Global?.Admin?.cho_phep_tim_khac_diem && !isAdmin
+        StockID: !Brand?.Global?.Admin?.cho_phep_tim_khac_diem
+          ? !isAdmin
             ? CrStocks?.ID
-            : "",
+            : ""
+          : CrStocks?.ID,
         From,
         To,
       });
@@ -105,10 +108,11 @@ function OrdersAdmin({ f7router }) {
         pi: pageParam,
         ps: 12,
         Token: Auth.token,
-        StockID:
-          !Brand?.Global?.Admin?.cho_phep_tim_khac_diem && !isAdmin
+        StockID: !Brand?.Global?.Admin?.cho_phep_tim_khac_diem
+          ? !isAdmin
             ? CrStocks?.ID
-            : "",
+            : ""
+          : CrStocks?.ID,
         From,
         To,
       });
@@ -116,6 +120,9 @@ function OrdersAdmin({ f7router }) {
       return {
         ...data,
       };
+    },
+    onSuccess: () => {
+      f7.dialog.close();
     },
     getNextPageParam: (lastPage, pages) =>
       lastPage.pi === lastPage.pCount ? undefined : lastPage.pi + 1,
@@ -203,13 +210,14 @@ function OrdersAdmin({ f7router }) {
                       item.Title === filters.Type && "text-app"
                     )}
                     noLinkClass
-                    onClick={() =>
+                    onClick={() => {
+                      f7.dialog.preloader("Đang thực hiện ...");
                       setFilters((prevState) => ({
                         ...prevState,
                         Type: item.Title,
                         Key: "",
-                      }))
-                    }
+                      }));
+                    }}
                   >
                     {item.Title}
                   </Link>
@@ -223,9 +231,14 @@ function OrdersAdmin({ f7router }) {
       <div
         className={clsx(
           "flex flex-col h-full overflow-hidden relative transition-[padding] duration-300 ease-in-out",
-          Brand?.Global?.EZSIDVersion ? !(debouncedKey.Key === "" && debouncedKey.Type !== "Toàn thời gian")
-            ? "pt-0"
-            : "pt-[67px]" : ''
+          Brand?.Global?.EZSIDVersion
+            ? !(
+                debouncedKey.Key === "" &&
+                debouncedKey.Type !== "Toàn thời gian"
+              )
+              ? "pt-0"
+              : "pt-[67px]"
+            : ""
         )}
       >
         {Brand?.Global?.EZSIDVersion ? (

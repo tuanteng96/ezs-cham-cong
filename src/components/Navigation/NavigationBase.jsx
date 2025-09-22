@@ -26,7 +26,6 @@ import PromHelpers from "../../helpers/PromHelpers";
 import WorkTrackAPI from "../../api/WorkTrack.api";
 import moment from "moment";
 import { useIsFetching, useMutation, useQueryClient } from "react-query";
-import { toast } from "react-toastify";
 import { useCheckInOut } from "../../hooks";
 import PickerConfirm from "../PickerConfirm";
 import WorksHelpers from "../../helpers/WorksHelpers";
@@ -46,15 +45,10 @@ function NavigationBase({ pathname }) {
   const [Option, setOption] = useState({});
 
   let [CountProcessings, setCountProcessings] = useState(0);
-  let [isPopoverOpened, setIsPopoverOpened] = useState(false);
 
-  let InvoiceProcessings = useStore("InvoiceProcessings");
   let Processings = useStore("Processings");
-  let ClientBirthDayCount = useStore("ClientBirthDayCount");
 
   let isLoadingProcessings = useIsFetching({ queryKey: ["Processings"] }) > 0;
-  let isLoadingInvoice =
-    useIsFetching({ queryKey: ["InvoiceProcessings"] }) > 0;
 
   const Brand = useStore("Brand");
   const CrStocks = useStore("CrStocks");
@@ -102,15 +96,6 @@ function NavigationBase({ pathname }) {
   useEffect(() => {
     setCountProcessings(Processings?.Count);
   }, [Processings]);
-
-  useEffect(() => {
-    if (isPopoverOpened) {
-      Promise.all([
-        queryClient.invalidateQueries(["ClientBirthDayCount"]),
-        queryClient.invalidateQueries(["InvoiceProcessings"]),
-      ]);
-    }
-  }, [isPopoverOpened]);
 
   const inOutMutation = useMutation({
     mutationFn: async (body) => {
@@ -997,16 +982,14 @@ function NavigationBase({ pathname }) {
         {pos_mng?.hasRight ? (
           <>
             <Link
-              onClick={setIsPopoverOpened}
+              noLinkClass
+              href="/admin/processings/"
               className="relative btn-popover-processings-base"
             >
               <div
                 className={clsx(
                   "flex flex-col items-center justify-center pt-1",
-                  [
-                    "/admin/processings/",
-                    "/admin/pos/invoice-processings/",
-                  ].includes(pathname)
+                  ["/admin/processings/"].includes(pathname)
                     ? "text-app"
                     : "text-gray-600"
                 )}
@@ -1029,92 +1012,6 @@ function NavigationBase({ pathname }) {
                 </>
               )}
             </Link>
-            <Popover
-              targetEl=".btn-popover-processings-base"
-              opened={isPopoverOpened}
-              className="popover-processings-base w-[210px]"
-              onPopoverClosed={() => setIsPopoverOpened(false)}
-            >
-              <div className="flex flex-col py-1">
-                <Link
-                  className={clsx(
-                    "relative px-4 py-3 font-medium border-b last:border-0",
-                    pathname === "/admin/processings/" && "text-app"
-                  )}
-                  noLinkClass
-                  onClick={() => {
-                    setIsPopoverOpened(false);
-                    f7.views.main.router.navigate("/admin/processings/");
-                  }}
-                >
-                  Cần xử lý
-                  {isLoadingProcessings ? (
-                    <span className="w-5 animate-pulse absolute text-white bg-danger text-[11px] px-1.5 min-w-[15px] h-[17px] leading-none rounded-full flex items-center justify-center top-2/4 right-4 -translate-y-2/4 font-lato"></span>
-                  ) : (
-                    <>
-                      {CountProcessings > 0 ? (
-                        <span className="absolute text-white bg-danger text-[11px] px-1.5 min-w-[15px] h-[17px] leading-none rounded-full flex items-center justify-center top-2/4 right-4 -translate-y-2/4 font-lato">
-                          {CountProcessings}
-                        </span>
-                      ) : (
-                        <></>
-                      )}
-                    </>
-                  )}
-                </Link>
-                <Link
-                  className={clsx(
-                    "relative px-4 py-3 font-medium border-b last:border-0",
-                    pathname === "/admin/pos/invoice-processings/" && "text-app"
-                  )}
-                  noLinkClass
-                  onClick={() => {
-                    setIsPopoverOpened(false);
-                    f7.views.main.router.navigate(
-                      "/admin/pos/invoice-processings/"
-                    );
-                  }}
-                >
-                  Hoá đơn đang xử lý
-                  {isLoadingInvoice ? (
-                    <span className="w-5 animate-pulse absolute text-white bg-danger text-[11px] px-1.5 min-w-[15px] h-[17px] leading-none rounded-full flex items-center justify-center top-2/4 right-4 -translate-y-2/4 font-lato"></span>
-                  ) : (
-                    <>
-                      {InvoiceProcessings && InvoiceProcessings.length > 0 ? (
-                        <span className="absolute text-white bg-danger text-[11px] px-1.5 min-w-[15px] h-[17px] leading-none rounded-full flex items-center justify-center top-2/4 right-4 -translate-y-2/4 font-lato">
-                          {InvoiceProcessings &&
-                            InvoiceProcessings.filter(
-                              (x) => !x?.CheckIn?.CheckOutTime
-                            ).length}
-                        </span>
-                      ) : (
-                        <></>
-                      )}
-                    </>
-                  )}
-                </Link>
-                <Link
-                  className={clsx(
-                    "relative px-4 py-3 font-medium border-b last:border-0",
-                    pathname === "/admin/pos/clients/birthday/" && "text-app"
-                  )}
-                  noLinkClass
-                  onClick={() => {
-                    setIsPopoverOpened(false);
-                    f7.views.main.router.navigate(
-                      "/admin/pos/clients/birthday/"
-                    );
-                  }}
-                >
-                  Khách sinh nhật
-                  {ClientBirthDayCount?.day > 0 && (
-                    <span className="absolute text-white bg-danger text-[11px] px-1.5 min-w-[15px] h-[17px] leading-none rounded-full flex items-center justify-center top-2/4 right-4 -translate-y-2/4 font-lato">
-                      {ClientBirthDayCount?.day}
-                    </span>
-                  )}
-                </Link>
-              </div>
-            </Popover>
           </>
         ) : (
           <>

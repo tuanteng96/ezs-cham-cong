@@ -473,7 +473,7 @@ function Panels(props) {
             </Menu>
           </Sidebar>
         </div>
-        <div className="flex items-center justify-between h-[50px] px-5 border-t">
+        <div className="flex items-center justify-between h-[50px] min-h-[50px] px-5 border-t">
           <div
             className="flex items-center h-full text-danger"
             onClick={logout}

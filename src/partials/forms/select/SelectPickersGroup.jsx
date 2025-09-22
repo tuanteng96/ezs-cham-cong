@@ -77,86 +77,82 @@ const SelectPickersGroup = forwardRef(
     }));
 
     return (
-      <AnimatePresence initial={false}>
-        <>
+      <>
+        <div
+          className="relative"
+          onClick={() => !isDisabled && open()}
+          ref={ref}
+        >
           <div
-            className="relative"
-            onClick={() => !isDisabled && open()}
-            ref={ref}
+            className={clsx(
+              "no-keyboard flex w-full pl-4 pr-24 py-3 border rounded focus:border-primary shadow-input",
+              errorMessageForce ? "border-danger" : "border-[#d5d7da]",
+              isDisabled && "bg-[#f0f0f0]"
+            )}
           >
-            <div
-              className={clsx(
-                "no-keyboard flex w-full pl-4 pr-24 py-3 border rounded focus:border-primary shadow-input",
-                errorMessageForce ? "border-danger" : "border-[#d5d7da]",
-                isDisabled && "bg-[#f0f0f0]"
-              )}
-            >
-              {isMulti && (
-                <div className="flex flex-wrap gap-2">
-                  {value &&
-                    value.map((x, idx) => (
-                      <div className="flex bg-gray-100 rounded-sm" key={idx}>
-                        <div className="px-1.5 py-px text-[13px]">
-                          {x.label}
-                        </div>
-                        <div
-                          className="flex items-center px-1 bg-gray-200"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            if (!isDisabled) {
-                              onChange(
-                                value.filter((o) => x.value !== o.value)
-                              );
-                            }
-                          }}
-                        >
-                          <XMarkIcon className="w-3.5" />
-                        </div>
+            {isMulti && (
+              <div className="flex flex-wrap gap-2">
+                {value &&
+                  value.map((x, idx) => (
+                    <div className="flex bg-gray-100 rounded-sm" key={idx}>
+                      <div className="px-1.5 py-px text-[13px]">{x.label}</div>
+                      <div
+                        className="flex items-center px-1 bg-gray-200"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (!isDisabled) {
+                            onChange(value.filter((o) => x.value !== o.value));
+                          }
+                        }}
+                      >
+                        <XMarkIcon className="w-3.5" />
                       </div>
-                    ))}
-                </div>
-              )}
-
-              {!isMulti && (
-                <>
-                  {Array.isArray(value)
-                    ? value.map((x) => x.label).toString()
-                    : value?.label || ""}
-                </>
-              )}
-
-              {(!value || value.length === 0) && (
-                <div className="text-muted">{placeholder}</div>
-              )}
-              <div className="absolute right-0 flex h-full top-2/4 -translate-y-2/4">
-                <div className="flex items-center justify-center w-12 h-full">
-                  <ChevronDownIcon className="w-5" />
-                </div>
-                {isClearable &&
-                  !isDisabled &&
-                  value &&
-                  (Array.isArray(value) ? value.length > 0 : value) && (
-                    <div
-                      className="flex items-center justify-center w-12 h-full relative after:content-[''] after:absolute after:right-0 after:h-4/6 after:w-[1px] after:bg-[#d5d7da] after:left-0"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onChange("");
-                      }}
-                    >
-                      <XMarkIcon className="w-5" />
                     </div>
-                  )}
+                  ))}
               </div>
+            )}
+
+            {!isMulti && (
+              <>
+                {Array.isArray(value)
+                  ? value.map((x) => x.label).toString()
+                  : value?.label || ""}
+              </>
+            )}
+
+            {(!value || value.length === 0) && (
+              <div className="text-muted">{placeholder}</div>
+            )}
+            <div className="absolute right-0 flex h-full top-2/4 -translate-y-2/4">
+              <div className="flex items-center justify-center w-12 h-full">
+                <ChevronDownIcon className="w-5" />
+              </div>
+              {isClearable &&
+                !isDisabled &&
+                value &&
+                (Array.isArray(value) ? value.length > 0 : value) && (
+                  <div
+                    className="flex items-center justify-center w-12 h-full relative after:content-[''] after:absolute after:right-0 after:h-4/6 after:w-[1px] after:bg-[#d5d7da] after:left-0"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onChange("");
+                    }}
+                  >
+                    <XMarkIcon className="w-5" />
+                  </div>
+                )}
             </div>
           </div>
-          {errorMessage && errorMessageForce && (
-            <div className="mt-1.5 text-xs text-danger font-light">
-              {errorMessage}
-            </div>
-          )}
+        </div>
+        {errorMessage && errorMessageForce && (
+          <div className="mt-1.5 text-xs text-danger font-light">
+            {errorMessage}
+          </div>
+        )}
 
-          {visible &&
-            createPortal(
+        {createPortal(
+          <AnimatePresence>
+            {visible && (
               <div className="fixed z-[125001] inset-0 flex justify-end flex-col">
                 <motion.div
                   key={visible}
@@ -349,11 +345,12 @@ const SelectPickersGroup = forwardRef(
                     </div>
                   )}
                 </motion.div>
-              </div>,
-              document.getElementById("framework7-root")
+              </div>
             )}
-        </>
-      </AnimatePresence>
+          </AnimatePresence>,
+          document.getElementById("framework7-root")
+        )}
+      </>
     );
   }
 );

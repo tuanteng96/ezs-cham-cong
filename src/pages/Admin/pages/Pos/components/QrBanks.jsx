@@ -7,13 +7,16 @@ import React from "react";
 import { useQuery } from "react-query";
 import { toast } from "react-toastify";
 import { PickerShowQrCodePay } from ".";
+import { useFirebase } from "@/hooks";
 
 function QrBanks({ Order, Value }) {
   const FirebaseApp = useStore("FirebaseApp");
   let CrStocks = useStore("CrStocks");
   let Brand = useStore("Brand");
 
-  const database = FirebaseApp && getDatabase(FirebaseApp);
+  const firebase = useFirebase(FirebaseApp);
+
+  const database = firebase.db;
 
   const Banks = useQuery({
     queryKey: ["BanksPayments"],

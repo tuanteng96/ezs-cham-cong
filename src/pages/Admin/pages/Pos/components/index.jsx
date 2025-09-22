@@ -1,6 +1,7 @@
 import MenuSubNavbar from "./MenuNavbar/MenuSubNavbar";
 import PanelPos from "./PanelPos";
 import PickerAccumulate from "./PickerAccumulate";
+import PickerAddDebt from "./PickerAddDebt";
 import PickerAddEditFee from "./PickerAddEditFee";
 import PickerAddEditTIP from "./PickerAddEditTIP";
 import PickerAddEditWallet from "./PickerAddEditWallet";
@@ -22,6 +23,7 @@ import PickerExchangePoint from "./PickerExchangePoint";
 import PickerFilter from "./PickerFilter";
 import PickerFilterClientBook from "./PickerFilterClientBook";
 import PickerHistoryCoachs from "./PickerHistoryCoachs";
+import PickerInvoiceNew from "./PickerInvoiceNew";
 import PickerPayments from "./PickerPayments";
 import PickerPreviewOldCard from "./PickerPreviewOldCard";
 import PickerPriceProdAdd from "./PickerPriceProdAdd";
@@ -87,5 +89,7 @@ export {
   PickerHistoryCoachs,
   PickerAddEditTIP,
   PickerReservedService,
-  PickerAddEditFee
+  PickerAddEditFee,
+  PickerAddDebt,
+  PickerInvoiceNew
 };

@@ -99,8 +99,10 @@ let Menu = [
 ];
 
 function PosClientDiary({ f7router, f7route }) {
+  const defaultActive = f7route?.query?.activeTab || Menu[0].ID;
+
   let [Menus, setMenus] = useState(Menu);
-  const [active, setActive] = useState(Menu[0].ID);
+  const [active, setActive] = useState(defaultActive);
   const [SortedByTime, setSortedByTime] = useState(true);
   const [TypeSale, setTypeSale] = useState({
     Title: "Tất cả",
@@ -119,6 +121,12 @@ function PosClientDiary({ f7router, f7route }) {
     auth: Auth,
     CrStocks,
   });
+
+  useEffect(() => {
+    if (f7route?.query?.activeTab) {
+      f7.tab.show("#" + f7route.query.activeTab, true);
+    }
+  }, [f7route?.query]);
 
   const { isLoading, refetch } = useQuery({
     queryKey: ["ClientDiaryID", { ID: f7route?.params?.id }],
@@ -147,26 +155,40 @@ function PosClientDiary({ f7router, f7route }) {
               let newItems = [];
               if (data?.data[property] && data?.data[property].length > 0) {
                 for (let obj of data?.data[property]) {
-                  let idx = newItems.findIndex(
-                    (x) =>
-                      moment(x.BookDate, "YYYY-MM-DD").format("DD-MM-YYYY") ===
-                      moment(obj?.OrderService?.BookDate, "YYYY-MM-DD").format(
-                        "DD-MM-YYYY"
-                      )
-                  );
-                  if (idx > -1) {
-                    newItems[idx].Items = [
-                      ...newItems[idx].Items,
-                      ...obj.Items,
-                    ];
-                  } else {
-                    newItems.push({
-                      ...obj,
-                      BookDate: obj?.OrderService?.BookDate,
-                    });
+                  if (obj.Items && obj.Items.length > 0) {
+                    for (let sub of obj.Items) {
+                      let index = newItems.findIndex(
+                        (o) =>
+                          moment(o.BookDate, "YYYY-MM-DD").format(
+                            "DD/MM/YYYY"
+                          ) ==
+                          moment(sub.CreateDate, "YYYY-MM-DD").format(
+                            "DD/MM/YYYY"
+                          )
+                      );
+
+                      if (index > -1) {
+                        newItems[index].Items.push({
+                          ...sub,
+                          OrderService: obj.OrderService,
+                        });
+                      } else {
+                        newItems.push({
+                          BookDate: sub.CreateDate,
+                          Items: [
+                            {
+                              ...sub,
+                              OrderService: obj.OrderService,
+                            },
+                          ],
+                          OrderService: obj.OrderService,
+                        });
+                      }
+                    }
                   }
                 }
               }
+
               newMenu[index].children = data?.data[property];
               newMenu[index].items = ArrayHelpers.sortDateTime(newItems);
             } else {
@@ -952,7 +974,7 @@ function PosClientDiary({ f7router, f7route }) {
                                               )}
                                             </div>
                                             <div className="px-2 py-3.5 text-center text-gray-700">
-                                              {attachments?.OrderService?.Title}
+                                              {item?.OrderService?.Title}
                                             </div>
                                           </div>
                                         ))}

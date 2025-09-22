@@ -22,6 +22,7 @@ import { toast } from "react-toastify";
 import { PickerShowQrCodePay } from ".";
 import { getDatabase, ref, remove, set } from "firebase/database";
 import moment from "moment";
+import { useFirebase } from "@/hooks";
 
 function PickerPayments({ children, Order, Client }) {
   let DebtPay =
@@ -38,7 +39,9 @@ function PickerPayments({ children, Order, Client }) {
 
   const FirebaseApp = useStore("FirebaseApp");
 
-  const database = FirebaseApp && getDatabase(FirebaseApp);
+  const firebase = useFirebase(FirebaseApp);
+
+  const database = firebase.db;
 
   const [visible, setVisible] = useState(false);
   const [visibleCalculator, setVisibleCalculator] = useState(false);

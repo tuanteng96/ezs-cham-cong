@@ -5,21 +5,27 @@ import { f7 } from "framework7-react";
 import SubscribeHelpers from "../helpers/SubscribeHelpers";
 import axios from "axios";
 import { pick, keys } from "lodash-es";
-import { initializeApp } from "firebase/app";
 import CDNHelpers from "@/helpers/CDNHelpers";
+
+const getStorage = (name) => {
+  try {
+    return JSON.parse(localStorage.getItem(name)) || null;
+  } catch {
+    return null;
+  }
+};
 
 const store = createStore({
   state: {
-    Brand: JSON.parse(localStorage.getItem("Brand")) || null,
-    Auth: JSON.parse(localStorage.getItem("Auth")) || null,
-    Stocks: JSON.parse(localStorage.getItem("Stocks")) || null,
+    Brand: getStorage("Brand"),
+    Auth: getStorage("Auth"),
+    Stocks: getStorage("Stocks"),
     StockRights: [],
     StocksAll: [],
-    CrStocks: JSON.parse(localStorage.getItem("CrStocks")) || null,
-    RightTree: JSON.parse(localStorage.getItem("RightTree")) || null,
-    WorkTimeSettings:
-      JSON.parse(localStorage.getItem("WorkTimeSettings")) || null,
-    CrsInOut: JSON.parse(localStorage.getItem("CrsInOut")) || null,
+    CrStocks: getStorage("CrStocks"),
+    RightTree: getStorage("RightTree"),
+    WorkTimeSettings: getStorage("WorkTimeSettings"),
+    CrsInOut: getStorage("CrsInOut"),
     Notifications: [],
     Processings: null,
     InvoiceProcessings: null,
@@ -68,7 +74,7 @@ const store = createStore({
       return state.ClientBirthDayCount;
     },
     FirebaseApp({ state }) {
-      return initializeApp(state.FirebaseApp, state?.Brand?.Domain);
+      return state.FirebaseApp || null;
     },
   },
   actions: {
@@ -148,7 +154,7 @@ const store = createStore({
           ),
         },
       };
-
+      
       StorageHelpers.set({
         data: {
           Auth: newValue,
@@ -174,7 +180,7 @@ const store = createStore({
             let StocksList = value?.Info?.Stocks?.filter(
               (x) => x.ID !== state.CrStocks?.ID
             );
-
+            
             StorageHelpers.set({
               data: {
                 CrStocks:
@@ -291,7 +297,8 @@ const store = createStore({
             if (state?.Auth?.ID) {
               axios
                 .get(
-                  `${state.Brand.Domain}/api/v3/apptoken?cmd=call&token=${token}&accid=${state.Auth.ID}&acctype=${state.Auth.acc_type}&senderIndex=2&logout=1`)
+                  `${state.Brand.Domain}/api/v3/apptoken?cmd=call&token=${token}&accid=${state.Auth.ID}&acctype=${state.Auth.acc_type}&senderIndex=2&logout=1`
+                )
                 .then(() => {
                   dispatch("setLogout").then(() => {
                     f7.dialog.close();

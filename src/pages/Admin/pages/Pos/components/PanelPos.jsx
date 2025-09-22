@@ -9,21 +9,31 @@ import {
 import clsx from "clsx";
 import { Link, Panel, f7, useStore } from "framework7-react";
 import moment from "moment";
-import React from "react";
+import React, { forwardRef, useImperativeHandle, useRef } from "react";
 import { getDatabase, ref, set } from "firebase/database";
 import { toast } from "react-toastify";
 import { useMutation } from "react-query";
 import AdminAPI from "@/api/Admin.api";
 import { PickerShowQrCode } from ".";
 import { RolesHelpers } from "@/helpers/RolesHelpers";
+import { useFirebase } from "@/hooks";
 
-function PanelPos({ Client }) {
+const PanelPos = forwardRef(function PanelPos({ Client }, ref) {
+  let buttonRef = useRef(null);
+  useImperativeHandle(ref, () => ({
+    openPopover: () => {
+      buttonRef?.current?.el?.click();
+    },
+  }));
+
   const CrStocks = useStore("CrStocks");
   const Brand = useStore("Brand");
   const Auth = useStore("Auth");
   const FirebaseApp = useStore("FirebaseApp");
 
-  const database = FirebaseApp && getDatabase(FirebaseApp);
+  const firebase = useFirebase(FirebaseApp);
+
+  const database = firebase.db;
 
   const { adminTools_byStock } = RolesHelpers.useRoles({
     nameRoles: ["adminTools_byStock"],
@@ -157,13 +167,12 @@ function PanelPos({ Client }) {
   };
 
   const getValueOrder = (rs) => {
-    
-    let Value = 0
-    if(rs?.cashSum && rs.cashSum.length > 0) {
-      return rs.cashSum[0].Payed - Math.abs(rs.cashSum[0].Return)
+    let Value = 0;
+    if (rs?.cashSum && rs.cashSum.length > 0) {
+      return rs.cashSum[0].Payed - Math.abs(rs.cashSum[0].Return);
     }
-    return Value
-  }
+    return Value;
+  };
 
   const isOldCard = () => {
     if (Brand?.Global?.Admin?.nv_le_tan_an_tao_the_cu) {
@@ -175,7 +184,7 @@ function PanelPos({ Client }) {
   return (
     <Panel left floating swipeOnlyClose containerEl="#page-pos" id="panel-pos">
       <div className="flex flex-col h-full">
-        <div className="flex p-4 border-b">
+        <div className="flex p-3 border-b">
           <Link
             panelClose
             noLinkClass
@@ -238,45 +247,21 @@ function PanelPos({ Client }) {
             )}
           </PickerShowQrCode>
         </div>
-        {/* <div className="grid grid-cols-3 border-b">
-          <Link
-            noLinkClass
-            className="flex flex-col items-center py-2"
-            href={`/admin/pos/manage/${Client?.ID}/wallet/`}
-            panelClose
-          >
-            <div className="mb-px text-[#333]">Ví điện tử</div>
-            <div className="font-bold font-lato">
-              {StringHelpers.formatVND(Client?.Present?.nap_vi)}
-            </div>
-          </Link>
-          <Link
-            noLinkClass
-            className="flex flex-col items-center py-2 border-x"
-            href={`/admin/pos/manage/${Client?.ID}/card/`}
-            panelClose
-          >
-            <div className="mb-px text-[#333]">Thẻ Tiền</div>
-            <div className="font-bold font-lato">
-              {StringHelpers.formatVND(Client?.Present?.the_tien_kha_dung)}
-            </div>
-          </Link>
-          <Link
-            noLinkClass
-            className="flex flex-col items-center py-2"
-            href={`/admin/pos/manage/${Client?.ID}/debt/`}
-            panelClose
-          >
-            <div className="mb-px text-[#333]">Công Nợ</div>
-            <div className="font-bold font-lato text-danger">
-              {StringHelpers.formatVND(Client?.Present?.no)}
-            </div>
-          </Link>
-        </div> */}
-        <div className="flex flex-wrap gap-1 px-4 py-2.5 border-b-4">
+        <div className="flex flex-wrap gap-1 px-3 py-2.5 border-b-4">
           <div className="bg-danger-light text-danger rounded px-1.5 text-[13px] py-px">
             #{Client?.ID}
           </div>
+          {Brand?.Global?.Admin?.thong_tin_pos && (
+            <Link
+              panelClose
+              href={`/admin/pos/manage/${Client?.ID}/info-client`}
+              noLinkClass
+              className="bg-success-light text-success rounded px-1.5 text-[13px] py-px"
+            >
+              Thông tin
+            </Link>
+          )}
+
           {Client?.Stock?.ID && Client?.Stock?.ID !== CrStocks?.ID ? (
             <div className="bg-danger-light text-danger rounded px-2 text-[13px] py-px">
               Khác điểm : {Client?.Stock?.Title}
@@ -357,8 +342,9 @@ function PanelPos({ Client }) {
             </div>
           )}
         </div>
-        <div className="px-4 py-3 border-b">
+        <div className="px-3 py-3 border-b">
           <Link
+            ref={buttonRef}
             popoverOpen=".popover-add-pos"
             className="w-full px-4 py-3 font-medium text-white rounded bg-app"
           >
@@ -366,148 +352,155 @@ function PanelPos({ Client }) {
             <ChevronUpIcon className="w-5 ml-2" />
           </Link>
         </div>
-        <div className="overflow-auto grow">
-          <div>
-            <div className="border-b border-dashed last:border-b-0">
-              <Link
-                className="flex px-4 py-3.5 font-medium text-[#3F4254]"
-                noLinkClass
-                href={`/admin/pos/manage/${Client?.ID}/services`}
-                panelClose
-              >
-                Quản lý thẻ dịch vụ
-              </Link>
-            </div>
-            <div className="border-b border-dashed last:border-b-0">
-              <Link
-                className="flex px-4 py-3.5 font-medium text-[#3F4254]"
-                noLinkClass
-                href={
-                  `/admin/pos/manage/${Client?.ID}/books/?client=` +
-                  JSON.stringify({
-                    label: Client?.FullName,
-                    value: Client?.ID,
-                    MobilePhone: Client?.MobilePhone,
-                  })
-                }
-                panelClose
-              >
-                Quản lý đặt lịch
-              </Link>
-            </div>
-            <div className="border-b border-dashed last:border-b-0">
-              <Link
-                className="flex px-4 py-3.5 font-medium text-[#3F4254]"
-                noLinkClass
-                href={`/admin/pos/manage/${Client?.ID}/wallet/`}
-                panelClose
-              >
-                Ví điện tử
-                {Client?.Present?.nap_vi > 0 && (
-                  <span className="pl-2">
-                    -
-                    <span className="pl-2 font-bold font-lato text-success">
-                      {StringHelpers.formatVND(Client?.Present?.nap_vi)}
-                    </span>
-                  </span>
-                )}
-              </Link>
-            </div>
-            <div className="border-b border-dashed last:border-b-0">
-              <Link
-                className="flex px-4 py-3.5 font-medium text-[#3F4254]"
-                noLinkClass
-                href={`/admin/pos/manage/${Client?.ID}/card/`}
-                panelClose
-              >
-                Thẻ tiền
-                {Client?.Present?.the_tien_kha_dung > 0 && (
-                  <span className="pl-2">
-                    -
-                    <span className="pl-2 font-bold font-lato text-success">
-                      {StringHelpers.formatVND(
-                        Client?.Present?.the_tien_kha_dung
-                      )}
-                    </span>
-                  </span>
-                )}
-              </Link>
-            </div>
-            <div className="border-b border-dashed last:border-b-0">
-              <Link
-                className="flex px-4 py-3.5 font-medium text-[#3F4254]"
-                noLinkClass
-                href={`/admin/pos/manage/${Client?.ID}/points/`}
-                panelClose
-              >
-                Tích điểm
-                {Client?.Present?.points > 0 && (
-                  <span className="pl-2">
-                    -
-                    <span className="pl-2 pr-1 font-bold font-lato text-success">
-                      {Client?.Present?.points}
-                    </span>
-                    điểm
-                  </span>
-                )}
-              </Link>
-            </div>
-            <div className="border-b border-dashed last:border-b-0">
-              <Link
-                className="flex px-4 py-3.5 font-medium text-[#3F4254]"
-                noLinkClass
-                href={`/admin/pos/manage/${Client?.ID}/debt/`}
-                panelClose
-              >
-                Công nợ
-                {Client?.Present?.no > 0 && (
-                  <span className="pl-2">
-                    -
-                    <span className="pl-2 font-bold font-lato text-danger">
-                      {StringHelpers.formatVND(Client?.Present?.no)}
-                    </span>
-                  </span>
-                )}
-              </Link>
-            </div>
-            <div className="border-b border-dashed last:border-b-0">
-              <Link
-                className="flex px-4 py-3.5 font-medium text-[#3F4254]"
-                noLinkClass
-                href={`/admin/pos/manage/${Client?.ID}/order/`}
-                panelClose
-              >
-                Đơn hàng
-                {getValueOrder(Client?.Present) > 0 && (
-                  <span className="pl-2">
-                    -
-                    <span className="pl-2 font-bold font-lato text-danger">
-                      {StringHelpers.formatVND(getValueOrder(Client?.Present))}
-                    </span>
-                  </span>
-                )}
-              </Link>
-            </div>
-            <div className="border-b border-dashed last:border-b-0">
-              <Link
-                panelClose
-                className="flex px-4 py-3.5 font-medium text-[#3F4254]"
-                noLinkClass
-                href={`/admin/pos/manage/${Client?.ID}/diary`}
-              >
-                Nhật ký khách hàng
-              </Link>
-            </div>
-            {isOldCard() && (
-              <div className="border-b border-dashed last:border-b-0">
+        <div className="overflow-auto grow bg-[var(--f7-page-bg-color)]">
+          <div className="p-3">
+            <div className="mt-3 bg-white rounded-lg first:mt-0">
+              <div className="border-b last:border-b-0">
                 <Link
                   className="flex px-4 py-3.5 font-medium text-[#3F4254]"
                   noLinkClass
-                  href={`/admin/pos/manage/${Client?.ID}/create-old-card/`}
+                  href={`/admin/pos/manage/${Client?.ID}/services`}
                   panelClose
                 >
-                  Tạo thẻ cũ
+                  Quản lý thẻ dịch vụ
                 </Link>
+              </div>
+              <div className="border-b last:border-b-0">
+                <Link
+                  className="flex px-4 py-3.5 font-medium text-[#3F4254]"
+                  noLinkClass
+                  href={
+                    `/admin/pos/manage/${Client?.ID}/books/?client=` +
+                    JSON.stringify({
+                      label: Client?.FullName,
+                      value: Client?.ID,
+                      MobilePhone: Client?.MobilePhone,
+                    })
+                  }
+                  panelClose
+                >
+                  Quản lý đặt lịch
+                </Link>
+              </div>
+              <div className="border-b last:border-b-0">
+                <Link
+                  className="flex flex-col px-4 py-3.5 font-medium text-[#3F4254]"
+                  noLinkClass
+                  href={`/admin/pos/manage/${Client?.ID}/order/`}
+                  panelClose
+                >
+                  Đơn hàng
+                  {getValueOrder(Client?.Present) > 0 ? (
+                    <div className="mt-[2px] italic leading-4">
+                      <span className="font-light text-gray-500">
+                        Đã chi tiêu
+                      </span>
+                      <span className="pl-2 font-bold font-lato text-danger">
+                        {StringHelpers.formatVND(
+                          getValueOrder(Client?.Present)
+                        )}
+                      </span>
+                    </div>
+                  ) : (
+                    <></>
+                  )}
+                </Link>
+              </div>
+              <div className="border-b last:border-b-0">
+                <Link
+                  panelClose
+                  className="flex px-4 py-3.5 font-medium text-[#3F4254]"
+                  noLinkClass
+                  href={`/admin/pos/manage/${Client?.ID}/diary`}
+                >
+                  Nhật ký khách hàng
+                </Link>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3 mt-3 first:mt-0">
+              <Link
+                className="bg-white rounded-lg p-3.5"
+                noLinkClass
+                onClick={(e) => {
+                  e.preventDefault();
+                  f7.panel.close("left");
+                  f7.views.main.router.navigate(
+                    `/admin/pos/manage/${Client?.ID}/wallet/`
+                  );
+                }}
+              >
+                <div className="mb-[2px] font-light text-gray-500">
+                  Ví điện tử
+                </div>
+                <div className="font-bold leading-4 font-lato text-app">
+                  {StringHelpers.formatVND(Client?.Present?.nap_vi)}
+                </div>
+              </Link>
+              <Link
+                noLinkClass
+                className="bg-white rounded-lg p-3.5"
+                onClick={(e) => {
+                  e.preventDefault();
+                  f7.panel.close("left");
+                  f7.views.main.router.navigate(
+                    `/admin/pos/manage/${Client?.ID}/card/`
+                  );
+                }}
+              >
+                <div className="mb-[2px] font-light text-gray-500">
+                  Thẻ tiền
+                </div>
+                <div className="font-bold leading-4 font-lato">
+                  {StringHelpers.formatVND(Client?.Present?.the_tien_kha_dung)}
+                </div>
+              </Link>
+              <Link
+                noLinkClass
+                className="bg-white rounded-lg p-3.5"
+                onClick={(e) => {
+                  e.preventDefault();
+                  f7.panel.close("left");
+                  f7.views.main.router.navigate(
+                    `/admin/pos/manage/${Client?.ID}/points/`
+                  );
+                }}
+              >
+                <div className="mb-[2px] font-light text-gray-500">
+                  Tích điểm
+                </div>
+                <div className="font-bold leading-4 font-lato">
+                  {Client?.Present?.points || 0}
+                </div>
+              </Link>
+              <Link
+                noLinkClass
+                className="bg-white rounded-lg p-3.5"
+                onClick={(e) => {
+                  e.preventDefault();
+                  f7.panel.close("left");
+                  f7.views.main.router.navigate(
+                    `/admin/pos/manage/${Client?.ID}/debt/`
+                  );
+                }}
+              >
+                <div className="mb-[2px] font-light text-gray-500">Công nợ</div>
+                <div className="font-bold leading-4 font-lato text-danger">
+                  {StringHelpers.formatVND(Client?.Present?.no)}
+                </div>
+              </Link>
+            </div>
+            {isOldCard() && (
+              <div className="mt-3 bg-white rounded-lg first:mt-0">
+                <div className="border-b last:border-b-0">
+                  <Link
+                    className="flex px-4 py-3.5 font-medium text-[#3F4254]"
+                    noLinkClass
+                    href={`/admin/pos/manage/${Client?.ID}/create-old-card/`}
+                    panelClose
+                  >
+                    Tạo thẻ cũ
+                  </Link>
+                </div>
               </div>
             )}
           </div>
@@ -515,6 +508,6 @@ function PanelPos({ Client }) {
       </div>
     </Panel>
   );
-}
+});
 
 export default PanelPos;

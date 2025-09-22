@@ -366,32 +366,29 @@ const PickerSalesCommissionSharing = forwardRef(
         };
       }
       if (tabIndex === 1) {
-        let DividedValues = Divided.filter((item) => item.Staff).map(
-          (item) => ({
+        let DividedValues = Divided.filter(
+          (item) => item?.Staff?.length > 0
+        ).map((item) => ({
+          Product: item.Product,
+          Hoa_Hong: item?.Staff.map((x) => ({
             Product: item.Product,
-            Hoa_Hong: [
-              {
-                Product: item.Product,
-                Staff: item.Staff,
-                Value:
-                  item.Type.value === "KY_THUAT_VIEN"
-                    ? getValueKTV({ item: item.Product, user: item.Staff })
-                    : getValueHH({
-                        item: item.Product,
-                        user: item.Staff,
-                        Type: item.Type,
-                      }),
-              },
-            ],
-            Doanh_So: [
-              {
-                Product: item.Product,
-                Staff: item.Staff,
-                Value: item.Product.gia_tri_doanh_so,
-              },
-            ],
-          })
-        );
+            Staff: x,
+            Value:
+              item.Type.value === "KY_THUAT_VIEN"
+                ? getValueKTV({ item: item.Product, user: x }) /
+                  item.Staff.length
+                : getValueHH({
+                    item: item.Product,
+                    user: x,
+                    Type: item.Type,
+                  }) / item.Staff.length,
+          })),
+          Doanh_So: item?.Staff.map((x) => ({
+            Product: item.Product,
+            Staff: x,
+            Value: item.Product.gia_tri_doanh_so / item.Staff.length,
+          })),
+        }));
         const Hoa_Hong = [].concat.apply(
           [],
           DividedValues && DividedValues.length > 0
@@ -690,8 +687,13 @@ const PickerSalesCommissionSharing = forwardRef(
                                     errorMessageForce={fieldState?.invalid}
                                     actions={[
                                       {
-                                        Title: <div><EllipsisHorizontalIcon className="w-6" /></div>,
-                                        className: "bg-white max-w-[50px] text-black border border-[#d3d3d3]",
+                                        Title: (
+                                          <div>
+                                            <EllipsisHorizontalIcon className="w-6" />
+                                          </div>
+                                        ),
+                                        className:
+                                          "bg-white max-w-[50px] text-black border border-[#d3d3d3]",
                                         onClick: (close) => close(),
                                         isLoading: updateMutation.isLoading,
                                         isDisabled: updateMutation.isLoading,
@@ -856,6 +858,7 @@ const PickerSalesCommissionSharing = forwardRef(
                                       control={control}
                                       render={({ field, fieldState }) => (
                                         <SelectMembersBouns
+                                          isMulti
                                           isClearable
                                           placeholder="Chọn nhân viên"
                                           value={field.value}

@@ -122,6 +122,12 @@ function PrinterOrder({ f7route }) {
       return data?.data
         ? {
             ...data?.data,
+            OrderTotal:
+              data?.data?.list && data?.data?.list.length > 0
+                ? data?.data?.list
+                    .map((x) => x.Price * x.Qty)
+                    .reduce((partialSum, a) => partialSum + a, 0)
+                : 0,
             Cashes: (data.data?.Cashes
               ? data.data?.Cashes.filter((x) => x.CashType === "Thu")
               : []
@@ -365,8 +371,10 @@ function PrinterOrder({ f7route }) {
               {Order?.data?.SysConfig?.BillPhone ||
               Order?.data?.SysConfig?.BillAddress ? (
                 <div>
-                  <div>{Order?.data?.SysConfig?.BillAddress || 'Chưa có'}</div>
-                  <div>Hotline: {Order?.data?.SysConfig?.BillPhone || 'Chưa có'}</div>
+                  <div>{Order?.data?.SysConfig?.BillAddress || "Chưa có"}</div>
+                  <div>
+                    Hotline: {Order?.data?.SysConfig?.BillPhone || "Chưa có"}
+                  </div>
                 </div>
               ) : (
                 <div
@@ -504,31 +512,44 @@ function PrinterOrder({ f7route }) {
                   <div>Tổng giá trị:</div>
                   <div className="font-bold">
                     {StringHelpers.formatVND(
-                      Order?.data?.OrderEnt?.TotalProdValue
+                      Order?.data?.OrderTotal -
+                        Order?.data?.OrderEnt?.TotalValue <=
+                        0
+                        ? Order?.data?.OrderEnt?.TotalValue
+                        : Order?.data?.OrderTotal
                     )}
                   </div>
                 </div>
-                {Order?.data?.OrderEnt?.TotalValue > 0 && (
+                {Order?.data?.OrderTotal - Order?.data?.OrderEnt?.TotalValue >
+                  0 && (
                   <div className="flex justify-between mb-1 last:mb-0">
                     <div>Khuyến mại:</div>
                     <div className="font-bold">
                       {StringHelpers.formatVND(
-                        Order?.data?.OrderEnt?.TotalProdValue -
+                        Order?.data?.OrderTotal -
+                          Order?.data?.OrderEnt?.TotalValue <=
+                          0
+                          ? 0
+                          : Order?.data?.OrderTotal -
+                              Order?.data?.OrderEnt?.TotalValue
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {Order?.data?.OrderTotal - Order?.data?.OrderEnt?.TotalValue >
+                  0 &&
+                  Order?.data?.OrderEnt?.TotalValue !==
+                    Order?.data?.OrderEnt?.ToPay && (
+                    <div className="flex justify-between mb-1 last:mb-0">
+                      <div>Còn lại:</div>
+                      <div className="font-bold">
+                        {StringHelpers.formatVND(
                           Order?.data?.OrderEnt?.TotalValue
-                      )}
+                        )}
+                      </div>
                     </div>
-                  </div>
-                )}
-                {Order?.data?.OrderEnt?.TotalValue > 0 && (
-                  <div className="flex justify-between mb-1 last:mb-0">
-                    <div>Còn lại:</div>
-                    <div className="font-bold">
-                      {StringHelpers.formatVND(
-                        Order?.data?.OrderEnt?.TotalValue
-                      )}
-                    </div>
-                  </div>
-                )}
+                  )}
                 {Order?.data?.OrderEnt?.VoucherCode && (
                   <div className="flex justify-between mb-1 last:mb-0">
                     <div>
@@ -546,8 +567,9 @@ function PrinterOrder({ f7route }) {
                     </div>
                   </div>
                 )}
-                {Order?.data?.OrderEnt?.CustomeDiscount > 0 && (
-                  <>
+                {Order?.data?.OrderEnt?.VoucherCode &&
+                  Order?.data?.OrderEnt?.ToMoney !==
+                    Order?.data?.OrderEnt?.ToPay && (
                     <div className="flex justify-between mb-1 last:mb-0">
                       <div>Giá trị đơn hàng:</div>
                       <div className="font-bold">
@@ -556,17 +578,19 @@ function PrinterOrder({ f7route }) {
                         )}
                       </div>
                     </div>
-                    <div className="flex justify-between mb-1 last:mb-0">
-                      <div>Chiết khấu trên đơn:</div>
-                      <div className="font-bold">
-                        {Order?.data?.OrderEnt?.CustomeDiscount <= 100
-                          ? `${Order?.data?.OrderEnt?.CustomeDiscount}%`
-                          : StringHelpers.formatVND(
-                              Order?.data?.OrderEnt?.CustomeDiscount
-                            )}
-                      </div>
+                  )}
+
+                {Order?.data?.OrderEnt?.CustomeDiscount > 0 && (
+                  <div className="flex justify-between mb-1 last:mb-0">
+                    <div>Chiết khấu trên đơn:</div>
+                    <div className="font-bold">
+                      {Order?.data?.OrderEnt?.CustomeDiscount <= 100
+                        ? `${Order?.data?.OrderEnt?.CustomeDiscount}%`
+                        : StringHelpers.formatVND(
+                            Order?.data?.OrderEnt?.CustomeDiscount
+                          )}
                     </div>
-                  </>
+                  </div>
                 )}
                 <div className="flex justify-between mb-1 font-bold last:mb-0">
                   <div>Giá trị cần thanh toán:</div>
@@ -651,20 +675,6 @@ function PrinterOrder({ f7route }) {
         <div className="hidden" ref={buttonToPopoverWrapper}>
           <div className="button-to-print"></div>
         </div>
-        {/* <div className="p-4 bg-white border-t">
-          <Button
-            type="button"
-            className="flex-1 bg-primary"
-            fill
-            large
-            preloader
-            loading={isLoading || PrintersIP?.isLoading || Order.isLoading}
-            disabled={isLoading || PrintersIP?.isLoading || Order.isLoading}
-            onClick={onPrinter}
-          >
-            In hoá đơn
-          </Button>
-        </div> */}
         <div className="flex gap-3 p-4 bg-white border-t">
           <Button
             style={{ "--f7-preloader-color": "#000" }}

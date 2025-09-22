@@ -1,6 +1,7 @@
 import {
   CalendarDaysIcon,
   ChevronLeftIcon,
+  EllipsisVerticalIcon,
   PlusIcon,
 } from "@heroicons/react/24/outline";
 import {
@@ -13,13 +14,13 @@ import {
   Page,
   Segmented,
   Subnavbar,
-  PhotoBrowser,
   Tab,
   Tabs,
   useStore,
+  f7,
 } from "framework7-react";
 import React, { useState, useEffect, useRef } from "react";
-import { useQuery } from "react-query";
+import { useInfiniteQuery, useMutation, useQuery } from "react-query";
 import StaffsAPI from "../../api/Staffs.api";
 import moment from "moment";
 import StringHelpers from "../../helpers/StringHelpers";
@@ -29,19 +30,30 @@ import { DatePickerWrap } from "../../partials/forms";
 import PickerDiaryAdd from "./components/PickerDiaryAdd";
 import NoFound from "../../components/NoFound";
 import Dom7 from "dom7";
+import InfiniteScroll from "react-infinite-scroll-component";
+import ArrayHelpers from "@/helpers/ArrayHelpers";
+import { PickerSheet } from "@/partials/components/Sheet";
+import { PickerAddEditCustomerInfo } from "./components";
+import { Fancybox } from "@fancyapps/ui";
+import { RolesHelpers } from "@/helpers/RolesHelpers";
+import { toast } from "react-toastify";
 
 function TechniciansProfile({ id, memberid, f7route }) {
   const Auth = useStore("Auth");
   const CrStocks = useStore("CrStocks");
   const Brand = useStore("Brand");
 
+  const { adminTools_byStock } = RolesHelpers.useRoles({
+    nameRoles: ["adminTools_byStock"],
+    auth: Auth,
+    CrStocks,
+  });
+
   const [filters, setFilters] = useState({
     mon: new Date(),
   });
 
   const [active, setActive] = useState("#thong-tin");
-  const [photos, setPhotos] = useState([]);
-  const [thumbs, setThumbs] = useState([]);
 
   const standalone = useRef(null);
   const elDiary = useRef(null);
@@ -154,6 +166,34 @@ function TechniciansProfile({ id, memberid, f7route }) {
     enabled: Boolean(active === "#hinh-anh"),
   });
 
+  const CustomerInfoQuery = useInfiniteQuery({
+    queryKey: ["Technicians-Customer"],
+    queryFn: async ({ pageParam = 1 }) => {
+      const { data } = await StaffsAPI.getCustomerInfo({
+        data: { MemberID: memberid, Pi: pageParam, Ps: 20 },
+        Token: Auth.token,
+      });
+      return data || null;
+    },
+    getNextPageParam: (lastPage, pages) =>
+      lastPage.Pi === lastPage.pCount ? undefined : lastPage.Pi + 1,
+    keepPreviousData: true,
+    enabled: Boolean(active === "#ho-so"),
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (body) => {
+      let data = await StaffsAPI.deleteCustomerInfo(body);
+      await CustomerInfoQuery.refetch();
+      return data;
+    },
+  });
+
+  const Lists = ArrayHelpers.useInfiniteQuery(
+    CustomerInfoQuery?.data?.pages,
+    "lst"
+  );
+
   useEffect(() => {
     if (elDiary?.current || elAttachments?.current) {
       let $$ = Dom7;
@@ -166,21 +206,56 @@ function TechniciansProfile({ id, memberid, f7route }) {
       }
 
       let newPhotos = [];
-      let newThumbs = [];
 
-      for (let image of images) {
+      for (const image of images) {
         let src = $$(image).attr("src");
         newPhotos.push({ url: src });
-        newThumbs.push(src);
-
-        $$(image).click(() => {
-          let index = photos.findIndex((x) => x.url === src);
-          standalone.current.open(index);
-        });
       }
 
-      setPhotos(newPhotos);
-      setThumbs(newThumbs);
+      for (let [index, image] of images.entries()) {
+        $$(image).click(() => {
+          Fancybox.show(
+            newPhotos.map((x) => ({
+              src: x.url,
+              thumbSrc: x.url,
+            })),
+            {
+              Carousel: {
+                Toolbar: {
+                  items: {
+                    downloadImage: {
+                      tpl: '<button class="f-button"><svg tabindex="-1" width="24" height="24" viewBox="0 0 24 24"><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2M7 11l5 5 5-5M12 4v12"></path></svg></button>',
+                      click: () => {
+                        PromHelpers.OPEN_LINK(
+                          AssetsHelpers.toAbsoluteUrl(image.Src)
+                        );
+                      },
+                    },
+                  },
+                  display: {
+                    left: ["counter"],
+                    middle: [
+                      "zoomIn",
+                      "zoomOut",
+                      // "toggle1to1",
+                      "rotateCCW",
+                      "rotateCW",
+                      // "flipX",
+                      // "flipY",
+                    ],
+                    right: [
+                      "downloadImage",
+                      //"thumbs",
+                      "close",
+                    ],
+                  },
+                },
+              },
+              startIndex: index,
+            }
+          );
+        });
+      }
     }
   }, [
     elDiary?.current,
@@ -190,6 +265,37 @@ function TechniciansProfile({ id, memberid, f7route }) {
     standalone,
     active,
   ]);
+
+  const onDelete = (item) => {
+    f7.dialog.confirm(`Bạn có chắc chắn muốn xoá ?`, () => {
+      f7.dialog.preloader("Đang thực hiện...");
+
+      deleteMutation.mutate(
+        {
+          data: {
+            delete: [item.ID],
+          },
+          Token: Auth.token,
+        },
+        {
+          onSuccess: (data) => {
+            f7.dialog.close();
+            toast.success(`Xoá thành công.`);
+          },
+        }
+      );
+    });
+  };
+  
+  let isCustomer = Lists.some(
+    (x) =>
+      x.MemberID === Number(memberid) && x.Items &&
+      x.Items.findIndex(
+        (o) =>
+          moment(o.CreateDate).format("DD-MM-YYYY") ===
+          moment().format("DD-MM-YYYY")
+      ) > -1
+  );
 
   return (
     <Page
@@ -275,6 +381,15 @@ function TechniciansProfile({ id, memberid, f7route }) {
             >
               Hình ảnh
             </Button>
+            {Brand?.Global?.Admin?.thong_tin_pos && (
+              <Button
+                tabLink="#ho-so"
+                active={active === "#ho-so"}
+                onClick={() => setActive("#ho-so")}
+              >
+                Hồ sơ
+              </Button>
+            )}
           </Segmented>
         </Subnavbar>
       </Navbar>
@@ -394,6 +509,12 @@ function TechniciansProfile({ id, memberid, f7route }) {
                       {StringHelpers.formatVND(
                         data?.member?.Present?.the_tien_kha_dung
                       )}
+                    </div>
+                  </div>
+                  <div className="px-4 py-2">
+                    <div className="text-muted">Tích điểm</div>
+                    <div className="mt-px font-medium capitalize">
+                      {data?.member?.Present?.points || 0}
                     </div>
                   </div>
                 </div>
@@ -580,14 +701,229 @@ function TechniciansProfile({ id, memberid, f7route }) {
             </>
           )}
         </Tab>
+        {Brand?.Global?.Admin?.thong_tin_pos && (
+          <Tab
+            onTabShow={(el) => Dom7(el).scrollTop(0)}
+            id="ho-so"
+            className="h-full"
+          >
+            <div className="flex flex-col h-full pb-safe-b">
+              <div
+                id="scrollableDivTechniciansInfo"
+                className="overflow-auto grow"
+              >
+                <InfiniteScroll
+                  dataLength={Lists.length}
+                  next={CustomerInfoQuery.fetchNextPage}
+                  hasMore={CustomerInfoQuery.hasNextPage}
+                  loader={
+                    CustomerInfoQuery.isLoading ? null : (
+                      <>
+                        {CustomerInfoQuery.isFetchingNextPage &&
+                          Lists &&
+                          Lists.length > 0 && (
+                            <div className="flex justify-center ezs-ptr">
+                              <div className="lds-ellipsis">
+                                <div></div>
+                                <div></div>
+                                <div></div>
+                                <div></div>
+                              </div>
+                            </div>
+                          )}
+                      </>
+                    )
+                  }
+                  scrollableTarget="scrollableDivTechniciansInfo"
+                  refreshFunction={CustomerInfoQuery.refetch}
+                  pullDownToRefresh
+                  pullDownToRefreshThreshold={50}
+                  pullDownToRefreshContent={
+                    <div className="flex justify-center ezs-ptr">
+                      <div className="lds-ellipsis">
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                      </div>
+                    </div>
+                  }
+                  releaseToRefreshContent={
+                    <div className="flex justify-center ezs-ptr">
+                      <div className="lds-ellipsis">
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                      </div>
+                    </div>
+                  }
+                >
+                  <div className="p-4">
+                    {CustomerInfoQuery?.isLoading && (
+                      <>
+                        {Array(2)
+                          .fill()
+                          .map((_, index) => (
+                            <div
+                              className="flex flex-col p-4 mb-3.5 bg-white rounded-lg last:mb-0 animate-pulse"
+                              key={index}
+                            >
+                              {/* Dòng ngày + icon */}
+                              <div className="flex justify-between pb-2.5 mb-2.5 border-b last:mb-0 last:pb-0 last:border-0 items-center">
+                                <div className="w-24 h-4 bg-gray-200 rounded"></div>
+                                <div className="w-6 h-6 bg-gray-200 rounded"></div>
+                              </div>
+
+                              {/* Dòng người nhập */}
+                              <div className="flex justify-between pb-2.5 mb-2.5 border-b last:mb-0 last:pb-0 last:border-0 items-center">
+                                <div className="w-20 h-4 bg-gray-200 rounded"></div>
+                                <div className="w-32 h-4 bg-gray-200 rounded"></div>
+                              </div>
+                            </div>
+                          ))}
+                      </>
+                    )}
+                    
+                    {!CustomerInfoQuery?.isLoading && (
+                      <>
+                        {Lists && Lists.length > 0 && (
+                          <>
+                            {Lists.map((item, index) => (
+                              <div className="mb-3.5 last:mb-0" key={index}>
+                                {item.Items &&
+                                  item.Items.sort((x, y) =>
+                                    moment(y.CreateDate).diff(
+                                      moment(x.CreateDate)
+                                    )
+                                  ).map((sub, idx) => (
+                                    <PickerSheet
+                                      key={idx}
+                                      Title="Bạn muốn thực hiện ?"
+                                      Options={[
+                                        {
+                                          Title:
+                                            moment().format("YYYY-MM-DD") !==
+                                              moment(sub.CreateDate).format(
+                                                "YYYY-MM-DD"
+                                              ) && !adminTools_byStock?.hasRight
+                                              ? "Xem chi tiết"
+                                              : "Xem & chỉnh sửa",
+                                          component: ({
+                                            children,
+                                            close,
+                                            setHideForChild,
+                                          }) => (
+                                            <PickerAddEditCustomerInfo
+                                              data={sub}
+                                              MemberID={memberid}
+                                              onOpen={() =>
+                                                setHideForChild(true)
+                                              }
+                                              onClose={() => {
+                                                setHideForChild(false);
+                                                close();
+                                              }}
+                                            >
+                                              {({ open }) => (
+                                                <div
+                                                  className="flex items-center justify-center h-[54px] border-b last:border-0 text-[15px] cursor-pointer"
+                                                  onClick={() => {
+                                                    open();
+                                                  }}
+                                                >
+                                                  {children}
+                                                </div>
+                                              )}
+                                            </PickerAddEditCustomerInfo>
+                                          ),
+                                        },
+
+                                        {
+                                          Title: "Xoá thông tin",
+                                          className:
+                                            "flex items-center justify-center h-[54px] border-b last:border-0 text-[15px] cursor-pointer text-danger",
+                                          onClick: (e) => {
+                                            onDelete(sub);
+                                          },
+                                          hidden:
+                                            moment().format("YYYY-MM-DD") !==
+                                              moment(sub.CreateDate).format(
+                                                "YYYY-MM-DD"
+                                              ) &&
+                                            !adminTools_byStock?.hasRight,
+                                        },
+                                      ].filter((x) => !x.hidden)}
+                                      Close={{
+                                        Title: "Đóng",
+                                      }}
+                                    >
+                                      {({ open }) => (
+                                        <div
+                                          className="flex flex-col p-4 mb-3.5 bg-white rounded-lg last:mb-0"
+                                          onClick={open}
+                                        >
+                                          <div className="flex justify-between pb-2.5 mb-2.5 border-b last:mb-0 last:pb-0 last:border-0 items-center">
+                                            <div className="font-semibold text-gray-500 font-lato">
+                                              {moment(sub.CreateDate).format(
+                                                "DD/MM/YYYY"
+                                              )}
+                                            </div>
+                                            <div>
+                                              <EllipsisVerticalIcon className="w-6 text-primary" />
+                                            </div>
+                                          </div>
+                                          <div className="flex justify-between pb-2.5 mb-2.5 border-b last:mb-0 last:pb-0 last:border-0 items-center">
+                                            <div className="text-gray-500">
+                                              Người nhập
+                                            </div>
+                                            <div className="font-medium">
+                                              {sub?.UserFullName || ""}
+                                            </div>
+                                          </div>
+                                        </div>
+                                      )}
+                                    </PickerSheet>
+                                  ))}
+                              </div>
+                            ))}
+                          </>
+                        )}
+                        {(!Lists || Lists.length) === 0 && (
+                          <NoFound
+                            Title="Không có kết quả nào."
+                            Desc="Rất tiếc ... Không tìm thấy dữ liệu nào."
+                          />
+                        )}
+                      </>
+                    )}
+                  </div>
+                </InfiniteScroll>
+              </div>
+              {!isCustomer && (
+                <div className="p-4">
+                  <PickerAddEditCustomerInfo MemberID={memberid}>
+                    {({ open }) => (
+                      <Button
+                        onClick={open}
+                        type="button"
+                        className="rounded-full bg-app"
+                        fill
+                        large
+                        preloader
+                        loading={CustomerInfoQuery.isLoading}
+                        disabled={CustomerInfoQuery.isLoading}
+                      >
+                        Thêm mới thông tin
+                      </Button>
+                    )}
+                  </PickerAddEditCustomerInfo>
+                </div>
+              )}
+            </div>
+          </Tab>
+        )}
       </Tabs>
-      <PhotoBrowser
-        photos={photos}
-        thumbs={thumbs}
-        ref={standalone}
-        navbarShowCount={true}
-        toolbar={false}
-      />
     </Page>
   );
 }

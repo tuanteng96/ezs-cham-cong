@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Link,
   NavLeft,
@@ -22,7 +22,7 @@ import AssetsHelpers from "@/helpers/AssetsHelpers";
 import moment from "moment";
 import AdminAPI from "@/api/Admin.api";
 
-function ClientBirthDay(props) {
+function ClientBirthDay({ f7route }) {
   const [isToday, setIsToday] = useState(true);
   const [data, setData] = useState([]);
 
@@ -30,6 +30,10 @@ function ClientBirthDay(props) {
 
   let Auth = useStore("Auth");
   let CrStocks = useStore("CrStocks");
+
+  useEffect(() => {
+    if (f7route?.query?.mon) setIsToday(false);
+  }, [f7route.query]);
 
   let { isLoading } = useQuery({
     queryKey: ["ClientBirthDay", { ID: Auth?.ID, StockID: CrStocks?.ID }],
@@ -240,7 +244,7 @@ function ClientBirthDay(props) {
                         }
                       />
                       <div className="absolute top-0 flex items-center justify-center w-6 h-6 text-xs font-bold text-white border-white border-[2px] rounded-full -left-3 font-lato bg-danger">
-                        {moment(item.Birth).format("DD")}
+                        {moment(item.BirthDate).format("DD")}
                       </div>
                     </div>
                     <div className="flex-1 pl-4 pr-4">

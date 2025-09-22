@@ -31,22 +31,25 @@ const UploadImages = ({
 }) => {
   const Auth = useStore("Auth");
   const [completed, setCompleted] = useState(0);
-
+  
   const uploadMutation = useMutation({
     mutationFn: (body) =>
       MoresAPI.uploadProgress(body, (progress) => {
         setCompleted(progress);
       }),
   });
-
+  
   const onPhotoLibrary = () => {
+    
     const arg = {
       accept: accept,
       isMultiple: isMultiple,
     };
+    
     PromHelpers.CHOOSE_IMAGES(JSON.stringify(arg))
       .then(({ data }) => {
         f7.dialog.close();
+          
         if (data) {
           if (!isMultiple) {
             onChange(data[0].data);
@@ -147,15 +150,19 @@ const UploadImages = ({
                 className="w-full"
                 src={AssetsHelpers.toAbsoluteUrl(value)}
                 alt="Avatar"
-                onError={e => {
+                onError={(e) => {
                   if (
                     e.target.src !==
-                    AssetsHelpers.toAbsoluteUrl('/v2/assets/images/files/image-default.png', "")
-                  ) {
-                    e.target.onerror = null
-                    e.target.src = AssetsHelpers.toAbsoluteUrl(
-                      '/v2/assets/images/files/image-default.png', ""
+                    AssetsHelpers.toAbsoluteUrl(
+                      "/v2/assets/images/files/image-default.png",
+                      ""
                     )
+                  ) {
+                    e.target.onerror = null;
+                    e.target.src = AssetsHelpers.toAbsoluteUrl(
+                      "/v2/assets/images/files/image-default.png",
+                      ""
+                    );
                   }
                 }}
               />
@@ -208,7 +215,7 @@ const UploadImages = ({
       <Popover
         className={clsx(
           "min-w-[200px]",
-          popoverOpen && "popover-upload-images"
+          popoverOpen || "popover-upload-images"
         )}
       >
         <div className="flex flex-col py-1">

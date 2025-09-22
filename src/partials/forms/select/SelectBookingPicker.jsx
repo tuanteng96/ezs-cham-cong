@@ -11,7 +11,7 @@ import {
 import clsx from "clsx";
 import { AnimatePresence, motion } from "framer-motion";
 import { Input } from "framework7-react";
-import React, { forwardRef, useState } from "react";
+import React, { forwardRef, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
 const SelectBookingPicker = forwardRef(
@@ -29,89 +29,104 @@ const SelectBookingPicker = forwardRef(
       isRequired = true,
       isClearable = true,
       isFilter = false,
+      isFilterFocus = false,
       onInputFilter,
-      truncate = false
+      truncate = false,
+      onVisible
     },
     ref
   ) => {
     const [key, setKey] = useState("");
     const [visible, setVisible] = useState(false);
+    const inputRef = useRef(null);
+
+    useEffect(() => {
+      if (visible && isFilter && isFilterFocus && inputRef?.current) {
+        const timer = setTimeout(() => {
+          requestAnimationFrame(() => {
+            inputRef.current?.focus();
+          });
+        }, 300);
+        return () => clearTimeout(timer);
+      }
+    }, [visible, isFilter, isFilterFocus]);
 
     let open = () => {
       setVisible(true);
+      onVisible?.(true)
     };
 
     let close = () => {
       setVisible(false);
+      onVisible?.(false)
       setKey("");
+      onInputFilter("")
     };
 
     return (
-      <AnimatePresence initial={false}>
-        <>
-          <div className="relative" onClick={open} ref={ref}>
-            <div
-              className={clsx(
-                "no-keyboard flex w-full pl-4 pr-24 py-3 border rounded focus:border-primary shadow-[0_4px_6px_0_rgba(16,25,40,.06)",
-                errorMessageForce ? "border-danger" : "border-[#d5d7da]"
-              )}
-            >
-              {(!value || value.length === 0) && (
-                <span className="text-[#b5b6c3]">{placeholder}</span>
-              )}
-              {isMulti ? (
-                <div className="flex flex-wrap gap-2">
-                  {value &&
-                    value.map((x, idx) => (
-                      <div className="flex bg-gray-100 rounded-sm" key={idx}>
-                        <div className="px-1.5 py-px text-[13px]">
-                          {x.label}
-                        </div>
-                        <div
-                          className="flex items-center px-1 bg-gray-200"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onChange(value.filter((o) => x.value !== o.value));
-                          }}
-                        >
-                          <XMarkIcon className="w-3.5" />
-                        </div>
+      <>
+        <div className="relative" onClick={open} ref={ref}>
+          <div
+            className={clsx(
+              "no-keyboard flex w-full pl-4 pr-24 py-3 border rounded focus:border-primary shadow-[0_4px_6px_0_rgba(16,25,40,.06)",
+              errorMessageForce ? "border-danger" : "border-[#d5d7da]"
+            )}
+          >
+            {(!value || value.length === 0) && (
+              <span className="text-[#b5b6c3]">{placeholder}</span>
+            )}
+            {isMulti ? (
+              <div className="flex flex-wrap gap-2">
+                {value &&
+                  value.map((x, idx) => (
+                    <div className="flex bg-gray-100 rounded-sm" key={idx}>
+                      <div className="px-1.5 py-px text-[13px]">{x.label}</div>
+                      <div
+                        className="flex items-center px-1 bg-gray-200"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onChange(value.filter((o) => x.value !== o.value));
+                        }}
+                      >
+                        <XMarkIcon className="w-3.5" />
                       </div>
-                    ))}
-                </div>
-              ) : value?.label ? (
-                <div className={clsx(truncate && "truncate")}>{value?.label}</div>
-              ) : (
-                ""
-              )}
-            </div>
-            <div className="absolute right-0 flex h-full top-2/4 -translate-y-2/4">
-              <div className="flex items-center justify-center w-12 h-full">
-                <ChevronDownIcon className="w-5" />
+                    </div>
+                  ))}
               </div>
-              {isClearable && value ? (
-                <div
-                  className="flex items-center justify-center w-12 h-full relative after:content-[''] after:absolute after:right-0 after:h-4/6 after:w-[1px] after:bg-[#d5d7da] after:left-0"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onChange("");
-                  }}
-                >
-                  <XMarkIcon className="w-5" />
-                </div>
-              ) : (
-                <></>
-              )}
-            </div>
+            ) : value?.label ? (
+              <div className={clsx(truncate && "truncate")}>{value?.label}</div>
+            ) : (
+              ""
+            )}
           </div>
-          {errorMessage && errorMessageForce && (
-            <div className="mt-1.5 text-xs text-danger font-light">
-              {errorMessage}
+          <div className="absolute right-0 flex h-full top-2/4 -translate-y-2/4">
+            <div className="flex items-center justify-center w-12 h-full">
+              <ChevronDownIcon className="w-5" />
             </div>
-          )}
+            {isClearable && value ? (
+              <div
+                className="flex items-center justify-center w-12 h-full relative after:content-[''] after:absolute after:right-0 after:h-4/6 after:w-[1px] after:bg-[#d5d7da] after:left-0"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onChange("");
+                }}
+              >
+                <XMarkIcon className="w-5" />
+              </div>
+            ) : (
+              <></>
+            )}
+          </div>
+        </div>
+        {errorMessage && errorMessageForce && (
+          <div className="mt-1.5 text-xs text-danger font-light">
+            {errorMessage}
+          </div>
+        )}
 
-          {visible &&
-            createPortal(
+        {createPortal(
+          <AnimatePresence initial={false}>
+            {visible && (
               <div className="fixed z-[125001] inset-0 flex justify-end flex-col">
                 <motion.div
                   key={visible}
@@ -139,22 +154,22 @@ const SelectBookingPicker = forwardRef(
                   {isFilter && (
                     <div className="px-4 mb-4">
                       <div className="relative">
-                        <Input
-                          className="[&_input]:rounded [&_input]:placeholder:normal-case [&_input]:text-[15px] [&_input]:pl-14"
+                        <input
+                          ref={inputRef}
+                          className="text-[15px] pl-14 rounded border w-full focus:border-primary shadow-input border-[#d5d7da] h-12"
                           type="text"
                           placeholder={placeholderInput}
                           value={key}
-                          clearButton={true}
                           onInput={(e) => {
                             setKey(e.target.value);
                             onInputFilter && onInputFilter(e.target.value);
                           }}
-                          onFocus={(e) =>
-                            KeyboardsHelper.setAndroid({
-                              Type: "body",
-                              Event: e,
-                            })
-                          }
+                          // onFocus={(e) =>
+                          //   KeyboardsHelper.setAndroid({
+                          //     Type: "body",
+                          //     Event: e,
+                          //   })
+                          // }
                         />
                         <div className="absolute top-0 left-0 flex items-center justify-center h-full px-4 pointer-events-none">
                           <MagnifyingGlassIcon className="w-6 text-gray-500" />
@@ -163,47 +178,51 @@ const SelectBookingPicker = forwardRef(
                     </div>
                   )}
 
-                  <div className="border-y">
-                    <PickerAddMember
-                      onChange={(values) => {
-                        let item = {
-                          ...values,
-                          label: values.FullName,
-                          value: values.ID,
-                          suffix: value?.MobilePhone,
-                        };
-                        if (isMulti) {
-                          onChange(value ? [...value, item] : [item]);
-                        } else {
-                          onChange(item);
-                          isRequired && close();
-                        }
-                      }}
-                    >
-                      {({ open }) => (
-                        <div
-                          className="relative py-3.5 pl-4 pr-8 border-b last:border-0"
-                          onClick={open}
-                        >
-                          <div className="flex items-center">
-                            <div className="w-11 h-11">
-                              <div className="relative flex items-center justify-center h-full overflow-hidden rounded-full bg-success-light w-11">
-                                <PlusIcon className="w-6 text-success" />
+                  {(!options || options.length === 0) && (
+                    <div className="border-y">
+                      <PickerAddMember
+                        keySearch={key}
+                        onChange={(values) => {
+                          let item = {
+                            ...values,
+                            label: values.FullName,
+                            value: values.ID,
+                            suffix: value?.MobilePhone,
+                            isNew: true
+                          };
+                          if (isMulti) {
+                            onChange(value ? [...value, item] : [item]);
+                          } else {
+                            onChange(item);
+                            isRequired && close();
+                          }
+                        }}
+                      >
+                        {({ open }) => (
+                          <div
+                            className="relative py-3.5 pl-4 pr-8 border-b last:border-0"
+                            onClick={open}
+                          >
+                            <div className="flex items-center">
+                              <div className="w-11 h-11">
+                                <div className="relative flex items-center justify-center h-full overflow-hidden rounded-full bg-success-light w-11">
+                                  <PlusIcon className="w-6 text-success" />
+                                </div>
                               </div>
-                            </div>
-                            <div className="pl-4">
-                              <div className="mb-px font-medium">
-                                Thêm khách hàng mới
-                              </div>
-                              <div className="text-[#757676] font-light">
-                                Tạo nhanh 1 khách hàng mới
+                              <div className="pl-4">
+                                <div className="mb-px font-medium">
+                                  Thêm mới khách hàng
+                                </div>
+                                <div className="text-[#757676] font-light">
+                                  Tạo nhanh 1 khách hàng mới
+                                </div>
                               </div>
                             </div>
                           </div>
-                        </div>
-                      )}
-                    </PickerAddMember>
-                  </div>
+                        )}
+                      </PickerAddMember>
+                    </div>
+                  )}
 
                   <div className="overflow-auto pb-safe-b grow">
                     {options &&
@@ -291,11 +310,12 @@ const SelectBookingPicker = forwardRef(
                     )}
                   </div>
                 </motion.div>
-              </div>,
-              document.getElementById("framework7-root")
+              </div>
             )}
-        </>
-      </AnimatePresence>
+          </AnimatePresence>,
+          document.getElementById("framework7-root")
+        )}
+      </>
     );
   }
 );

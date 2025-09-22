@@ -71,7 +71,7 @@ const getStatusClass = (Status, item) => {
   if (Status === "CHUA_XAC_NHAN") {
     return "warning";
   }
-  if (Status === "KHACH_KHONG_DEN") {
+  if (Status === "KHACH_KHONG_DEN" || Status === "TU_CHOI") {
     return "danger";
   }
   if (Status === "KHACH_DEN") {
@@ -89,7 +89,7 @@ const getStatusText = (Status, item) => {
   const isAuto =
     item?.Desc && item.Desc.toUpperCase().indexOf("TỰ ĐỘNG ĐẶT LỊCH");
   if (Status === "XAC_NHAN") {
-    if (isAuto !== "" && isAuto > -1) return "primary-2";
+    if (isAuto !== "" && isAuto > -1) return "Đặt lịch dự kiến";
     return "Đã xác nhận";
   }
   if (Status === "CHUA_XAC_NHAN") {
@@ -326,7 +326,6 @@ function PosAdmin({ f7router }) {
                   MemberPhone: item?.MemberPhone || null,
                 };
               })
-              .filter((item) => item.Status !== "TU_CHOI")
           : [];
       let dataBooksAuto =
         data.osList && Array.isArray(data.osList)
@@ -704,12 +703,14 @@ function PosAdmin({ f7router }) {
           </PickerFilter>
         </NavRight>
         <Subnavbar>
+          
           <MenuSubNavbar
             className="w-full h-full px-2"
             data={Views ? Views.filter((x) => !x.hidden) : []}
             selected={Views.filter((x) => x.Key === filters.view)[0].Index}
             setSelected={(val) => {
-              let index = Views.findIndex((x) => x.ID === val);
+              let index = Views.findIndex((x) => x.ID === Number(val));
+              
               if (index > -1) {
                 if (Views[index].Path) {
                   f7router.navigate(Views[index].Path);
