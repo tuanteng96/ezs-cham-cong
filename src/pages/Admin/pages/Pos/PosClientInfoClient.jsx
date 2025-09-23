@@ -93,7 +93,7 @@ function PosClientInfoClient({ f7router, f7route }) {
       (o) =>
         moment(o.CreateDate).format("DD-MM-YYYY") ===
         moment().format("DD-MM-YYYY")
-    );
+    ) > -1;
 
   return (
     <Page
