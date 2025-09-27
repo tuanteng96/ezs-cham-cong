@@ -128,7 +128,7 @@ function PickerInvoiceNew({ children, data, onClose, onOpen }) {
       );
     } else {
       close();
-      f7.views.main.router.navigate(`/admin/pos/manage/${Member?.value}/`);
+      f7.views.main.router.navigate(`/admin/pos/manage/${Member?.value}/?add=popover`);
     }
   };
 

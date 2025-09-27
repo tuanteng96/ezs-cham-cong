@@ -18,7 +18,6 @@ function LayoutProvider({ children }) {
   let Auth = useStore("Auth");
   let Brand = useStore("Brand");
   let CrStocks = useStore("CrStocks");
-  let CrsInOut = useStore("CrsInOut");
 
   const queryClient = useQueryClient();
 
@@ -89,6 +88,7 @@ function LayoutProvider({ children }) {
         }
       } else {
         if (data?.Status !== -1) {
+          
           DeviceHelpers.get({
             success: ({ deviceId }) => {
               let { StockInfo, Info } = data;
@@ -128,7 +128,20 @@ function LayoutProvider({ children }) {
                 data.DeviceIDs !== deviceId
               ) {
                 store.dispatch("setAuth", data);
-                
+
+                //Lưu mã máy theo dõi sự thay đổi
+                AdminAPI.saveMachineCode({
+                  Token: data?.token,
+                  data: {
+                    updateList: [
+                      {
+                        UserID: data.ID,
+                        DeviceIDs: deviceId,
+                      },
+                    ],
+                  },
+                });
+
                 // f7.dialog.alert(
                 //   "Tài khoản đang đăng nhập trên thiết bị khác.",
                 //   () => {
@@ -139,6 +152,18 @@ function LayoutProvider({ children }) {
                 // );
               } else if (data && data.ID && !data.DeviceIDs) {
                 store.dispatch("setAuth", data);
+
+                AdminAPI.saveMachineCode({
+                  Token: data?.token,
+                  data: {
+                    updateList: [
+                      {
+                        UserID: data.ID,
+                        DeviceIDs: deviceId,
+                      },
+                    ],
+                  },
+                });
 
                 // f7.dialog.alert("Phiên đăng nhập của bạn đã hết hạn.", () => {
                 //   store
@@ -509,6 +534,7 @@ function LayoutProvider({ children }) {
         MemberCheckInID: CrStocks?.ID,
         pi: 1,
         ps: 100,
+        StockID: CrStocks?.ID,
       });
 
       return data?.data

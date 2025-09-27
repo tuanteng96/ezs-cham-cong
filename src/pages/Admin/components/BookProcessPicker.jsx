@@ -97,12 +97,15 @@ function BookProcessPicker({ children, data, type }) {
           close();
           toast.success(type + " thành công.");
           window?.noti27?.TIN_NHAN &&
-            nwindow?.oti27.TIN_NHAN({
+            window?.noti27?.TIN_NHAN({
               type:
                 type === "Xác nhận đặt lịch"
                   ? "CONFIRM_APPOINTMENT_WEB_APP"
                   : "CONFIRM_CANCEL_WEB_APP",
-              data: values,
+              data: {
+                ...values,
+                Member: data?.Member,
+              },
             });
         },
       }

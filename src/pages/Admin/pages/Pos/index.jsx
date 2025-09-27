@@ -148,6 +148,52 @@ function PosAdmin({ f7router }) {
   let Brand = useStore("Brand");
   let Stocks = useStore("Stocks");
 
+  let Views = [
+    {
+      ID: 1,
+      Index: 1,
+      Title: "Danh sách",
+      Key: "listWeek",
+      visibleCount: true,
+    },
+    {
+      ID: 2,
+      Index: 2,
+      Title: "Dạng lưới",
+      Key: "timeGridDay",
+      visibleCount: true,
+    },
+    {
+      ID: 3,
+      Index: 3,
+      Title: "Nhân viên",
+      Key: "resourceTimeGridDay",
+      visibleCount: true,
+    },
+    {
+      ID: 4,
+      Index: 4,
+      Title: "Buồng / Phòng",
+      Key: "resourceTimelineDay",
+      visibleCount: true,
+    },
+    {
+      ID: 5,
+      Index: 5,
+      Title: "Lịch lớp học",
+      visibleCount: true,
+      Path: "/admin/pos/calendar/class-schedule/",
+      hidden: !Brand?.Global?.Admin?.lop_hoc_pt,
+    },
+    {
+      ID: 6,
+      Index: 6,
+      Title: "Lịch chăm sóc",
+      visibleCount: true,
+      Path: "/admin/pos/calendar/care-schedule/",
+    },
+  ];
+
   const getViewCalendar = () => {
     if (Brand?.Global?.Admin?.PosActiveCalendar) {
       let index = Views.findIndex(
@@ -284,48 +330,47 @@ function PosAdmin({ f7router }) {
 
       let dataBooks =
         data.books && Array.isArray(data.books)
-          ? data.books
-              .map((item) => {
-                let TreatmentJson = item?.TreatmentJson
-                  ? JSON.parse(item?.TreatmentJson)
-                  : "";
+          ? data.books.map((item) => {
+              let TreatmentJson = item?.TreatmentJson
+                ? JSON.parse(item?.TreatmentJson)
+                : "";
 
-                return {
-                  ...item,
-                  start: item.BookDate,
-                  end: moment(item.BookDate)
-                    .add(item.RootMinutes ?? 60, "minutes")
-                    .toDate(),
-                  title: item.RootTitles,
-                  className: `fc-${getStatusClass(
-                    item.Status,
-                    item
-                  )} shadow-lg rounded !mt-0 !ml-0 !mr-0 px-3 py-1.5 text-white`,
-                  resourceIds:
-                    filters.view === "resourceTimelineDay"
-                      ? [TreatmentJson?.ID || TreatmentJson?.value || 0]
-                      : item.UserServices &&
-                        Array.isArray(item.UserServices) &&
-                        item.UserServices.length > 0
-                      ? item.UserServices.map((item) => item.ID)
-                      : [0],
-                  MemberCurrent: {
-                    FullName:
-                      item?.IsAnonymous ||
-                      item.Member?.MobilePhone === "0000000000"
-                        ? item?.FullName
-                        : item?.Member?.FullName,
-                    MobilePhone:
-                      item?.IsAnonymous ||
-                      item.Member?.MobilePhone === "0000000000"
-                        ? item?.Phone
-                        : item?.Member?.MobilePhone,
-                  },
-                  Star: checkStar(item),
-                  isBook: true,
-                  MemberPhone: item?.MemberPhone || null,
-                };
-              })
+              return {
+                ...item,
+                start: item.BookDate,
+                end: moment(item.BookDate)
+                  .add(item.RootMinutes ?? 60, "minutes")
+                  .toDate(),
+                title: item.RootTitles,
+                className: `fc-${getStatusClass(
+                  item.Status,
+                  item
+                )} shadow-lg rounded !mt-0 !ml-0 !mr-0 px-3 py-1.5 text-white`,
+                resourceIds:
+                  filters.view === "resourceTimelineDay"
+                    ? [TreatmentJson?.ID || TreatmentJson?.value || 0]
+                    : item.UserServices &&
+                      Array.isArray(item.UserServices) &&
+                      item.UserServices.length > 0
+                    ? item.UserServices.map((item) => item.ID)
+                    : [0],
+                MemberCurrent: {
+                  FullName:
+                    item?.IsAnonymous ||
+                    item.Member?.MobilePhone === "0000000000"
+                      ? item?.FullName
+                      : item?.Member?.FullName,
+                  MobilePhone:
+                    item?.IsAnonymous ||
+                    item.Member?.MobilePhone === "0000000000"
+                      ? item?.Phone
+                      : item?.Member?.MobilePhone,
+                },
+                Star: checkStar(item),
+                isBook: true,
+                MemberPhone: item?.MemberPhone || null,
+              };
+            })
           : [];
       let dataBooksAuto =
         data.osList && Array.isArray(data.osList)
@@ -559,52 +604,6 @@ function PosAdmin({ f7router }) {
     };
   }, [calendarRef]);
 
-  let Views = [
-    {
-      ID: 1,
-      Index: 1,
-      Title: "Danh sách",
-      Key: "listWeek",
-      visibleCount: true,
-    },
-    {
-      ID: 2,
-      Index: 2,
-      Title: "Dạng lưới",
-      Key: "timeGridDay",
-      visibleCount: true,
-    },
-    {
-      ID: 3,
-      Index: 3,
-      Title: "Nhân viên",
-      Key: "resourceTimeGridDay",
-      visibleCount: true,
-    },
-    {
-      ID: 4,
-      Index: 4,
-      Title: "Buồng / Phòng",
-      Key: "resourceTimelineDay",
-      visibleCount: true,
-    },
-    {
-      ID: 5,
-      Index: 5,
-      Title: "Lịch lớp học",
-      visibleCount: true,
-      Path: "/admin/pos/calendar/class-schedule/",
-      hidden: !Brand?.Global?.Admin?.lop_hoc_pt,
-    },
-    {
-      ID: 6,
-      Index: 6,
-      Title: "Lịch chăm sóc",
-      visibleCount: true,
-      Path: "/admin/pos/calendar/care-schedule/",
-    },
-  ];
-
   return (
     <Page
       className="bg-white"
@@ -703,14 +702,13 @@ function PosAdmin({ f7router }) {
           </PickerFilter>
         </NavRight>
         <Subnavbar>
-          
           <MenuSubNavbar
             className="w-full h-full px-2"
             data={Views ? Views.filter((x) => !x.hidden) : []}
             selected={Views.filter((x) => x.Key === filters.view)[0].Index}
             setSelected={(val) => {
               let index = Views.findIndex((x) => x.ID === Number(val));
-              
+
               if (index > -1) {
                 if (Views[index].Path) {
                   f7router.navigate(Views[index].Path);
@@ -833,15 +831,26 @@ function PosAdmin({ f7router }) {
                               <div
                                 className={clsx(
                                   "w-2 h-2 rounded-full",
-                                  "fc-bg-" + getStatusClass(item.Status || item?.os?.Status, item)
+                                  "fc-bg-" +
+                                    getStatusClass(
+                                      item.Status || item?.os?.Status,
+                                      item
+                                    )
                                 )}
                               ></div>
                               <div
                                 className={clsx(
-                                  "fc-text-" + getStatusClass(item.Status || item?.os?.Status, item)
+                                  "fc-text-" +
+                                    getStatusClass(
+                                      item.Status || item?.os?.Status,
+                                      item
+                                    )
                                 )}
                               >
-                                {getStatusText(item.Status || item?.os?.Status, item)}
+                                {getStatusText(
+                                  item.Status || item?.os?.Status,
+                                  item
+                                )}
                               </div>
                             </div>
                           </div>

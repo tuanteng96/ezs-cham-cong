@@ -185,7 +185,7 @@ function EditOsCalendar({ f7route, f7router }) {
           Status = "doing";
         }
       }
-      
+
       return rs
         ? { ...rs, Materials, ContextJSONApi, Status, rsStatus: rs?.Status }
         : null;
@@ -1108,7 +1108,12 @@ function EditOsCalendar({ f7route, f7router }) {
                     )}
                   </div>
                   {fieldsStaffs && fieldsStaffs.length > 0 && (
-                    <div className="px-4 pt-4">
+                    <div
+                      className={clsx(
+                        "px-4 pt-4",
+                        !IsAutoSalaryMethod && "pb-4"
+                      )}
+                    >
                       {fieldsStaffs.map((item, index) => (
                         <div
                           className="mb-3 pb-3.5 border-b border-dashed last:mb-0 last:pb-0 last:border-0"

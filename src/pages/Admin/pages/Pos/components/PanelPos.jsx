@@ -10,13 +10,15 @@ import clsx from "clsx";
 import { Link, Panel, f7, useStore } from "framework7-react";
 import moment from "moment";
 import React, { forwardRef, useImperativeHandle, useRef } from "react";
-import { getDatabase, ref, set } from "firebase/database";
+import { getDatabase, ref as dbRef, set } from "firebase/database";
 import { toast } from "react-toastify";
 import { useMutation } from "react-query";
 import AdminAPI from "@/api/Admin.api";
 import { PickerShowQrCode } from ".";
 import { RolesHelpers } from "@/helpers/RolesHelpers";
 import { useFirebase } from "@/hooks";
+
+
 
 const PanelPos = forwardRef(function PanelPos({ Client }, ref) {
   let buttonRef = useRef(null);
@@ -121,7 +123,7 @@ const PanelPos = forwardRef(function PanelPos({ Client }, ref) {
           onSuccess: ({ data }) => {
             if (data?.token) {
               set(
-                ref(
+                dbRef(
                   database,
                   "qrcode/" +
                     Brand?.Domain?.replace(/^https?:\/\//, "")

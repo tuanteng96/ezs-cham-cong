@@ -3,7 +3,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Button, f7, useStore } from "framework7-react";
 import React, { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, useFieldArray, useForm } from "react-hook-form";
 import AdminAPI from "@/api/Admin.api";
 import { useMutation, useQueryClient } from "react-query";
 import { toast } from "react-toastify";
@@ -11,6 +11,7 @@ import { NumericFormat } from "react-number-format";
 import clsx from "clsx";
 import { ref, remove, set } from "firebase/database";
 import { useFirebase } from "@/hooks";
+import { SelectMembers } from "@/partials/forms/select";
 
 const PHI_QUET_THE = ({ Client, Order, SettingFee, Auth, CrStocks, close }) => {
   const queryClient = useQueryClient();
@@ -277,8 +278,25 @@ const TIP = ({ Client, Order, SettingFee, Auth, CrStocks, Brand, close }) => {
     defaultValues: {
       Tip: "",
       isDisabled: false,
+      Staffs: [],
     },
   });
+
+  const { fields, append, remove } = useFieldArray({
+    control, // control props comes from useForm (optional: if you are using FormProvider)
+    name: "Staffs", // unique name for your Field Array
+  });
+
+  let { Tip, isDisabled } = watch();
+
+  useEffect(() => {
+    if (fields.length > 0) {
+      const divided = Math.floor((Number(Tip) || 0) / fields.length);
+      fields.forEach((_, idx) => {
+        setValue(`Staffs[${idx}].Price`, divided);
+      });
+    }
+  }, [Tip, fields.length, setValue]);
 
   useEffect(() => {
     if (Order && Order.Order && Client?.CheckIn) {
@@ -300,7 +318,28 @@ const TIP = ({ Client, Order, SettingFee, Auth, CrStocks, Brand, close }) => {
 
   const addMutation = useMutation({
     mutationFn: async (body) => {
-      let data = await AdminAPI.addOrderCheckIn(body);
+      let data = await AdminAPI.addOrderCheckIn(body.data);
+
+      if (body.STAFFS && body.STAFFS.length > 0) {
+        for (const staff of body.STAFFS) {
+          const formData = new FormData();
+          formData.append("[ID]", 0);
+          formData.append("[Value]", staff.Price);
+          formData.append("[IsOut]", true);
+          formData.append("[StockID]", CrStocks?.ID);
+          formData.append("[SysTagID]", "2051");
+          formData.append("[_Title]", "TIP ĐƠN HÀNG");
+          formData.append("[ReceiverUserID]", staff.value);
+          formData.append(
+            "[Desc]",
+            `TIP: ${Client?.FullName} - ${Client?.CheckIn?.ID}`
+          );
+          await AdminAPI.addEditCashs({
+            data: formData,
+            Token: Auth?.token,
+          });
+        }
+      }
 
       await Promise.all([
         queryClient.invalidateQueries(["OrderManageID"]),
@@ -331,9 +370,15 @@ const TIP = ({ Client, Order, SettingFee, Auth, CrStocks, Brand, close }) => {
 
     addMutation.mutate(
       {
-        data: bodyFormData,
-        Token: Auth?.token,
-        StockID: CrStocks?.ID,
+        data: {
+          data: bodyFormData,
+          Token: Auth?.token,
+          StockID: CrStocks?.ID,
+        },
+        STAFFS:
+          values.Staffs && values.Staffs.length > 0
+            ? values.Staffs.filter((x) => Number(x.Price) > 0)
+            : [],
       },
       {
         onSuccess: (data) => {
@@ -403,8 +448,6 @@ const TIP = ({ Client, Order, SettingFee, Auth, CrStocks, Brand, close }) => {
     }
   };
 
-  const { isDisabled } = watch();
-
   if (isDisabled) return <></>;
 
   return (
@@ -455,6 +498,79 @@ const TIP = ({ Client, Order, SettingFee, Auth, CrStocks, Brand, close }) => {
             )}
           />
         </div>
+        <div className="mb-3.5 last:mb-0">
+          <div className="mb-px font-light">Nhân viên</div>
+          <Controller
+            name="Staffs"
+            control={control}
+            render={({ field, fieldState }) => (
+              <SelectMembers
+                StockID={CrStocks?.ID}
+                placeholderInput="Tên nhân viên"
+                placeholder="Chọn nhân viên"
+                value={field.value}
+                label="Chọn nhân viên"
+                onChange={(val) => {
+                  field.onChange(val);
+                  remove();
+
+                  val &&
+                    val.forEach((item) => {
+                      append({ ...item, Price: "" });
+                    });
+                }}
+                isFilter
+                isMulti
+              />
+            )}
+          />
+        </div>
+        {fields &&
+          fields.map((item, index) => (
+            <div className="mb-3.5 last:mb-0" key={item.id}>
+              <div className="mb-px font-light">{item.label}</div>
+              <Controller
+                name={`Staffs[${index}].Price`}
+                control={control}
+                render={({ field, fieldState }) => (
+                  <div>
+                    <div className="relative">
+                      <NumericFormat
+                        className={clsx(
+                          "w-full input-number-format border shadow-[0_4px_6px_0_rgba(16,25,40,.06)] rounded py-3 px-4 focus:border-primary",
+                          fieldState?.invalid
+                            ? "border-danger"
+                            : "border-[#d5d7da]"
+                        )}
+                        type="text"
+                        autoComplete="off"
+                        thousandSeparator={true}
+                        placeholder="Nhập số tiền"
+                        value={field.value}
+                        onValueChange={(val) => {
+                          let newValue =
+                            typeof val.floatValue === "undefined"
+                              ? val.value
+                              : val.floatValue;
+                          field.onChange(newValue);
+                        }}
+                      />
+                      {field.value ? (
+                        <div
+                          className="absolute top-0 right-0 flex items-center justify-center w-12 h-full"
+                          onClick={() => field.onChange("")}
+                        >
+                          <XMarkIcon className="w-5" />
+                        </div>
+                      ) : (
+                        <></>
+                      )}
+                    </div>
+                  </div>
+                )}
+              />
+            </div>
+          ))}
         <div className="mb-3.5 last:mb-0 grid-cols-2 gap-2 grid">
           <Button
             type="submit"

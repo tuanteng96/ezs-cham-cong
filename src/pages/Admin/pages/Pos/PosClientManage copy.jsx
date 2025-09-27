@@ -162,10 +162,6 @@ function PosClientManage({ f7route, f7router }) {
   const Order = useQuery({
     queryKey: ["OrderManageID", { ID: Client?.data?.CheckIn?.ID }],
     queryFn: async () => {
-      let ProdsTitleNail = [
-        { ProdID: "20475", IDFees: "11605" },
-        { ProdID: "74122", IDFees: "11606" },
-      ];
       let bodyFormData = new FormData();
       bodyFormData.append("CheckInID", Client?.data?.CheckIn?.ID);
 
@@ -209,52 +205,6 @@ function PosClientManage({ f7route, f7router }) {
         newObj.Os = newOs;
         return newObj;
       });
-      if (
-        ProdsTitleNail &&
-        ProdsTitleNail.length > 0 &&
-        newRs.OrderItems.length > 0
-      ) {
-        if (
-          newRs.OrderItems.some((item) =>
-            ProdsTitleNail.some((o) => Number(o.ProdID) === item.ProdID)
-          )
-        ) {
-          newRs.OrderItems = newRs.OrderItems.map((OrderItem) => {
-            let newOrderItem = { ...OrderItem };
-            let index = ProdsTitleNail.findIndex(
-              (x) => Number(x.ProdID) === OrderItem.ProdID
-            );
-            if (index > -1) {
-              let { IDFees } = ProdsTitleNail[index];
-              newOrderItem.AdditionalFees = newRs.OrderItems.filter(
-                (x) => x.IsAddFee && x.ProdType === Number(IDFees)
-              );
-            }
-            return newOrderItem;
-          });
-
-          const feeProdIDs = newRs.OrderItems.flatMap((item) =>
-            item.AdditionalFees
-              ? item.AdditionalFees.map((fee) => fee.ProdID)
-              : []
-          );
-
-          newRs.OrderItems = newRs.OrderItems.filter(
-            (item) => !feeProdIDs.includes(item.ProdID)
-          );
-
-          newRs.OrderItems = newRs.OrderItems.flatMap((item) => {
-            if (typeof item.AdditionalFees !== "undefined") {
-              return Array.from({ length: Number(item.Qty) }, (_, i) => ({
-                ...item,
-                Qty: 1,
-                PositionIndex: i,
-              }));
-            }
-            return [item];
-          });
-        }
-      }
 
       if (Brand?.Global?.Admin?.Pos_quan_ly.kiem_tra_dk_xoa_phu_phi_don_hang) {
         let ids = newRs.OrderItems.filter(
@@ -995,415 +945,128 @@ function PosClientManage({ f7route, f7router }) {
                     </div> */}
                     </div>
                   )}
-
+  {console.log(Order?.data?.OrderItems)}
                 {Order?.data?.OrderItems &&
                   Order?.data?.OrderItems.length > 0 && (
                     <div className="mb-3.5 last:mb-0">
-                      {Order?.data?.OrderItems.map((item, index) => {
-                        if (typeof item?.AdditionalFees !== "undefined") {
-                          return (
+                      {Order?.data?.OrderItems.map((item, index) => (
+                        <PickerEditProd
+                          MemberID={f7route?.params?.id}
+                          item={item}
+                          CheckInID={Client?.data?.CheckIn?.ID}
+                          key={index}
+                          Order={Order?.data?.Order}
+                          OrderItems={Order?.data?.OrderItems}
+                        >
+                          {({ open }) => (
                             <div
-                              className="mb-3.5 last:mb-0 bg-white rounded-lg"
+                              className="flex gap-3 p-4 mb-3.5 last:mb-0 bg-white rounded-lg"
+                              onClick={open}
                               key={index}
                             >
-                              <PickerEditProd
-                                MemberID={f7route?.params?.id}
-                                item={item}
-                                CheckInID={Client?.data?.CheckIn?.ID}
-                                Order={Order?.data?.Order}
-                                OrderItems={Order?.data?.OrderItems}
-                              >
-                                {({ open }) => (
-                                  <div
-                                    className="flex items-center gap-3 p-4"
-                                    onClick={open}
-                                    key={index}
-                                  >
-                                    <div className="w-[70px]">
-                                      <img
-                                        className="object-cover w-full border rounded-full aspect-square"
-                                        src={AssetsHelpers.toAbsoluteUrl(
-                                          item.Thumbnail
-                                        )}
-                                        onError={(e) => {
-                                          e.currentTarget.src =
-                                            AssetsHelpers.toAbsoluteUrlCore(
-                                              "no-product.png",
-                                              "/images/"
-                                            );
-                                        }}
-                                        alt=""
-                                      />
-                                    </div>
-                                    <div className="flex-1">
-                                      <div className="mb-px font-medium line-clamp-2">
-                                        {item?.ProdTitle}
-                                        {item.HasFeeInUse && (
-                                          <span className="pl-1 text-gray-500">
-                                            ( Đã dùng )
-                                          </span>
-                                        )}
-                                      </div>
-
-                                      {item?.ProdOrService === 1 &&
-                                        item?.Os?.length > 0 && (
-                                          <>
-                                            {item?.Os?.length === 1 ? (
-                                              <div
-                                                className="flex text-success mt-1.5"
-                                                onClick={(e) => {
-                                                  e.stopPropagation();
-                                                  f7.views.main.router.navigate(
-                                                    "/admin/pos/calendar/os/?formState=" +
-                                                      encodeURIComponent(
-                                                        JSON.stringify({
-                                                          Os: {
-                                                            ID: item?.Os[0]
-                                                              .Services[
-                                                              item
-                                                                ?.PositionIndex
-                                                            ]?.ID,
-                                                            MemberID:
-                                                              item?.Os[0]
-                                                                .Services[
-                                                                item
-                                                                  ?.PositionIndex
-                                                              ]?.MemberID || "",
-                                                            ProdService:
-                                                              item?.Os[0]
-                                                                .Services[
-                                                                item
-                                                                  ?.PositionIndex
-                                                              ]?.ProdService ||
-                                                              "",
-                                                            ProdService2:
-                                                              item?.Os[0]
-                                                                .Services[
-                                                                item
-                                                                  ?.PositionIndex
-                                                              ]?.ProdService2 ||
-                                                              "",
-                                                            Title:
-                                                              item?.Os[0]
-                                                                .Services[
-                                                                item
-                                                                  ?.PositionIndex
-                                                              ]?.Title || "",
-                                                          },
-                                                        })
-                                                      )
-                                                  );
-                                                }}
-                                              >
-                                                {item?.Os[0].Services[
-                                                  item?.PositionIndex
-                                                ].Staffs &&
-                                                item?.Os[0].Services[
-                                                  item?.PositionIndex
-                                                ].Staffs.length > 0 ? (
-                                                  <span className="text-sm">
-                                                    <span className="pr-1">
-                                                      NV:
-                                                    </span>
-                                                    {item?.Os[0].Services[
-                                                      item?.PositionIndex
-                                                    ].Staffs.map(
-                                                      (x) => x.FullName
-                                                    ).join(", ")}
-                                                  </span>
-                                                ) : (
-                                                  <>
-                                                    <span className="text-sm">
-                                                      Chọn nhân viên thực hiện
-                                                    </span>
-                                                  </>
-                                                )}
-                                              </div>
-                                            ) : (
-                                              <>
-                                                <Link
-                                                  noLinkClass
-                                                  className="flex text-success mt-1.5"
-                                                  onClick={(e) => {
-                                                    e.stopPropagation();
-                                                  }}
-                                                  popoverOpen={`.popover-OrderItem-${item?.ID}`}
-                                                >
-                                                  {getStaffMultiOs(item?.Os) ? (
-                                                    <>
-                                                      <span className="pr-1">
-                                                        NV:
-                                                      </span>
-                                                      {getStaffMultiOs(
-                                                        item?.Os
-                                                      )}
-                                                    </>
-                                                  ) : (
-                                                    <>
-                                                      <PlusIcon className="w-3.5 mr-1" />
-                                                      <span className="text-sm">
-                                                        Nhân viên thực hiện
-                                                      </span>
-                                                    </>
-                                                  )}
-                                                </Link>
-                                                <Popover
-                                                  className={`popover-OrderItem-${item?.ID}`}
-                                                >
-                                                  <div className="flex flex-col py-1">
-                                                    {item?.Os.map((os, i) => (
-                                                      <Link
-                                                        key={i}
-                                                        popoverClose
-                                                        className="flex flex-col p-3 font-medium border-b last:border-0"
-                                                        noLinkClass
-                                                        onClick={(e) => {
-                                                          e.stopPropagation();
-                                                          f7.views.main.router.navigate(
-                                                            "/admin/pos/calendar/os/?formState=" +
-                                                              encodeURIComponent(
-                                                                JSON.stringify({
-                                                                  Os: {
-                                                                    ID: os
-                                                                      .Services[0]
-                                                                      ?.ID,
-                                                                    MemberID:
-                                                                      os
-                                                                        .Services[0]
-                                                                        ?.MemberID ||
-                                                                      "",
-                                                                    ProdService:
-                                                                      os
-                                                                        .Services[0]
-                                                                        ?.ProdService ||
-                                                                      "",
-                                                                    ProdService2:
-                                                                      os
-                                                                        .Services[0]
-                                                                        ?.ProdService2 ||
-                                                                      "",
-                                                                    Title:
-                                                                      os
-                                                                        .Services[0]
-                                                                        ?.Title ||
-                                                                      "",
-                                                                  },
-                                                                })
-                                                              )
-                                                          );
-                                                        }}
-                                                      >
-                                                        <div>
-                                                          [#{os?.Product?.ID}]{" "}
-                                                          {os?.Product?.Title}
-                                                        </div>
-
-                                                        {os?.Services &&
-                                                        os?.Services[0]
-                                                          .Staffs &&
-                                                        os?.Services[0].Staffs
-                                                          .length > 0 ? (
-                                                          <div className="mt-1 text-sm font-light text-gray-600">
-                                                            <span className="pr-1">
-                                                              NV:
-                                                            </span>
-                                                            {os?.Services[0].Staffs.map(
-                                                              (x) => x.FullName
-                                                            ).join(", ")}
-                                                          </div>
-                                                        ) : (
-                                                          <></>
-                                                        )}
-                                                      </Link>
-                                                    ))}
-                                                  </div>
-                                                </Popover>
-                                              </>
-                                            )}
-                                          </>
-                                        )}
-                                    </div>
-                                    <div className="flex items-center justify-end w-10">
-                                      <EllipsisVerticalIcon className="w-6 text-gray-400" />
-                                    </div>
-                                  </div>
-                                )}
-                              </PickerEditProd>
-                              {item.AdditionalFees &&
-                                item.AdditionalFees.length > 0 && (
-                                  <div className="px-4 pb-4">
-                                    {item.AdditionalFees.map((fee, i) => (
-                                      <PickerEditProd
-                                        MemberID={f7route?.params?.id}
-                                        item={fee}
-                                        CheckInID={Client?.data?.CheckIn?.ID}
-                                        key={i}
-                                        Order={Order?.data?.Order}
-                                        OrderItems={Order?.data?.OrderItems}
-                                      >
-                                        {({ open }) => (
-                                          <div
-                                            className="flex gap-3 p-3 mb-1.5 rounded-lg last:mb-0 bg-gray-50"
-                                            onClick={open}
-                                            key={index}
-                                          >
-                                            {/* <div className="w-[45px]">
-                                          <img
-                                            className="object-cover w-full border rounded-full aspect-square"
-                                            src={AssetsHelpers.toAbsoluteUrl(
-                                              fee.Thumbnail
-                                            )}
-                                            onError={(e) => {
-                                              e.currentTarget.src =
-                                                AssetsHelpers.toAbsoluteUrlCore(
-                                                  "no-product.png",
-                                                  "/images/"
-                                                );
-                                            }}
-                                            alt=""
-                                          />
-                                        </div> */}
-                                            <div className="flex-1">
-                                              <div className="mb-px font-medium line-clamp-2">
-                                                [{fee?.ProdCode}]{" "}
-                                                {fee?.ProdTitle}
-                                                {fee.HasFeeInUse && (
-                                                  <span className="pl-1 text-gray-500">
-                                                    ( Đã dùng )
-                                                  </span>
-                                                )}
-                                              </div>
-                                              <div className="flex justify-between">
-                                                <div className="font-lato">
-                                                  {fee?.Qty}
-                                                  <span className="px-1">
-                                                    x
-                                                  </span>
-                                                  {StringHelpers.formatVND(
-                                                    fee?.PriceOrder
-                                                  )}
-                                                  <span className="px-1.5">
-                                                    =
-                                                  </span>
-                                                  {StringHelpers.formatVND(
-                                                    fee?.ToMoney
-                                                  )}
-                                                </div>
-                                              </div>
-                                            </div>
-                                            <div className="flex items-center justify-end w-10">
-                                              <ChevronRightIcon className="w-5 text-gray-400" />
-                                            </div>
-                                          </div>
-                                        )}
-                                      </PickerEditProd>
-                                    ))}
-                                  </div>
-                                )}
-                            </div>
-                          );
-                        }
-                        return (
-                          <PickerEditProd
-                            MemberID={f7route?.params?.id}
-                            item={item}
-                            CheckInID={Client?.data?.CheckIn?.ID}
-                            key={index}
-                            Order={Order?.data?.Order}
-                            OrderItems={Order?.data?.OrderItems}
-                          >
-                            {({ open }) => (
-                              <div
-                                className="flex gap-3 p-4 mb-3.5 last:mb-0 bg-white rounded-lg"
-                                onClick={open}
-                                key={index}
-                              >
-                                <div className="w-[70px]">
-                                  <img
-                                    className="object-cover w-full border rounded aspect-square"
-                                    src={AssetsHelpers.toAbsoluteUrl(
-                                      item.Thumbnail
-                                    )}
-                                    onError={(e) => {
-                                      e.currentTarget.src =
-                                        AssetsHelpers.toAbsoluteUrlCore(
-                                          "no-product.png",
-                                          "/images/"
-                                        );
-                                    }}
-                                    alt=""
-                                  />
+                              <div className="w-[70px]">
+                                <img
+                                  className="object-cover w-full border rounded aspect-square"
+                                  src={AssetsHelpers.toAbsoluteUrl(
+                                    item.Thumbnail
+                                  )}
+                                  onError={(e) => {
+                                    e.currentTarget.src =
+                                      AssetsHelpers.toAbsoluteUrlCore(
+                                        "no-product.png",
+                                        "/images/"
+                                      );
+                                  }}
+                                  alt=""
+                                />
+                              </div>
+                              <div className="flex-1">
+                                <div className="mb-px font-medium line-clamp-2">
+                                  [{item?.ProdCode}] {item?.ProdTitle}
+                                  {item.HasFeeInUse && (
+                                    <span className="pl-1 text-gray-500">
+                                      ( Đã dùng )
+                                    </span>
+                                  )}
                                 </div>
-                                <div className="flex-1">
-                                  <div className="mb-px font-medium line-clamp-2">
-                                    [{item?.ProdCode}] {item?.ProdTitle}
-                                    {item.HasFeeInUse && (
-                                      <span className="pl-1 text-gray-500">
-                                        ( Đã dùng )
-                                      </span>
-                                    )}
+                                <div className="flex justify-between">
+                                  <div className="font-lato">
+                                    {item?.Qty}
+                                    <span className="px-1">x</span>
+                                    {StringHelpers.formatVND(item?.PriceOrder)}
+                                    <span className="px-1.5">=</span>
+                                    {StringHelpers.formatVND(item?.ToMoney)}
                                   </div>
-                                  <div className="flex justify-between">
-                                    <div className="font-lato">
-                                      {item?.Qty}
-                                      <span className="px-1">x</span>
-                                      {StringHelpers.formatVND(
-                                        item?.PriceOrder
-                                      )}
-                                      <span className="px-1.5">=</span>
-                                      {StringHelpers.formatVND(item?.ToMoney)}
-                                    </div>
-                                  </div>
+                                </div>
 
-                                  {item?.ProdOrService === 1 &&
-                                    item?.Os?.length > 0 && (
-                                      <>
-                                        {item?.Os?.length === 1 ? (
-                                          <div
+                                {item?.ProdOrService === 1 &&
+                                  item?.Os?.length > 0 && (
+                                    <>
+                                      {item?.Os?.length === 1 ? (
+                                        <div
+                                          className="flex text-success mt-1.5"
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            f7.views.main.router.navigate(
+                                              "/admin/pos/calendar/os/?formState=" +
+                                                encodeURIComponent(
+                                                  JSON.stringify({
+                                                    Os: {
+                                                      ID: item?.Os[0]
+                                                        .Services[0]?.ID,
+                                                      MemberID:
+                                                        item?.Os[0].Services[0]
+                                                          ?.MemberID || "",
+                                                      ProdService:
+                                                        item?.Os[0].Services[0]
+                                                          ?.ProdService || "",
+                                                      ProdService2:
+                                                        item?.Os[0].Services[0]
+                                                          ?.ProdService2 || "",
+                                                      Title:
+                                                        item?.Os[0].Services[0]
+                                                          ?.Title || "",
+                                                    },
+                                                  })
+                                                )
+                                            );
+                                          }}
+                                        >
+                                          {item?.Os[0].Services[0].Staffs &&
+                                          item?.Os[0].Services[0].Staffs
+                                            .length > 0 ? (
+                                            <span className="text-sm">
+                                              <span className="pr-1">NV:</span>
+                                              {item?.Os[0].Services[0].Staffs.map(
+                                                (x) => x.FullName
+                                              ).join(", ")}
+                                            </span>
+                                          ) : (
+                                            <>
+                                              <PlusIcon className="w-3.5 mr-1" />
+                                              <span className="text-sm">
+                                                Nhân viên thực hiện
+                                              </span>
+                                            </>
+                                          )}
+                                        </div>
+                                      ) : (
+                                        <>
+                                          <Link
+                                            noLinkClass
                                             className="flex text-success mt-1.5"
                                             onClick={(e) => {
                                               e.stopPropagation();
-                                              f7.views.main.router.navigate(
-                                                "/admin/pos/calendar/os/?formState=" +
-                                                  encodeURIComponent(
-                                                    JSON.stringify({
-                                                      Os: {
-                                                        ID: item?.Os[0]
-                                                          .Services[0]?.ID,
-                                                        MemberID:
-                                                          item?.Os[0]
-                                                            .Services[0]
-                                                            ?.MemberID || "",
-                                                        ProdService:
-                                                          item?.Os[0]
-                                                            .Services[0]
-                                                            ?.ProdService || "",
-                                                        ProdService2:
-                                                          item?.Os[0]
-                                                            .Services[0]
-                                                            ?.ProdService2 ||
-                                                          "",
-                                                        Title:
-                                                          item?.Os[0]
-                                                            .Services[0]
-                                                            ?.Title || "",
-                                                      },
-                                                    })
-                                                  )
-                                              );
                                             }}
+                                            popoverOpen={`.popover-OrderItem-${item?.ID}`}
                                           >
-                                            {item?.Os[0].Services[0].Staffs &&
-                                            item?.Os[0].Services[0].Staffs
-                                              .length > 0 ? (
-                                              <span className="text-sm">
+                                            {getStaffMultiOs(item?.Os) ? (
+                                              <>
                                                 <span className="pr-1">
                                                   NV:
                                                 </span>
-                                                {item?.Os[0].Services[0].Staffs.map(
-                                                  (x) => x.FullName
-                                                ).join(", ")}
-                                              </span>
+                                                {getStaffMultiOs(item?.Os)}
+                                              </>
                                             ) : (
                                               <>
                                                 <PlusIcon className="w-3.5 mr-1" />
@@ -1412,112 +1075,83 @@ function PosClientManage({ f7route, f7router }) {
                                                 </span>
                                               </>
                                             )}
-                                          </div>
-                                        ) : (
-                                          <>
-                                            <Link
-                                              noLinkClass
-                                              className="flex text-success mt-1.5"
-                                              onClick={(e) => {
-                                                e.stopPropagation();
-                                              }}
-                                              popoverOpen={`.popover-OrderItem-${item?.ID}`}
-                                            >
-                                              {getStaffMultiOs(item?.Os) ? (
-                                                <>
-                                                  <span className="pr-1">
-                                                    NV:
-                                                  </span>
-                                                  {getStaffMultiOs(item?.Os)}
-                                                </>
-                                              ) : (
-                                                <>
-                                                  <PlusIcon className="w-3.5 mr-1" />
-                                                  <span className="text-sm">
-                                                    Nhân viên thực hiện
-                                                  </span>
-                                                </>
-                                              )}
-                                            </Link>
-                                            <Popover
-                                              className={`popover-OrderItem-${item?.ID}`}
-                                            >
-                                              <div className="flex flex-col py-1">
-                                                {item?.Os.map((os, i) => (
-                                                  <Link
-                                                    key={i}
-                                                    popoverClose
-                                                    className="flex flex-col p-3 font-medium border-b last:border-0"
-                                                    noLinkClass
-                                                    onClick={(e) => {
-                                                      e.stopPropagation();
-                                                      f7.views.main.router.navigate(
-                                                        "/admin/pos/calendar/os/?formState=" +
-                                                          encodeURIComponent(
-                                                            JSON.stringify({
-                                                              Os: {
-                                                                ID: os
-                                                                  .Services[0]
-                                                                  ?.ID,
-                                                                MemberID:
-                                                                  os.Services[0]
-                                                                    ?.MemberID ||
-                                                                  "",
-                                                                ProdService:
-                                                                  os.Services[0]
-                                                                    ?.ProdService ||
-                                                                  "",
-                                                                ProdService2:
-                                                                  os.Services[0]
-                                                                    ?.ProdService2 ||
-                                                                  "",
-                                                                Title:
-                                                                  os.Services[0]
-                                                                    ?.Title ||
-                                                                  "",
-                                                              },
-                                                            })
-                                                          )
-                                                      );
-                                                    }}
-                                                  >
-                                                    <div>
-                                                      [#{os?.Product?.ID}]{" "}
-                                                      {os?.Product?.Title}
-                                                    </div>
+                                          </Link>
+                                          <Popover
+                                            className={`popover-OrderItem-${item?.ID}`}
+                                          >
+                                            <div className="flex flex-col py-1">
+                                              {item?.Os.map((os, i) => (
+                                                <Link
+                                                  key={i}
+                                                  popoverClose
+                                                  className="flex flex-col p-3 font-medium border-b last:border-0"
+                                                  noLinkClass
+                                                  onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    f7.views.main.router.navigate(
+                                                      "/admin/pos/calendar/os/?formState=" +
+                                                        encodeURIComponent(
+                                                          JSON.stringify({
+                                                            Os: {
+                                                              ID: os.Services[0]
+                                                                ?.ID,
+                                                              MemberID:
+                                                                os.Services[0]
+                                                                  ?.MemberID ||
+                                                                "",
+                                                              ProdService:
+                                                                os.Services[0]
+                                                                  ?.ProdService ||
+                                                                "",
+                                                              ProdService2:
+                                                                os.Services[0]
+                                                                  ?.ProdService2 ||
+                                                                "",
+                                                              Title:
+                                                                os.Services[0]
+                                                                  ?.Title || "",
+                                                            },
+                                                          })
+                                                        )
+                                                    );
+                                                  }}
+                                                >
+                                                  <div>
+                                                    [#{os?.Product?.ID}]{" "}
+                                                    {os?.Product?.Title}
+                                                  </div>
 
-                                                    {os?.Services &&
-                                                    os?.Services[0].Staffs &&
-                                                    os?.Services[0].Staffs
-                                                      .length > 0 ? (
-                                                      <div className="mt-1 text-sm font-light text-gray-600">
-                                                        <span className="pr-1">
-                                                          NV:
-                                                        </span>
-                                                        {os?.Services[0].Staffs.map(
-                                                          (x) => x.FullName
-                                                        ).join(", ")}
-                                                      </div>
-                                                    ) : (
-                                                      <></>
-                                                    )}
-                                                  </Link>
-                                                ))}
-                                              </div>
-                                            </Popover>
-                                          </>
-                                        )}
-                                      </>
-                                    )}
-                                </div>
-                                <div className="flex items-center justify-end w-10">
-                                  <ChevronRightIcon className="w-6 text-gray-400" />
-                                </div>
+                                                  {os?.Services &&
+                                                  os?.Services[0].Staffs &&
+                                                  os?.Services[0].Staffs
+                                                    .length > 0 ? (
+                                                    <div className="mt-1 text-sm font-light text-gray-600">
+                                                      <span className="pr-1">
+                                                        NV:
+                                                      </span>
+                                                      {os?.Services[0].Staffs.map(
+                                                        (x) => x.FullName
+                                                      ).join(", ")}
+                                                    </div>
+                                                  ) : (
+                                                    <></>
+                                                  )}
+                                                </Link>
+                                              ))}
+                                            </div>
+                                          </Popover>
+                                        </>
+                                      )}
+                                    </>
+                                  )}
                               </div>
-                            )}
-                          </PickerEditProd>
-                        );
-                      })}
+                              <div className="flex items-center justify-end w-10">
+                                <ChevronRightIcon className="w-6 text-gray-400" />
+                              </div>
+                            </div>
+                          )}
+                        </PickerEditProd>
+                      ))}
                     </div>
                   )}
                 {(!Order?.data?.OrderItems ||

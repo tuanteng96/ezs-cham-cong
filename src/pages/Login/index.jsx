@@ -18,6 +18,7 @@ import KeyboardsHelper from "../../helpers/KeyboardsHelper";
 import StorageHelpers from "../../helpers/StorageHelpers";
 import { PickerOTP } from "./components";
 import { useFirebase } from "@/hooks";
+import AdminAPI from "@/api/Admin.api";
 
 const schemaLogin = yup
   .object({
@@ -34,7 +35,6 @@ function LoginPage({ f7router }) {
   let FirebaseApp = useStore("FirebaseApp");
 
   const firebase = useFirebase(FirebaseApp);
-
 
   const { control, handleSubmit, setError, setValue } = useForm({
     defaultValues: {
@@ -67,7 +67,12 @@ function LoginPage({ f7router }) {
             onSuccess: ({ data }) => {
               if (data && data?.acc_type && data?.acc_type !== "M") {
                 if (data?.Status !== -1) {
-                  if (data.ID === 1 || data?.DeviceIDs === deviceId) {
+                  // Tạm bỏ check DeviceIDs để theo dõi bằng cách thêm data?.DeviceIDs !== deviceId bên dưới
+                  if (
+                    data.ID === 1 ||
+                    data?.DeviceIDs === deviceId ||
+                    data?.DeviceIDs !== deviceId
+                  ) {
                     if (data?.opt_token) {
                       open({
                         Token: data?.opt_token,
@@ -111,6 +116,21 @@ function LoginPage({ f7router }) {
                           }
                         }
                       );
+                    }
+
+                    if (data?.DeviceIDs !== deviceId) {
+                      //Lưu mã máy theo dõi sự thay đổi
+                      AdminAPI.saveMachineCode({
+                        Token: data?.token,
+                        data: {
+                          updateList: [
+                            {
+                              UserID: data.ID,
+                              DeviceIDs: deviceId,
+                            },
+                          ],
+                        },
+                      });
                     }
                   } else {
                     setError("USN", {

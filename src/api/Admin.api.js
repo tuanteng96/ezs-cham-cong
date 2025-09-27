@@ -1,4 +1,3 @@
-import { data } from "dom7";
 import http from "../helpers/http";
 
 const AdminAPI = {
@@ -18,7 +17,7 @@ const AdminAPI = {
     StockID = "",
   }) =>
     http.get(
-      `/services/preview.aspx?cmd=search_member&key=&typeSearch=sell&ps=${ps}&pi=${pi}&searchId=4&__MemberCheckin=${MemberCheckInID}&__MemberMoney=0&__MyNoti=0&__AllNoti=0&__Birth=0&__MBirth=0&__Cate=false&__HasOrderService=0&__MemberGroups=false&__StaffID=0&__StockID=${StockID}&__Source=&__Tags=`,
+      `/services/preview.aspx?cmd=search_member&key=&typeSearch=sell&ps=${ps}&pi=${pi}&searchId=4&__MemberCheckin=${MemberCheckInID}&__MemberMoney=0&__MyNoti=0&__AllNoti=0&__Birth=0&__MBirth=0&__Cate=false&__HasOrderService=0&__MemberGroups=false&__StaffID=0&__StockID=${StockID}&__Source=&__Tags=&stockid=${StockID}`,
       {
         headers: {
           Authorization: `Bearer ${Token}`,
@@ -1072,7 +1071,7 @@ const AdminAPI = {
       headers: {
         Authorization: `Bearer ${Token}`,
       },
-    })
+    }),
 };
 
 export default AdminAPI;

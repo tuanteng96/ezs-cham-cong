@@ -23,11 +23,11 @@ export default {
     rollupOptions: {
       output: {
         format: "es",
-        manualChunks(id) {
-          if (id.includes("node_modules")) {
-            return "vendor";
-          }
-        },
+        // manualChunks(id) {
+        //   if (id.includes("node_modules")) {
+        //     return "vendor";
+        //   }
+        // },
         entryFileNames: "assets/js/index.js",
         chunkFileNames: "assets/js/[name].js",
         assetFileNames: (assetInfo) => {
